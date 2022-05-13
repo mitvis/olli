@@ -37,7 +37,6 @@ function parseMultiViewChart(): MultiViewChart {
     const axes = filterUniqueNodes(findScenegraphNodes(view, "axis").map((axisNode: any) => parseAxisInformation(axisNode)));
     const legends = filterUniqueNodes(findScenegraphNodes(view, "legend").map((legendNode: any) => parseLegendInformation(legendNode)));
 
-
     const chartItems = view.items.filter((el: any) => el.role === "scope")[0].items;
     const charts: ChartInformation[] = chartItems.map((chartNode: any) => {
         let chart: ChartInformation = parseSingleChart(chartNode)
@@ -61,7 +60,7 @@ function parseMultiViewChart(): MultiViewChart {
         legends.forEach((legend: EncodingInformation) => {
             const shallowLegendCopy = Object.assign({}, legend)
             shallowLegendCopy.data = JSON.parse(JSON.stringify(legend.data))
-            chart.axes.push(shallowLegendCopy)
+            chart.legends.push(shallowLegendCopy)
         })
     })
 

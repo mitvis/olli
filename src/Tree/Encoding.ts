@@ -67,8 +67,8 @@ function generateChartChildren(childrenNodes: AccessibilityTreeNode[], parent: A
 }
 
 function generateStructuredNodeChildren(parent: AccessibilityTreeNode, field: string, values: string[] | number[], data: any[]): AccessibilityTreeNode[] {
-    if (isValueArrayString(values)) {
-        return values.map((grouping: string) => {
+    if (isValueArrayString(values) || parent.type === "legend") {
+        return values.map((grouping: any) => {
             return informationToNode(`${[[grouping]]}`, parent, data.filter((node: any) => node[field] === grouping), "filteredData", data.filter((node: any) => node[field] === grouping))
         })
     } else {
@@ -169,12 +169,19 @@ function generateChildNodes(type: NodeType, parent: AccessibilityTreeNode, gener
                    })
                 })
             })
+            generationInformation.legends.forEach((legend: EncodingInformation) => {
+                legend.data = legend.data.filter((val: any) => {
+                   return Object.keys(val).some((key: string) => {
+                       return chartTitle.includes(val[key]);
+                   })
+                })
+            })
         }
         return generateChartChildren([], parent, generationInformation.axes, generationInformation.legends, gridNodes);
     } else if (type === "xAxis" || type === "yAxis" || type === "legend") {
         return generateStructuredNodeChildren(parent, generationInformation.field, generationInformation.values, generationInformation.data);
     } else if (type === "filteredData") {
-        return generateFilteredDataChildren([], generationInformation.map((val: any) => val), parent);
+        return generateFilteredDataChildren([], generationInformation.map((val: any) => Object.assign({}, val)), parent);
     } else if (type === "grid") {
         return generateGridChildren(parent, [generationInformation[0].field, generationInformation[1].field], generationInformation[0].values, generationInformation[1].values, generationInformation[0].data)
     } else {

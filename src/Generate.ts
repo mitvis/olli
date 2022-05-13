@@ -46,3 +46,5 @@ export function createAccessibilityTree(options: TreeConfigOptions) {
 
     document.getElementById(options.domId)?.appendChild(htmlRendering);
 } 
+
+(window as any).createAccessibilityTree = createAccessibilityTree;
