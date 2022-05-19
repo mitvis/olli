@@ -7,7 +7,6 @@ export type BaseAccessibilityTreeNode = {
     parent: AccessibilityTreeNode | null,
     children: AccessibilityTreeNode[],
     selected: any[],
-    lastVisitedChild: AccessibilityTreeNode | null;
     type: NodeType,
     fieldsUsed: string[]
 }
