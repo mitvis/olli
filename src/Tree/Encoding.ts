@@ -1,4 +1,4 @@
-import { EncodingInformation, ChartInformation, MultiViewChart } from "../Adapters/Types";
+import { Guide, ChartInformation, MultiViewChart } from "../Adapters/Types";
 import { AccessibilityTreeNode, NodeType } from "./Types";
 
 export function abstractedVisToTree(visualizationInformation: any): AccessibilityTreeNode {
@@ -22,9 +22,9 @@ function generateMultiViewChildren(parent: AccessibilityTreeNode, multiViewChart
 }
 
 function generateChartChildren(childrenNodes: AccessibilityTreeNode[], parent: AccessibilityTreeNode,
-    axes: EncodingInformation[], legends: EncodingInformation[], grids: EncodingInformation[]): AccessibilityTreeNode[] {
+    axes: Guide[], legends: Guide[], grids: Guide[]): AccessibilityTreeNode[] {
     if (axes.length > 0) {
-        const axis: EncodingInformation = axes.pop()!;
+        const axis: Guide = axes.pop()!;
         const scaleType = axis.scaleType ? `for a ${axis.scaleType} scale ` : "";
         const axisField: string = Array.isArray(axis.field) ? axis.field[1] : (axis.field as string);
         let minValue = axis.data.reduce((currentMin: any, currentVal: any) => {
@@ -51,14 +51,14 @@ function generateChartChildren(childrenNodes: AccessibilityTreeNode[], parent: A
         childrenNodes.push(informationToNode(description, parent, axis.data, axis.title.includes("Y-Axis") ? "yAxis" : "xAxis", axis));
         return generateChartChildren(childrenNodes, parent, axes, legends, grids);
     } else if (legends.length > 0) {
-        const legend: EncodingInformation = legends.pop()!;
+        const legend: Guide = legends.pop()!;
         const scaleType = legend.scaleType ? `for ${legend.scaleType} scale ` : "";
         let node: AccessibilityTreeNode = informationToNode(legend.title, parent, legend.data, "legend", legend)
         node.description = `Legend titled '${node.description}' ${scaleType}with ${node.children.length} values`;
         childrenNodes.push(node);
         return generateChartChildren(childrenNodes, parent, axes, legends, grids);
     } else if (grids.length > 0 && grids.length === 2) {
-        const grid: EncodingInformation[] = [grids.pop()!, grids.pop()!];
+        const grid: Guide[] = [grids.pop()!, grids.pop()!];
         childrenNodes.push(informationToNode("Grid view of the data", parent, grid[0].data, "grid", grid))
         return generateChartChildren(childrenNodes, parent, axes, legends, grids);
     } else {
@@ -162,14 +162,14 @@ function generateChildNodes(type: NodeType, parent: AccessibilityTreeNode, gener
         let gridNodes = generationInformation.markUsed === 'point' ? generationInformation.gridNodes : []
         if (parent.parent) {
             const chartTitle = generationInformation.title.substring(24);
-            generationInformation.axes.forEach((axis: EncodingInformation) => {
+            generationInformation.axes.forEach((axis: Guide) => {
                 axis.data = axis.data.filter((val: any) => {
                    return Object.keys(val).some((key: string) => {
                        return chartTitle.includes(val[key]);
                    })
                 })
             })
-            generationInformation.legends.forEach((legend: EncodingInformation) => {
+            generationInformation.legends.forEach((legend: Guide) => {
                 legend.data = legend.data.filter((val: any) => {
                    return Object.keys(val).some((key: string) => {
                        return chartTitle.includes(val[key]);
@@ -195,7 +195,6 @@ function informationToNode(desc: string, parent: AccessibilityTreeNode | null, s
         parent: parent,
         children: [],
         selected: selected,
-        lastVisitedChild: null,
         type: type,
         fieldsUsed: parent !== null ? parent.fieldsUsed : childrenInformation.dataFieldsUsed
     }

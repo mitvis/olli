@@ -1,5 +1,5 @@
 import { Spec } from "vega";
-import { VisAdapter, AbstractedVis, ChartInformation, Mark, EncodingInformation } from "./Types";
+import { VisAdapter, AbstractedVis, ChartInformation, Mark, Guide } from "./Types";
 import { VegaVisAdapter } from "./VegaAdapter";
 import * as vegaLite from "vega-lite"
 
@@ -35,12 +35,12 @@ function modifyVisFromMark(vis: ChartInformation, mark: Mark, spec: any): void {
             console.log(bandScale)
             const bandAxis = spec.axes?.filter((axis: Axis) => axis.scale === bandScale.name)[0]!
             console.log(bandAxis)
-            vis.axes = vis.axes.filter((visAxis: EncodingInformation) => visAxis.title === bandAxis.title)
+            vis.axes = vis.axes.filter((visAxis: Guide) => visAxis.title === bandAxis.title)
             */
             const nomAxis = Object.keys(spec.encoding).filter((key: string) => {
                 return spec.encoding[key].type === "nominal" || spec.encoding[key].aggregate === undefined
             })[0]
-            vis.axes = vis.axes.filter((visAxis: EncodingInformation) => visAxis.field === spec.encoding[nomAxis].field)
+            vis.axes = vis.axes.filter((visAxis: Guide) => visAxis.title.toLowerCase().includes(`${nomAxis}-axis`))
             break;
         case 'geoshape':
             break;
