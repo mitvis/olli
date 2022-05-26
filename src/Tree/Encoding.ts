@@ -1,12 +1,17 @@
 import { Guide, ChartInformation, MultiViewChart } from "../Adapters/Types";
 import { AccessibilityTreeNode, NodeType } from "./Types";
+import { Mark } from '../Adapters/Types'
 
 export function abstractedVisToTree(visualizationInformation: any): AccessibilityTreeNode {
     let node: AccessibilityTreeNode
-    if (visualizationInformation.charts === undefined) {
-        node = informationToNode(visualizationInformation.description, null, visualizationInformation.axes[0].data, "chart", visualizationInformation);
+    if (visualizationInformation.charts !== undefined) {
+        node = informationToNode(visualizationInformation.description, null, visualizationInformation.data.get('source_0'), "multiView", visualizationInformation);
+        node.description += ` With ${node.children.length} nested charts`
     } else {
-        node = informationToNode(visualizationInformation.description, null, [], "multiView", visualizationInformation);
+        const axesString: string = visualizationInformation.axes.length > 0 ? ` ${visualizationInformation.axes.length} axes and` : '';
+        const legendsString: string = visualizationInformation.legends.length > 0 ? ` ${visualizationInformation.legends.length} legends` : ''
+        node = informationToNode(visualizationInformation.description, null, [], "chart", visualizationInformation);
+        node.description += ` with ${axesString} ${legendsString}`
     }
     node.children.forEach((child: AccessibilityTreeNode) => updateDescriptions(child, visualizationInformation))
     return node
@@ -14,7 +19,7 @@ export function abstractedVisToTree(visualizationInformation: any): Accessibilit
 
 function generateMultiViewChildren(parent: AccessibilityTreeNode, multiViewChart: MultiViewChart): AccessibilityTreeNode[] {
     return multiViewChart.charts.map((singleChart: ChartInformation) => informationToNode(
-        `${singleChart.title}Chart ${multiViewChart.charts.indexOf(singleChart) + 1} of ${multiViewChart.charts.length}`,
+        `A chart titled ${singleChart.facetedValue} Chart ${multiViewChart.charts.indexOf(singleChart) + 1} of ${multiViewChart.charts.length}`,
         parent,
         [],
         "chart",
@@ -41,11 +46,10 @@ function generateChartChildren(childrenNodes: AccessibilityTreeNode[], parent: A
                 return currentMax
             }
         }, axis.data[0][axisField])
-
         if (axisField.toLowerCase().includes("date")) {
             minValue = new Date(minValue).toLocaleString("en-US", { year: 'numeric', month: 'short', day: 'numeric' });
             maxValue = new Date(maxValue).toLocaleString("en-US", { year: 'numeric', month: 'short', day: 'numeric' });
-        }        
+        }
 
         const description = `${axis.title} ${scaleType}with values from ${minValue} to ${maxValue}`;
         childrenNodes.push(informationToNode(description, parent, axis.data, axis.title.includes("Y-Axis") ? "yAxis" : "xAxis", axis));
@@ -66,7 +70,7 @@ function generateChartChildren(childrenNodes: AccessibilityTreeNode[], parent: A
     }
 }
 
-function generateStructuredNodeChildren(parent: AccessibilityTreeNode, field: string, values: string[] | number[], data: any[]): AccessibilityTreeNode[] {
+function generateStructuredNodeChildren(parent: AccessibilityTreeNode, field: string, values: string[] | number[], data: any[], markUsed: Mark): AccessibilityTreeNode[] {
     if (isValueArrayString(values) || parent.type === "legend") {
         return values.map((grouping: any) => {
             return informationToNode(`${[[grouping]]}`, parent, data.filter((node: any) => node[field] === grouping), "filteredData", data.filter((node: any) => node[field] === grouping))
@@ -77,10 +81,16 @@ function generateStructuredNodeChildren(parent: AccessibilityTreeNode, field: st
                 return val[field] >= lowerBound && val[field] < upperBound;
             })
         }
-        const valueIncrements: number[][] = (values as number[]).reduce(getEncodingValueIncrements, []);
+
+        let valueIncrements: any[];
+        if (markUsed !== 'bar') {
+            valueIncrements = (values as number[]).reduce(getEncodingValueIncrements, []);
+        } else {
+            valueIncrements = values.map((val: number) => [val, val]);
+        }
         return valueIncrements.map((range: number[]) => {
             let desc = ``
-            if (parent.description.includes("date")) {
+            if (parent.description.includes("date") || parent.description.includes("temporal")) {
                 range.forEach((val: number) => desc += `${new Date(val).toLocaleString("en-US", { year: 'numeric', month: 'short', day: 'numeric' })}, `)
             } else {
                 desc = `${range},`
@@ -161,25 +171,20 @@ function generateChildNodes(type: NodeType, parent: AccessibilityTreeNode, gener
     } else if (type === "chart") {
         let gridNodes = generationInformation.markUsed === 'point' ? generationInformation.gridNodes : []
         if (parent.parent) {
-            const chartTitle = generationInformation.title.substring(24);
             generationInformation.axes.forEach((axis: Guide) => {
                 axis.data = axis.data.filter((val: any) => {
-                   return Object.keys(val).some((key: string) => {
-                       return chartTitle.includes(val[key]);
-                   })
+                    return Object.keys(val).some((key: string) => val[key] === generationInformation.facetedValue)
                 })
             })
             generationInformation.legends.forEach((legend: Guide) => {
                 legend.data = legend.data.filter((val: any) => {
-                   return Object.keys(val).some((key: string) => {
-                       return chartTitle.includes(val[key]);
-                   })
+                    return Object.keys(val).some((key: string) => val[key] === generationInformation.facetedValue)
                 })
             })
         }
         return generateChartChildren([], parent, generationInformation.axes, generationInformation.legends, gridNodes);
     } else if (type === "xAxis" || type === "yAxis" || type === "legend") {
-        return generateStructuredNodeChildren(parent, generationInformation.field, generationInformation.values, generationInformation.data);
+        return generateStructuredNodeChildren(parent, generationInformation.field, generationInformation.values, generationInformation.data, generationInformation.markUsed);
     } else if (type === "filteredData") {
         return generateFilteredDataChildren([], generationInformation.map((val: any) => Object.assign({}, val)), parent);
     } else if (type === "grid") {
