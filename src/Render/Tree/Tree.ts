@@ -65,6 +65,5 @@ function renderInnerTree(tree: AccessibilityTreeNode): HTMLElement {
     const style = document.createElement('style')
     style.innerHTML = treeStyle;
     document.head.appendChild(style)
-
     return nodeToAppend;
 }

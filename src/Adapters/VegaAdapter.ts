@@ -1,5 +1,5 @@
 import { Spec, ScaleDataRef, Scale, ScaleData } from "vega";
-import { EncodingInformation, AbstractedVis, VisAdapter, MultiViewChart, ChartInformation } from "./Types";
+import { Guide, AbstractedVis, VisAdapter, MultiViewChart, ChartInformation, Axis, Legend } from "./Types";
 
 let view: any;
 let spec: Spec;
@@ -11,8 +11,7 @@ let spec: Spec;
 * @returns the {@link abstractedVisPlot}, the non-concrete visualization information that can be later used to
 * generate the Accessibility Tree Encoding
 */
-export const VegaVisAdapter: VisAdapter = {
-    convertToGog(visObject: any, helperVisInformation: any): AbstractedVis {
+export const VegaAdapter: VisAdapter = (visObject: any, helperVisInformation: any): AbstractedVis => {
         view = visObject;
         spec = helperVisInformation;
         if (view.items.some((el: any) => el.role === "scope")) {
@@ -21,7 +20,6 @@ export const VegaVisAdapter: VisAdapter = {
             return parseSingleChart(view);
         }
     }
-}
 
 function parseMultiViewChart(): MultiViewChart {
     const filterUniqueNodes = ((nodeArr: any[]) => {
@@ -31,6 +29,7 @@ function parseMultiViewChart(): MultiViewChart {
                 uniqueNodes.push(node)
             }
         })
+
         return uniqueNodes
     })
     const baseVisDescription = vegaVisDescription(spec);
@@ -48,20 +47,21 @@ function parseMultiViewChart(): MultiViewChart {
         charts: charts,
         data: getData(),
         dataFieldsUsed: getDataFields(axes, legends),
-        description: baseVisDescription
+        description: baseVisDescription,
+        facetedField: ""
+    }
+
+    const shallowCopyArray = (objToCopy: any[], arrToPush: any[]): void => {
+        objToCopy.forEach((obj: any) => {
+            const objCopy = Object.assign({}, obj);
+            objCopy.data = JSON.parse(JSON.stringify(obj.data))
+            arrToPush.push(objCopy);
+        })
     }
 
     multiViewChart.charts.forEach((chart: ChartInformation) => {
-        axes.forEach((axis: EncodingInformation) => {
-            const shallowAxisCopy = Object.assign({}, axis)
-            shallowAxisCopy.data = JSON.parse(JSON.stringify(axis.data))
-            chart.axes.push(shallowAxisCopy)
-        })
-        legends.forEach((legend: EncodingInformation) => {
-            const shallowLegendCopy = Object.assign({}, legend)
-            shallowLegendCopy.data = JSON.parse(JSON.stringify(legend.data))
-            chart.legends.push(shallowLegendCopy)
-        })
+        shallowCopyArray(axes, chart.axes);
+        shallowCopyArray(legends, chart.legends);
     })
 
     return multiViewChart;
@@ -71,14 +71,12 @@ function parseSingleChart(chart: any): ChartInformation {
     const baseVisDescription = vegaVisDescription(spec);
     const axes = findScenegraphNodes(chart, "axis").map((axisNode: any) => parseAxisInformation(axisNode));
     const legends = findScenegraphNodes(chart, "legend").map((legendNode: any) => parseLegendInformation(legendNode))
-    const gridNodes: EncodingInformation[] = getGridNodes(axes);
+    const gridNodes: Guide[] = getGridNodes(axes);
     const dataFields: string[] = getDataFields(axes, legends);
     const data: Map<string, any[]> = getData();
-
-    const chartTitle: string | null = findScenegraphNodes(chart, "title")[0] !== undefined ? 
-    findScenegraphNodes(chart, "title")[0].items[0].items[0].items[0].text 
-    : null;
-
+    const chartTitle: string | null = findScenegraphNodes(chart, "title")[0] !== undefined ?
+        findScenegraphNodes(chart, "title")[0].items[0].items[0].items[0].text
+        : null;
     let chartNode: ChartInformation = {
         data: data,
         axes: axes,
@@ -87,11 +85,9 @@ function parseSingleChart(chart: any): ChartInformation {
         gridNodes: gridNodes,
         dataFieldsUsed: dataFields
     }
-
     if (chartTitle) {
         chartNode.title = chartTitle;
     }
-
     return chartNode;
 }
 
@@ -114,9 +110,9 @@ function vegaVisDescription(spec: Spec): string {
 }
 
 /**
- * @returns a key-value pairing of the axis orientation and the {@link EncodingInformation} of the corresponding axis
+ * @returns a key-value pairing of the axis orientation and the {@link Guide} of the corresponding axis
  */
-function parseAxisInformation(axis: any): EncodingInformation {
+function parseAxisInformation(axis: any): Axis {
     const axisView = axis.items[0]
     const ticks = axisView.items.find((n: any) => n.role === 'axis-tick').items.map((n: any) => n.datum.value);
     const title = axisView.items.find((n: any) => n.role === "axis-title");
@@ -136,26 +132,40 @@ function parseAxisInformation(axis: any): EncodingInformation {
         title: title === undefined ? axisStr : `${axisStr} titled '${title.items[0].text}'`,
         data: getScaleData(getData(), scale),
         field: fields,
-        hasGrid: false,
-        scaleType: spec.scales?.find((specScale: any) => specScale.name === scale)?.type
+        scaleType: spec.scales?.find((specScale: any) => specScale.name === scale)?.type,
+        orient: orient
     }
 }
 
 /**
- * @returns a key-value pairing of the legend name and the {@link EncodingInformation} of the corresponding axis
+ * @returns a key-value pairing of the legend name and the {@link Guide} of the corresponding axis
  */
-function parseLegendInformation(legendNode: any): EncodingInformation {
-    let legendLabels = legendNode.items[0].items.find((n: any) => n.role === "legend-entry").items[0].items[0].items;
-    let legendTitle = legendNode.items[0].items.find((n: any) => n.role === "legend-title").items[0].text;
+function parseLegendInformation(legendNode: any): Legend {
     let scale = legendNode.items[0].datum.scales[Object.keys(legendNode.items[0].datum.scales)[0]];
-    const field = (spec.scales?.find((specScale: any) => specScale.name === scale)?.domain as ScaleDataRef).field
+    let data: any[] = getScaleData(getData(), scale)
+    if (data === undefined) {
+        data = getData().get("source_0")!;
+    }
+    let labels: any[] = legendNode.items[0].items.find((n: any) => n.role === "legend-entry").items[0].items[0].items;
+    let title: string = legendNode.items[0].items.find((n: any) => n.role === "legend-title").items[0].text;
+    let field: string | undefined
+    const legendDomain = spec.scales?.find((specScale: any) => specScale.name === scale)?.domain
+    if ((legendDomain as ScaleDataRef).field) {
+        field = (legendDomain as ScaleDataRef)!.field as string;
+    } else {
+        if (Object.keys(data[0]).some((key: string) => key.toLocaleString() === title.toLocaleLowerCase())) {
+            field = title.toLocaleLowerCase();
+        }
+    }
+
+
     return {
-        values: legendLabels.map((n: any) => n.items.find((el: any) => el.role === "legend-label").items[0].datum.value),
-        title: legendTitle,
-        data: getScaleData(getData(), scale),
+        values: labels.map((n: any) => n.items.find((el: any) => el.role === "legend-label").items[0].datum.value),
+        title: title,
+        data: data,
         field: (field as string),
-        hasGrid: false,
-        scaleType: spec.scales?.find((specScale: any) => specScale.name === scale)?.type
+        scaleType: spec.scales?.find((specScale: any) => specScale.name === scale)?.type,
+        type: ""
     }
 
 }
@@ -174,9 +184,9 @@ function getScaleData(data: Map<string, any[]>, scale: string): any[] {
 
 /**
  * Determines if the chart has the eligible qualities to have a navigable grid node
- * @returns the {@link EncodingInformation} nodes of that are used for the grid
+ * @returns the {@link Guide} nodes of that are used for the grid
  */
-function getGridNodes(axes: EncodingInformation[]): EncodingInformation[] {
+function getGridNodes(axes: Guide[]): Guide[] {
     const gridAxes = view.items.filter((el: any) => el.role === "axis" && el.items[0].items.some((it: any) => it.role === "axis-grid"))
     return gridAxes.map((axis: any) => {
         return axes[axis.items[0].orient]
@@ -186,7 +196,7 @@ function getGridNodes(axes: EncodingInformation[]): EncodingInformation[] {
 /**
  * @returns the fields of the data object that are used throughout the visualization axes legends
  */
-function getDataFields(axes: EncodingInformation[], legends: EncodingInformation[]): string[] {
+function getDataFields(axes: Guide[], legends: Guide[]): string[] {
     let fields: string[] = [];
     const pushFields = (obj: any) => {
         Object.keys(obj).forEach((key: string) => {

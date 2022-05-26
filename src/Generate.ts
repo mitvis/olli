@@ -1,5 +1,5 @@
 import { AbstractedVis } from "./Adapters/Types"
-import { VegaVisAdapter } from "./Adapters/VegaAdapter"
+import { VegaAdapter } from "./Adapters/VegaAdapter"
 import { VegaLiteAdapter } from "./Adapters/VegaLiteAdapter"
 import { renderTable } from "./Render/Table"
 import { renderTree } from "./Render/Tree/Tree"
@@ -20,22 +20,22 @@ export function createAccessibilityTree(options: TreeConfigOptions) {
     let abstractedVisualization: AbstractedVis
     switch (options.adapter) {
         case ("vega"):
-            abstractedVisualization = VegaVisAdapter.convertToGog(options.visObject.scenegraph().root.items[0], options.visSpec);
+            abstractedVisualization = VegaAdapter(options.visObject.scenegraph().root.items[0], options.visSpec);
             break;
         case ("vega-lite"):
-            abstractedVisualization = VegaLiteAdapter.convertToGog(options.visObject.scenegraph().root.items[0], options.visSpec);
+            abstractedVisualization = VegaLiteAdapter(options.visObject.scenegraph().root.items[0], options.visSpec);
             break;
     }
 
     let chartEncodingTree: AccessibilityTreeNode = abstractedVisToTree(abstractedVisualization);
-    
+
     let htmlRendering: HTMLElement;
 
-    switch(options.renderType) {
-        case("table"):
+    switch (options.renderType) {
+        case ("table"):
             htmlRendering = renderTable(chartEncodingTree);
             break;
-        case("tree"):
+        case ("tree"):
             htmlRendering = renderTree(chartEncodingTree);
             new TreeLinks(htmlRendering).init();
     }
@@ -44,7 +44,8 @@ export function createAccessibilityTree(options: TreeConfigOptions) {
         htmlRendering.setAttribute("aria-label", options.ariaLabel);
     }
 
+
     document.getElementById(options.domId)?.appendChild(htmlRendering);
-} 
+}
 
 (window as any).createAccessibilityTree = createAccessibilityTree;
