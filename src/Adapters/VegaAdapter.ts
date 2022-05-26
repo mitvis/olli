@@ -1,5 +1,5 @@
 import { Spec, ScaleDataRef, Scale, ScaleData } from "vega";
-import { Guide, AbstractedVis, VisAdapter, MultiViewChart, ChartInformation } from "./Types";
+import { Guide, AbstractedVis, VisAdapter, MultiViewChart, ChartInformation, Axis, Legend } from "./Types";
 
 let view: any;
 let spec: Spec;
@@ -11,8 +11,7 @@ let spec: Spec;
 * @returns the {@link abstractedVisPlot}, the non-concrete visualization information that can be later used to
 * generate the Accessibility Tree Encoding
 */
-export const VegaVisAdapter: VisAdapter = {
-    convertToGog(visObject: any, helperVisInformation: any): AbstractedVis {
+export const VegaAdapter: VisAdapter = (visObject: any, helperVisInformation: any): AbstractedVis => {
         view = visObject;
         spec = helperVisInformation;
         if (view.items.some((el: any) => el.role === "scope")) {
@@ -21,7 +20,6 @@ export const VegaVisAdapter: VisAdapter = {
             return parseSingleChart(view);
         }
     }
-}
 
 function parseMultiViewChart(): MultiViewChart {
     const filterUniqueNodes = ((nodeArr: any[]) => {
@@ -49,7 +47,8 @@ function parseMultiViewChart(): MultiViewChart {
         charts: charts,
         data: getData(),
         dataFieldsUsed: getDataFields(axes, legends),
-        description: baseVisDescription
+        description: baseVisDescription,
+        facetedField: ""
     }
 
     const shallowCopyArray = (objToCopy: any[], arrToPush: any[]): void => {
@@ -113,7 +112,7 @@ function vegaVisDescription(spec: Spec): string {
 /**
  * @returns a key-value pairing of the axis orientation and the {@link Guide} of the corresponding axis
  */
-function parseAxisInformation(axis: any): Guide {
+function parseAxisInformation(axis: any): Axis {
     const axisView = axis.items[0]
     const ticks = axisView.items.find((n: any) => n.role === 'axis-tick').items.map((n: any) => n.datum.value);
     const title = axisView.items.find((n: any) => n.role === "axis-title");
@@ -133,14 +132,15 @@ function parseAxisInformation(axis: any): Guide {
         title: title === undefined ? axisStr : `${axisStr} titled '${title.items[0].text}'`,
         data: getScaleData(getData(), scale),
         field: fields,
-        scaleType: spec.scales?.find((specScale: any) => specScale.name === scale)?.type
+        scaleType: spec.scales?.find((specScale: any) => specScale.name === scale)?.type,
+        orient: orient
     }
 }
 
 /**
  * @returns a key-value pairing of the legend name and the {@link Guide} of the corresponding axis
  */
-function parseLegendInformation(legendNode: any): Guide {
+function parseLegendInformation(legendNode: any): Legend {
     let scale = legendNode.items[0].datum.scales[Object.keys(legendNode.items[0].datum.scales)[0]];
     let data: any[] = getScaleData(getData(), scale)
     if (data === undefined) {
@@ -164,7 +164,8 @@ function parseLegendInformation(legendNode: any): Guide {
         title: title,
         data: data,
         field: (field as string),
-        scaleType: spec.scales?.find((specScale: any) => specScale.name === scale)?.type
+        scaleType: spec.scales?.find((specScale: any) => specScale.name === scale)?.type,
+        type: ""
     }
 
 }

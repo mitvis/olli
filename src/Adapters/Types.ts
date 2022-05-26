@@ -21,21 +21,31 @@ export type Guide = {
     values: string[] | number[]
     title: string
     data: any[]
-    field: string | string[]
+    field: string | string[],
+    markUsed?: Mark,
     scaleType?: string
+}
+
+export interface Axis extends Guide {
+    orient: string
+}
+
+export interface Legend extends Guide {
+    type: string
 }
 
 /**
  * Outlines the grammar of graphics information that has to be parsed from a visualization.
  */
 export interface ChartInformation extends AbstractedVis {
-    axes: Guide[] ,
-    legends: Guide[],
+    axes: Axis[] ,
+    legends: Legend[],
     description: string,
     gridNodes: Guide[],
     dataFieldsUsed: string[],
     markUsed?: Mark,
     title? : string
+    facetedValue?: any
 }
 
 /**
@@ -43,11 +53,10 @@ export interface ChartInformation extends AbstractedVis {
  */
 export interface MultiViewChart extends AbstractedVis {
     charts: ChartInformation[],
+    facetedField: string
 }
 
 /**
  * 
  */
-export type VisAdapter = {
-    convertToGog: (visObject: any, helperVisInformation: any) => AbstractedVis,
-}
+export type VisAdapter = (visObject: any, helperVisInformation: any) => AbstractedVis;
