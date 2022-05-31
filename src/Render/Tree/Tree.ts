@@ -1,7 +1,7 @@
 import { AccessibilityTreeNode } from "../../Tree/Types";
-import {treeStyle} from "./TreeStyle";
+import { treeStyle } from "./TreeStyle";
 
-export function renderTree(tree: AccessibilityTreeNode): HTMLElement { 
+export function renderTree(tree: AccessibilityTreeNode): HTMLElement {
     const treeDom = document.createElement("ul");
     treeDom.setAttribute("aria-labelledby", "tree1")
     treeDom.setAttribute("id", "treeView")
@@ -41,7 +41,15 @@ function renderInnerTree(tree: AccessibilityTreeNode): HTMLElement {
             tree.fieldsUsed.forEach((key: string) => {
                 const headerData = document.createElement("td")
                 headerData.setAttribute("class", "tableInformation");
-                headerData.innerText = dataPoint.selected[0][key];
+                if (isNaN(dataPoint.selected[0][key])) {
+                    headerData.innerText = dataPoint.selected[0][key];
+                } else {
+                        if (dataPoint.selected[0][key] % 1 != 0) {
+                            headerData.innerText = Number(dataPoint.selected[0][key] as number).toFixed(2);
+                        } else {
+                            headerData.innerText = dataPoint.selected[0][key]
+                        }
+                }
                 dataRow.appendChild(headerData);
             })
             tableBody.appendChild(dataRow)

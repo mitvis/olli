@@ -29,19 +29,6 @@ function parseMultiView(scenegraph: any, spec: any): AbstractedVis {
 
         return uniqueNodes
     })
-
-    let axes: Axis[] = filterUniqueNodes(findScenegraphNodes(scenegraph, "axis").map((axis: any) => parseAxis(scenegraph, axis, spec)))
-    let legends: Legend[] = filterUniqueNodes(findScenegraphNodes(scenegraph, "legend").map((legend: any) => parseLegend(scenegraph, legend, spec)))
-    let fields = (axes as any[]).concat(legends).reduce((fieldArr: string[], guide: Guide) => fieldArr.concat(guide.field), [])
-    let facetedField = spec.encoding.facet !== undefined ? spec.encoding.facet.field : spec.encoding['color'].field
-
-    let nestedHeirarchies: ChartInformation[] = scenegraph.items.filter((el: any) => el.role === "scope")[0].items
-        .map((chart: any) => {
-            let chartData = parseChart(chart, spec)
-            const titleNode = findScenegraphNodes(chart, "title-text")[0]
-            chartData.facetedValue = chart.datum[facetedField];
-            return chartData
-        });
     const shallowCopyArray = (objToCopy: any[], arrToPush: any[]): void => {
         objToCopy.forEach((obj: any) => {
             const objCopy = Object.assign({}, obj);
@@ -50,10 +37,19 @@ function parseMultiView(scenegraph: any, spec: any): AbstractedVis {
         })
     }
 
-    nestedHeirarchies.forEach((chart: ChartInformation) => {
-        shallowCopyArray(axes, chart.axes)
-        shallowCopyArray(legends, chart.legends)
-    });
+    let axes: Axis[] = filterUniqueNodes(findScenegraphNodes(scenegraph, "axis").map((axis: any) => parseAxis(scenegraph, axis, spec)))
+    let legends: Legend[] = filterUniqueNodes(findScenegraphNodes(scenegraph, "legend").map((legend: any) => parseLegend(scenegraph, legend, spec)))
+    let fields = (axes as any[]).concat(legends).reduce((fieldArr: string[], guide: Guide) => fieldArr.concat(guide.field), [])
+    let facetedField = spec.encoding.facet !== undefined ? spec.encoding.facet.field : spec.encoding['color'].field
+    let nestedHeirarchies: ChartInformation[] = scenegraph.items.filter((el: any) => el.role === "scope")[0].items
+        .map((chart: any) => {
+            let chartData = parseChart(chart, spec)
+            shallowCopyArray(axes, chartData.axes)
+            shallowCopyArray(legends, chartData.legends)
+            chartData.facetedValue = chart.datum[facetedField];
+            modifyVisFromMark(chartData, chartData.markUsed!, spec)
+            return chartData
+        });
 
     let node: MultiViewChart = {
         description: "",
@@ -80,7 +76,6 @@ function parseChart(scenegraph: any, spec: any): ChartInformation {
     let legends: Legend[] = findScenegraphNodes(scenegraph, "legend").map((legend: any) => parseLegend(scenegraph, legend, spec))
     let fields: string[] = (axes as any[]).concat(legends).reduce((fieldArr: string[], guide: Guide) => fieldArr.concat(guide.field), [])
     let mark: Mark = spec.mark
-
     let node: ChartInformation = {
         axes: axes.filter((axis: Axis) => axis.field !== undefined),
         legends: legends,
@@ -234,7 +229,7 @@ function modifyVisFromMark(vis: ChartInformation, mark: Mark, spec: any): void {
             if (vis.title) {
                 vis.title = `Scatter plot with title ${vis.title} `;
             }
-            vis.gridNodes = vis.axes;
+            vis.gridNodes = [...vis.axes];
             break;
     }
 }

@@ -231,13 +231,13 @@ export class TreeItemLink {
                 flag = true;
                 break;
             case this.keyCode.X:
-                this.tree.focusOnSpecificNode("x-axis", this)
+                // this.tree.focusOnSpecificNode("x-axis", this)
                 break;
             case this.keyCode.Y:
-                this.tree.focusOnSpecificNode("y-axis", this)
+                // this.tree.focusOnSpecificNode("y-axis", this)
                 break;
             case this.keyCode.L:
-                this.tree.focusOnSpecificNode("legend", this)
+                // this.tree.focusOnSpecificNode("legend", this)
                 break;
         }
 
@@ -313,12 +313,12 @@ export class GridTreeItemLink extends TreeItemLink {
         }
 
         this.gridIndex = this.parent.children.length;
-        this.gridWidth = getNodeFromString("X-Axis").children.length;;
+        this.gridWidth = getNodeFromString("X-Axis").children.length;
 
         const getRowPosition = (): number => {
             if (this.gridIndex !== 0) {
                 let prevPosition: number = (this.parent.children[this.gridIndex - 1] as GridTreeItemLink).rowPosition;
-                return prevPosition <= this.gridWidth ? prevPosition + 1 : 1
+                return prevPosition === this.gridWidth ? 1 : prevPosition + 1 
             } else {
                 return 1;
             }
