@@ -161,10 +161,40 @@ export class TreeItemLink {
             return;
         }
 
-        if (event.shift) {
+        if (event.shiftKey) {
+            let root = this.getRootNode();
             if (event.keyCode == this.keyCode.SPACE || event.keyCode == this.keyCode.RETURN) {
                 event.stopPropagation();
                 this.stopDefaultClick = true;
+            } else if (root.label.includes('nested charts') && event.target === this.domNode) {
+                const nodePosition = (item: TreeItemLink): number[] => {
+                    let arr: number[] = [];
+                    let node: TreeItemLink = item
+                    while (node !== undefined) {
+                        if (node.parent) {
+                            let index: number = node.parent.children.indexOf(node);
+                            if (index !== -1) {
+                                arr.push(index)
+                            }
+                        }
+                        node = node.parent
+                    }
+                    return arr
+                }
+
+                if (event.keyCode === this.keyCode.LEFT) {
+                    let pos: number[] = nodePosition(this).reverse()
+                    pos[0] = pos[0] - 1
+                    if (pos[0] >= 0) {
+                        this.shiftToNode(pos)
+                    }
+                } else if (event.keyCode === this.keyCode.RIGHT) {
+                    let pos: number[] = nodePosition(this).reverse()
+                    pos[0] = pos[0] + 1
+                    if (pos[pos.length - 1] < root.children.length) {
+                        this.shiftToNode(pos)   
+                    }
+                }
             }
         } else {
             this.checkBaseKeys(event)
@@ -179,7 +209,7 @@ export class TreeItemLink {
             case this.keyCode.RETURN:
                 if (this.isExpandable) {
                     if (this.isExpanded()) {
-                        this.tree.collapseTreeitem();
+                        this.tree.collapseTreeitem(this);
                     }
                     else {
                         this.tree.expandTreeitem(this);
@@ -211,7 +241,7 @@ export class TreeItemLink {
             case this.keyCode.UP:
                 if (this.isExpandable && this.isExpanded()) {
                     this.tree.setFocusToParentItem();
-                    this.tree.collapseTreeitem();
+                    this.tree.collapseTreeitem(this);
                     flag = true;
                 } else {
                     if (this.inGroup) {
@@ -257,7 +287,7 @@ export class TreeItemLink {
         if (this.isExpandable) {
             if (this.isExpanded()) {
                 this.tree.setFocusToItem(this);
-                this.tree.collapseTreeitem();
+                this.tree.collapseTreeitem(this);
             }
             else {
                 if (this.isExpandable && !this.isExpanded()) {
@@ -293,6 +323,25 @@ export class TreeItemLink {
     handleMouseOut(event: any) {
         event.currentTarget.classList.remove('hover');
     }
+
+    private getRootNode(): TreeItemLink {
+        if (this.parent !== undefined) {
+            return this.parent.getRootNode()
+        } else {
+            return this
+        }
+    }
+
+    private shiftToNode(pos: number[]): void {
+        let node = pos.reduce((nodeToReturn: TreeItemLink, posNum: number, i: number) => {
+            if (nodeToReturn.children[posNum] === undefined) {
+                return nodeToReturn
+            } else {
+                return nodeToReturn.children[posNum]
+            }
+        }, this.getRootNode())
+        this.tree.setFocusToAdjacentItem(node)
+    }
 }
 
 export class GridTreeItemLink extends TreeItemLink {
@@ -313,12 +362,12 @@ export class GridTreeItemLink extends TreeItemLink {
         }
 
         this.gridIndex = this.parent.children.length;
-        this.gridWidth = getNodeFromString("X-Axis").children.length;
+        this.gridWidth = this.parent.parent.label.includes('facet') ? getNodeFromString("Y-Axis").children.length : getNodeFromString("X-Axis").children.length;
 
         const getRowPosition = (): number => {
             if (this.gridIndex !== 0) {
                 let prevPosition: number = (this.parent.children[this.gridIndex - 1] as GridTreeItemLink).rowPosition;
-                return prevPosition === this.gridWidth ? 1 : prevPosition + 1 
+                return prevPosition === this.gridWidth ? 1 : prevPosition + 1
             } else {
                 return 1;
             }
@@ -333,7 +382,7 @@ export class GridTreeItemLink extends TreeItemLink {
         let currentChildIndex: number = this.parent.children.indexOf(this);
         switch (event.keyCode) {
             case this.keyCode.W:
-                if (currentChildIndex + this.gridWidth <= this.parent.children.length) {
+                if (currentChildIndex + this.gridWidth < this.parent.children.length) {
                     this.tree.setFocusToItem(this.parent.children[currentChildIndex + this.gridWidth])
                 }
                 break;
@@ -354,5 +403,4 @@ export class GridTreeItemLink extends TreeItemLink {
                 break;
         }
     }
-
 }

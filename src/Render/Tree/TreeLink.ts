@@ -49,7 +49,7 @@ export class TreeLinks {
 
                 if ((elem.tagName.toLowerCase() === 'li' && elem.firstElementChild.tagName.toLowerCase() === 'span') ||
                     elem.tagName.toLowerCase() === `tr` || (elem.tagName.toLowerCase() === 'th') || (elem.tagName.toLowerCase() === 'td')) {
-                    if (group && group.label.substring(0,9) === "Grid view"){//elem.innerText.includes("Grid view")) {
+                    if (group && group.label.substring(0, 9) === "Grid view") {
                         ti = new GridTreeItemLink(elem, tree, group, treeLevel)
                     } else {
                         ti = new TreeItemLink(elem, tree, group, treeLevel);
@@ -81,8 +81,29 @@ export class TreeLinks {
     }
 
     setFocusToItem(treeitem: TreeItemLink) {
-        this.currentNode = treeitem
         this.currentNode.domNode.tabIndex = 0;
+        this.currentNode = treeitem
+        this.currentNode.domNode.focus();
+    }
+
+    setFocusToAdjacentItem(treeitem: TreeItemLink) {
+        this.currentNode.domNode.tabIndex = 0;
+
+        let parent = this.currentNode.parent
+        while (parent !== undefined) {
+            parent.domNode.setAttribute('aria-expanded', false);
+            this.updateVisibleTreeitems();
+            parent = parent.parent
+        }
+
+        if (!treeitem.isVisible) {
+            let node: TreeItemLink = treeitem
+            while (!treeitem.isVisible) {
+                this.expandTreeitem(node.parent);
+                node = node.parent;
+            }
+        }
+        this.currentNode = treeitem
         this.currentNode.domNode.focus();
     }
 
@@ -116,7 +137,7 @@ export class TreeLinks {
         if (this.currentNode.parent) {
             this.currentNode.parent.lastVisitedChild = this.currentNode;
             this.setFocusToItem(this.currentNode.parent);
-            if (this.currentNode.isExpandable && this.currentNode.isExpanded) this.collapseTreeitem()
+            if (this.currentNode.isExpandable && this.currentNode.isExpanded) this.collapseTreeitem(this.currentNode)
         }
     }
 
@@ -147,11 +168,11 @@ export class TreeLinks {
 
     }
 
-    collapseTreeitem(): void {
+    collapseTreeitem(item: TreeItemLink): void {
 
         let parent: TreeItemLink;
 
-        if (this.currentNode.isExpanded()) {
+        if (item.isExpanded()) {
             parent = this.currentNode;
         } else {
             parent = this.currentNode.parent;
@@ -209,7 +230,7 @@ export class TreeLinks {
                     if (base !== node) {
                         node.parent.lastVisitedChild = node;
                         this.currentNode = node.parent;
-                        this.collapseTreeitem();
+                        this.collapseTreeitem(this.currentNode);
                     }
                 }
 
@@ -217,7 +238,7 @@ export class TreeLinks {
                 if (base.isExpanded()) {
                     collapseChildren(this.currentNode);
                     base.lastVisitedChild = this.currentNode
-                    this.collapseTreeitem();
+                    this.collapseTreeitem(this.currentNode);
                 }
                 this.setFocusToItem(base);
 
