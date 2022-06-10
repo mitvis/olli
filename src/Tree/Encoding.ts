@@ -19,7 +19,7 @@ export function abstractedVisToTree(visualizationInformation: any): Accessibilit
 
 function generateMultiViewChildren(parent: AccessibilityTreeNode, multiViewChart: MultiViewChart): AccessibilityTreeNode[] {
     return multiViewChart.charts.map((singleChart: ChartInformation) => informationToNode(
-        `A chart titled ${singleChart.facetedValue} Chart ${multiViewChart.charts.indexOf(singleChart) + 1} of ${multiViewChart.charts.length}`,
+        `A facet titled ${singleChart.facetedValue}, ${multiViewChart.charts.indexOf(singleChart) + 1} of ${multiViewChart.charts.length}`,
         parent,
         [],
         "chart",
@@ -71,7 +71,7 @@ function generateChartChildren(childrenNodes: AccessibilityTreeNode[], parent: A
 }
 
 function generateStructuredNodeChildren(parent: AccessibilityTreeNode, field: string, values: string[] | number[], data: any[], markUsed: Mark): AccessibilityTreeNode[] {
-    if (isValueArrayString(values) || parent.type === "legend") {
+    if (isStringArray(values) || parent.type === "legend") {
         return values.map((grouping: any) => {
             return informationToNode(`${[[grouping]]}`, parent, data.filter((node: any) => node[field] === grouping), "filteredData", data.filter((node: any) => node[field] === grouping))
         })
@@ -102,50 +102,62 @@ function generateStructuredNodeChildren(parent: AccessibilityTreeNode, field: st
 
 function generateGridChildren(parent: AccessibilityTreeNode, fields: string[], firstValues: number[], secondValues: number[], data: any[]): AccessibilityTreeNode[] {
     let childNodes: AccessibilityTreeNode[] = []
-    const filterData = (xLowerBound: number, xUpperBound: number, yLowerBound: number, yUpperBound: number): any[] => {
+    const filterData = (xLowerBound: number | string, yLowerBound: number | string, xUpperBound?: number | string, yUpperBound?: number | string): any[] => {
         return data.filter((val: any) => {
-            return (val[fields[1]] >= xLowerBound && val[fields[1]] < xUpperBound) &&
-                (val[fields[0]] >= yLowerBound && val[fields[0]] < yUpperBound);
+            const inRange = (field: string, r1: number | string, r2?: number | string): boolean => {
+                if (r2) {
+                    return val[field] >= r1 && val[field] < r2
+                } else {
+                    return val[field] === r1
+                }
+            }
+            return inRange(fields[1], xLowerBound, xUpperBound) && inRange(fields[0], yLowerBound, yUpperBound);
         });
     }
 
-    const yIncrements: number[][] = firstValues.reduce(getEncodingValueIncrements, []);
-    const xIncrements: number[][] = secondValues.reduce(getEncodingValueIncrements, []);
+    const yIncrements: number[][] | string[][] = firstValues.reduce(getEncodingValueIncrements, []);
+    const xIncrements: number[][] | string[][] = secondValues.reduce(getEncodingValueIncrements, []);
 
-    yIncrements.forEach((yIncrement: number[]) => {
-        xIncrements.forEach((xIncrement: number[]) => {
-            const filteredSelection: any[] = filterData(xIncrement[0], xIncrement[1], yIncrement[0], yIncrement[1]);
+    yIncrements.forEach((yIncrement: number[] | string[]) => {
+        xIncrements.forEach((xIncrement: number[] | string[]) => {
+            const filteredSelection: any[] = filterData(xIncrement[0], yIncrement[0], xIncrement[1], yIncrement[1]);
             childNodes.push(informationToNode(`${[yIncrement, xIncrement]}`, parent, filteredSelection, "filteredData", filteredSelection));
         })
     })
     return childNodes;
 }
 
-function isValueArrayString(data: any[]): data is string[] {
+function isStringArray(data: any[]): data is string[] {
     return data.every((pnt: string | number) => typeof pnt === "string")
 }
 
-function getEncodingValueIncrements(incrementArray: any[][], currentValue: any, index: number, array: number[]): any[][] {
-    let bounds: [number, number]
-    let reducedIndex = index - 1;
-    if (reducedIndex === -1 && currentValue !== 0) {
-        const incrementDifference: number = array[index + 1] - currentValue
-        bounds = [(currentValue - incrementDifference), currentValue];
-    } else if (index === array.length - 1) {
-        const incrementDifference: number = currentValue - array[index - 1]
-        let finalIncrement;
-        if (currentValue instanceof Date) {
-            finalIncrement = currentValue.getTime() + incrementDifference;
-        } else {
-            finalIncrement = currentValue + incrementDifference;
-        }
-        bounds = [currentValue, finalIncrement];
-
+function getEncodingValueIncrements(incrementArray: any[][], currentValue: any, index: number, array: number[] | string[]): any[][] {
+    if (isStringArray(array)) {
+        incrementArray.push([currentValue])
+        return incrementArray
     } else {
-        bounds = [array[reducedIndex], array[reducedIndex + 1]];
+        let bounds: [number, number]
+        let reducedIndex = index - 1;
+        if (reducedIndex === -1 && currentValue !== 0) {
+            const incrementDifference: number = (array[index + 1] as number) - currentValue
+            bounds = [(currentValue - incrementDifference), currentValue];
+        } else if (index === array.length - 1) {
+            const incrementDifference: number = currentValue - (array[index - 1] as number)
+            let finalIncrement;
+            if (currentValue instanceof Date) {
+                finalIncrement = currentValue.getTime() + incrementDifference;
+            } else {
+                finalIncrement = currentValue + incrementDifference;
+            }
+            incrementArray.push([array[reducedIndex] as number, currentValue])
+            bounds = [currentValue, finalIncrement];
+
+        } else {
+            bounds = [array[reducedIndex] as number, array[reducedIndex + 1] as number];
+        }
+        incrementArray.push([bounds[0], bounds[1]])
+        return incrementArray
     }
-    incrementArray.push([bounds[0], bounds[1]])
-    return incrementArray
 }
 
 function generateFilteredDataChildren(childrenNodes: AccessibilityTreeNode[], filteredSelection: any[], parent: AccessibilityTreeNode): AccessibilityTreeNode[] {
@@ -169,7 +181,6 @@ function generateChildNodes(type: NodeType, parent: AccessibilityTreeNode, gener
     if (type === "multiView") {
         return generateMultiViewChildren(parent, generationInformation);
     } else if (type === "chart") {
-        let gridNodes = generationInformation.markUsed === 'point' ? generationInformation.gridNodes : []
         if (parent.parent) {
             generationInformation.axes.forEach((axis: Guide) => {
                 axis.data = axis.data.filter((val: any) => {
@@ -182,7 +193,7 @@ function generateChildNodes(type: NodeType, parent: AccessibilityTreeNode, gener
                 })
             })
         }
-        return generateChartChildren([], parent, generationInformation.axes, generationInformation.legends, gridNodes);
+        return generateChartChildren([], parent, generationInformation.axes, generationInformation.legends, generationInformation.gridNodes);
     } else if (type === "xAxis" || type === "yAxis" || type === "legend") {
         return generateStructuredNodeChildren(parent, generationInformation.field, generationInformation.values, generationInformation.data, generationInformation.markUsed);
     } else if (type === "filteredData") {
