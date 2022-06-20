@@ -51,7 +51,7 @@ export interface ChartInformation extends AbstractedVis {
 /**
  * plots that masy have multiple charts contained within a single specification
  */
-export interface MultiViewChart extends AbstractedVis {
+export interface FactedChart extends AbstractedVis {
     charts: ChartInformation[],
     facetedField: string
 }

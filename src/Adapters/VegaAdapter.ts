@@ -1,5 +1,5 @@
 import { Spec, ScaleDataRef, Scale, ScaleData } from "vega";
-import { Guide, AbstractedVis, VisAdapter, MultiViewChart, ChartInformation, Axis, Legend } from "./Types";
+import { Guide, AbstractedVis, VisAdapter, FactedChart, ChartInformation, Axis, Legend } from "./Types";
 
 let view: any;
 let spec: Spec;
@@ -21,7 +21,7 @@ export const VegaAdapter: VisAdapter = (visObject: any, helperVisInformation: an
         }
     }
 
-function parseMultiViewChart(): MultiViewChart {
+function parseMultiViewChart(): FactedChart {
     const filterUniqueNodes = ((nodeArr: any[]) => {
         let uniqueNodes: any[] = []
         nodeArr.forEach((node: any) => {

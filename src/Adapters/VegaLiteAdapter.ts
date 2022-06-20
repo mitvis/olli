@@ -5,7 +5,7 @@ import {
     ChartInformation,
     Mark,
     Guide,
-    MultiViewChart,
+    FactedChart,
     Axis,
     Legend
 } from "./Types";
@@ -51,7 +51,7 @@ function parseMultiView(scenegraph: any, spec: any): AbstractedVis {
             return chartData
         });
 
-    let node: MultiViewChart = {
+    let node: FactedChart = {
         description: "",
         data: getVisualizationData(scenegraph, spec),
         dataFieldsUsed: fields,
@@ -139,8 +139,8 @@ function parseLegend(scenegraph: any, legendScenegraphNode: any, spec: any): Leg
 
 function constructChartDescription(node: AbstractedVis, spec: any): void {
     let desc: string = spec.description ? spec.description : "";
-    if ((node as MultiViewChart).charts !== undefined) {
-        desc = `${desc} with ${(node as MultiViewChart).charts.length} nested charts.`
+    if ((node as FactedChart).charts !== undefined) {
+        desc = `${desc} with ${(node as FactedChart).charts.length} nested charts.`
         node.description = spec.description;
     } else {
         node.description = `${desc}`;

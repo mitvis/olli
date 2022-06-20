@@ -1,4 +1,4 @@
-import { Guide, ChartInformation, MultiViewChart } from "../Adapters/Types";
+import { Guide, ChartInformation, FactedChart } from "../Adapters/Types";
 import { AccessibilityTreeNode, NodeType } from "./Types";
 import { Mark } from '../Adapters/Types'
 
@@ -17,7 +17,7 @@ export function abstractedVisToTree(visualizationInformation: any): Accessibilit
     return node
 }
 
-function generateMultiViewChildren(parent: AccessibilityTreeNode, multiViewChart: MultiViewChart): AccessibilityTreeNode[] {
+function generateMultiViewChildren(parent: AccessibilityTreeNode, multiViewChart: FactedChart): AccessibilityTreeNode[] {
     return multiViewChart.charts.map((singleChart: ChartInformation) => informationToNode(
         `A facet titled ${singleChart.facetedValue}, ${multiViewChart.charts.indexOf(singleChart) + 1} of ${multiViewChart.charts.length}`,
         parent,
