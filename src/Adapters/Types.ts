@@ -1,3 +1,6 @@
+/**
+ * Detailing the different marks that can exist in a chart
+ */
 export type Mark = "point" | "bar" | "rect" | "line" | "geoshape" | "circle" | "area";
 
 /**
@@ -26,10 +29,16 @@ export type Guide = {
     scaleType?: string
 }
 
+/**
+ * Extending the {@link Guide} interface for visualization axes
+ */
 export interface Axis extends Guide {
     orient: string
 }
 
+/**
+ * Extending the {@link Guide} interface for visualization legends
+ */
 export interface Legend extends Guide {
     type: string
 }
@@ -57,6 +66,6 @@ export interface FactedChart extends AbstractedVis {
 }
 
 /**
- * 
+ * Interface describing how a visualization adapter should be created 
  */
 export type VisAdapter = (visObject: any, helperVisInformation: any) => AbstractedVis;

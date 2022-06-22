@@ -53,11 +53,10 @@ to different visualization libaries break down a chart where an accessible rende
                   visObject: val,
                   visSpec: specArray[specIndex] })
                 });
-  </script>   
+  </script>
 </div>
 
-
-## Current Visualization Library Support:
+## Current Visualization Library Support
 
 * [Vega](https://vega.github.io/vega/)
 * [Vega-Lite](https://vega.github.io/vega-lite)
@@ -74,7 +73,6 @@ to different visualization libaries break down a chart where an accessible rende
 
 All of these steps are done by calling `olli({...})` in a single configuration containing the deconstructed
 visualization, type of rendering to create, and the DOM Id of where to append the rendering.
-
 
 ## Usage
 
@@ -111,8 +109,8 @@ The most basic way to use Olli is to add it to any basic HTML page.
       })
     </script>
     ```
-</details>
 
+</details>
 
 ### JS Applications
 
@@ -123,7 +121,7 @@ Olli can also be easily added to normal JavaScript applications.
 1. Install the preset:
 
     ```sh
-    $ npm install olli
+    npm install olli
     ```
 
 2. Import `olli`, and the adapter you want to use, into the file you want to use it in
@@ -144,11 +142,10 @@ Olli can also be easily added to normal JavaScript applications.
         renderType: 'tree'
         domId: 'Accessible-Vis'
       })
-    ...	  
+    ...   
     ```
 
 </details>
-
 
 ### React
 
@@ -160,7 +157,7 @@ inside the `useEffect(() => {}) hook.
 1. Install preset:
 
     ```sh
-    $ npm install olli
+    npm install olli
     ```
 
 2. Import `olli`, and the adapter you want to use, into the component you want to use it in
@@ -183,10 +180,10 @@ inside the `useEffect(() => {}) hook.
         domId: 'Accessible-Vis'
       })
     })
-    ...	  
+    ...   
     ```
-</details>
 
+</details>
 
 ## Configuration Object
 
@@ -213,7 +210,6 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 ```
-
 
 ## Config
 
@@ -255,7 +251,6 @@ Size Limits supports three ways to define config.
    ]
    ```
 
-
 ## Contributing
 
 If you want to help with Olli's development and want to see visualizations become more accessible,
@@ -275,6 +270,7 @@ There's a simple interface outlined for adapters where you can either create you
 add support for your library.
 
 The adapter interface is as follows:
+
 ```js
 
 export type VisAdapter = (visObject: any, helperVisInformation: any) => VisualizationStructure
