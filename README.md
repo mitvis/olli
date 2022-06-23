@@ -211,46 +211,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-## Config
-
-Size Limits supports three ways to define config.
-
-1. `size-limit` section in `package.json`:
-
-   ```json
-     "size-limit": [
-       {
-         "path": "index.js",
-         "import": "{ createStore }",
-         "limit": "500 ms"
-       }
-     ]
-   ```
-
-2. or a separate `.size-limit.json` config file:
-
-   ```js
-   [
-     {
-       "path": "index.js",
-       "import": "{ createStore }",
-       "limit": "500 ms"
-     }
-   ]
-   ```
-
-3. or a more flexible `.size-limit.js` or `.size-limit.cjs` config file:
-
-   ```js
-   module.exports = [
-     {
-       path: "index.js",
-       import: "{ createStore }",
-       limit: "500 ms"
-     }
-   ]
-   ```
-
 ## Contributing
 
 If you want to help with Olli's development and want to see visualizations become more accessible,
