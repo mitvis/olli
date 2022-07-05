@@ -4,7 +4,7 @@ import { Mark } from '../Adapters/Types'
 
 /**
  * Constructs an {@link AccessibilityTreeNode} based off of a generalized visualization
- * @param olliVisSpec the {@link ChartInformation} or {@link FactedChart} to transform into a tree
+ * @param olliVisSpec the {@link Chart} or {@link FacetedChart} to transform into a tree
  * @returns The transormed {@link AccessibilityTreeNode}
  */
 export function olliVisSpecToTree(olliVisSpec: OlliVisSpec): AccessibilityTreeNode {
@@ -24,7 +24,7 @@ export function olliVisSpecToTree(olliVisSpec: OlliVisSpec): AccessibilityTreeNo
 /**
  * Generates children tree nodes for the given parent node.
  * @param parent The root faceted chart to be the parent of each nested chart
- * @param multiViewChart The {@link FactedChart} of the abstracted visualization
+ * @param multiViewChart The {@link FacetedChart} of the abstracted visualization
  * @returns an array of {@link AccessibilityTreeNode} to be the given parent's children
  */
 function generateMultiViewChildren(parent: AccessibilityTreeNode, multiViewChart: FacetedChart): AccessibilityTreeNode[] {
