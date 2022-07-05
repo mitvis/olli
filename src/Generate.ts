@@ -1,4 +1,4 @@
-import { AbstractedVis } from "./Adapters/Types"
+import { OlliVisSpec } from "./Adapters/Types"
 import { renderTable } from "./Render/Table"
 import { renderTree } from "./Render/TreeView/Tree"
 import { TreeLinks } from "./Render/TreeView/TreeLink"
@@ -9,7 +9,7 @@ import { AccessibilityTreeNode } from "./Tree/Types"
  * The configuration object outlining how an accessible visualization should be rendered based on a {@link VisualizationStructure}.
  */
 type OlliConfigOptions = {
-    visualization: AbstractedVis,
+    visualization: OlliVisSpec,
     domId: string,
     renderType?: 'tree' | 'table',
     ariaLabel?: string

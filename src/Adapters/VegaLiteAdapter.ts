@@ -1,6 +1,6 @@
 import {
     VisAdapter,
-    AbstractedVis,
+    OlliVisSpec,
     ChartInformation,
     Mark,
     Guide,
@@ -10,12 +10,12 @@ import {
 } from "./Types";
 
 /**
- * Adapter to deconstruct Vega-Lite visualizations into an {@link AbstractedVis}
+ * Adapter to deconstruct Vega-Lite visualizations into an {@link OlliVisSpec}
  * @param visObject The Vega Scenegraph from the view
  * @param helperVisInformation The Vega-Lite Spec that rendered the visualization
- * @returns An {@link AbstractedVis} of the deconstructed Vega-Lite visualization
+ * @returns An {@link OlliVisSpec} of the deconstructed Vega-Lite visualization
  */
-export const VegaLiteAdapter: VisAdapter = (visObject: any, helperVisInformation: any): AbstractedVis => {
+export const VegaLiteAdapter: VisAdapter = (visObject: any, helperVisInformation: any): OlliVisSpec => {
     if (visObject.items.some((node: any) => node.role === 'scope')) {
         return parseMultiView(visObject, helperVisInformation)
     } else {
@@ -26,9 +26,9 @@ export const VegaLiteAdapter: VisAdapter = (visObject: any, helperVisInformation
 /**
  * @param scenegraph The Vega Scenegraph from the view
  * @param spec The Vega-Lite Spec that rendered the visualization
- * @returns An {@link AbstractedVis} of the deconstructed Vega-Lite visualization
+ * @returns An {@link OlliVisSpec} of the deconstructed Vega-Lite visualization
  */
-function parseMultiView(scenegraph: any, spec: any): AbstractedVis {
+function parseMultiView(scenegraph: any, spec: any): OlliVisSpec {
     const filterUniqueNodes = ((nodeArr: any[]) => {
         let uniqueNodes: any[] = []
         nodeArr.forEach((node: any) => {
@@ -84,7 +84,7 @@ function parseMultiView(scenegraph: any, spec: any): AbstractedVis {
 /**
  * @param scenegraph The Vega Scenegraph from the view
  * @param spec The Vega-Lite Spec that rendered the visualization
- * @returns An {@link AbstractedVis} of the deconstructed Vega-Lite visualization
+ * @returns An {@link OlliVisSpec} of the deconstructed Vega-Lite visualization
  */
 function parseChart(scenegraph: any, spec: any): ChartInformation {
     let axes: Axis[] = findScenegraphNodes(scenegraph, "axis").map((axis: any) => parseAxis(scenegraph, axis, spec))
@@ -168,10 +168,10 @@ function parseLegend(scenegraph: any, legendScenegraphNode: any, spec: any): Leg
 
 /**
  * 
- * @param node The {@link AbstractedVis} whose description is being modified
+ * @param node The {@link OlliVisSpec} whose description is being modified
  * @param spec The specification of the Vega-Lite visualization being deconstructed
  */
-function constructChartDescription(node: AbstractedVis, spec: any): void {
+function constructChartDescription(node: OlliVisSpec, spec: any): void {
     let desc: string = spec.description ? spec.description : "";
     if ((node as FactedChart).charts !== undefined) {
         desc = `${desc} with ${(node as FactedChart).charts.length} nested charts.`

@@ -1,5 +1,5 @@
 import { Spec, ScaleDataRef, Scale, ScaleData } from "vega";
-import { Guide, AbstractedVis, VisAdapter, FactedChart, ChartInformation, Axis, Legend } from "./Types";
+import { Guide, OlliVisSpec, VisAdapter, FactedChart, ChartInformation, Axis, Legend } from "./Types";
 
 let view: any;
 let spec: Spec;
@@ -8,10 +8,10 @@ let spec: Spec;
 * Adapter function that breaks down a Vega visualization into it's basic visual grammar
 * @param view The Vega Scenegraph object used in the visualization
 * @param spec The Vega Specification used to generate the visualization
-* @returns the {@link abstractedVisPlot}, the non-concrete visualization information that can be later used to
+* @returns the {@link OlliVisSpec}, the non-concrete visualization information that can be later used to
 * generate the Accessibility Tree Encoding
 */
-export const VegaAdapter: VisAdapter = (visObject: any, helperVisInformation: any): AbstractedVis => {
+export const VegaAdapter: VisAdapter = (visObject: any, helperVisInformation: any): OlliVisSpec => {
         view = visObject;
         spec = helperVisInformation;
         if (view.items.some((el: any) => el.role === "scope")) {
