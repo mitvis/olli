@@ -5,8 +5,8 @@ import multiSeriesLine from './specs/vlStockLine.json'
 import stackedBar from './specs/vlStackedBar.json'
 import * as vegaLite from "vega-lite"
 import * as vega from "vega"
-import { olliVisSpecToTree } from "../Tree/Encoding"
-import { AccessibilityTreeNode } from "../Tree/Types"
+import { olliVisSpecToTree } from "../Structure"
+import { AccessibilityTreeNode } from "../Structure/Types"
 
 
 describe("Tests for the Accessibility Tree Creation on a Simple Bar Chart", () => {
