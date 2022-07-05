@@ -3,7 +3,7 @@
 Olli is a library, that in a single function call, creates a scalable and standard infrastructure for acessible web-based visualizations
 by embedding a navigable tree that users can explore for a richer screen reader experience. Adapters specific
 to different visualization libaries break down a chart where an accessible rendering is then created using existing
-[ARIA TreeView](https://www.w3.org/wiki/TreeView) technology. 
+[ARIA TreeView](https://www.w3.org/wiki/TreeView) technology.
 
 <!-- Below is an example with a Vega-Lite visualization:
 <div align="center">
@@ -188,28 +188,29 @@ inside the `useEffect(() => {}) hook.
 
 ## Configuration Object
 
-Size Limit has a [GitHub action] that comments and rejects pull requests based
-on Size Limit output.
+The configuration object is what's needed to generate an accessibile visualization. It is a simple object that includes the `OlliVisSpec` of your visualization, the type of rendering you want to create, an optional [ARIA label](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-label) for the rendering, and the DOM id of where you want the rendering placed on your webpage. If no render type is specified the default rendering will be the navigable TreeView.
 
-1. Install and configure Size Limit as shown above.
-2. Add the following action inside `.github/workflows/size-limit.yml`
+Type specification of the configuration:
 
-```yaml
-name: "size"
-on:
-  pull_request:
-    branches:
-      - master
-jobs:
-  size:
-    runs-on: ubuntu-latest
-    env:
-      CI_JOB_NUMBER: 1
-    steps:
-      - uses: actions/checkout@v1
-      - uses: andresz1/size-limit-action@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+```ts
+type OlliConfigOptions = {
+    visualization: OlliVisSpec,
+    domId: string,
+    renderType?: 'tree' | 'table',
+    ariaLabel?: string
+}
+```
+
+Configuration Example:
+
+```ts
+
+let olliConfig: OlliConfigOptions = {
+  visualization: VegaLiteAdapter(vlScenegraph, vlSpec),
+  domId: 'Accessible-Vis',
+  renderType: 'tree'
+}
+
 ```
 
 ## Contributing
