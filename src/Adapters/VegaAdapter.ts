@@ -1,5 +1,5 @@
 import { Spec, ScaleDataRef, Scale, ScaleData } from "vega";
-import { Guide, OlliVisSpec, VisAdapter, FactedChart, ChartInformation, Axis, Legend } from "./Types";
+import { Guide, OlliVisSpec, VisAdapter, FacetedChart, Chart, Axis, Legend } from "./Types";
 
 let view: any;
 let spec: Spec;
@@ -21,7 +21,7 @@ export const VegaAdapter: VisAdapter = (visObject: any, helperVisInformation: an
         }
     }
 
-function parseMultiViewChart(): FactedChart {
+function parseMultiViewChart(): FacetedChart {
     const filterUniqueNodes = ((nodeArr: any[]) => {
         let uniqueNodes: any[] = []
         nodeArr.forEach((node: any) => {
@@ -37,8 +37,8 @@ function parseMultiViewChart(): FactedChart {
     const legends = filterUniqueNodes(findScenegraphNodes(view, "legend").map((legendNode: any) => parseLegendInformation(legendNode)));
 
     const chartItems = view.items.filter((el: any) => el.role === "scope")[0].items;
-    const charts: ChartInformation[] = chartItems.map((chartNode: any) => {
-        let chart: ChartInformation = parseSingleChart(chartNode)
+    const charts: Chart[] = chartItems.map((chartNode: any) => {
+        let chart: Chart = parseSingleChart(chartNode)
         chart.title = findScenegraphNodes(chartNode, "title-text")[0].items[0].text;
         return chart
     })
@@ -59,7 +59,7 @@ function parseMultiViewChart(): FactedChart {
         })
     }
 
-    multiViewChart.charts.forEach((chart: ChartInformation) => {
+    multiViewChart.charts.forEach((chart: Chart) => {
         shallowCopyArray(axes, chart.axes);
         shallowCopyArray(legends, chart.legends);
     })
@@ -67,7 +67,7 @@ function parseMultiViewChart(): FactedChart {
     return multiViewChart;
 }
 
-function parseSingleChart(chart: any): ChartInformation {
+function parseSingleChart(chart: any): Chart {
     const baseVisDescription = vegaVisDescription(spec);
     const axes = findScenegraphNodes(chart, "axis").map((axisNode: any) => parseAxisInformation(axisNode));
     const legends = findScenegraphNodes(chart, "legend").map((legendNode: any) => parseLegendInformation(legendNode))
@@ -77,7 +77,7 @@ function parseSingleChart(chart: any): ChartInformation {
     const chartTitle: string | null = findScenegraphNodes(chart, "title")[0] !== undefined ?
         findScenegraphNodes(chart, "title")[0].items[0].items[0].items[0].text
         : null;
-    let chartNode: ChartInformation = {
+    let chartNode: Chart = {
         data: data,
         axes: axes,
         legends: legends,

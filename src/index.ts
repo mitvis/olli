@@ -1,9 +1,9 @@
 import { OlliVisSpec } from "./Adapters/Types"
 import { renderTable } from "./Render/Table"
-import { renderTree } from "./Render/TreeView/Tree"
+import { renderTree } from "./Render/TreeView"
 import { TreeLinks } from "./Render/TreeView/TreeLink"
-import { abstractedVisToTree } from "./Tree/Encoding"
-import { AccessibilityTreeNode } from "./Tree/Types"
+import { olliVisSpecToTree } from "./Structure"
+import { AccessibilityTreeNode } from "./Structure/Types"
 
 /**
  * The configuration object outlining how an accessible visualization should be rendered based on a {@link VisualizationStructure}.
@@ -16,11 +16,11 @@ type OlliConfigOptions = {
 }
 
 /**
- * 
+ *
  * @param config The {@link OlliConfigOptions} object to specify how an accessible visualization should be generated.
  */
 export function olli(config: OlliConfigOptions) {
-    let chartEncodingTree: AccessibilityTreeNode = abstractedVisToTree(config.visualization);
+    let chartEncodingTree: AccessibilityTreeNode = olliVisSpecToTree(config.visualization);
 
     let htmlRendering: HTMLElement;
 

@@ -1,4 +1,3 @@
-import { AccessibilityTreeNode } from "../../Tree/Types";
 import { GridTreeItemLink, TreeItemLink } from "./TreeItemLinks";
 /*
 *   This content is licensed according to the W3C Software License at

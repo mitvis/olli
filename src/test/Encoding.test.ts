@@ -5,7 +5,7 @@ import multiSeriesLine from './specs/vlStockLine.json'
 import stackedBar from './specs/vlStackedBar.json'
 import * as vegaLite from "vega-lite"
 import * as vega from "vega"
-import { abstractedVisToTree } from "../Tree/Encoding"
+import { olliVisSpecToTree } from "../Tree/Encoding"
 import { AccessibilityTreeNode } from "../Tree/Types"
 
 
@@ -41,9 +41,9 @@ describe("Tests for the Accessibility Tree Creation on a faceted charts", () => 
             .initialize(vegaRender)
             .hover()
             .runAsync()
-    
-        const accessibilityTree: AccessibilityTreeNode = abstractedVisToTree(VegaLiteAdapter((view.scenegraph() as any).root.items[0], specToUse))
-        
+
+        const accessibilityTree: AccessibilityTreeNode = olliVisSpecToTree(VegaLiteAdapter((view.scenegraph() as any).root.items[0], specToUse))
+
         expect(1).toBe(1);
     });
 
@@ -58,9 +58,9 @@ describe("Tests for the Accessibility Tree Creation on a faceted charts", () => 
             .initialize(vegaRender)
             .hover()
             .runAsync()
-    
-        const accessibilityTree: AccessibilityTreeNode = abstractedVisToTree(VegaLiteAdapter((view.scenegraph() as any).root.items[0], specToUse))
-        
+
+        const accessibilityTree: AccessibilityTreeNode = olliVisSpecToTree(VegaLiteAdapter((view.scenegraph() as any).root.items[0], specToUse))
+
         expect(1).toBe(1);
     });
 
@@ -75,9 +75,9 @@ describe("Tests for the Accessibility Tree Creation on a faceted charts", () => 
             .initialize(vegaRender)
             .hover()
             .runAsync()
-    
-        const accessibilityTree: AccessibilityTreeNode = abstractedVisToTree(VegaLiteAdapter((view.scenegraph() as any).root.items[0], specToUse))
-        
+
+        const accessibilityTree: AccessibilityTreeNode = olliVisSpecToTree(VegaLiteAdapter((view.scenegraph() as any).root.items[0], specToUse))
+
         expect(1).toBe(1);
     });
 })

@@ -1,7 +1,7 @@
-import { AccessibilityTreeNode } from "../Tree/Types";
+import { AccessibilityTreeNode } from "../../Structure/Types";
 
 /**
- * 
+ *
  * @param tree The {@link AccessibilityTreeNode} to generate a table from
  * @returns An {@link HTMLElement} table of the data used in a visualization
  */
@@ -23,7 +23,7 @@ export function renderTable(tree: AccessibilityTreeNode): HTMLElement {
             tableData.innerText = data[field];
             dataRow.appendChild(tableData);
         })
-        
+
         tableBody.appendChild(dataRow);
     })
     table.appendChild(tableBody)
