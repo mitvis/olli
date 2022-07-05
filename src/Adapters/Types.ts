@@ -1,10 +1,13 @@
+/**
+ * Detailing the different marks that can exist in a chart
+ */
 export type Mark = "point" | "bar" | "rect" | "line" | "geoshape" | "circle" | "area";
 
 /**
  * A simple union type that when implemented a concrete adapter class can be used with any visualization library to
  * later be used to create an explorable Accessibility Tree.
  */
- export type AbstractedVis = {
+ export type OlliVisSpec = {
     description: string,
     data: Map<string, any[]>,
     dataFieldsUsed: string[],
@@ -26,10 +29,16 @@ export type Guide = {
     scaleType?: string
 }
 
+/**
+ * Extending the {@link Guide} interface for visualization axes
+ */
 export interface Axis extends Guide {
     orient: string
 }
 
+/**
+ * Extending the {@link Guide} interface for visualization legends
+ */
 export interface Legend extends Guide {
     type: string
 }
@@ -37,7 +46,7 @@ export interface Legend extends Guide {
 /**
  * Outlines the grammar of graphics information that has to be parsed from a visualization.
  */
-export interface ChartInformation extends AbstractedVis {
+export interface ChartInformation extends OlliVisSpec {
     axes: Axis[] ,
     legends: Legend[],
     description: string,
@@ -51,12 +60,12 @@ export interface ChartInformation extends AbstractedVis {
 /**
  * plots that masy have multiple charts contained within a single specification
  */
-export interface MultiViewChart extends AbstractedVis {
+export interface FactedChart extends OlliVisSpec {
     charts: ChartInformation[],
     facetedField: string
 }
 
 /**
- * 
+ * Interface describing how a visualization adapter should be created 
  */
-export type VisAdapter = (visObject: any, helperVisInformation: any) => AbstractedVis;
+export type VisAdapter = (visObject: any, helperVisInformation: any) => OlliVisSpec;

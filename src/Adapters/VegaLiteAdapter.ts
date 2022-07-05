@@ -1,16 +1,21 @@
-import { Spec } from "vega";
 import {
     VisAdapter,
-    AbstractedVis,
+    OlliVisSpec,
     ChartInformation,
     Mark,
     Guide,
-    MultiViewChart,
+    FactedChart,
     Axis,
     Legend
 } from "./Types";
 
-export const VegaLiteAdapter: VisAdapter = (visObject: any, helperVisInformation: any): AbstractedVis => {
+/**
+ * Adapter to deconstruct Vega-Lite visualizations into an {@link OlliVisSpec}
+ * @param visObject The Vega Scenegraph from the view
+ * @param helperVisInformation The Vega-Lite Spec that rendered the visualization
+ * @returns An {@link OlliVisSpec} of the deconstructed Vega-Lite visualization
+ */
+export const VegaLiteAdapter: VisAdapter = (visObject: any, helperVisInformation: any): OlliVisSpec => {
     if (visObject.items.some((node: any) => node.role === 'scope')) {
         return parseMultiView(visObject, helperVisInformation)
     } else {
@@ -18,7 +23,12 @@ export const VegaLiteAdapter: VisAdapter = (visObject: any, helperVisInformation
     }
 }
 
-function parseMultiView(scenegraph: any, spec: any): AbstractedVis {
+/**
+ * @param scenegraph The Vega Scenegraph from the view
+ * @param spec The Vega-Lite Spec that rendered the visualization
+ * @returns An {@link OlliVisSpec} of the deconstructed Vega-Lite visualization
+ */
+function parseMultiView(scenegraph: any, spec: any): OlliVisSpec {
     const filterUniqueNodes = ((nodeArr: any[]) => {
         let uniqueNodes: any[] = []
         nodeArr.forEach((node: any) => {
@@ -51,7 +61,7 @@ function parseMultiView(scenegraph: any, spec: any): AbstractedVis {
             return chartData
         });
 
-    let node: MultiViewChart = {
+    let node: FactedChart = {
         description: "",
         data: getVisualizationData(scenegraph, spec),
         dataFieldsUsed: fields,
@@ -71,6 +81,11 @@ function parseMultiView(scenegraph: any, spec: any): AbstractedVis {
     return node;
 }
 
+/**
+ * @param scenegraph The Vega Scenegraph from the view
+ * @param spec The Vega-Lite Spec that rendered the visualization
+ * @returns An {@link OlliVisSpec} of the deconstructed Vega-Lite visualization
+ */
 function parseChart(scenegraph: any, spec: any): ChartInformation {
     let axes: Axis[] = findScenegraphNodes(scenegraph, "axis").map((axis: any) => parseAxis(scenegraph, axis, spec))
     let legends: Legend[] = findScenegraphNodes(scenegraph, "legend").map((legend: any) => parseLegend(scenegraph, legend, spec))
@@ -90,6 +105,13 @@ function parseChart(scenegraph: any, spec: any): ChartInformation {
     return node
 }
 
+/**
+ * 
+ * @param scenegraph The Vega Scenegraph from the view
+ * @param axisScenegraphNode The specific scenegraph node of an axis
+ * @param spec The Vega-Lite Spec that rendered the visualization
+ * @returns A {@link Axis} from the converted axisScenegraphNode
+ */
 function parseAxis(scenegraph: any, axisScenegraphNode: any, spec: any): Axis {
     const axisView = axisScenegraphNode.items[0]
     const orient = axisView.orient
@@ -118,6 +140,13 @@ function parseAxis(scenegraph: any, axisScenegraphNode: any, spec: any): Axis {
     }
 }
 
+/**
+ * 
+ * @param scenegraph The Vega Scenegraph from the view
+ * @param legendScenegraphNode The specific scenegraph node of a legend
+ * @param spec The Vega-Lite Spec that rendered the visualization
+ * @returns A {@link legend} from the converted legendScenegraphNode
+ */
 function parseLegend(scenegraph: any, legendScenegraphNode: any, spec: any): Legend {
     let scale = legendScenegraphNode.items[0].datum.scales[Object.keys(legendScenegraphNode.items[0].datum.scales)[0]];
     let data: any[] = getScaleData(getVisualizationData(scenegraph, spec), scale, spec)
@@ -137,10 +166,15 @@ function parseLegend(scenegraph: any, legendScenegraphNode: any, spec: any): Leg
     }
 }
 
-function constructChartDescription(node: AbstractedVis, spec: any): void {
+/**
+ * 
+ * @param node The {@link OlliVisSpec} whose description is being modified
+ * @param spec The specification of the Vega-Lite visualization being deconstructed
+ */
+function constructChartDescription(node: OlliVisSpec, spec: any): void {
     let desc: string = spec.description ? spec.description : "";
-    if ((node as MultiViewChart).charts !== undefined) {
-        desc = `${desc} with ${(node as MultiViewChart).charts.length} nested charts.`
+    if ((node as FactedChart).charts !== undefined) {
+        desc = `${desc} with ${(node as FactedChart).charts.length} nested charts.`
         node.description = spec.description;
     } else {
         node.description = `${desc}`;
@@ -159,6 +193,12 @@ function getScaleData(data: Map<string, any[]>, scale: string, spec: any): any[]
     return data.get('source_0')!;
 }
 
+/**
+ * A Map of data used in the visualization
+ * @param view The Vega Scenegraph of this visualization
+ * @param spec The Vega-Lite specification for the visualization
+ * @returns A key-value pair of the data defined in this visualization
+ */
 function getVisualizationData(view: any, spec: any): Map<string, any[]> {
     try {
         let data: Map<string, any[]> = new Map()
@@ -171,6 +211,12 @@ function getVisualizationData(view: any, spec: any): Map<string, any[]> {
     }
 }
 
+/**
+ * Traverses a provided scenegraph node for nodes of a specific role.
+ * @param scenegraphNode The root scenegraph node to traverse
+ * @param passRole The string of the node role to search for
+ * @returns an array of ndoes that contain the specified role
+ */
 export function findScenegraphNodes(scenegraphNode: any, passRole: string): any[] {
     let nodes: any[] = [];
     const cancelRoles: string[] = ["cell", "axis-grid"]
@@ -191,7 +237,13 @@ export function findScenegraphNodes(scenegraphNode: any, passRole: string): any[
     return nodes
 }
 
-export function verifyNode(scenegraphNode: any, cancelRoles: string[]): boolean {
+/**
+ * Checks if a scenegraph node or its children do not have any specified role names
+ * @param scenegraphNode The scenegraph ndoe to traverse
+ * @param cancelRoles Roles of Scenegraph Nodes that should not be parsed
+ * @returns True if the provided scenegraph node and its children do not contain any of the cancelRols
+ */
+function verifyNode(scenegraphNode: any, cancelRoles: string[]): boolean {
     if (scenegraphNode.role !== undefined && !cancelRoles.some((role: string) => scenegraphNode.role.includes(role))) {
         if (scenegraphNode.items.every((item: any) => verifyNode(item, cancelRoles)) || scenegraphNode.items === undefined) {
             return true
@@ -207,17 +259,15 @@ export function verifyNode(scenegraphNode: any, cancelRoles: string[]): boolean 
     }
 }
 
+/**
+ * 
+ * @param vis The {@link ChartInformation} to update
+ * @param mark The {@link Mark} used in the provided {@Link ChartInformation}
+ * @param spec The Vega-Lite specification of the provided visualization 
+ */
 function modifyVisFromMark(vis: ChartInformation, mark: Mark, spec: any): void {
     switch (mark) {
         case 'bar':
-            /*
-            Filtering Axes for band scales (potential to be implemented into the Vega Adapter)
-            const bandScale = spec.scales?.filter((scale: Scale) => scale.type === "band")[0]!;
-            console.log(bandScale)
-            const bandAxis = spec.axes?.filter((axis: Axis) => axis.scale === bandScale.name)[0]!
-            console.log(bandAxis)
-            vis.axes = vis.axes.filter((visAxis: Guide) => visAxis.title === bandAxis.title)
-            */
             const nomAxis = Object.keys(spec.encoding).filter((key: string) => {
                 return spec.encoding[key].type === "nominal" || spec.encoding[key].aggregate === undefined
             })[0]

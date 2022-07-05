@@ -1,20 +1,25 @@
-import { AbstractedVis } from "./Adapters/Types"
-import { VegaAdapter } from "./Adapters/VegaAdapter"
-import { VegaLiteAdapter } from "./Adapters/VegaLiteAdapter"
+import { OlliVisSpec } from "./Adapters/Types"
 import { renderTable } from "./Render/Table"
-import { renderTree } from "./Render/Tree/Tree"
-import { TreeLinks } from "./Render/Tree/TreeLink"
+import { renderTree } from "./Render/TreeView/Tree"
+import { TreeLinks } from "./Render/TreeView/TreeLink"
 import { abstractedVisToTree } from "./Tree/Encoding"
 import { AccessibilityTreeNode } from "./Tree/Types"
 
-type TreeConfigOptions = {
-    visualization: AbstractedVis,
+/**
+ * The configuration object outlining how an accessible visualization should be rendered based on a {@link VisualizationStructure}.
+ */
+type OlliConfigOptions = {
+    visualization: OlliVisSpec,
     domId: string,
-    renderType?: "table",
+    renderType?: 'tree' | 'table',
     ariaLabel?: string
 }
 
-export function olli(config: TreeConfigOptions) {
+/**
+ * 
+ * @param config The {@link OlliConfigOptions} object to specify how an accessible visualization should be generated.
+ */
+export function olli(config: OlliConfigOptions) {
     let chartEncodingTree: AccessibilityTreeNode = abstractedVisToTree(config.visualization);
 
     let htmlRendering: HTMLElement;
@@ -23,6 +28,7 @@ export function olli(config: TreeConfigOptions) {
         case ("table"):
             htmlRendering = renderTable(chartEncodingTree);
             break;
+        case ('tree'):
         default:
             htmlRendering = renderTree(chartEncodingTree);
             new TreeLinks(htmlRendering).init();

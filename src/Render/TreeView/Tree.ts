@@ -1,6 +1,11 @@
 import { AccessibilityTreeNode } from "../../Tree/Types";
 import { treeStyle } from "./TreeStyle";
 
+/**
+ * 
+ * @param tree A {@link AccessibilityTreeNode} to generate a navigable tree view from
+ * @returns An {@link HTMLElement} ARIA TreeView of the navigable tree view for a visualization
+ */
 export function renderTree(tree: AccessibilityTreeNode): HTMLElement {
     const treeDom = document.createElement("ul");
     treeDom.setAttribute("aria-labelledby", "tree1")

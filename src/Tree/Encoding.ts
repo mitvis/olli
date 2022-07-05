@@ -1,7 +1,12 @@
-import { Guide, ChartInformation, MultiViewChart } from "../Adapters/Types";
+import { Guide, ChartInformation, FactedChart } from "../Adapters/Types";
 import { AccessibilityTreeNode, NodeType } from "./Types";
 import { Mark } from '../Adapters/Types'
 
+/**
+ * Constructs an {@link AccessibilityTreeNode} based off of a generalized visualization
+ * @param visualizationInformation the {@link ChartInformation} or {@link FactedChart} to transform into a tree
+ * @returns The transormed {@link AccessibilityTreeNode}
+ */
 export function abstractedVisToTree(visualizationInformation: any): AccessibilityTreeNode {
     let node: AccessibilityTreeNode
     if (visualizationInformation.charts !== undefined) {
@@ -17,7 +22,13 @@ export function abstractedVisToTree(visualizationInformation: any): Accessibilit
     return node
 }
 
-function generateMultiViewChildren(parent: AccessibilityTreeNode, multiViewChart: MultiViewChart): AccessibilityTreeNode[] {
+/**
+ * Generates children tree nodes for the given parent node.
+ * @param parent The root faceted chart to be the parent of each nested chart
+ * @param multiViewChart The {@link FactedChart} of the abstracted visualization
+ * @returns an array of {@link AccessibilityTreeNode} to be the given parent's children
+ */
+function generateMultiViewChildren(parent: AccessibilityTreeNode, multiViewChart: FactedChart): AccessibilityTreeNode[] {
     return multiViewChart.charts.map((singleChart: ChartInformation) => informationToNode(
         `A facet titled ${singleChart.facetedValue}, ${multiViewChart.charts.indexOf(singleChart) + 1} of ${multiViewChart.charts.length}`,
         parent,
@@ -26,6 +37,15 @@ function generateMultiViewChildren(parent: AccessibilityTreeNode, multiViewChart
         singleChart));
 }
 
+/**
+ * Recursively generates children nodes of a chart's structured elements for the provided parent
+ * @param childrenNodes the array of children nodes to eventually return to the parent
+ * @param parent The root chart to be the parent of each nested chart
+ * @param axes The {@link Guide}s of axes to be transformed into {@link AccessibilityTreeNode}s
+ * @param legends The {@link Guide}s of legends to be transformed into {@link AccessibilityTreeNode}s
+ * @param grids The {@link Guide}s of axes with grid lines to be transformed into {@link AccessibilityTreeNode}s
+ * @returns an array of {@link AccessibilityTreeNode} to be the given parent's children
+ */
 function generateChartChildren(childrenNodes: AccessibilityTreeNode[], parent: AccessibilityTreeNode,
     axes: Guide[], legends: Guide[], grids: Guide[]): AccessibilityTreeNode[] {
     if (axes.length > 0) {
@@ -70,6 +90,15 @@ function generateChartChildren(childrenNodes: AccessibilityTreeNode[], parent: A
     }
 }
 
+/**
+ * Generates the incremental children for each structured element of a visualization
+ * @param parent The structured element whose data is being incrmeented
+ * @param field The data field used to compare idividual data points
+ * @param values The groupings or increments of values for the structured element (ex: for axes these are the array of ticks)
+ * @param data The array of data used in the visualization
+ * @param markUsed {@link Mark} of the visualization
+ * @returns an array of {@link AccessibilityTreeNode} to be the given parent's children
+ */
 function generateStructuredNodeChildren(parent: AccessibilityTreeNode, field: string, values: string[] | number[], data: any[], markUsed: Mark): AccessibilityTreeNode[] {
     if (isStringArray(values) || parent.type === "legend") {
         return values.map((grouping: any) => {
@@ -100,6 +129,15 @@ function generateStructuredNodeChildren(parent: AccessibilityTreeNode, field: st
     }
 }
 
+/**
+ * Generates the incremental children for a pair of axes forming an explorable grid
+ * @param parent The structured element whose data is being incrmeented
+ * @param field The data fields used to compare idividual data points
+ * @param firstValues Array of tick values for the first axis
+ * @param secondValues Array of tick values for the second axis
+ * @param data The array of data used in the visualization
+ * @returns an array of {@link AccessibilityTreeNode} to be the given parent's children
+ */
 function generateGridChildren(parent: AccessibilityTreeNode, fields: string[], firstValues: number[], secondValues: number[], data: any[]): AccessibilityTreeNode[] {
     let childNodes: AccessibilityTreeNode[] = []
     const filterData = (xLowerBound: number | string, yLowerBound: number | string, xUpperBound?: number | string, yUpperBound?: number | string): any[] => {
@@ -160,6 +198,13 @@ function getEncodingValueIncrements(incrementArray: any[][], currentValue: any, 
     }
 }
 
+/**
+ * Recursively generates a child node for each data point in the provided range
+ * @param childrenNodes The array {@link AccessibilityTreeNode} to eventually return
+ * @param filteredSelection The data points to transform into {@link AccessibilityTreeNode} nodes
+ * @param parent The parent whose children are being generated
+ * @returns 
+ */
 function generateFilteredDataChildren(childrenNodes: AccessibilityTreeNode[], filteredSelection: any[], parent: AccessibilityTreeNode): AccessibilityTreeNode[] {
     if (filteredSelection.length > 0) {
         const dataPoint: any = filteredSelection.pop();
@@ -177,6 +222,13 @@ function generateFilteredDataChildren(childrenNodes: AccessibilityTreeNode[], fi
     return childrenNodes
 }
 
+/**
+ * Creates specific children nodes based on a provided {@link NodeType}
+ * @param type The {@link NodeType} of the parent
+ * @param parent The parent {@link AccessibilityTreeNode} whose children need to be generated
+ * @param generationInformation A changing variable that assists in generating children nodes at all levels
+ * @returns an array of {@link AccessibilityTreeNode}
+ */
 function generateChildNodes(type: NodeType, parent: AccessibilityTreeNode, generationInformation: any): AccessibilityTreeNode[] {
     if (type === "multiView") {
         return generateMultiViewChildren(parent, generationInformation);
@@ -205,6 +257,15 @@ function generateChildNodes(type: NodeType, parent: AccessibilityTreeNode, gener
     }
 }
 
+/**
+ * Creates a {@link AccessibilityTreeNode} of the given parameters
+ * @param desc The string that will be used when rendering this node
+ * @param parent The parent {@link AccessibilityTreeNode} of the node to be generated
+ * @param selected Selection of data from this node and its children
+ * @param type Meta-data to know what kind of element this node is from a visualization
+ * @param childrenInformation changing variable to assist with generating more nodes of the tree
+ * @returns The {@link AccessibilityTreeNode} from the provided parameters
+ */
 function informationToNode(desc: string, parent: AccessibilityTreeNode | null, selected: any[], type: NodeType, childrenInformation?: any): AccessibilityTreeNode {
     let node: AccessibilityTreeNode = {
         description: desc,
@@ -220,6 +281,11 @@ function informationToNode(desc: string, parent: AccessibilityTreeNode | null, s
     return node
 }
 
+/**
+ * 
+ * @param node The node whose description is being created
+ * @returns A description based on the provided {@link AccessibilityTreeNode}
+ */
 function nodeToDesc(node: AccessibilityTreeNode): string {
     if (node.type === "multiView" || node.type === "chart") {
         return node.description
@@ -237,6 +303,11 @@ function nodeToDesc(node: AccessibilityTreeNode): string {
     return "";
 }
 
+/**
+ * Creates a more verbose description for nodes after the tree has been created
+ * @param node The node whose description is being updating
+ * @param chartInformation The {@link ChartInformation} to help creating a more verbose description
+ */
 function updateDescriptions(node: AccessibilityTreeNode, chartInformation: ChartInformation): void {
     if (node.type === "filteredData" && chartInformation.markUsed === "line") {
         node.description = `${node.description}.` //with [Trend Information];

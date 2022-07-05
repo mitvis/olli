@@ -1,5 +1,10 @@
 import { AccessibilityTreeNode } from "../Tree/Types";
 
+/**
+ * 
+ * @param tree The {@link AccessibilityTreeNode} to generate a table from
+ * @returns An {@link HTMLElement} table of the data used in a visualization
+ */
 export function renderTable(tree: AccessibilityTreeNode): HTMLElement {
     const table = document.createElement("table");
     const tableBody = document.createElement("tbody");
