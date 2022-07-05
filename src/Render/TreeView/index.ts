@@ -44,14 +44,11 @@ function renderInnerTree(tree: AccessibilityTreeNode): HTMLElement {
             tree.fieldsUsed.forEach((key: string) => {
                 const headerData = document.createElement("td")
                 headerData.setAttribute("class", "tableInformation");
-                if (isNaN(dataPoint.selected[0][key])) {
-                    headerData.innerText = dataPoint.selected[0][key];
+                const value = dataPoint.selected[0][key];
+                if (!isNaN(value) && value % 1 != 0) {
+                    headerData.innerText = Number(value).toFixed(2);
                 } else {
-                        if (dataPoint.selected[0][key] % 1 != 0) {
-                            headerData.innerText = Number(dataPoint.selected[0][key] as number).toFixed(2);
-                        } else {
-                            headerData.innerText = dataPoint.selected[0][key]
-                        }
+                    headerData.innerText = dataPoint.selected[0][key]
                 }
                 dataRow.appendChild(headerData);
             })
