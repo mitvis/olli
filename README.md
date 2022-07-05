@@ -3,8 +3,9 @@
 Olli is a library, that in a single function call, creates a scalable and standard infrastructure for acessible web-based visualizations
 by embedding a navigable tree that users can explore for a richer screen reader experience. Adapters specific
 to different visualization libaries break down a chart where an accessible rendering is then created using existing
-[ARIA TreeView](https://www.w3.org/wiki/TreeView) technology. Below is an example with a Vega-Lite visualization:
+[ARIA TreeView](https://www.w3.org/wiki/TreeView) technology. 
 
+<!-- Below is an example with a Vega-Lite visualization:
 <div align="center">
   <div id="Vis"></div>
   <div id="Tree"></div>
@@ -54,7 +55,7 @@ to different visualization libaries break down a chart where an accessible rende
                   visSpec: specArray[specIndex] })
                 });
   </script>
-</div>
+</div> -->
 
 ## Current Visualization Library Support
 

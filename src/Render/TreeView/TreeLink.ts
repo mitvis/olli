@@ -137,7 +137,7 @@ export class TreeLinks {
         if (this.currentNode.parent) {
             this.currentNode.parent.lastVisitedChild = this.currentNode;
             this.setFocusToItem(this.currentNode.parent);
-            if (this.currentNode.isExpandable && this.currentNode.isExpanded) this.collapseTreeitem(this.currentNode)
+            if (this.currentNode.isExpandable && this.currentNode.isExpanded()) this.collapseTreeitem(this.currentNode)
         }
     }
 
