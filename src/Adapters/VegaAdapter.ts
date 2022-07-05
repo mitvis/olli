@@ -1,4 +1,4 @@
-import { Spec, ScaleDataRef, Scale, ScaleData } from "vega";
+import { Spec, ScaleDataRef, Scale, ScaleData, Scene } from "vega";
 import { Guide, OlliVisSpec, VisAdapter, FacetedChart, Chart, Axis, Legend } from "./Types";
 
 let view: any;
@@ -11,7 +11,7 @@ let spec: Spec;
 * @returns the {@link OlliVisSpec}, the non-concrete visualization information that can be later used to
 * generate the Accessibility Tree Encoding
 */
-export const VegaAdapter: VisAdapter = (visObject: any, helperVisInformation: any): OlliVisSpec => {
+export const VegaAdapter: VisAdapter = (visObject: Scene, helperVisInformation: Spec): OlliVisSpec => {
         view = visObject;
         spec = helperVisInformation;
         if (view.items.some((el: any) => el.role === "scope")) {
@@ -73,7 +73,7 @@ function parseSingleChart(chart: any): Chart {
     const legends = findScenegraphNodes(chart, "legend").map((legendNode: any) => parseLegendInformation(legendNode))
     const gridNodes: Guide[] = getGridNodes(axes);
     const dataFields: string[] = getDataFields(axes, legends);
-    const data: Map<string, any[]> = getData();
+    const data: any[] = getData();
     const chartTitle: string | null = findScenegraphNodes(chart, "title")[0] !== undefined ?
         findScenegraphNodes(chart, "title")[0].items[0].items[0].items[0].text
         : null;
@@ -91,12 +91,14 @@ function parseSingleChart(chart: any): Chart {
     return chartNode;
 }
 
-function getData(): Map<string, any[]> {
+function getData(): any[] {
     try {
-        let data: Map<string, any[]> = new Map()
-        const datasets = spec.data?.map((set: any) => set.name)!
-        datasets.map((key: string) => data.set(key, view.context.data[key].values.value));
-        return data
+        // let data: Map<string, any[]> = new Map()
+        // const datasets = spec.data?.map((set: any) => set.name)!
+        // datasets.map((key: string) => data.set(key, view.context.data[key].values.value));
+        // return data
+        return view.context.data['source_0'].values.value
+        // TODO hardcoded dataset name
     } catch (error) {
         throw new Error(`No data defined in the Vega Spec \n ${error}`)
     }
@@ -130,7 +132,7 @@ function parseAxisInformation(axis: any): Axis {
     return {
         values: ticks,
         title: title === undefined ? axisStr : `${axisStr} titled '${title.items[0].text}'`,
-        data: getScaleData(getData(), scale),
+        data: getData(),
         field: fields,
         scaleType: spec.scales?.find((specScale: any) => specScale.name === scale)?.type,
         orient: orient
@@ -142,10 +144,7 @@ function parseAxisInformation(axis: any): Axis {
  */
 function parseLegendInformation(legendNode: any): Legend {
     let scale = legendNode.items[0].datum.scales[Object.keys(legendNode.items[0].datum.scales)[0]];
-    let data: any[] = getScaleData(getData(), scale)
-    if (data === undefined) {
-        data = getData().get("source_0")!;
-    }
+    let data: any[] = getData();
     let labels: any[] = legendNode.items[0].items.find((n: any) => n.role === "legend-entry").items[0].items[0].items;
     let title: string = legendNode.items[0].items.find((n: any) => n.role === "legend-title").items[0].text;
     let field: string | undefined

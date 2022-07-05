@@ -73,10 +73,7 @@ function parseMultiView(scenegraph: any, spec: any): OlliVisSpec {
 
     node.dataFieldsUsed.push(facetedField)
     node.charts.forEach((chart: Chart) => {
-        for (let key in chart.data.keys()) {
-            let data = chart.data.get(key)!
-            chart.data.set(key, data.filter((val: any) => val[facetedField] === chart.title))
-        }
+        chart.data = chart.data.filter((val: any) => val[facetedField] === chart.title)
     })
 
     constructChartDescription(node, spec)
@@ -121,7 +118,7 @@ function parseAxis(scenegraph: any, axisScenegraphNode: any, spec: any): Axis {
     const ticks = axisView.items.find((n: any) => n.role === 'axis-tick').items.map((n: any) => n.datum.value);
     const title = spec.encoding[encodingKey].title;
     const scale = axisView.datum.scale
-    const axisData = getScaleData(getVisualizationData(scenegraph, spec), scale, spec)
+    const axisData = getVisualizationData(scenegraph, spec);
     const axisStr = axisView.orient === "bottom" || axisView.orient === "top" ? "X-Axis" : "Y-Axis";
     let field;
 
@@ -151,10 +148,7 @@ function parseAxis(scenegraph: any, axisScenegraphNode: any, spec: any): Axis {
  */
 function parseLegend(scenegraph: any, legendScenegraphNode: any, spec: any): Legend {
     let scale = legendScenegraphNode.items[0].datum.scales[Object.keys(legendScenegraphNode.items[0].datum.scales)[0]];
-    let data: any[] = getScaleData(getVisualizationData(scenegraph, spec), scale, spec)
-    if (data === undefined) {
-        data = getVisualizationData(scenegraph, spec).get("source_0")!;
-    }
+    let data: any[] = getVisualizationData(scenegraph, spec);
     let labels: any[] = legendScenegraphNode.items[0].items.find((n: any) => n.role === "legend-entry").items[0].items[0].items;
 
     return {
@@ -184,30 +178,21 @@ function constructChartDescription(node: OlliVisSpec, spec: any): void {
 }
 
 /**
- * Finds the corresponding data that a scale refers to
- * @param scale The name of the scale to compare in the Vega Spec
- * @returns The array of objects that the scale uses.
- */
-function getScaleData(data: Map<string, any[]>, scale: string, spec: any): any[] {
-    // const scaleDomain = spec.scales?.find((s: any) => scale === s.name)!.domain;
-    // const dataRef = scaleDomain.data
-
-    return data.get('source_0')!;
-}
-
-/**
  * A Map of data used in the visualization
  * @param view The Vega Scenegraph of this visualization
  * @param spec The Vega-Lite specification for the visualization
  * @returns A key-value pair of the data defined in this visualization
  */
-function getVisualizationData(view: any, spec: any): Map<string, any[]> {
+function getVisualizationData(view: any, spec: any): any[] {
     try {
-        let data: Map<string, any[]> = new Map()
-        Object.keys(view.context.data).forEach((key: string) => {
-            data.set(key, view.context.data[key].values.value)
-        })
-        return data
+        // TODO fix hardcoded dataset name
+        const source_0 = view.context.data['source_0'].values.value;
+        // let data: Map<string, any[]> = new Map()
+        // Object.keys(view.context.data).forEach((key: string) => {
+        //     data.set(key, view.context.data[key].values.value)
+        // })
+        // return data
+        return source_0;
     } catch (error) {
         throw new Error(`No data defined in the Spec \n ${error}`)
     }
