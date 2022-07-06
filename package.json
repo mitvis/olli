@@ -11,6 +11,7 @@
   "author": "Matt Blanco",
   "license": "MIT",
   "dependencies": {
+    "@observablehq/plot": "^0.5.2",
     "ts-loader": "^9.3.0",
     "ts-node": "^10.8.0",
     "vega": "^5.22.1",
