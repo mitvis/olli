@@ -30,7 +30,7 @@ export function olli(config: OlliConfigOptions) {
             break;
         case ('tree'):
         default:
-            htmlRendering = renderTree(chartEncodingTree);
+            htmlRendering = document.createElement("ul").appendChild(renderTree(chartEncodingTree));
             new TreeLinks(htmlRendering).init();
     }
 

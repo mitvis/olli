@@ -7,14 +7,6 @@ import { treeStyle } from "./TreeStyle";
  * @returns An {@link HTMLElement} ARIA TreeView of the navigable tree view for a visualization
  */
 export function renderTree(tree: AccessibilityTreeNode): HTMLElement {
-    const treeDom = document.createElement("ul");
-
-    treeDom.appendChild(renderInnerTree(tree));
-
-    return treeDom;
-}
-
-function renderInnerTree(tree: AccessibilityTreeNode): HTMLElement {
     let nodeToAppend: HTMLElement = document.createElement("li")
     nodeToAppend.setAttribute("role", "treeitem");
     nodeToAppend.setAttribute("aria-expanded", "false");
