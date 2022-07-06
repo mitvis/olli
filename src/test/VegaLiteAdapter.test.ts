@@ -2,7 +2,7 @@ import { VegaLiteAdapter } from "../Adapters/VegaLiteAdapter"
 import barChart from "./specs/vlSimpleBar.json"
 import * as vegaLite from "vega-lite"
 import * as vega from "vega"
-import { AbstractedVis } from "../Adapters/Types"
+import { OlliVisSpec } from "../Adapters/Types"
 
 
 describe("Tests for the Vega-Lite Adapter on a Simple Bar Chart", () => {

@@ -1,10 +1,12 @@
+import { Scene } from "vega";
+import { TopLevelSpec } from "vega-lite";
 import {
     VisAdapter,
     OlliVisSpec,
-    ChartInformation,
+    Chart,
     Mark,
     Guide,
-    FactedChart,
+    FacetedChart,
     Axis,
     Legend
 } from "./Types";
@@ -15,7 +17,7 @@ import {
  * @param helperVisInformation The Vega-Lite Spec that rendered the visualization
  * @returns An {@link OlliVisSpec} of the deconstructed Vega-Lite visualization
  */
-export const VegaLiteAdapter: VisAdapter = (visObject: any, helperVisInformation: any): OlliVisSpec => {
+export const VegaLiteAdapter: VisAdapter = (visObject: Scene, helperVisInformation: TopLevelSpec): OlliVisSpec => {
     if (visObject.items.some((node: any) => node.role === 'scope')) {
         return parseMultiView(visObject, helperVisInformation)
     } else {
@@ -51,7 +53,7 @@ function parseMultiView(scenegraph: any, spec: any): OlliVisSpec {
     let legends: Legend[] = filterUniqueNodes(findScenegraphNodes(scenegraph, "legend").map((legend: any) => parseLegend(scenegraph, legend, spec)))
     let fields = (axes as any[]).concat(legends).reduce((fieldArr: string[], guide: Guide) => fieldArr.concat(guide.field), [])
     let facetedField = spec.encoding.facet !== undefined ? spec.encoding.facet.field : spec.encoding['color'].field
-    let nestedHeirarchies: ChartInformation[] = scenegraph.items.filter((el: any) => el.role === "scope")[0].items
+    let nestedHeirarchies: Chart[] = scenegraph.items.filter((el: any) => el.role === "scope")[0].items
         .map((chart: any) => {
             let chartData = parseChart(chart, spec)
             shallowCopyArray(axes, chartData.axes)
@@ -61,7 +63,7 @@ function parseMultiView(scenegraph: any, spec: any): OlliVisSpec {
             return chartData
         });
 
-    let node: FactedChart = {
+    let node: FacetedChart = {
         description: "",
         data: getVisualizationData(scenegraph, spec),
         dataFieldsUsed: fields,
@@ -70,11 +72,8 @@ function parseMultiView(scenegraph: any, spec: any): OlliVisSpec {
     }
 
     node.dataFieldsUsed.push(facetedField)
-    node.charts.forEach((chart: ChartInformation) => {
-        for (let key in chart.data.keys()) {
-            let data = chart.data.get(key)!
-            chart.data.set(key, data.filter((val: any) => val[facetedField] === chart.title))
-        }
+    node.charts.forEach((chart: Chart) => {
+        chart.data = chart.data.filter((val: any) => val[facetedField] === chart.title)
     })
 
     constructChartDescription(node, spec)
@@ -86,12 +85,12 @@ function parseMultiView(scenegraph: any, spec: any): OlliVisSpec {
  * @param spec The Vega-Lite Spec that rendered the visualization
  * @returns An {@link OlliVisSpec} of the deconstructed Vega-Lite visualization
  */
-function parseChart(scenegraph: any, spec: any): ChartInformation {
+function parseChart(scenegraph: any, spec: any): Chart {
     let axes: Axis[] = findScenegraphNodes(scenegraph, "axis").map((axis: any) => parseAxis(scenegraph, axis, spec))
     let legends: Legend[] = findScenegraphNodes(scenegraph, "legend").map((legend: any) => parseLegend(scenegraph, legend, spec))
     let fields: string[] = (axes as any[]).concat(legends).reduce((fieldArr: string[], guide: Guide) => fieldArr.concat(guide.field), [])
     let mark: Mark = spec.mark
-    let node: ChartInformation = {
+    let node: Chart = {
         axes: axes.filter((axis: Axis) => axis.field !== undefined),
         legends: legends,
         description: "",
@@ -106,7 +105,7 @@ function parseChart(scenegraph: any, spec: any): ChartInformation {
 }
 
 /**
- * 
+ *
  * @param scenegraph The Vega Scenegraph from the view
  * @param axisScenegraphNode The specific scenegraph node of an axis
  * @param spec The Vega-Lite Spec that rendered the visualization
@@ -119,7 +118,7 @@ function parseAxis(scenegraph: any, axisScenegraphNode: any, spec: any): Axis {
     const ticks = axisView.items.find((n: any) => n.role === 'axis-tick').items.map((n: any) => n.datum.value);
     const title = spec.encoding[encodingKey].title;
     const scale = axisView.datum.scale
-    const axisData = getScaleData(getVisualizationData(scenegraph, spec), scale, spec)
+    const axisData = getVisualizationData(scenegraph, spec);
     const axisStr = axisView.orient === "bottom" || axisView.orient === "top" ? "X-Axis" : "Y-Axis";
     let field;
 
@@ -141,7 +140,7 @@ function parseAxis(scenegraph: any, axisScenegraphNode: any, spec: any): Axis {
 }
 
 /**
- * 
+ *
  * @param scenegraph The Vega Scenegraph from the view
  * @param legendScenegraphNode The specific scenegraph node of a legend
  * @param spec The Vega-Lite Spec that rendered the visualization
@@ -149,10 +148,7 @@ function parseAxis(scenegraph: any, axisScenegraphNode: any, spec: any): Axis {
  */
 function parseLegend(scenegraph: any, legendScenegraphNode: any, spec: any): Legend {
     let scale = legendScenegraphNode.items[0].datum.scales[Object.keys(legendScenegraphNode.items[0].datum.scales)[0]];
-    let data: any[] = getScaleData(getVisualizationData(scenegraph, spec), scale, spec)
-    if (data === undefined) {
-        data = getVisualizationData(scenegraph, spec).get("source_0")!;
-    }
+    let data: any[] = getVisualizationData(scenegraph, spec);
     let labels: any[] = legendScenegraphNode.items[0].items.find((n: any) => n.role === "legend-entry").items[0].items[0].items;
 
     return {
@@ -167,30 +163,18 @@ function parseLegend(scenegraph: any, legendScenegraphNode: any, spec: any): Leg
 }
 
 /**
- * 
+ *
  * @param node The {@link OlliVisSpec} whose description is being modified
  * @param spec The specification of the Vega-Lite visualization being deconstructed
  */
 function constructChartDescription(node: OlliVisSpec, spec: any): void {
     let desc: string = spec.description ? spec.description : "";
-    if ((node as FactedChart).charts !== undefined) {
-        desc = `${desc} with ${(node as FactedChart).charts.length} nested charts.`
+    if ((node as FacetedChart).charts !== undefined) {
+        desc = `${desc} with ${(node as FacetedChart).charts.length} nested charts.`
         node.description = spec.description;
     } else {
         node.description = `${desc}`;
     }
-}
-
-/**
- * Finds the corresponding data that a scale refers to
- * @param scale The name of the scale to compare in the Vega Spec
- * @returns The array of objects that the scale uses.
- */
-function getScaleData(data: Map<string, any[]>, scale: string, spec: any): any[] {
-    // const scaleDomain = spec.scales?.find((s: any) => scale === s.name)!.domain;
-    // const dataRef = scaleDomain.data
-
-    return data.get('source_0')!;
 }
 
 /**
@@ -199,13 +183,16 @@ function getScaleData(data: Map<string, any[]>, scale: string, spec: any): any[]
  * @param spec The Vega-Lite specification for the visualization
  * @returns A key-value pair of the data defined in this visualization
  */
-function getVisualizationData(view: any, spec: any): Map<string, any[]> {
+function getVisualizationData(view: any, spec: any): any[] {
     try {
-        let data: Map<string, any[]> = new Map()
-        Object.keys(view.context.data).forEach((key: string) => {
-            data.set(key, view.context.data[key].values.value)
-        })
-        return data
+        // TODO fix hardcoded dataset name
+        const source_0 = view.context.data['source_0'].values.value;
+        // let data: Map<string, any[]> = new Map()
+        // Object.keys(view.context.data).forEach((key: string) => {
+        //     data.set(key, view.context.data[key].values.value)
+        // })
+        // return data
+        return source_0;
     } catch (error) {
         throw new Error(`No data defined in the Spec \n ${error}`)
     }
@@ -260,12 +247,12 @@ function verifyNode(scenegraphNode: any, cancelRoles: string[]): boolean {
 }
 
 /**
- * 
+ *
  * @param vis The {@link ChartInformation} to update
  * @param mark The {@link Mark} used in the provided {@Link ChartInformation}
- * @param spec The Vega-Lite specification of the provided visualization 
+ * @param spec The Vega-Lite specification of the provided visualization
  */
-function modifyVisFromMark(vis: ChartInformation, mark: Mark, spec: any): void {
+function modifyVisFromMark(vis: Chart, mark: Mark, spec: any): void {
     switch (mark) {
         case 'bar':
             const nomAxis = Object.keys(spec.encoding).filter((key: string) => {

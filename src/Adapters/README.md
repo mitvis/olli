@@ -34,7 +34,7 @@ interface ChartInformation extends AbstractedVis {
 Interface for `FacetedChart`:
 
 ```js
-interface FactedChart extends AbstractedVis {
+interface FacetedChart extends AbstractedVis {
     charts: ChartInformation[],
     facetedField: string
 }

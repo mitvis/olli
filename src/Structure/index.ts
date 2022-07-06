@@ -1,35 +1,34 @@
-import { Guide, ChartInformation, FactedChart } from "../Adapters/Types";
+import { Guide, Chart, FacetedChart, OlliVisSpec, isFacetedChart, isChart } from "../Adapters/Types";
 import { AccessibilityTreeNode, NodeType } from "./Types";
 import { Mark } from '../Adapters/Types'
 
 /**
  * Constructs an {@link AccessibilityTreeNode} based off of a generalized visualization
- * @param visualizationInformation the {@link ChartInformation} or {@link FactedChart} to transform into a tree
+ * @param olliVisSpec the {@link Chart} or {@link FacetedChart} to transform into a tree
  * @returns The transormed {@link AccessibilityTreeNode}
  */
-export function abstractedVisToTree(visualizationInformation: any): AccessibilityTreeNode {
-    let node: AccessibilityTreeNode
-    if (visualizationInformation.charts !== undefined) {
-        node = informationToNode(visualizationInformation.description, null, visualizationInformation.data.get('source_0'), "multiView", visualizationInformation);
+export function olliVisSpecToTree(olliVisSpec: OlliVisSpec): AccessibilityTreeNode {
+    let node: AccessibilityTreeNode;
+    if (isFacetedChart(olliVisSpec)) {
+        node = informationToNode(olliVisSpec.description, null, olliVisSpec.data, "multiView", olliVisSpec);
         node.description += ` With ${node.children.length} nested charts`
     } else {
-        const axesString: string = visualizationInformation.axes.length > 0 ? ` ${visualizationInformation.axes.length} axes and` : '';
-        const legendsString: string = visualizationInformation.legends.length > 0 ? ` ${visualizationInformation.legends.length} legends` : ''
-        node = informationToNode(visualizationInformation.description, null, [], "chart", visualizationInformation);
+        const axesString: string = olliVisSpec.axes.length > 0 ? ` ${olliVisSpec.axes.length} axes and` : '';
+        const legendsString: string = olliVisSpec.legends.length > 0 ? ` ${olliVisSpec.legends.length} legends` : ''
+        node = informationToNode(olliVisSpec.description, null, [], "chart", olliVisSpec);
         node.description += ` with ${axesString} ${legendsString}`
     }
-    node.children.forEach((child: AccessibilityTreeNode) => updateDescriptions(child, visualizationInformation))
     return node
 }
 
 /**
  * Generates children tree nodes for the given parent node.
  * @param parent The root faceted chart to be the parent of each nested chart
- * @param multiViewChart The {@link FactedChart} of the abstracted visualization
+ * @param multiViewChart The {@link FacetedChart} of the abstracted visualization
  * @returns an array of {@link AccessibilityTreeNode} to be the given parent's children
  */
-function generateMultiViewChildren(parent: AccessibilityTreeNode, multiViewChart: FactedChart): AccessibilityTreeNode[] {
-    return multiViewChart.charts.map((singleChart: ChartInformation) => informationToNode(
+function generateMultiViewChildren(parent: AccessibilityTreeNode, multiViewChart: FacetedChart): AccessibilityTreeNode[] {
+    return multiViewChart.charts.map((singleChart: Chart) => informationToNode(
         `A facet titled ${singleChart.facetedValue}, ${multiViewChart.charts.indexOf(singleChart) + 1} of ${multiViewChart.charts.length}`,
         parent,
         [],
@@ -203,7 +202,7 @@ function getEncodingValueIncrements(incrementArray: any[][], currentValue: any, 
  * @param childrenNodes The array {@link AccessibilityTreeNode} to eventually return
  * @param filteredSelection The data points to transform into {@link AccessibilityTreeNode} nodes
  * @param parent The parent whose children are being generated
- * @returns 
+ * @returns
  */
 function generateFilteredDataChildren(childrenNodes: AccessibilityTreeNode[], filteredSelection: any[], parent: AccessibilityTreeNode): AccessibilityTreeNode[] {
     if (filteredSelection.length > 0) {
@@ -282,7 +281,7 @@ function informationToNode(desc: string, parent: AccessibilityTreeNode | null, s
 }
 
 /**
- * 
+ *
  * @param node The node whose description is being created
  * @returns A description based on the provided {@link AccessibilityTreeNode}
  */
@@ -301,16 +300,4 @@ function nodeToDesc(node: AccessibilityTreeNode): string {
         return node.fieldsUsed.reduce((desc: string, currentKey: string) => `${desc} ${currentKey}: ${node.selected[0][currentKey]}`, "");
     }
     return "";
-}
-
-/**
- * Creates a more verbose description for nodes after the tree has been created
- * @param node The node whose description is being updating
- * @param chartInformation The {@link ChartInformation} to help creating a more verbose description
- */
-function updateDescriptions(node: AccessibilityTreeNode, chartInformation: ChartInformation): void {
-    if (node.type === "filteredData" && chartInformation.markUsed === "line") {
-        node.description = `${node.description}.` //with [Trend Information];
-    }
-    node.children.forEach((child: AccessibilityTreeNode) => updateDescriptions(child, chartInformation));
 }

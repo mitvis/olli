@@ -2,10 +2,6 @@ import { VegaLiteAdapter } from "../Adapters/VegaLiteAdapter"
 import barChart from "./specs/vlSimpleBar.json"
 import * as vegaLite from "vega-lite"
 import * as vega from "vega"
-import { abstractedVisToTree } from "../Tree/Encoding"
-import { AccessibilityTreeNode } from "../Tree/Types"
-import { renderTree } from "../Render/Tree/Tree"
-import { TreeLinks } from "../Render/Tree/TreeLink"
 
 
 describe("Tests for the Accessibility Tree Creation on a Simple Bar Chart", () => {

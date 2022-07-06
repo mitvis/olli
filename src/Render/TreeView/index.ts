@@ -1,22 +1,12 @@
-import { AccessibilityTreeNode } from "../../Tree/Types";
+import { AccessibilityTreeNode } from "../../Structure/Types";
 import { treeStyle } from "./TreeStyle";
 
 /**
- * 
+ *
  * @param tree A {@link AccessibilityTreeNode} to generate a navigable tree view from
  * @returns An {@link HTMLElement} ARIA TreeView of the navigable tree view for a visualization
  */
 export function renderTree(tree: AccessibilityTreeNode): HTMLElement {
-    const treeDom = document.createElement("ul");
-    treeDom.setAttribute("aria-labelledby", "tree1")
-    treeDom.setAttribute("id", "treeView")
-
-    treeDom.appendChild(renderInnerTree(tree));
-
-    return treeDom;
-}
-
-function renderInnerTree(tree: AccessibilityTreeNode): HTMLElement {
     let nodeToAppend: HTMLElement = document.createElement("li")
     nodeToAppend.setAttribute("role", "treeitem");
     nodeToAppend.setAttribute("aria-expanded", "false");
@@ -46,14 +36,11 @@ function renderInnerTree(tree: AccessibilityTreeNode): HTMLElement {
             tree.fieldsUsed.forEach((key: string) => {
                 const headerData = document.createElement("td")
                 headerData.setAttribute("class", "tableInformation");
-                if (isNaN(dataPoint.selected[0][key])) {
-                    headerData.innerText = dataPoint.selected[0][key];
+                const value = dataPoint.selected[0][key];
+                if (!isNaN(value) && value % 1 != 0) {
+                    headerData.innerText = Number(value).toFixed(2);
                 } else {
-                        if (dataPoint.selected[0][key] % 1 != 0) {
-                            headerData.innerText = Number(dataPoint.selected[0][key] as number).toFixed(2);
-                        } else {
-                            headerData.innerText = dataPoint.selected[0][key]
-                        }
+                    headerData.innerText = dataPoint.selected[0][key]
                 }
                 dataRow.appendChild(headerData);
             })
