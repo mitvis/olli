@@ -1,10 +1,11 @@
-import { VegaLiteAdapter } from "../Adapters/VegaLiteAdapter"
+import { VegaLiteAdapter } from "../../Adapters/VegaLiteAdapter"
 import barChart from "./specs/vlSimpleBar.json"
 import * as vegaLite from "vega-lite"
 import * as vega from "vega"
+import { OlliVisSpec } from "../../Adapters/Types"
 
 
-describe("Tests for the Accessibility Tree Creation on a Simple Bar Chart", () => {
+describe("Tests for the Vega-Lite Adapter on a Simple Bar Chart", () => {
     let specToUse: any = barChart
     let vegaSpec = vegaLite.compile(specToUse).spec;
     const runtime = vega.parse(vegaSpec);
@@ -16,14 +17,10 @@ describe("Tests for the Accessibility Tree Creation on a Simple Bar Chart", () =
         .hover()
         .run();
 
-    // const htmlTreeRendering: HTMLElement =
-    // renderTree(abstractedVisToTree(VegaLiteAdapter((view.scenegraph() as any).root.items[0], barChart)))
+    // const abstractedVegaLiteVis: AbstractedVis = VegaLiteAdapter((view.scenegraph() as any).root.items[0], barChart)
 
-    // const treeLinks: TreeLinks = new TreeLinks(htmlTreeRendering);
-    // treeLinks.init()
-
-
-    test("Testing encoding generation", () => {
+    test("Testing description generation", () => {
+        // expect(abstractedVegaLiteVis.description).toBe('A simple bar chart with embedded data');
         expect(1).toBe(1);
     });
 })
