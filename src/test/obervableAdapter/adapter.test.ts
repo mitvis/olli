@@ -1,7 +1,7 @@
 import { PlotAdapter } from "../../Adapters/ObservablePlotAdapter";
 import { Axis, Chart, FacetedChart, Legend, OlliVisSpec } from "../../Adapters/Types";
-
-const Plot = require("@observablehq/plot");
+// @ts-ignore
+import * as Plot from "@observablehq/plot";
 
 const letterData = [
     { letter: 'E', freq: 0.12702, vowel: true },

@@ -1,5 +1,4 @@
-import { VisAdapter, OlliVisSpec, FacetedChart, Chart, Axis, Legend } from "./Types";
-const Plot = require("@observablehq/plot");
+import { VisAdapter, OlliVisSpec, FacetedChart, Chart, Axis, Legend, Guide } from "./Types";
 
 /**
  * * Adapter to deconstruct ObservablePlot visualizations into an {@link OlliVisSpec}
@@ -22,7 +21,6 @@ export const PlotAdapter: VisAdapter = (plot: any, svg: Element): OlliVisSpec =>
  * @returns the generated {@link FacetedChart}
  */
 function plotToFacetedChart(plot: any, svg: Element): FacetedChart {
-    Plot.plot()
     const axes: Axis[] = ['x-axis', 'y-axis'].reduce((parsedAxes: Axis[], s: string) => {
         let axisSVG = findHtmlElement(svg, s);
         if (axisSVG) {
@@ -40,7 +38,29 @@ function plotToFacetedChart(plot: any, svg: Element): FacetedChart {
  * @returns the generated {@link Chart}
  */
 function plotToChart(plot: any, svg: Element): Chart {
-    return {} as Chart
+    const axes: Axis[] = ['x-axis', 'y-axis'].reduce((parsedAxes: Axis[], s: string) => {
+        let axisSVG = findHtmlElement(svg, s);
+        if (axisSVG) {
+            parsedAxes.push(parseAxis(plot, axisSVG))
+        }
+        return parsedAxes
+    }, [])
+    let legends: Legend[] = []
+    if (plot.color.legend) legends.push(parseLegend(plot, svg.children[0]))
+    const plotMark = plot.marks.filter((mark: any) => mark.ariaLabel !== 'rule')[0]
+    let fields: string[] = (axes as any[]).concat(legends).reduce((fieldArr: string[], guide: Guide) => fieldArr.concat(guide.field), []) //TODO: Same code as vega-lite adapter, create utility functions that can be reused accross adapters
+
+    let chart: Chart = {
+        axes: axes,
+        legends: legends,
+        data: plotMark.data,
+        dataFieldsUsed: fields,
+        description: `A chart with ${axes.length} axes and ${legends.length} legends`,
+        gridNodes: [],
+    }
+
+
+    return chart
 }
 
 /**
@@ -93,12 +113,12 @@ function parseAxis(plot: any, svg: Element): Axis {
  * @param svg the SVG element of an legend 
  * @returns A {@link Legend} of the visualization
  */
-function parseLegend(plot: any, svg: Element): Legend {
+function parseLegend(plot: any, svg: Element): Legend { //TODO: Does not support 'ramp' legend types when the legend is rendered as an SVG
     const plotMark = plot.marks.filter((mark: any) => mark.ariaLabel !== 'rule')[0];
     const channel = plotMark.channels.find((c: any) => c.scale === 'color');
     const values: string[] | number[] = [];
 
-    for(let i = 0; i < svg.firstChild?.childNodes.length!; i++){
+    for(let i = 0; i < svg.childNodes.length!; i++){
         let c = svg.firstChild?.childNodes.item(i)!;
         if (c.nodeName !== 'STYLE') {
             if (isNaN(parseInt(c.textContent!))) {

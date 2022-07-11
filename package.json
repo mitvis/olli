@@ -8,7 +8,7 @@
     "build": "webpack",
     "test": "jest"
   },
-  "author": "Matt Blanco",
+  "author": "Matthew Blanco",
   "license": "MIT",
   "dependencies": {
     "@observablehq/plot": "^0.5.2",
