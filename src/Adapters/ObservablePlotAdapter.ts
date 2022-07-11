@@ -46,7 +46,7 @@ function plotToChart(plot: any, svg: Element): Chart {
         return parsedAxes
     }, [])
     let legends: Legend[] = []
-    if (plot.color.legend) legends.push(parseLegend(plot, svg.children[0]))
+    if (plot.color && plot.color.legend) legends.push(parseLegend(plot, svg.children[0]))
     const plotMark = plot.marks.filter((mark: any) => mark.ariaLabel !== 'rule')[0]
     let fields: string[] = (axes as any[]).concat(legends).reduce((fieldArr: string[], guide: Guide) => fieldArr.concat(guide.field), []) //TODO: Same code as vega-lite adapter, create utility functions that can be reused accross adapters
 
@@ -74,29 +74,34 @@ function parseAxis(plot: any, svg: Element): Axis {
     const orient = axisType === 'y' ? 'left' : 'bottom';
     const plotMark = plot.marks.filter((mark: any) => mark.ariaLabel !== 'rule')[0]
     const channel = plotMark.channels.find((c: any) => c.scale === axisType)
-    const ticks = Object.keys(svg.children).reduce<string[] | number[]>((tArr: number[] | string[], k: string) => {
+    const ticks: string[] | number[] = Object.keys(svg.children).reduce((tArr: number[] | string[], k: string) => {
         const cObj: Element = svg.children[parseInt(k)]
-        let tickValue: string;
-        if (cObj.className === 'tick') {
+        let tickValue: string = '';
+        if (cObj.classList[0] === 'tick') {
             cObj.childNodes.forEach((innerChild: ChildNode) => {
-                if (innerChild.textContent !== '') tickValue = innerChild.textContent!
+                if (innerChild.textContent !== '') {
+                    tickValue = innerChild.textContent!
+                }
             })
         }
-
-        if (isNaN(parseInt(tickValue!))) {
-            tArr.push(parseInt(tickValue!) as never)
-        } else {
-            tArr.push(tickValue! as never);
+        
+        if (tickValue !== '') {
+            if (isNaN(parseInt(tickValue))) {
+                //@ts-ignore
+                tArr.push(tickValue)
+            } else {
+                //@ts-ignore
+                tArr.push(parseFloat(tickValue));
+            }
         }
-
         return tArr
     }, [])
 
     let guide: Axis = {
-        values: ticks,
-        title: `${svg?.getAttribute('aria-label')} titled ${channel.label}`,
+        values: [...ticks] as string[] | number[],
+        title: `${svg?.getAttribute('aria-label')} titled ${channel.value.label}`,
         data: plotMark.data,
-        field: channel.label,
+        field: channel.value.label,
         orient: orient
     }
 
@@ -118,7 +123,7 @@ function parseLegend(plot: any, svg: Element): Legend { //TODO: Does not support
     const channel = plotMark.channels.find((c: any) => c.scale === 'color');
     const values: string[] | number[] = [];
 
-    for(let i = 0; i < svg.childNodes.length!; i++){
+    for (let i = 0; i < svg.childNodes.length!; i++) {
         let c = svg.firstChild?.childNodes.item(i)!;
         if (c.nodeName !== 'STYLE') {
             if (isNaN(parseInt(c.textContent!))) {
@@ -152,7 +157,7 @@ function parseLegend(plot: any, svg: Element): Legend { //TODO: Does not support
 function findHtmlElement(svg: Element, label: string): Element | undefined {
     const attributeToCompare = 'aria-label';
     let returnedElement: Element | undefined;
-    Object.keys(svg.children).forEach((k: string) => { 
+    Object.keys(svg.children).forEach((k: string) => {
         let childElement: Element = svg.children[parseInt(k)];
         if (childElement.getAttribute(attributeToCompare) === label) {
             returnedElement = childElement;
@@ -170,3 +175,5 @@ function findHtmlElement(svg: Element, label: string): Element | undefined {
 function hasFacets(plot: any): boolean {
     return plot.facet || plot.marks.some((mark: any) => mark.ariaLabel === 'line')
 }
+
+(window as any).PlotAdapter = PlotAdapter;
