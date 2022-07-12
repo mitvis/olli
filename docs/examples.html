@@ -1,0 +1,16 @@
+---
+layout: default
+title: "Examples"
+---
+
+<span style="color: green">this is the content in examples.html</span>
+
+{% for example in site.data.examples %}
+<div>
+  <h3>{{example.title}}</h3>
+  <img src="{{example.img}}" />
+  <div>
+    {% include {{example.vegaLiteCode}} %}
+  </div>
+</div>
+{% endfor %}
