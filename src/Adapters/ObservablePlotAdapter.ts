@@ -21,14 +21,42 @@ export const PlotAdapter: VisAdapter = (plot: any, svg: Element): OlliVisSpec =>
  * @returns the generated {@link FacetedChart}
  */
 function plotToFacetedChart(plot: any, svg: Element): FacetedChart {
+    const chartSVG = svg.tagName !== 'svg' ? Object.values(svg.children).find((n) => n.tagName === 'svg')! : svg;
+    console.log(chartSVG)
     const axes: Axis[] = ['x-axis', 'y-axis'].reduce((parsedAxes: Axis[], s: string) => {
-        let axisSVG = findHtmlElement(svg, s);
+        let axisSVG = findHtmlElement(chartSVG, s);
         if (axisSVG) {
             parsedAxes.push(parseAxis(plot, axisSVG))
         }
         return parsedAxes
     }, [])
-    return {} as FacetedChart
+    let legends: Legend[] = []
+    if (plot.color && plot.color.legend) legends.push(parseLegend(plot, svg.children[0]))
+    const plotMark = plot.marks.filter((mark: any) => mark.ariaLabel !== 'rule')[0]
+    let fields = (axes as any[]).concat(legends).reduce((fieldArr: string[], guide: Guide) => fieldArr.concat(guide.field), [])
+    let charts: Chart[] = Object.values(chartSVG.children)
+        .filter((n) => n.getAttribute('aria-label') === 'line' || n.getAttribute('aria-label') === 'facet')
+        .map((n) => { console.log(n); return plotToChart(plot, chartSVG)});
+    let facetField = plot.facet ? plot.facet.y ? plot.facet.y : plot.facet.x : '';
+
+    /* TODO
+    - get faceted values from SVG of f[y-axis, x-axis] tick values
+      - filter data using facetedField anf faceted value
+    - find a way to work with line charts when a single line exists
+      - if more than one line exists look for stroke value in the mark object
+
+    - find a way to search for the best mark object within the spec
+    */
+
+    let facetedChart: FacetedChart = {
+        charts: charts,
+        data: plotMark.data,
+        dataFieldsUsed: fields,
+        description: `Faceted chart with ${charts.length} nested charts`,
+        facetedField: facetField
+    };
+
+    return facetedChart
 }
 
 /**
@@ -39,7 +67,8 @@ function plotToFacetedChart(plot: any, svg: Element): FacetedChart {
  */
 function plotToChart(plot: any, svg: Element): Chart {
     const axes: Axis[] = ['x-axis', 'y-axis'].reduce((parsedAxes: Axis[], s: string) => {
-        let axisSVG = findHtmlElement(svg, s);
+        const chartSVG = svg.tagName !== 'svg' ? Object.values(svg.children).find((n) => n.tagName === 'svg')! : svg;
+        let axisSVG = findHtmlElement(chartSVG, s);
         if (axisSVG) {
             parsedAxes.push(parseAxis(plot, axisSVG))
         }
@@ -74,6 +103,7 @@ function parseAxis(plot: any, svg: Element): Axis {
     const orient = axisType === 'y' ? 'left' : 'bottom';
     const plotMark = plot.marks.filter((mark: any) => mark.ariaLabel !== 'rule')[0]
     const channel = plotMark.channels.find((c: any) => c.scale === axisType)
+    const field: string = typeof channel.value === 'object' ? channel.value.label : channel.value
     const ticks: string[] | number[] = Object.keys(svg.children).reduce((tArr: number[] | string[], k: string) => {
         const cObj: Element = svg.children[parseInt(k)]
         let tickValue: string = '';
@@ -84,7 +114,7 @@ function parseAxis(plot: any, svg: Element): Axis {
                 }
             })
         }
-        
+
         if (tickValue !== '') {
             if (isNaN(parseInt(tickValue))) {
                 //@ts-ignore
@@ -99,9 +129,9 @@ function parseAxis(plot: any, svg: Element): Axis {
 
     let guide: Axis = {
         values: [...ticks] as string[] | number[],
-        title: `${svg?.getAttribute('aria-label')} titled ${channel.value.label}`,
+        title: `${svg?.getAttribute('aria-label')} titled ${field}`,
         data: plotMark.data,
-        field: channel.value.label,
+        field: field,
         orient: orient
     }
 
@@ -121,19 +151,18 @@ function parseAxis(plot: any, svg: Element): Axis {
 function parseLegend(plot: any, svg: Element): Legend { //TODO: Does not support 'ramp' legend types when the legend is rendered as an SVG
     const plotMark = plot.marks.filter((mark: any) => mark.ariaLabel !== 'rule')[0];
     const channel = plotMark.channels.find((c: any) => c.scale === 'color');
-    const values: string[] | number[] = [];
-
-    for (let i = 0; i < svg.childNodes.length!; i++) {
-        let c = svg.firstChild?.childNodes.item(i)!;
+    const values: string[] | number[] = Object.keys(svg.children).reduce((a: string[] | number[], k: string) => {
+        let c = svg.children[parseInt(k)];
         if (c.nodeName !== 'STYLE') {
             if (isNaN(parseInt(c.textContent!))) {
-                values.push(parseInt(c.textContent!) as never);
+                a.push(c.textContent as never);
             } else {
-                values.push(c?.textContent as never);
+                a.push(parseInt(c.textContent!) as never);
             }
         }
-    }
 
+        return a
+    }, [])
 
     let guide: Legend = {
         values: values,
@@ -145,7 +174,7 @@ function parseLegend(plot: any, svg: Element): Legend { //TODO: Does not support
     }
 
     if (plot.color.type) guide.type = plot.color.type
-    return {} as Legend
+    return guide
 }
 
 /**
