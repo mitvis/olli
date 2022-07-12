@@ -1,3 +1,4 @@
+import { PlotAdapter } from "./Adapters/ObservablePlotAdapter"
 import { OlliVisSpec } from "./Adapters/Types"
 import { renderTable } from "./Render/Table"
 import { renderTree } from "./Render/TreeView"
@@ -43,3 +44,4 @@ export function olli(config: OlliConfigOptions) {
 }
 
 (window as any).olli = olli;
+// (window as any).PlotAdapter = PlotAdapter;

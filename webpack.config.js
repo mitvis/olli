@@ -1,8 +1,8 @@
 const path = require('path');
 
 module.exports = {
-    entry: './src/index.ts',
-    mode: 'production',
+    // mode: 'production',
+    mode: 'development',
     module: {
         rules: [
             {
@@ -15,8 +15,12 @@ module.exports = {
     resolve: {
         extensions: ['.tsx', '.ts', '.js'],
     },
+    entry: {
+        './Olli/olli': './src/index.ts',
+        './Olli/Adapters/ObservableAdapter': './src/Adapters/ObservablePlotAdapter.ts',
+    },
     output: {
-        filename: 'main.js',
         path: path.resolve(__dirname, 'dist'),
+        filename: '[name].js'
     },
 };
