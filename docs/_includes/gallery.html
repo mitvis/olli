@@ -2,7 +2,7 @@
 <div class="Container-Gallery">
     {% for example in site.data.examples %}
     <a class="Gallery-Link Gallery-Link-Clicked">
-        <img class="Image Gallery-Image" src="{{example.img}}" />
+        <img class="Image Gallery-Image" src="{{site.url}}{{site.baseurl}}{{example.img}}" />
     </a>
     {% endfor %}
 </div>

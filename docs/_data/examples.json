@@ -1,42 +1,42 @@
 [
   {
     "title": "Bar Chart",
-    "img": "./img/lol.jpg",
+    "img": "/img/barChart.jpg",
     "vegaLiteCode": "barley-vl.html",
     "vegaCode": "",
     "observablePlotCode": ""
   },
   {
     "title": "Line Chart",
-    "img": "./img/lol.jpg",
+    "img": "/img/lineChart.jpg",
     "vegaLiteCode": "barley-vl.html",
     "vegaCode": "",
     "observablePlotCode": ""
   },
   {
     "title": "Scatterplot",
-    "img": "./img/lol.jpg",
+    "img": "/img/scatterplot.jpg",
     "vegaLiteCode": "barley-vl.html",
     "vegaCode": "",
     "observablePlotCode": ""
   },
   {
     "title": "Multi-Series Line Chart",
-    "img": "./img/lol.jpg",
+    "img": "/img/multiSeriesLineChart.jpg",
     "vegaLiteCode": "barley-vl.html",
     "vegaCode": "",
     "observablePlotCode": ""
   },
   {
     "title": "Stacked Bar Chart",
-    "img": "./img/lol.jpg",
+    "img": "/img/stackedBarChart.jpg",
     "vegaLiteCode": "barley-vl.html",
     "vegaCode": "",
     "observablePlotCode": ""
   },
   {
     "title": "Faceted Chart",
-    "img": "./img/lol.jpg",
+    "img": "/img/facetedChart.jpg",
     "vegaLiteCode": "barley-vl.html",
     "vegaCode": "",
     "observablePlotCode": ""
