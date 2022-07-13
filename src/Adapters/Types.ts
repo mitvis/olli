@@ -30,7 +30,7 @@ export type Mark = "point" | "bar" | "rect" | "line" | "geoshape" | "circle" | "
 }
 
 /**
- * plots that masy have multiple charts contained within a single specification
+ * plots that may have multiple charts contained within a single specification
  */
 export interface FacetedChart extends BaseOlliVisSpec {
     type: "facetedChart",
