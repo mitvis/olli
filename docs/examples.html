@@ -3,14 +3,20 @@ layout: default
 title: "Examples"
 ---
 
-<span style="color: green">this is the content in examples.html</span>
-
-{% for example in site.data.examples %}
 <div>
-  <h3>{{example.title}}</h3>
-  <img src="{{example.img}}" />
-  <div>
-    {% include {{example.vegaLiteCode}} %}
-  </div>
+  <h3>Supported Chart Types</h3>
+  <span>
+    Below are the current supported chart types for Olli. To see example code for embedding visualizations in a
+    webpage, please read the <a href="{{site.baseurl}}/usage/">usage documentation</a>.
+  </span>
+  <ul>
+    <li>Bar Charts</li>
+    <li>Line Charts</li>
+    <li>Scatterplots</li>
+    <li>Multi-Series Line Charts</li>
+    <li>Stacked Bar Charts</li>
+    <li>Faceted Charts</li>
+  </ul>
 </div>
-{% endfor %}
+
+{% include gallery.html %}

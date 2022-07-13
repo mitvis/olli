@@ -1,7 +1,44 @@
 [
   {
-    "title": "Barley Trellis Plot",
+    "title": "Bar Chart",
     "img": "./img/lol.jpg",
-    "vegaLiteCode": "barley-vl.html"
+    "vegaLiteCode": "barley-vl.html",
+    "vegaCode": "",
+    "observablePlotCode": ""
+  },
+  {
+    "title": "Line Chart",
+    "img": "./img/lol.jpg",
+    "vegaLiteCode": "barley-vl.html",
+    "vegaCode": "",
+    "observablePlotCode": ""
+  },
+  {
+    "title": "Scatterplot",
+    "img": "./img/lol.jpg",
+    "vegaLiteCode": "barley-vl.html",
+    "vegaCode": "",
+    "observablePlotCode": ""
+  },
+  {
+    "title": "Multi-Series Line Chart",
+    "img": "./img/lol.jpg",
+    "vegaLiteCode": "barley-vl.html",
+    "vegaCode": "",
+    "observablePlotCode": ""
+  },
+  {
+    "title": "Stacked Bar Chart",
+    "img": "./img/lol.jpg",
+    "vegaLiteCode": "barley-vl.html",
+    "vegaCode": "",
+    "observablePlotCode": ""
+  },
+  {
+    "title": "Faceted Chart",
+    "img": "./img/lol.jpg",
+    "vegaLiteCode": "barley-vl.html",
+    "vegaCode": "",
+    "observablePlotCode": ""
   }
 ]
