@@ -41,7 +41,6 @@ export interface FacetedChart extends BaseOlliVisSpec {
 
 export interface NestedChart extends BaseOlliVisSpec {
     type: "nestedChart",
-    // maps faceted value to chart
     charts: Chart[],
 }
 
