@@ -41,6 +41,14 @@ export interface FacetedChart extends BaseOlliVisSpec {
 
 export type OlliVisSpec = Chart | FacetedChart;
 
+export const chart = (fields: Omit<Chart, 'type'>): Chart => {
+    return { ...fields, type: "chart" }
+}
+
+export const facetedChart = (fields: Omit<FacetedChart, 'type'>): FacetedChart => {
+    return { ...fields, type: "facetedChart" }
+}
+
 /**
  * The {@link Guide} is an the information needed for generating various nodes on the Accessibility Tree where
  *   values: is the array of values on the data source (ex: tick values for an Axis)
