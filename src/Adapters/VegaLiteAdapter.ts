@@ -55,15 +55,14 @@ function parseMultiView(scenegraph: any, spec: any): OlliVisSpec {
     let legends: Legend[] = filterUniqueNodes(findScenegraphNodes(scenegraph, "legend").map((legend: any) => parseLegend(scenegraph, legend, spec)))
     let fields = (axes as any[]).concat(legends).reduce((fieldArr: string[], guide: Guide) => fieldArr.concat(guide.field), [])
     let facetedField = spec.encoding.facet !== undefined ? spec.encoding.facet.field : spec.encoding['color'].field
-    let nestedHeirarchies: Chart[] = scenegraph.items.filter((el: any) => el.role === "scope")[0].items
+    let nestedHeirarchies: Map<any, Chart> = new Map(scenegraph.items.filter((el: any) => el.role === "scope")[0].items
         .map((chart: any) => {
             let chartData = parseChart(chart, spec)
             shallowCopyArray(axes, chartData.axes)
             shallowCopyArray(legends, chartData.legends)
-            chartData.facetedValue = chart.datum[facetedField];
             modifyVisFromMark(chartData, chartData.markUsed!, spec)
-            return chartData
-        });
+            return [chart.datum[facetedField], chartData]
+        }));
 
     let node = facetedChart({
         description: "",
@@ -171,8 +170,11 @@ function parseLegend(scenegraph: any, legendScenegraphNode: any, spec: any): Leg
  */
 function constructChartDescription(node: OlliVisSpec, spec: any): void {
     let desc: string = spec.description ? spec.description : "";
-    if ((node as FacetedChart).charts !== undefined) {
-        desc = `${desc} with ${(node as FacetedChart).charts.length} nested charts.`
+    if (node.type === "facetedChart") {
+        desc = `${desc} with ${node.charts.size} faceted charts.`
+        node.description = spec.description;
+    } else if (node.type === "nestedChart") {
+        desc = `${desc} with ${node.charts.length} nested charts.`
         node.description = spec.description;
     } else {
         node.description = `${desc}`;

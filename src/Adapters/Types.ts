@@ -27,7 +27,6 @@ export type Mark = "point" | "bar" | "rect" | "line" | "geoshape" | "circle" | "
     dataFieldsUsed: string[],
     markUsed?: Mark,
     title? : string
-    facetedValue?: any
 }
 
 /**
@@ -35,11 +34,20 @@ export type Mark = "point" | "bar" | "rect" | "line" | "geoshape" | "circle" | "
  */
 export interface FacetedChart extends BaseOlliVisSpec {
     type: "facetedChart",
-    charts: Chart[],
+    // maps faceted value to chart
+    charts: Map<any, Chart>,
     facetedField: string
 }
 
-export type OlliVisSpec = Chart | FacetedChart;
+export interface NestedChart extends BaseOlliVisSpec {
+    type: "nestedChart",
+    // maps faceted value to chart
+    charts: Chart[],
+}
+
+export type CompositeChart = FacetedChart | NestedChart;
+
+export type OlliVisSpec = Chart | CompositeChart;
 
 export const chart = (fields: Omit<Chart, 'type'>): Chart => {
     return { ...fields, type: "chart" }
@@ -47,6 +55,10 @@ export const chart = (fields: Omit<Chart, 'type'>): Chart => {
 
 export const facetedChart = (fields: Omit<FacetedChart, 'type'>): FacetedChart => {
     return { ...fields, type: "facetedChart" }
+}
+
+export const nestedChart = (fields: Omit<NestedChart, 'type'>): NestedChart => {
+    return { ...fields, type: "nestedChart" }
 }
 
 /**
