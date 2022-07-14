@@ -1,5 +1,5 @@
 import { Spec, ScaleDataRef, Scale, ScaleData, Scene } from "vega";
-import { Guide, OlliVisSpec, VisAdapter, FacetedChart, Chart, Axis, Legend, facetedChart } from "./Types";
+import { Guide, OlliVisSpec, VisAdapter, FacetedChart, Chart, Axis, Legend, facetedChart, nestedChart, NestedChart } from "./Types";
 
 let view: any;
 let spec: Spec;
@@ -21,7 +21,7 @@ export const VegaAdapter: VisAdapter = (visObject: Scene, helperVisInformation: 
         }
     }
 
-function parseMultiViewChart(): FacetedChart {
+function parseMultiViewChart(): NestedChart {
     const filterUniqueNodes = ((nodeArr: any[]) => {
         let uniqueNodes: any[] = []
         nodeArr.forEach((node: any) => {
@@ -43,12 +43,11 @@ function parseMultiViewChart(): FacetedChart {
         return chart
     })
 
-    let multiViewChart = facetedChart({
+    let multiViewChart = nestedChart({
         charts: charts,
         data: getData(),
         dataFieldsUsed: getDataFields(axes, legends),
         description: baseVisDescription,
-        facetedField: ""
     })
 
     const shallowCopyArray = (objToCopy: any[], arrToPush: any[]): void => {
