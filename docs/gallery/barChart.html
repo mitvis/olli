@@ -1,0 +1,19 @@
+---
+layout: default
+title: "Bar Chart"
+---
+{% assign chart = site.data.examples[0] %}
+
+<div>
+    {% for adapter in chart.adapters %}
+    <div class="Select-Adapter">
+        <span class="Select-Adapter-Name">
+            {{ adapter.name }}
+        </span>
+    </div>
+    {% endfor %}
+    <div id="Visualization"></div>
+    <div id="AccessibilityTree"></div>
+    <code>Code!</code>
+    <script></script>
+</div>

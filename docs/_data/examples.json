@@ -2,43 +2,109 @@
   {
     "title": "Bar Chart",
     "img": "/img/barChart.jpg",
-    "vegaLiteCode": "barley-vl.html",
-    "vegaCode": "",
-    "observablePlotCode": ""
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "barley-vl.html"
+      },
+      {
+        "name": "Vega",
+        "code": "barley-vl.html"
+      },
+      {
+        "name": "Observable",
+        "code": "barley-vl.html"
+      }
+    ]
   },
   {
     "title": "Line Chart",
     "img": "/img/lineChart.jpg",
-    "vegaLiteCode": "barley-vl.html",
-    "vegaCode": "",
-    "observablePlotCode": ""
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "barley-vl.html"
+      },
+      {
+        "name": "Vega",
+        "code": "barley-vl.html"
+      },
+      {
+        "name": "Observable",
+        "code": "barley-vl.html"
+      }
+    ]
   },
   {
     "title": "Scatterplot",
     "img": "/img/scatterplot.jpg",
-    "vegaLiteCode": "barley-vl.html",
-    "vegaCode": "",
-    "observablePlotCode": ""
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "barley-vl.html"
+      },
+      {
+        "name": "Vega",
+        "code": "barley-vl.html"
+      },
+      {
+        "name": "Observable",
+        "code": "barley-vl.html"
+      }
+    ]
   },
   {
     "title": "Multi-Series Line Chart",
     "img": "/img/multiSeriesLineChart.jpg",
-    "vegaLiteCode": "barley-vl.html",
-    "vegaCode": "",
-    "observablePlotCode": ""
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "barley-vl.html"
+      },
+      {
+        "name": "Vega",
+        "code": "barley-vl.html"
+      },
+      {
+        "name": "Observable",
+        "code": "barley-vl.html"
+      }
+    ]
   },
   {
     "title": "Stacked Bar Chart",
     "img": "/img/stackedBarChart.jpg",
-    "vegaLiteCode": "barley-vl.html",
-    "vegaCode": "",
-    "observablePlotCode": ""
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "barley-vl.html"
+      },
+      {
+        "name": "Vega",
+        "code": "barley-vl.html"
+      },
+      {
+        "name": "Observable",
+        "code": "barley-vl.html"
+      }
+    ]
   },
   {
     "title": "Faceted Chart",
     "img": "/img/facetedChart.jpg",
-    "vegaLiteCode": "barley-vl.html",
-    "vegaCode": "",
-    "observablePlotCode": ""
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "barley-vl.html"
+      },
+      {
+        "name": "Vega",
+        "code": "barley-vl.html"
+      },
+      {
+        "name": "Observable",
+        "code": "barley-vl.html"
+      }
+    ]
   }
 ]
