@@ -1,4 +1,4 @@
-import { Guide, Chart, FacetedChart, OlliVisSpec, isFacetedChart, isChart } from "../Adapters/Types";
+import { Guide, Chart, FacetedChart, OlliVisSpec } from "../Adapters/Types";
 import { AccessibilityTreeNode, NodeType } from "./Types";
 import { Mark } from '../Adapters/Types'
 
@@ -9,7 +9,7 @@ import { Mark } from '../Adapters/Types'
  */
 export function olliVisSpecToTree(olliVisSpec: OlliVisSpec): AccessibilityTreeNode {
     let node: AccessibilityTreeNode;
-    if (isFacetedChart(olliVisSpec)) {
+    if (olliVisSpec.type === "facetedChart") {
         node = informationToNode(olliVisSpec.description, null, olliVisSpec.data, "multiView", olliVisSpec);
         node.description += ` With ${node.children.length} nested charts`
     } else {

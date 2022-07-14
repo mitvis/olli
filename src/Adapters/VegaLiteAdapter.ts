@@ -8,7 +8,9 @@ import {
     Guide,
     FacetedChart,
     Axis,
-    Legend
+    Legend,
+    facetedChart,
+    chart
 } from "./Types";
 
 /**
@@ -63,13 +65,13 @@ function parseMultiView(scenegraph: any, spec: any): OlliVisSpec {
             return chartData
         });
 
-    let node: FacetedChart = {
+    let node = facetedChart({
         description: "",
         data: getVisualizationData(scenegraph, spec),
         dataFieldsUsed: fields,
         charts: nestedHeirarchies,
         facetedField: facetedField
-    }
+    })
 
     node.dataFieldsUsed.push(facetedField)
     node.charts.forEach((chart: Chart) => {
@@ -90,7 +92,7 @@ function parseChart(scenegraph: any, spec: any): Chart {
     let legends: Legend[] = findScenegraphNodes(scenegraph, "legend").map((legend: any) => parseLegend(scenegraph, legend, spec))
     let fields: string[] = (axes as any[]).concat(legends).reduce((fieldArr: string[], guide: Guide) => fieldArr.concat(guide.field), [])
     let mark: Mark = spec.mark
-    let node: Chart = {
+    let node = chart({
         axes: axes.filter((axis: Axis) => axis.field !== undefined),
         legends: legends,
         description: "",
@@ -98,7 +100,7 @@ function parseChart(scenegraph: any, spec: any): Chart {
         gridNodes: [],
         data: getVisualizationData(scenegraph, spec),
         markUsed: mark
-    }
+    })
     constructChartDescription(node, spec);
     modifyVisFromMark(node, mark, spec);
     return node

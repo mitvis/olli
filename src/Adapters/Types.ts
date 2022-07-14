@@ -8,6 +8,7 @@ export type Mark = "point" | "bar" | "rect" | "line" | "geoshape" | "circle" | "
  * later be used to create an explorable Accessibility Tree.
  */
  type BaseOlliVisSpec = {
+    type: string,
     description: string,
     data: any[],
     dataFieldsUsed: string[],
@@ -18,6 +19,7 @@ export type Mark = "point" | "bar" | "rect" | "line" | "geoshape" | "circle" | "
  * Outlines the grammar of graphics information that has to be parsed from a visualization.
  */
  export interface Chart extends BaseOlliVisSpec {
+    type: "chart",
     axes: Axis[] ,
     legends: Legend[],
     description: string,
@@ -32,18 +34,19 @@ export type Mark = "point" | "bar" | "rect" | "line" | "geoshape" | "circle" | "
  * plots that masy have multiple charts contained within a single specification
  */
 export interface FacetedChart extends BaseOlliVisSpec {
+    type: "facetedChart",
     charts: Chart[],
     facetedField: string
 }
 
 export type OlliVisSpec = Chart | FacetedChart;
 
-export const isChart = (olliVisSpec: OlliVisSpec): olliVisSpec is Chart => {
-    return Boolean((olliVisSpec as Chart).axes && (olliVisSpec as Chart).legends);
+export const chart = (fields: Omit<Chart, 'type'>): Chart => {
+    return { ...fields, type: "chart" }
 }
 
-export const isFacetedChart = (olliVisSpec: OlliVisSpec): olliVisSpec is FacetedChart => {
-    return Boolean((olliVisSpec as FacetedChart).facetedField);
+export const facetedChart = (fields: Omit<FacetedChart, 'type'>): FacetedChart => {
+    return { ...fields, type: "facetedChart" }
 }
 
 /**
