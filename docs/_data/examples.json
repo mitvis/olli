@@ -5,7 +5,7 @@
     "adapters": [
       {
         "name": "Vega-Lite",
-        "code": "barley-vl.html"
+        "code": "bar-vl.html"
       },
       {
         "name": "Vega",
