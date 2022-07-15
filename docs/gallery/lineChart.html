@@ -3,6 +3,5 @@ layout: default
 title: "Line Chart Example"
 ---
 
-    <div>
-        line chart
-    </div>
+{% assign chart=site.data.examples[1] %}
+{% include example.html content=chart %}

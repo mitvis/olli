@@ -5,15 +5,15 @@
     "adapters": [
       {
         "name": "Vega-Lite",
-        "code": "bar-vl.html"
+        "code": "/examples/barChart-vl.html"
       },
       {
         "name": "Vega",
-        "code": "barley-vl.html"
+        "code": "/examples/barChart-v.html"
       },
       {
-        "name": "Observable",
-        "code": "barley-vl.html"
+        "name": "ObservablePlot",
+        "code": "/examples/barChart-op.html"
       }
     ]
   },
@@ -23,15 +23,15 @@
     "adapters": [
       {
         "name": "Vega-Lite",
-        "code": "barley-vl.html"
+        "code": "/examples/barley-vl.html"
       },
       {
         "name": "Vega",
-        "code": "barley-vl.html"
+        "code": "/examples/barley-vl.html"
       },
       {
-        "name": "Observable",
-        "code": "barley-vl.html"
+        "name": "ObservablePlot",
+        "code": "/examples/barley-vl.html"
       }
     ]
   },
@@ -41,15 +41,15 @@
     "adapters": [
       {
         "name": "Vega-Lite",
-        "code": "barley-vl.html"
+        "code": "/examples/barley-vl.html"
       },
       {
         "name": "Vega",
-        "code": "barley-vl.html"
+        "code": "/examples/barley-vl.html"
       },
       {
-        "name": "Observable",
-        "code": "barley-vl.html"
+        "name": "ObservablePlot",
+        "code": "/examples/barley-vl.html"
       }
     ]
   },
@@ -59,15 +59,15 @@
     "adapters": [
       {
         "name": "Vega-Lite",
-        "code": "barley-vl.html"
+        "code": "/examples/barley-vl.html"
       },
       {
         "name": "Vega",
-        "code": "barley-vl.html"
+        "code": "/examples/barley-vl.html"
       },
       {
-        "name": "Observable",
-        "code": "barley-vl.html"
+        "name": "ObservablePlot",
+        "code": "/examples/barley-vl.html"
       }
     ]
   },
@@ -77,15 +77,15 @@
     "adapters": [
       {
         "name": "Vega-Lite",
-        "code": "barley-vl.html"
+        "code": "/examples/barley-vl.html"
       },
       {
         "name": "Vega",
-        "code": "barley-vl.html"
+        "code": "/examples/barley-vl.html"
       },
       {
-        "name": "Observable",
-        "code": "barley-vl.html"
+        "name": "ObservablePlot",
+        "code": "/examples/barley-vl.html"
       }
     ]
   },
@@ -95,15 +95,15 @@
     "adapters": [
       {
         "name": "Vega-Lite",
-        "code": "barley-vl.html"
+        "code": "/examples/barley-vl.html"
       },
       {
         "name": "Vega",
-        "code": "barley-vl.html"
+        "code": "/examples/barley-vl.html"
       },
       {
-        "name": "Observable",
-        "code": "barley-vl.html"
+        "name": "ObservablePlot",
+        "code": "/examples/barley-vl.html"
       }
     ]
   }
