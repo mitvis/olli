@@ -42,4 +42,4 @@ export function olli(config: OlliConfigOptions) {
     document.getElementById(config.domId)?.appendChild(htmlRendering);
 }
 
-(window as any).olli = olli;
+// (window as any).olli = olli;
