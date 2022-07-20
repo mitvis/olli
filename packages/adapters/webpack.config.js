@@ -16,12 +16,7 @@ module.exports = {
         extensions: ['.tsx', '.ts', '.js'],
     },
     output: {
-        path: path.resolve(__dirname, 'dist'),
-        filename: '[name].js',
-        library: {
-            type: 'umd',
-            name: '[name]',
-        },
-        globalObject: 'this',
-    },
+        filename: 'adapters.js',
+        path: path.resolve('../../', 'dist/olli')
+    }
 };
