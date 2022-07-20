@@ -274,5 +274,3 @@ function modifyVisFromMark(vis: Chart, mark: Mark, spec: any): void {
             break;
     }
 }
-
-(window as any).VegaLiteAdapter = VegaLiteAdapter
