@@ -1,4 +1,4 @@
-import { OlliVisSpec } from "./Adapters/Types"
+import { OlliVisSpec } from "../../adapters/src/Types"
 import { renderTable } from "./Render/Table"
 import { renderTree } from "./Render/TreeView"
 import { TreeLinks } from "./Render/TreeView/TreeLink"
@@ -41,5 +41,3 @@ export function olli(config: OlliConfigOptions) {
 
     document.getElementById(config.domId)?.appendChild(htmlRendering);
 }
-
-// (window as any).olli = olli;
