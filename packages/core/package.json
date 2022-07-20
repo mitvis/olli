@@ -1,0 +1,27 @@
+{
+  "name": "@olli/core",
+  "version": "1.0.0",
+  "description": "The core of Olli handling the creation of the Accessibility Tree and rendering the accessible output to the DOM",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mitvis/olli.git"
+  },
+  "keywords": [
+    "visualization",
+    "accessibility"
+  ],
+  "author": "Matthew Blanco",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mitvis/olli/issues"
+  },
+  "homepage": "https://mitvis.github.io/olli/",
+  "dependencies": {
+    "webpack": "^5.73.0"
+  }
+}
