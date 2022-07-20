@@ -248,3 +248,5 @@ export function verifyNode(scenegraphNode: any, cancelRoles: string[]): boolean 
         return false
     }
 }
+
+(window as any).VegaAdapter = VegaAdapter
