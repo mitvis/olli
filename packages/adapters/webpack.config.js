@@ -1,12 +1,9 @@
 const path = require('path');
 
 module.exports = {
-<<<<<<< HEAD:webpack.config.js
-    // mode: 'production',
-=======
     entry: './src/index.ts',
->>>>>>> main:packages/adapters/webpack.config.js
     mode: 'development',
+    watch: true,
     module: {
         rules: [
             {
@@ -18,10 +15,6 @@ module.exports = {
     },
     resolve: {
         extensions: ['.tsx', '.ts', '.js'],
-    },
-    entry: {
-        './Olli/olli': './src/index.ts',
-        './Olli/Adapters/ObservableAdapter': './src/Adapters/ObservablePlotAdapter.ts',
     },
     output: {
         filename: 'adapters.js',

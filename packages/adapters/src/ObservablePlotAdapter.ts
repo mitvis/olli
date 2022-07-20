@@ -6,7 +6,7 @@ import { VisAdapter, OlliVisSpec, FacetedChart, Chart, Axis, Legend, Guide } fro
  * @param svg the rendered SVGElement of the visualization 
  * @returns the generated {@link OlliVisSpec}
  */
-export const PlotAdapter: VisAdapter = (plot: any, svg: Element): OlliVisSpec => {
+export const ObservablePlotAdapter: VisAdapter = (plot: any, svg: Element): OlliVisSpec => {
     if (hasFacets(plot)) {
         return plotToFacetedChart(plot, svg);
     } else {
@@ -22,7 +22,6 @@ export const PlotAdapter: VisAdapter = (plot: any, svg: Element): OlliVisSpec =>
  */
 function plotToFacetedChart(plot: any, svg: Element): FacetedChart {
     const chartSVG = svg.tagName !== 'svg' ? Object.values(svg.children).find((n) => n.tagName === 'svg')! : svg;
-    console.log(chartSVG)
     const axes: Axis[] = ['x-axis', 'y-axis'].reduce((parsedAxes: Axis[], s: string) => {
         let axisSVG = findHtmlElement(chartSVG, s);
         if (axisSVG) {
@@ -34,14 +33,14 @@ function plotToFacetedChart(plot: any, svg: Element): FacetedChart {
     if (plot.color && plot.color.legend) legends.push(parseLegend(plot, svg.children[0]))
     const plotMark = plot.marks.filter((mark: any) => mark.ariaLabel !== 'rule')[0]
     let fields = (axes as any[]).concat(legends).reduce((fieldArr: string[], guide: Guide) => fieldArr.concat(guide.field), [])
-    let charts: Chart[] = Object.values(chartSVG.children)
+    let charts: Map<any, Chart> = new Map(Object.values(chartSVG.children)
         .filter((n) => n.getAttribute('aria-label') === 'line' || n.getAttribute('aria-label') === 'facet')
-        .map((n) => { console.log(n); return plotToChart(plot, chartSVG)});
+        .map((n: any) => [n.__data__, plotToChart(plot, chartSVG)]));
     let facetField = plot.facet ? plot.facet.y ? plot.facet.y : plot.facet.x : '';
 
     /* TODO
     - get faceted values from SVG of f[y-axis, x-axis] tick values
-      - filter data using facetedField anf faceted value
+      - filter data using facetedField and faceted value
     - find a way to work with line charts when a single line exists
       - if more than one line exists look for stroke value in the mark object
 
@@ -49,10 +48,11 @@ function plotToFacetedChart(plot: any, svg: Element): FacetedChart {
     */
 
     let facetedChart: FacetedChart = {
+        type: "facetedChart",
         charts: charts,
         data: plotMark.data,
         dataFieldsUsed: fields,
-        description: `Faceted chart with ${charts.length} nested charts`,
+        description: `Faceted chart with ${charts.values.length} nested charts`,
         facetedField: facetField
     };
 
@@ -81,6 +81,7 @@ function plotToChart(plot: any, svg: Element): Chart {
 
     let chart: Chart = {
         axes: axes,
+        type: "chart",
         legends: legends,
         data: plotMark.data,
         dataFieldsUsed: fields,
@@ -205,4 +206,4 @@ function hasFacets(plot: any): boolean {
     return plot.facet || plot.marks.some((mark: any) => mark.ariaLabel === 'line')
 }
 
-(window as any).PlotAdapter = PlotAdapter;
+(window as any).ObservablePlotAdapter = ObservablePlotAdapter;
