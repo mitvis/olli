@@ -2,7 +2,7 @@ const path = require('path');
 
 module.exports = {
     entry: './src/index.ts',
-    mode: 'production',
+    mode: 'development',
     module: {
         rules: [
             {
@@ -16,12 +16,7 @@ module.exports = {
         extensions: ['.tsx', '.ts', '.js'],
     },
     output: {
-        path: path.resolve(__dirname, 'dist'),
-        filename: '[name].js',
-        library: {
-            type: 'umd',
-            name: '[name]',
-        },
-        globalObject: 'this',
-    },
-};
+        filename: 'olli.js',
+        path: path.resolve('../../', 'dist/olli')
+    }
+}
