@@ -1,4 +1,4 @@
-import { OlliVisSpec } from "../../adapters/src/Types"
+import { OlliVisSpec } from "@olli/adapters/src/Types"
 import { renderTable } from "./Render/Table"
 import { renderTree } from "./Render/TreeView"
 import { TreeLinks } from "./Render/TreeView/TreeLink"

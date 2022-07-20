@@ -1,6 +1,5 @@
-import { Guide, Chart, CompositeChart, OlliVisSpec } from "../../../adapters/src/Types";
+import { Guide, Chart, CompositeChart, OlliVisSpec, Mark } from "@olli/adapters/src/Types";
 import { AccessibilityTreeNode, NodeType } from "./Types";
-import { Mark } from '../../../adapters/src/Types'
 
 /**
  * Constructs an {@link AccessibilityTreeNode} based off of a generalized visualization
