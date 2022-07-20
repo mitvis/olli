@@ -12,27 +12,14 @@
     <code style="white-space: pre-wrap;">
     let spec = {
         "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-        "description": "A scatterplot showing body mass and flipper lengths of penguins.",
-        "data": {
-          "url": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/penguins.json"
-        },
-        "mark": "point",
+        "data": {"url": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/barley.json"},
+        "mark": "bar",
         "encoding": {
-          "x": {
-            "field": "Flipper Length (mm)",
-            "type": "quantitative",
-            "scale": {"zero": false}
-          },
-          "y": {
-            "field": "Body Mass (g)",
-            "type": "quantitative",
-            "scale": {"zero": false}
-          },
-          "color": {"field": "Species", "type": "nominal"},
-          "shape": {"field": "Species", "type": "nominal"}
+          "x": {"aggregate": "sum", "field": "yield"},
+          "y": {"field": "variety"},
+          "color": {"field": "site"}
         }
       }
-      
 
     let vegaSpec = vegaLite.compile(spec).spec
     const runtime = vega.parse(vegaSpec);
@@ -53,27 +40,14 @@
     <script type="module">
         let spec = {
             "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-            "description": "A scatterplot showing body mass and flipper lengths of penguins.",
-            "data": {
-                "url": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/penguins.json"
-            },
-            "mark": "point",
+            "data": { "url": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/barley.json" },
+            "mark": "bar",
             "encoding": {
-                "x": {
-                    "field": "Flipper Length (mm)",
-                    "type": "quantitative",
-                    "scale": { "zero": false }
-                },
-                "y": {
-                    "field": "Body Mass (g)",
-                    "type": "quantitative",
-                    "scale": { "zero": false }
-                },
-                "color": { "field": "Species", "type": "nominal" },
-                "shape": { "field": "Species", "type": "nominal" }
+                "x": { "aggregate": "sum", "field": "yield" },
+                "y": { "field": "variety" },
+                "color": { "field": "site" }
             }
         }
-
 
         let vegaSpec = vegaLite.compile(spec).spec
         const runtime = vega.parse(vegaSpec);

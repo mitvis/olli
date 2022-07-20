@@ -12,27 +12,15 @@
     <code style="white-space: pre-wrap;">
     let spec = {
         "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-        "description": "A scatterplot showing body mass and flipper lengths of penguins.",
-        "data": {
-          "url": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/penguins.json"
-        },
-        "mark": "point",
+        "description": "Stock prices of 5 Tech Companies over Time.",
+        "data": {"url": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/stocks.csv"},
+        "mark": "line",
         "encoding": {
-          "x": {
-            "field": "Flipper Length (mm)",
-            "type": "quantitative",
-            "scale": {"zero": false}
-          },
-          "y": {
-            "field": "Body Mass (g)",
-            "type": "quantitative",
-            "scale": {"zero": false}
-          },
-          "color": {"field": "Species", "type": "nominal"},
-          "shape": {"field": "Species", "type": "nominal"}
+          "x": {"field": "date", "type": "temporal"},
+          "y": {"field": "price", "type": "quantitative"},
+          "color": {"field": "symbol", "type": "nominal"}
         }
       }
-      
 
     let vegaSpec = vegaLite.compile(spec).spec
     const runtime = vega.parse(vegaSpec);
@@ -50,30 +38,19 @@
       domId: "AccessibilityTree-Vega-Lite"
     })
   </code>
-    <script type="module">
+    <script>
+
         let spec = {
             "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-            "description": "A scatterplot showing body mass and flipper lengths of penguins.",
-            "data": {
-                "url": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/penguins.json"
-            },
-            "mark": "point",
+            "description": "Stock prices of 5 Tech Companies over Time.",
+            "data": { "url": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/stocks.csv" },
+            "mark": "line",
             "encoding": {
-                "x": {
-                    "field": "Flipper Length (mm)",
-                    "type": "quantitative",
-                    "scale": { "zero": false }
-                },
-                "y": {
-                    "field": "Body Mass (g)",
-                    "type": "quantitative",
-                    "scale": { "zero": false }
-                },
-                "color": { "field": "Species", "type": "nominal" },
-                "shape": { "field": "Species", "type": "nominal" }
+                "x": { "field": "date", "type": "temporal" },
+                "y": { "field": "price", "type": "quantitative" },
+                "color": { "field": "symbol", "type": "nominal" }
             }
         }
-
 
         let vegaSpec = vegaLite.compile(spec).spec
         const runtime = vega.parse(vegaSpec);
