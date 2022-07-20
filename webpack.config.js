@@ -21,6 +21,11 @@ module.exports = {
     },
     output: {
         path: path.resolve(__dirname, 'dist'),
-        filename: '[name].js'
+        filename: '[name].js',
+        library: {
+            type: 'umd',
+            name: '[name]',
+        },
+        globalObject: 'this',
     },
 };

@@ -1,0 +1,110 @@
+[
+  {
+    "title": "Bar Chart",
+    "img": "/img/barChart.jpg",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/barChart-vl.html"
+      },
+      {
+        "name": "Vega",
+        "code": "/examples/barChart-v.html"
+      },
+      {
+        "name": "ObservablePlot",
+        "code": "/examples/barChart-op.html"
+      }
+    ]
+  },
+  {
+    "title": "Line Chart",
+    "img": "/img/lineChart.jpg",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/barley-vl.html"
+      },
+      {
+        "name": "Vega",
+        "code": "/examples/barley-vl.html"
+      },
+      {
+        "name": "ObservablePlot",
+        "code": "/examples/barley-vl.html"
+      }
+    ]
+  },
+  {
+    "title": "Scatterplot",
+    "img": "/img/scatterplot.jpg",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/barley-vl.html"
+      },
+      {
+        "name": "Vega",
+        "code": "/examples/barley-vl.html"
+      },
+      {
+        "name": "ObservablePlot",
+        "code": "/examples/barley-vl.html"
+      }
+    ]
+  },
+  {
+    "title": "Multi-Series Line Chart",
+    "img": "/img/multiSeriesLineChart.jpg",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/barley-vl.html"
+      },
+      {
+        "name": "Vega",
+        "code": "/examples/barley-vl.html"
+      },
+      {
+        "name": "ObservablePlot",
+        "code": "/examples/barley-vl.html"
+      }
+    ]
+  },
+  {
+    "title": "Stacked Bar Chart",
+    "img": "/img/stackedBarChart.jpg",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/barley-vl.html"
+      },
+      {
+        "name": "Vega",
+        "code": "/examples/barley-vl.html"
+      },
+      {
+        "name": "ObservablePlot",
+        "code": "/examples/barley-vl.html"
+      }
+    ]
+  },
+  {
+    "title": "Faceted Chart",
+    "img": "/img/facetedChart.jpg",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/barley-vl.html"
+      },
+      {
+        "name": "Vega",
+        "code": "/examples/barley-vl.html"
+      },
+      {
+        "name": "ObservablePlot",
+        "code": "/examples/barley-vl.html"
+      }
+    ]
+  }
+]

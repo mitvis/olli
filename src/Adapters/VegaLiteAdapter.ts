@@ -8,7 +8,9 @@ import {
     Guide,
     FacetedChart,
     Axis,
-    Legend
+    Legend,
+    facetedChart,
+    chart
 } from "./Types";
 
 /**
@@ -53,23 +55,22 @@ function parseMultiView(scenegraph: any, spec: any): OlliVisSpec {
     let legends: Legend[] = filterUniqueNodes(findScenegraphNodes(scenegraph, "legend").map((legend: any) => parseLegend(scenegraph, legend, spec)))
     let fields = (axes as any[]).concat(legends).reduce((fieldArr: string[], guide: Guide) => fieldArr.concat(guide.field), [])
     let facetedField = spec.encoding.facet !== undefined ? spec.encoding.facet.field : spec.encoding['color'].field
-    let nestedHeirarchies: Chart[] = scenegraph.items.filter((el: any) => el.role === "scope")[0].items
+    let nestedHeirarchies: Map<any, Chart> = new Map(scenegraph.items.filter((el: any) => el.role === "scope")[0].items
         .map((chart: any) => {
             let chartData = parseChart(chart, spec)
             shallowCopyArray(axes, chartData.axes)
             shallowCopyArray(legends, chartData.legends)
-            chartData.facetedValue = chart.datum[facetedField];
             modifyVisFromMark(chartData, chartData.markUsed!, spec)
-            return chartData
-        });
+            return [chart.datum[facetedField], chartData]
+        }));
 
-    let node: FacetedChart = {
+    let node = facetedChart({
         description: "",
         data: getVisualizationData(scenegraph, spec),
         dataFieldsUsed: fields,
         charts: nestedHeirarchies,
         facetedField: facetedField
-    }
+    })
 
     node.dataFieldsUsed.push(facetedField)
     node.charts.forEach((chart: Chart) => {
@@ -90,7 +91,7 @@ function parseChart(scenegraph: any, spec: any): Chart {
     let legends: Legend[] = findScenegraphNodes(scenegraph, "legend").map((legend: any) => parseLegend(scenegraph, legend, spec))
     let fields: string[] = (axes as any[]).concat(legends).reduce((fieldArr: string[], guide: Guide) => fieldArr.concat(guide.field), [])
     let mark: Mark = spec.mark
-    let node: Chart = {
+    let node = chart({
         axes: axes.filter((axis: Axis) => axis.field !== undefined),
         legends: legends,
         description: "",
@@ -98,7 +99,7 @@ function parseChart(scenegraph: any, spec: any): Chart {
         gridNodes: [],
         data: getVisualizationData(scenegraph, spec),
         markUsed: mark
-    }
+    })
     constructChartDescription(node, spec);
     modifyVisFromMark(node, mark, spec);
     return node
@@ -169,8 +170,11 @@ function parseLegend(scenegraph: any, legendScenegraphNode: any, spec: any): Leg
  */
 function constructChartDescription(node: OlliVisSpec, spec: any): void {
     let desc: string = spec.description ? spec.description : "";
-    if ((node as FacetedChart).charts !== undefined) {
-        desc = `${desc} with ${(node as FacetedChart).charts.length} nested charts.`
+    if (node.type === "facetedChart") {
+        desc = `${desc} with ${node.charts.size} faceted charts.`
+        node.description = spec.description;
+    } else if (node.type === "nestedChart") {
+        desc = `${desc} with ${node.charts.length} nested charts.`
         node.description = spec.description;
     } else {
         node.description = `${desc}`;

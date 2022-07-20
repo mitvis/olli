@@ -8,6 +8,7 @@ export type Mark = "point" | "bar" | "rect" | "line" | "geoshape" | "circle" | "
  * later be used to create an explorable Accessibility Tree.
  */
  type BaseOlliVisSpec = {
+    type: string,
     description: string,
     data: any[],
     dataFieldsUsed: string[],
@@ -18,6 +19,7 @@ export type Mark = "point" | "bar" | "rect" | "line" | "geoshape" | "circle" | "
  * Outlines the grammar of graphics information that has to be parsed from a visualization.
  */
  export interface Chart extends BaseOlliVisSpec {
+    type: "chart",
     axes: Axis[] ,
     legends: Legend[],
     description: string,
@@ -25,25 +27,37 @@ export type Mark = "point" | "bar" | "rect" | "line" | "geoshape" | "circle" | "
     dataFieldsUsed: string[],
     markUsed?: Mark,
     title? : string
-    facetedValue?: any
 }
 
 /**
- * plots that masy have multiple charts contained within a single specification
+ * plots that may have multiple charts contained within a single specification
  */
 export interface FacetedChart extends BaseOlliVisSpec {
-    charts: Chart[],
+    type: "facetedChart",
+    // maps faceted value to chart
+    charts: Map<any, Chart>,
     facetedField: string
 }
 
-export type OlliVisSpec = Chart | FacetedChart;
-
-export const isChart = (olliVisSpec: OlliVisSpec): olliVisSpec is Chart => {
-    return Boolean((olliVisSpec as Chart).axes && (olliVisSpec as Chart).legends);
+export interface NestedChart extends BaseOlliVisSpec {
+    type: "nestedChart",
+    charts: Chart[],
 }
 
-export const isFacetedChart = (olliVisSpec: OlliVisSpec): olliVisSpec is FacetedChart => {
-    return Boolean((olliVisSpec as FacetedChart).facetedField);
+export type CompositeChart = FacetedChart | NestedChart;
+
+export type OlliVisSpec = Chart | CompositeChart;
+
+export const chart = (fields: Omit<Chart, 'type'>): Chart => {
+    return { ...fields, type: "chart" }
+}
+
+export const facetedChart = (fields: Omit<FacetedChart, 'type'>): FacetedChart => {
+    return { ...fields, type: "facetedChart" }
+}
+
+export const nestedChart = (fields: Omit<NestedChart, 'type'>): NestedChart => {
+    return { ...fields, type: "nestedChart" }
 }
 
 /**

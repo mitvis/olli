@@ -1,0 +1,28 @@
+---
+layout: default
+title: "Home"
+---
+
+{% include gallery.html %}
+
+<div>
+    <span>
+        Olli is a library that creates a standard and scalable
+        infrastructure for acessible web-based visualizations by embedding a navigable tree that users can explore for a
+        richer screen reader experience. Adapters specific to different visualization libaries break down a chart where
+        an accessible rendering is then created using existing ARIA TreeView technology.
+    </span>
+    <span>
+        Using an adapter design pattern, Olli can be extended to support any JavaScript visualization library by
+        implementing a function that adapts existing chart instances into a standard <code>OlliVisSpec</code> interface.
+        This
+        interface details its structural, hierarchical, and visual components, that are then rendered as a tree view in
+        HTML compatible with the <em>Accessible Rich Internet Applications (ARIA) standard</em>.
+    </span>
+    <span>
+        Check out the <a href="{{site.baseurl}}/examples/">example gallery</a> to see how Olli can be used with
+        different charts from various visualization libraries, <a href="{{site.baseurl}}/docs/">browse the
+            documentation</a> to see how you can make your visualizations more accessible, or <a
+            href="{{site.baseurl}}/usage">create your own adapter</a> to expand accessible visualizations!
+    </span>
+</div>

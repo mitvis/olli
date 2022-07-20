@@ -2,6 +2,8 @@
   "name": "olli",
   "version": "1.0.0",
   "type": "commonjs",
+  "main": "./dist/Olli/olli.js",
+  "types": "./dist/Olli/Types/index.d.ts",
   "description": "A library that breaks down a chart from various visualiation libraries and converts it's structure into a navigable tree for screen readers.",
   "private": true,
   "scripts": {

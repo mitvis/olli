@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<style>
+    .Select-Adapter-Name-Selected {
+        background-color: lightblue;
+    }
+
+    .Select-Vis-Disabled {
+        display: none;
+    }
+</style>
+<div>
+    {% for adapter in include.content.adapters %}
+    <div class="Select-Adapters">
+        <span class="Select-Adapter-Name" id="{{ adapter.name }}">
+            {{ adapter.name }}
+        </span>
+    </div>
+    {% endfor %}
+    
+    {% for adapter in include.content.adapters %}
+    <div id="Block-Example-{{adapter.name}}" class="Select-Vis-Disabled">
+        <div id="Visualization-{{ adapter.name }}"></div>
+        <div id="AccessibilityTree-{{ adapter.name }}"></div>
+        {% include {{ adapter.code }} %}
+    </div>
+    {% endfor %}
+    <script>
+        let selectedAdapter = document.getElementById('Vega-Lite');
+        selectedAdapter.classList.add('Select-Adapter-Name-Selected');
+        document.getElementById('Block-Example-Vega-Lite').classList.remove('Select-Vis-Disabled');
+
+        window.onload = () => {
+            let adapters = document.getElementsByClassName('Select-Adapter-Name');
+            for (let i = 0; i < adapters.length; i++) {
+                let ad = adapters.item(i);
+                ad.addEventListener('click', () => {
+                    updateSelectedAdapter(ad)
+                })
+            }
+        }
+
+        const updateSelectedAdapter = (newAdapter) => {
+            selectedAdapter.classList.remove('Select-Adapter-Name-Selected')
+            document.getElementById(`Block-Example-${selectedAdapter.id}`).classList.add('Select-Vis-Disabled');
+            selectedAdapter = newAdapter;
+            selectedAdapter.classList.add('Select-Adapter-Name-Selected')
+            document.getElementById(`Block-Example-${newAdapter.id}`).classList.remove('Select-Vis-Disabled');
+        }
+    </script>
+</div>

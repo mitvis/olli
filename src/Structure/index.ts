@@ -1,15 +1,15 @@
-import { Guide, Chart, FacetedChart, OlliVisSpec, isFacetedChart, isChart } from "../Adapters/Types";
+import { Guide, Chart, CompositeChart, OlliVisSpec } from "../Adapters/Types";
 import { AccessibilityTreeNode, NodeType } from "./Types";
 import { Mark } from '../Adapters/Types'
 
 /**
  * Constructs an {@link AccessibilityTreeNode} based off of a generalized visualization
- * @param olliVisSpec the {@link Chart} or {@link FacetedChart} to transform into a tree
+ * @param olliVisSpec the {@link Chart} or {@link CompositeChart} to transform into a tree
  * @returns The transormed {@link AccessibilityTreeNode}
  */
 export function olliVisSpecToTree(olliVisSpec: OlliVisSpec): AccessibilityTreeNode {
     let node: AccessibilityTreeNode;
-    if (isFacetedChart(olliVisSpec)) {
+    if (olliVisSpec.type === "facetedChart" || olliVisSpec.type === "nestedChart") {
         node = informationToNode(olliVisSpec.description, null, olliVisSpec.data, "multiView", olliVisSpec);
         node.description += ` With ${node.children.length} nested charts`
     } else {
@@ -27,13 +27,23 @@ export function olliVisSpecToTree(olliVisSpec: OlliVisSpec): AccessibilityTreeNo
  * @param multiViewChart The {@link FacetedChart} of the abstracted visualization
  * @returns an array of {@link AccessibilityTreeNode} to be the given parent's children
  */
-function generateMultiViewChildren(parent: AccessibilityTreeNode, multiViewChart: FacetedChart): AccessibilityTreeNode[] {
-    return multiViewChart.charts.map((singleChart: Chart) => informationToNode(
-        `A facet titled ${singleChart.facetedValue}, ${multiViewChart.charts.indexOf(singleChart) + 1} of ${multiViewChart.charts.length}`,
-        parent,
-        [],
-        "chart",
-        singleChart));
+function generateMultiViewChildren(parent: AccessibilityTreeNode, multiViewChart: CompositeChart): AccessibilityTreeNode[] {
+    if (multiViewChart.type === "facetedChart") {
+        return Object.entries(multiViewChart.charts).map(([facetedValue, singleChart]: [any, Chart], i) => informationToNode(
+            `A facet titled ${facetedValue}, ${i + 1} of ${multiViewChart.charts.size}`,
+            parent,
+            [],
+            "chart",
+            singleChart));
+    } else {
+        // if (multiViewChart.type === "nestedChart")
+        return multiViewChart.charts.map((singleChart: Chart, i) => informationToNode(
+            `A nested chart ${singleChart.title ? `titled ${singleChart.title}` : ''}, ${i + 1} of ${multiViewChart.charts.length}`,
+            parent,
+            [],
+            "chart",
+            singleChart));
+    }
 }
 
 /**
