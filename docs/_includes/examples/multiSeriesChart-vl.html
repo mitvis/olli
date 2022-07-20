@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+    <script type="text/javascript" src="../Olli/olli.js"></script>
+    <script type="text/javascript" src="../Olli/Adapters/VegaLiteAdapter.js"></script>
+</head>
+
+<body>
+    <code style="white-space: pre-wrap;">
+    let spec = {
+        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+        "description": "Stock prices of 5 Tech Companies over Time.",
+        "data": {"url": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/stocks.csv"},
+        "mark": "line",
+        "encoding": {
+          "x": {"field": "date", "type": "temporal"},
+          "y": {"field": "price", "type": "quantitative"},
+          "color": {"field": "symbol", "type": "nominal"}
+        }
+      }
+
+    let vegaSpec = vegaLite.compile(spec).spec
+    const runtime = vega.parse(vegaSpec);
+    const vegaRender = document.getElementById('Visualization-Vega-Lite');
+    let view = new vega.View(runtime)
+      .logLevel(vega.Warn)
+      .initialize(vegaRender)
+      .renderer('svg')
+      .hover()
+      .run();
+  
+    olli({ 
+      visualization: VegaLiteAdapter(view, spec),
+      renderType: "tree", 
+      domId: "AccessibilityTree-Vega-Lite"
+    })
+  </code>
+    <script>
+
+        let spec = {
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+            "description": "Stock prices of 5 Tech Companies over Time.",
+            "data": { "url": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/stocks.csv" },
+            "mark": "line",
+            "encoding": {
+                "x": { "field": "date", "type": "temporal" },
+                "y": { "field": "price", "type": "quantitative" },
+                "color": { "field": "symbol", "type": "nominal" }
+            }
+        }
+
+        let vegaSpec = vegaLite.compile(spec).spec
+        const runtime = vega.parse(vegaSpec);
+        const vegaRender = document.getElementById('Visualization-Vega-Lite');
+        let view = new vega.View(runtime)
+            .logLevel(vega.Warn)
+            .initialize(vegaRender)
+            .renderer('svg')
+            .hover()
+            .runAsync()
+            .then(v => {
+                olli({
+                    visualization: VegaLiteAdapter(v.scenegraph().root.items[0], spec),
+                    renderType: "tree",
+                    domId: "AccessibilityTree-Vega-Lite"
+                })
+            });
+    </script>
+</body>
