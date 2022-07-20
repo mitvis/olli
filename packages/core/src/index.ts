@@ -1,9 +1,4 @@
-<<<<<<< HEAD:src/index.ts
-import { PlotAdapter } from "./Adapters/ObservablePlotAdapter"
-import { OlliVisSpec } from "./Adapters/Types"
-=======
 import { OlliVisSpec } from "@olli/adapters/src/Types"
->>>>>>> main:packages/core/src/index.ts
 import { renderTable } from "./Render/Table"
 import { renderTree } from "./Render/TreeView"
 import { TreeLinks } from "./Render/TreeView/TreeLink"
@@ -47,9 +42,4 @@ export function olli(config: OlliConfigOptions) {
     document.getElementById(config.domId)?.appendChild(htmlRendering);
 }
 
-<<<<<<< HEAD:src/index.ts
-// (window as any).olli = olli;
-=======
-
 (window as any).olli = olli
->>>>>>> main:packages/core/src/index.ts
