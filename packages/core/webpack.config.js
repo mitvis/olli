@@ -18,6 +18,11 @@ module.exports = {
     },
     output: {
         filename: 'olli.js',
-        path: path.resolve('../../', 'dist/olli')
+        path: path.resolve('../../', 'dist/olli'),
+        library: {
+            type: 'umd',
+            // name: 'Olli',
+        },
+        globalObject: 'this',
     }
 }
