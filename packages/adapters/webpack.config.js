@@ -17,7 +17,7 @@ module.exports = {
     },
     output: {
         filename: 'adapters.js',
-        path: path.resolve('../../', 'dist/olli'),
+        path: path.resolve('./', 'dist'),
         library: {
             type: 'umd',
             name: 'OlliAdapters',

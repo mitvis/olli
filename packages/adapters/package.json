@@ -2,7 +2,8 @@
   "name": "@olli/adapters",
   "version": "1.0.0",
   "description": "The adapters to be imported to transform visualizations from concrete libraries into an OlliVisSpec",
-  "main": "index.ts",
+  "main": "./dist/adapters.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack"
