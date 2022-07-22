@@ -1,4 +1,4 @@
-import { VisAdapter, OlliVisSpec, FacetedChart, Chart, Axis, Legend, Guide } from "./Types";
+import { VisAdapter, OlliVisSpec, FacetedChart, Chart, Axis, Legend, Guide, Mark } from "./Types";
 
 /**
  * * Adapter to deconstruct ObservablePlot visualizations into an {@link OlliVisSpec}
@@ -59,7 +59,7 @@ function plotToFacetedChart(plot: any, svg: Element): FacetedChart {
         data: plotMark.data,
         dataFieldsUsed: fields,
         description: `Faceted chart with ${charts.size} nested charts`,
-        facetedField: facetField
+        facetedField: facetField,
     };
 
     return facetedChart
@@ -94,8 +94,12 @@ function plotToChart(plot: any, svg: Element, data?: any[]): Chart {
         dataFieldsUsed: fields,
         description: `A chart with ${axes.length === 2 ? `${axes.length} axes`: `${axes[0].orient} axis`} ${legends.length > 0 ? `and ${legends.length} legends` : ''}`,
         gridNodes: [],
+        markUsed: plotMark.ariaLabel
     }
 
+    if (identifyMark(plotMark.ariaLabel) !== "[Undefined]") {
+        chart.markUsed = identifyMark(plotMark.ariaLabel);
+    }
 
     return chart
 }
@@ -178,7 +182,10 @@ function parseLegend(plot: any, svg: Element): Legend { //TODO: Does not support
         field: channel.value,
         title: channel.value,
         type: 'ordinal',
-        markUsed: plotMark.ariaLabel,
+    }
+
+    if (identifyMark(plotMark.ariaLabel) !== "[Undefined]") {
+        guide.markUsed = identifyMark(plotMark.ariaLabel);
     }
 
     if (plot.color.type) guide.type = plot.color.type
@@ -223,4 +230,15 @@ function isMultiSeries(plot: any): boolean {
     return lineMarks && lineMarks.channels.some((c: any) => c.name === "stroke");
 }
 
-(window as any).ObservablePlotAdapter = ObservablePlotAdapter;
+function identifyMark(m: string): Mark {
+    switch(m) {
+        case ('dot'):
+            return "point";
+        case ('bar'):
+             return "rect";
+        case ('line'):
+             return "line";
+        default:
+            return "[Undefined]"
+    }
+}
