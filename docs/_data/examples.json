@@ -23,15 +23,15 @@
     "adapters": [
       {
         "name": "Vega-Lite",
-        "code": "/examples/barley-vl.html"
+        "code": "/examples/lineChart-vl.html"
       },
       {
         "name": "Vega",
-        "code": "/examples/barley-vl.html"
+        "code": "/examples/lineChart-v.html"
       },
       {
         "name": "ObservablePlot",
-        "code": "/examples/barley-vl.html"
+        "code": "/examples/lineChart-op.html"
       }
     ]
   },
@@ -41,15 +41,15 @@
     "adapters": [
       {
         "name": "Vega-Lite",
-        "code": "/examples/barley-vl.html"
+        "code": "/examples/scatterplot-vl.html"
       },
       {
         "name": "Vega",
-        "code": "/examples/barley-vl.html"
+        "code": "/examples/scatterplot-v.html"
       },
       {
         "name": "ObservablePlot",
-        "code": "/examples/barley-vl.html"
+        "code": "/examples/scatterplot-op.html"
       }
     ]
   },
@@ -59,15 +59,15 @@
     "adapters": [
       {
         "name": "Vega-Lite",
-        "code": "/examples/barley-vl.html"
+        "code": "/examples/multiSeriesChart-vl.html"
       },
       {
         "name": "Vega",
-        "code": "/examples/barley-vl.html"
+        "code": "/examples/multiSeriesChart-v.html"
       },
       {
         "name": "ObservablePlot",
-        "code": "/examples/barley-vl.html"
+        "code": "/examples/multiSeriesChart-op.html"
       }
     ]
   },
@@ -77,15 +77,15 @@
     "adapters": [
       {
         "name": "Vega-Lite",
-        "code": "/examples/barley-vl.html"
+        "code": "/examples/stackedBar-vl.html"
       },
       {
         "name": "Vega",
-        "code": "/examples/barley-vl.html"
+        "code": "/examples/stackedBar-v.html"
       },
       {
         "name": "ObservablePlot",
-        "code": "/examples/barley-vl.html"
+        "code": "/examples/stackedBar-op.html"
       }
     ]
   },
@@ -95,15 +95,15 @@
     "adapters": [
       {
         "name": "Vega-Lite",
-        "code": "/examples/barley-vl.html"
+        "code": "/examples/facetedChart-vl.html"
       },
       {
         "name": "Vega",
-        "code": "/examples/barley-vl.html"
+        "code": "/examples/facetedChart-v.html"
       },
       {
         "name": "ObservablePlot",
-        "code": "/examples/barley-vl.html"
+        "code": "/examples/facetedChart-op.html"
       }
     ]
   }

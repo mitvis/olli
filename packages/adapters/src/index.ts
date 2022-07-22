@@ -1,9 +1,9 @@
-// import { PlotAdapter } from "./ObservablePlotAdapter";
+import { ObservablePlotAdapter } from "./ObservablePlotAdapter";
 import { VegaAdapter } from "./VegaAdapter";
 import { VegaLiteAdapter } from "./VegaLiteAdapter";
 
 export {
-//   PlotAdapter,
+  ObservablePlotAdapter,
   VegaAdapter,
   VegaLiteAdapter
 }

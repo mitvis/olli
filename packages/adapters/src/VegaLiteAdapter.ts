@@ -62,7 +62,8 @@ function parseMultiView(scenegraph: any, spec: any): OlliVisSpec {
             shallowCopyArray(legends, chartData.legends)
             modifyVisFromMark(chartData, chartData.markUsed!, spec)
             return [chart.datum[facetedField], chartData]
-        }));
+        })
+    );
 
     let node = facetedChart({
         description: "",

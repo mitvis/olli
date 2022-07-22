@@ -1,7 +1,7 @@
 /**
  * Detailing the different marks that can exist in a chart
  */
-export type Mark = "point" | "bar" | "rect" | "line" | "geoshape" | "circle" | "area";
+export type Mark = "point" | "bar" | "rect" | "line" | "geoshape" | "circle" | "area" | "[Undefined]";
 
 /**
  * A simple union type that when implemented a concrete adapter class can be used with any visualization library to
