@@ -7,7 +7,7 @@ import { VisAdapter, OlliVisSpec, FacetedChart, Chart, Axis, Legend, Guide } fro
  * @returns the generated {@link OlliVisSpec}
  */
 export const ObservablePlotAdapter: VisAdapter = (plot: any, svg: Element): OlliVisSpec => {
-    if (hasFacets(plot)) {
+    if (hasFacets(plot) || isMultiSeries(plot)) {
         return plotToFacetedChart(plot, svg);
     } else {
         return plotToChart(plot, svg);
@@ -32,11 +32,27 @@ function plotToFacetedChart(plot: any, svg: Element): FacetedChart {
     let legends: Legend[] = []
     if (plot.color && plot.color.legend) legends.push(parseLegend(plot, svg.children[0]))
     const plotMark = plot.marks.filter((mark: any) => mark.ariaLabel !== 'rule')[0]
-    let fields = (axes as any[]).concat(legends).reduce((fieldArr: string[], guide: Guide) => fieldArr.concat(guide.field), [])
-    let charts: Map<any, Chart> = new Map(Object.values(chartSVG.children)
-        .filter((n) => n.getAttribute('aria-label') === 'line' || n.getAttribute('aria-label') === 'facet')
-        .map((n: any) => [n.__data__, plotToChart(plot, chartSVG)]));
-    let facetField = plot.facet ? plot.facet.y ? plot.facet.y : plot.facet.x : '';
+    let fields = (axes as any[]).concat(legends).reduce((fieldArr: string[], guide: Guide) => fieldArr.concat(guide.field), []);
+    let charts: Map<any, Chart> = new Map();
+    let facetField = plot.facet ?
+        plot.facet.y ?
+            plot.facet.y :
+            plot.facet.x :
+        plot.marks.find((mark: any) => mark.ariaLabel === 'line').channels.find((c: any) => c.name === "stroke").value;
+    if (hasFacets(plot)) {
+        charts = new Map(Object.values(chartSVG.children)
+            .filter((n) => n.getAttribute('aria-label') === 'facet')
+            .map((n: any) => [n.__data__, plotToChart(plot, chartSVG)]));
+    } else {
+        debugger
+        const strokeValues = plotMark.data.reduce((values: string[], d: any) => {
+            if (!values.includes(d[facetField])) {
+                values.push(d[facetField]);
+            }
+            return values
+        }, [])
+        charts = new Map(strokeValues.map((s: string) => [s, plotToChart(plot, chartSVG)]))
+    }
 
     /* TODO
     - get faceted values from SVG of f[y-axis, x-axis] tick values
@@ -203,7 +219,17 @@ function findHtmlElement(svg: Element, label: string): Element | undefined {
  * @returns True if any facets exist and false otherwise
  */
 function hasFacets(plot: any): boolean {
-    return plot.facet || plot.marks.some((mark: any) => mark.ariaLabel === 'line')
+    return plot.facet
+}
+
+/**
+ * Determines if the provided ObservablePlot object is a multi-series line chart.
+ * @param plot The spec to check
+ * @returns True if multiple lines exist and false otherwise
+ */
+function isMultiSeries(plot: any): boolean {
+    const lineMarks = plot.marks.find((mark: any) => mark.ariaLabel === 'line');
+    return lineMarks && lineMarks.channels.some((c: any) => c.name === "stroke");
 }
 
 (window as any).ObservablePlotAdapter = ObservablePlotAdapter;
