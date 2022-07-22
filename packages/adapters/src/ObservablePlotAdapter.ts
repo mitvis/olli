@@ -42,24 +42,18 @@ function plotToFacetedChart(plot: any, svg: Element): FacetedChart {
     if (hasFacets(plot)) {
         charts = new Map(Object.values(chartSVG.children)
             .filter((n) => n.getAttribute('aria-label') === 'facet')
-            .map((n: any) => [n.__data__, plotToChart(plot, chartSVG)]));
+            .map((n: any) => [n.__data__, plotToChart(plot, chartSVG, plotMark.data.filter((d: any) => d[facetField] === n.__data__))]));
     } else {
-        debugger
         const strokeValues = plotMark.data.reduce((values: string[], d: any) => {
             if (!values.includes(d[facetField])) {
                 values.push(d[facetField]);
             }
             return values
         }, [])
-        charts = new Map(strokeValues.map((s: string) => [s, plotToChart(plot, chartSVG)]))
+        charts = new Map(strokeValues.map((s: string) => [s, plotToChart(plot, chartSVG, plotMark.data.filter((d: any) => d[facetField] === s))]))
     }
 
     /* TODO
-    - get faceted values from SVG of f[y-axis, x-axis] tick values
-      - filter data using facetedField and faceted value
-    - find a way to work with line charts when a single line exists
-      - if more than one line exists look for stroke value in the mark object
-
     - find a way to search for the best mark object within the spec
     */
 
@@ -79,9 +73,10 @@ function plotToFacetedChart(plot: any, svg: Element): FacetedChart {
  * Specifies that the provided visualization information relates to a single chart
  * @param plot The ObservablePlot spec to render the visualization
  * @param svg the rendered Element of the visualization 
+ * @param data A filtered data set used in the chart
  * @returns the generated {@link Chart}
  */
-function plotToChart(plot: any, svg: Element): Chart {
+function plotToChart(plot: any, svg: Element, data?: any[]): Chart {
     const axes: Axis[] = ['x-axis', 'y-axis'].reduce((parsedAxes: Axis[], s: string) => {
         const chartSVG = svg.tagName !== 'svg' ? Object.values(svg.children).find((n) => n.tagName === 'svg')! : svg;
         let axisSVG = findHtmlElement(chartSVG, s);
@@ -99,7 +94,7 @@ function plotToChart(plot: any, svg: Element): Chart {
         axes: axes,
         type: "chart",
         legends: legends,
-        data: plotMark.data,
+        data: data ? data : plotMark.data,
         dataFieldsUsed: fields,
         description: `A chart with ${axes.length} axes and ${legends.length} legends`,
         gridNodes: [],
