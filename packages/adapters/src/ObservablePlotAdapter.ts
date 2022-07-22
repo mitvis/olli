@@ -53,16 +53,12 @@ function plotToFacetedChart(plot: any, svg: Element): FacetedChart {
         charts = new Map(strokeValues.map((s: string) => [s, plotToChart(plot, chartSVG, plotMark.data.filter((d: any) => d[facetField] === s))]))
     }
 
-    /* TODO
-    - find a way to search for the best mark object within the spec
-    */
-
     let facetedChart: FacetedChart = {
         type: "facetedChart",
         charts: charts,
         data: plotMark.data,
         dataFieldsUsed: fields,
-        description: `Faceted chart with ${charts.values.length} nested charts`,
+        description: `Faceted chart with ${charts.size} nested charts`,
         facetedField: facetField
     };
 
@@ -96,7 +92,7 @@ function plotToChart(plot: any, svg: Element, data?: any[]): Chart {
         legends: legends,
         data: data ? data : plotMark.data,
         dataFieldsUsed: fields,
-        description: `A chart with ${axes.length} axes and ${legends.length} legends`,
+        description: `A chart with ${axes.length === 2 ? `${axes.length} axes`: `${axes[0].orient} axis`} ${legends.length > 0 ? `and ${legends.length} legends` : ''}`,
         gridNodes: [],
     }
 
