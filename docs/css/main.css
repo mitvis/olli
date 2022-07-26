@@ -1,14 +1,15 @@
 body {
   font-size: 18px;
   padding: 0 1em;
+  font-family: 'Cabin', sans-serif;
+}
+
+.Logo {
+  width: 4em;
 }
 
 a[href] {
   text-decoration: none;
-}
-
-.Container-Gallery {
-  /* text-align: center; */
 }
 
 .Gallery-Image {
@@ -25,7 +26,17 @@ code {
 }
 
 .Nav {
+  /* display: inline-block; */
+  position: relative;
+}
 
+.Links {
+  float: right;
+  margin-right: 5%;
+}
+
+.Links > a {
+  font-weight: 700;
 }
 
 footer {

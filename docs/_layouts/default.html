@@ -5,15 +5,21 @@
   <meta charset="utf-8">
   <title>{{ page.title }} | Olli</title>
   <link rel="stylesheet" href="{{site.baseurl}}/css/main.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cabin:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+  </style>
 </head>
 
 <body>
   <nav class="Nav">
-    <h2 class="Logo">Olli</h2>
-    <a href="{{site.baseurl}}/">Home</a>
-    <a href="{{site.baseurl}}/examples/">Examples</a>
-    <a href="{{site.baseurl}}/usage/">Usage</a>
-    <a href="https://github.com/mitvis/olli" target="_blank">Github</a>
+    <!-- <h2 class="Logo">Olli</h2> -->
+    <img class="Logo" src="{{site.baseurl}}/img/olli-logo.png" />
+    <div class="Links">
+      <a href="{{site.baseurl}}/">Home</a>
+      <a href="{{site.baseurl}}/examples/">Examples</a>
+      <a href="{{site.baseurl}}/usage/">Usage</a>
+      <a href="https://github.com/mitvis/olli" target="_blank">Github</a>
+    </div>
   </nav>
   <h1>{{ page.title }}</h1>
   <section>
