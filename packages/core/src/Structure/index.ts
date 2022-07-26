@@ -9,6 +9,7 @@ import { AccessibilityTreeNode, NodeType } from "./Types";
 export function olliVisSpecToTree(olliVisSpec: OlliVisSpec): AccessibilityTreeNode {
     let node: AccessibilityTreeNode;
     if (olliVisSpec.type === "facetedChart" || olliVisSpec.type === "nestedChart") {
+        console.log(olliVisSpec)
         node = informationToNode(olliVisSpec.description, null, olliVisSpec.data, "multiView", olliVisSpec);
         node.description += ` With ${node.children.length} nested charts`
     } else {
@@ -33,14 +34,18 @@ export function olliVisSpecToTree(olliVisSpec: OlliVisSpec): AccessibilityTreeNo
  */
 function generateMultiViewChildren(parent: AccessibilityTreeNode, multiViewChart: CompositeChart): AccessibilityTreeNode[] {
     if (multiViewChart.type === "facetedChart") {
-        return Object.entries(multiViewChart.charts).map(([facetedValue, singleChart]: [any, Chart], i) => informationToNode(
-            `A facet titled ${facetedValue}, ${i + 1} of ${multiViewChart.charts.size}`,
-            parent,
-            [],
-            "chart",
-            singleChart));
+        let charts: AccessibilityTreeNode[] = []
+        multiViewChart.charts.forEach((c: Chart, k: string, m: Map<any, Chart>) => {
+            charts.push(informationToNode(
+                `A facet titled ${k}, ${charts.length + 1} of ${m.size}`,
+                parent,
+                [],
+                "chart",
+                c))
+        })
+
+        return charts;
     } else {
-        // if (multiViewChart.type === "nestedChart")
         return multiViewChart.charts.map((singleChart: Chart, i) => informationToNode(
             `A nested chart ${singleChart.title ? `titled ${singleChart.title}` : ''}, ${i + 1} of ${multiViewChart.charts.length}`,
             parent,
@@ -63,6 +68,7 @@ function generateChartChildren(childrenNodes: AccessibilityTreeNode[], parent: A
     axes: Guide[], legends: Guide[], grids: Guide[]): AccessibilityTreeNode[] {
     if (axes.length > 0) {
         const axis: Guide = axes.pop()!;
+        console.log(axis)
         const scaleType = axis.scaleType ? `for a ${axis.scaleType} scale ` : "";
         const axisField: string = Array.isArray(axis.field) ? axis.field[1] : (axis.field as string);
         let minValue = axis.data.reduce((currentMin: any, currentVal: any) => {
