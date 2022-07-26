@@ -13,7 +13,7 @@
 <body>
   <nav class="Nav">
     <!-- <h2 class="Logo">Olli</h2> -->
-    <img class="Logo" src="{{site.baseurl}}/img/olli-logo.png" />
+    <a href="{{site.baseurl}}/"><img class="Logo" src="{{site.baseurl}}/img/olli-logo.png" /></a>
     <div class="Links">
       <a href="{{site.baseurl}}/">Home</a>
       <a href="{{site.baseurl}}/examples/">Examples</a>
@@ -21,8 +21,7 @@
       <a href="https://github.com/mitvis/olli" target="_blank">Github</a>
     </div>
   </nav>
-  <h1>{{ page.title }}</h1>
-  <section>
+  <section class="Content">
     {{ content }}
   </section>
   <footer>

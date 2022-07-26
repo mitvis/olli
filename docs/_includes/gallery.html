@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <div class="Container-Gallery">
     {% for example in site.data.examples %}
-        <a class="Gallery-Link Gallery-Link-Clicked" href="{{site.baseurl}}{{example.url}}">
+    <img class="Gallery-Image" src="{{site.baseurl}}{{example.img}}" />
+    <!-- <a class="Gallery-Link" href="{{site.baseurl}}{{example.url}}">
             <img class="Gallery-Image" src="{{site.baseurl}}{{example.img}}" />
-        </a>
+        </a> -->
     {% endfor %}
 </div>
