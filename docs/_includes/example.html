@@ -1,13 +1,7 @@
 <!DOCTYPE html>
-<style>
-    .Select-Adapter-Name-Selected {
-        background-color: lightblue;
-    }
 
-    .Select-Vis-Disabled {
-        display: none;
-    }
-</style>
+<link rel="stylesheet" href="{{site.baseurl}}/css/example.css">
+
 <div>
     {% for adapter in include.content.adapters %}
     <div class="Select-Adapters">
@@ -16,7 +10,7 @@
         </span>
     </div>
     {% endfor %}
-    
+
     {% for adapter in include.content.adapters %}
     <div id="Block-Example-{{adapter.name}}" class="Select-Vis-Disabled">
         <div id="Visualization-{{ adapter.name }}"></div>
