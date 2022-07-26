@@ -91,6 +91,7 @@ function parseSingleChart(chart: any): Chart {
 }
 
 function getData(): any[] {
+    console.log(view)
     try {
         // let data: Map<string, any[]> = new Map()
         // const datasets = spec.data?.map((set: any) => set.name)!

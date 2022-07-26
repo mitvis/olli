@@ -58,7 +58,7 @@ function plotToFacetedChart(plot: any, svg: Element): FacetedChart {
         charts: charts,
         data: plotMark.data,
         dataFieldsUsed: fields,
-        description: `Faceted chart with ${charts.size} nested charts`,
+        description: `Faceted chart`,
         facetedField: facetField,
     };
 
@@ -92,9 +92,8 @@ function plotToChart(plot: any, svg: Element, data?: any[]): Chart {
         legends: legends,
         data: data ? data : plotMark.data,
         dataFieldsUsed: fields,
-        description: `A chart with ${axes.length === 2 ? `${axes.length} axes`: `${axes[0].orient} axis`} ${legends.length > 0 ? `and ${legends.length} legends` : ''}`,
-        gridNodes: [],
-        markUsed: plotMark.ariaLabel
+        description: `A chart with ${plotMark.ariaLabel} marks`,
+        gridNodes: []
     }
 
     if (identifyMark(plotMark.ariaLabel) !== "[Undefined]") {

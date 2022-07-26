@@ -12,7 +12,12 @@ export function olliVisSpecToTree(olliVisSpec: OlliVisSpec): AccessibilityTreeNo
         node = informationToNode(olliVisSpec.description, null, olliVisSpec.data, "multiView", olliVisSpec);
         node.description += ` With ${node.children.length} nested charts`
     } else {
-        const axesString: string = olliVisSpec.axes.length > 0 ? ` ${olliVisSpec.axes.length} axes and` : '';
+        // ${axes.length === 2 ? `${axes.length} axes`: `${axes[0].orient} axis`} ${legends.length > 0 ? `and ${legends.length} legends` : ''}`
+        const axesString: string = olliVisSpec.axes.length > 0 ?
+            olliVisSpec.axes.length == 2 ?
+                ` ${olliVisSpec.axes.length} axes and` :
+                ` ${olliVisSpec.axes[0].orient} axis ` :
+            '';
         const legendsString: string = olliVisSpec.legends.length > 0 ? ` ${olliVisSpec.legends.length} legends` : ''
         node = informationToNode(olliVisSpec.description, null, [], "chart", olliVisSpec);
         node.description += ` with ${axesString} ${legendsString}`
