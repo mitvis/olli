@@ -2,6 +2,7 @@
   {
     "title": "Bar Chart",
     "img": "/img/barChart.jpg",
+    "url": "/gallery/barChart.html",
     "adapters": [
       {
         "name": "Vega-Lite",
@@ -20,6 +21,7 @@
   {
     "title": "Line Chart",
     "img": "/img/lineChart.jpg",
+    "url": "/gallery/lineChart.html",
     "adapters": [
       {
         "name": "Vega-Lite",
@@ -38,6 +40,7 @@
   {
     "title": "Scatterplot",
     "img": "/img/scatterplot.jpg",
+    "url": "/gallery/scatterplot.html",
     "adapters": [
       {
         "name": "Vega-Lite",
@@ -56,6 +59,7 @@
   {
     "title": "Multi-Series Line Chart",
     "img": "/img/multiSeriesLineChart.jpg",
+    "url": "/gallery/multiSeriesLine.html",
     "adapters": [
       {
         "name": "Vega-Lite",
@@ -74,6 +78,7 @@
   {
     "title": "Stacked Bar Chart",
     "img": "/img/stackedBarChart.jpg",
+    "url": "/gallery/stackedBar.html",
     "adapters": [
       {
         "name": "Vega-Lite",
@@ -92,6 +97,7 @@
   {
     "title": "Faceted Chart",
     "img": "/img/facetedChart.jpg",
+    "url": "/gallery/facet.html",
     "adapters": [
       {
         "name": "Vega-Lite",
