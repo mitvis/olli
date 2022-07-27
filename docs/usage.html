@@ -8,83 +8,98 @@ title: "Usage"
     <h3>HTML <code>&lt;script&gt;</code> Tags</h3>
     <p>The most basic way to use Olli is to add it to any basic HTML page.</p>
     <p>1. Add the script tag inside the document <code>&lt;head&gt;</code>:</p>
-    <code>
-          &lt;html&gt;
+    <div class="Code-Block">
+      <code class="prettyprint">
+        &lt;html&gt;
+          ....
+
+          &lt;head&gt;
             ....
 
-            &lt;head&gt;
-              ....
+            &lt;script src="https://.../olli.js" /&gt;
+            &lt;script src="https://.../olli/OlliAdapters.js" /&gt;
 
-              &lt;script src="https://.../olli.js" /&gt;
-              &lt;script src="https://.../olli/VegaLiteAdapter.js" /&gt;
+          &lt;/head&gt;
 
-            &lt;/head&gt;
-
-          &lt;/html&gt;</code>
-
-    2. Call Olli from a &lt;script&gt; tag:
-
-    <code>
-            ....
-
-            &lt;script&gt;
-
-              olli({
-                visualization: vegaLiteAdapter(visSpec, additionalInfo),
-                renderType: 'tree'
-                domId: 'Accessible-Vis'
-              })
-
-            &lt;/script&gt;
-        </code>
-  </div>
-  <div style="white-space: pre-wrap;">
-    <h3>JavaScript Applications</h3>
-    <span>Olli can also be easily added to normal JavaScript applications.</span>
-    <div>
-      <span>1. Install the preset:</span>
-      <code>
-        npm install olli
+        &lt;/html&gt;
       </code>
-      <span>2. Import `olli`, and the adapter you want to use, into the file you want to use it in:</span>
-      <code>
-        import { olli } from 'olli';
-        import { VegaLiteAdater } from 'olli/VegaLiteAdater'
-      </code>
-      <span>3. Call `olli` and set-up your configuration object:</span>
-      <code>
-        ...
-        olli({
-          visualization: VegaLiteAdapter(visSpec, additionalInfo),
-          renderType: 'tree'
-          domId: 'Accessible-Vis'
-        })
+    </div>
+    <p>2. Call Olli from a &lt;script&gt; tag:</p>
+    <div class="Code-Block">
+      <code class="prettyprint">
+        ....
+        &lt;script&gt;
+          olli({
+            visualization: OlliAdapters.VegaLiteAdapter(visSpec, additionalInfo),
+            renderType: 'tree'
+            domId: 'Accessible-Vis'
+          })
+        &lt;/script&gt;
         ...
       </code>
     </div>
   </div>
-  <div style="white-space: pre-wrap;">
-    <h3>React</h3>
-    <span>Olli can even be used with React, but due to how React handles the state of the DOM, `olli` has to be called
-      inside the `useEffect(() => {}) hook.</span>
-    <span>Install preset:</span>
-    <code>npm install olli</code>
-    <span>2. Import `olli`, and the adapter you want to use, into the component you want to use it in</span>
-    <code>
-      import { olli } from 'olli';
-      import { VegaLiteAdater } from 'olli/VegaLiteAdater'
-    </code>
-    <span>3. Call `olli` and set-up your configuration object inside the `useEffect(() => {})` hook:</span>
-    <code>
-      ...
-        useEffect(() => {
+  <div>
+    <h3>JavaScript Applications</h3>
+    <p>Olli can also be easily added to normal JavaScript applications.</p>
+    <div>
+      <p>1. Install the preset:</p>
+      <div class="Code-Block">
+        <code class="prettyprint">
+          npm install olli
+        </code>
+      </div>
+      <p>2. Import `olli`, and the adapter you want to use, into the file you want to use it in:</p>
+      <div class="Code-Block">
+        <code class="prettyprint">
+          import { olli } from 'olli';
+          import { VegaLiteAdater } from 'olli/OlliAdapters'
+        </code>
+      </div>
+      <p>3. Call `olli` and set-up your configuration object:</p>
+      <div class="Code-Block">
+        <code class="prettyprint">
+          ...
           olli({
-            visualization: vegaLiteAdapter(visSpec, additionalInfo),
+            visualization: VegaLiteAdapter(visSpec, additionalInfo),
             renderType: 'tree'
             domId: 'Accessible-Vis'
           })
-        })
-      ...
-    </code>
+          ...
+        </code>
+      </div>
+    </div>
+  </div>
+  <div>
+    <h3>React</h3>
+    <p>Olli can even be used with React, but due to how React handles the state of the DOM, `olli` has to be called
+      inside the `useEffect(() => {}) hook.</p>
+    <p>1. Install preset:</p>
+    <div class="Code-Block">
+      <code class="prettyprint">
+        npm install olli
+      </code>
+    </div>
+    <p>2. Import `olli`, and the adapter you want to use, into the component you want to use it in</p>
+    <div class="Code-Block">
+      <code class="prettyprint">
+        import { olli } from 'olli';
+        import { VegaLiteAdater } from 'olli/OlliAdapters'
+      </code>
+    </div>
+    <p>3. Call `olli` and set-up your configuration object inside the `useEffect(() => {})` hook:</p>
+    <div class="Code-Block">
+      <code class="prettyprint">
+        ...
+          useEffect(() => {
+            olli({
+              visualization: vegaLiteAdapter(visSpec, additionalInfo),
+              renderType: 'tree'
+              domId: 'Accessible-Vis'
+            })
+          })
+        ...
+      </code>
+    </div>
   </div>
 </div>

@@ -30,6 +30,11 @@ code {
   white-space: pre-wrap;
 }
 
+.Code-Block {
+  background-color: lightgray;
+  border-radius: 15px;
+}
+
 .Links {
   float: right;
   width: 35%;
