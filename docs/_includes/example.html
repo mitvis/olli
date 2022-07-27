@@ -3,18 +3,20 @@
 <link rel="stylesheet" href="{{site.baseurl}}/css/example.css">
 
 <div>
-    {% for adapter in include.content.adapters %}
-    <div class="Select-Adapters">
-        <span class="Select-Adapter-Name" id="{{ adapter.name }}">
+    <div class="Container-Adapters">
+        {% for adapter in include.content.adapters %}
+        <p class="Select-Adapter-Name" id="{{ adapter.name }}">
             {{ adapter.name }}
-        </span>
+        </p>
+        {% endfor %}
     </div>
-    {% endfor %}
 
     {% for adapter in include.content.adapters %}
     <div id="Block-Example-{{adapter.name}}" class="Select-Vis-Disabled">
-        <div id="Visualization-{{ adapter.name }}"></div>
-        <div id="AccessibilityTree-{{ adapter.name }}"></div>
+        <div class="Example-Block">
+            <div id="Visualization-{{ adapter.name }}"></div>
+            <div id="AccessibilityTree-{{ adapter.name }}"></div>
+        </div>
         {% include {{ adapter.code }} %}
     </div>
     {% endfor %}

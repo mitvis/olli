@@ -1,7 +1,28 @@
 .Select-Adapter-Name-Selected {
-  background-color: lightblue;
+  /* background-color: lightblue; */
+  font-weight: 700;
+}
+
+.Select-Adapter-Name {
+  width: fit-content;
+  padding: 3px;
+  float: left;
+}
+
+.Select-Adapter-Name:hover {
+  cursor: pointer;
+}
+
+.Container-Adapters {
+  display: flex;
+  width: 100%;
 }
 
 .Select-Vis-Disabled {
   display: none;
+}
+
+.Code-Block {
+  background-color: lightgray;
+  border-radius: 15px;
 }

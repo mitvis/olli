@@ -5,26 +5,30 @@
 </head>
 
 <body>
-    <code style="white-space: pre-wrap;">
-        const data = [
-                { "a": "A", "b": 28 }, { "a": "B", "b": 55 }, { "a": "C", "b": 43 },
-                { "a": "D", "b": 91 }, { "a": "E", "b": 81 }, { "a": "F", "b": 53 },
-                { "a": "G", "b": 19 }, { "a": "H", "b": 87 }, { "a": "I", "b": 52 }
-        ]
-
-        let spec = {
-            marks: [
-                Plot.barY(data, { x: "a", y: "b", fill: "steelblue" }),
-                Plot.ruleY([0])
+    <div class="Code-Block">
+        <code class="prettyprint">
+            const data = [
+                    { "a": "A", "b": 28 }, { "a": "B", "b": 55 }, { "a": "C", "b": 43 },
+                    { "a": "D", "b": 91 }, { "a": "E", "b": 81 }, { "a": "F", "b": 53 },
+                    { "a": "G", "b": 19 }, { "a": "H", "b": 87 }, { "a": "I", "b": 52 }
             ]
-        }
+    
+            let spec = {
+                marks: [
+                    Plot.barY(data, { x: "a", y: "b", fill: "steelblue" }),
+                    Plot.ruleY([0])
+                ]
+            }
 
-        olli({
-            visualization: ObservablePlotAdapter(spec, Plot.plot(spec)),
-            renderType: "tree",
-            domId: "AccessibilityTree-ObservablePlot"
-        })
-  </code>
+            document.getElementById("Visualization-ObservablePlot").append(Plot.plot(spec))
+    
+            olli({
+                visualization: ObservablePlotAdapter(spec, Plot.plot(spec)),
+                renderType: "tree",
+                domId: "AccessibilityTree-ObservablePlot"
+            })
+      </code>
+    </div>
     <script type="module">
         import * as Plot from "https://cdn.skypack.dev/@observablehq/plot@0.5";
 
@@ -40,6 +44,8 @@
                 Plot.ruleY([0])
             ]
         }
+
+        document.getElementById("Visualization-ObservablePlot").append(Plot.plot(spec))
 
         olli({
             visualization: OlliAdapters.ObservablePlotAdapter(spec, Plot.plot(spec)),

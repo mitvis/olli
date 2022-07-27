@@ -5,27 +5,32 @@
 </head>
 
 <body>
-    <code style="white-space: pre-wrap;">
+    <div class="Code-Block">
+        <code class="prettyprint">
         const data = [ ... ]
 
         let spec = {
             grid: true,
             facet: {
-              data: athletes,
+              data: data,
               y: 'sex'
             },
             marks: [
-              Plot.rectY(athletes, Plot.binX({ y: "count" }, { x: "weight", fill: "sex", stroke: 'black' })),
+              Plot.rectY(data, Plot.binX({ y: "count" }, { x: "weight", fill: "sex", stroke: 'black' })),
               Plot.ruleY([0])
             ]
-          }
+        }
+
+        document.getElementById("Visualization-ObservablePlot").append(Plot.plot(spec))
+
 
         olli({
             visualization: ObservablePlotAdapter(spec, Plot.plot(spec)),
             renderType: "tree",
             domId: "AccessibilityTree-ObservablePlot"
         })
-  </code>
+        </code>
+    </div>
     <script type="module">
         import * as Plot from "https://cdn.skypack.dev/@observablehq/plot@0.5";
 
@@ -413,14 +418,16 @@
         let spec = {
             grid: true,
             facet: {
-                data: athletes,
+                data: data,
                 y: 'sex'
             },
             marks: [
-                Plot.rectY(athletes, Plot.binX({ y: "count" }, { x: "weight", fill: "sex", stroke: 'black' })),
+                Plot.rectY(data, Plot.binX({ y: "count" }, { x: "weight", fill: "sex", stroke: 'black' })),
                 Plot.ruleY([0])
             ]
         }
+
+        document.getElementById("Visualization-ObservablePlot").append(Plot.plot(spec))
 
         olli({
             visualization: OlliAdapters.ObservablePlotAdapter(spec, Plot.plot(spec)),

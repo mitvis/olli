@@ -5,34 +5,66 @@
 </head>
 
 <body>
-    <code style="white-space: pre-wrap;">
-    let spec = {
-        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-        "description": "Google's stock price over time.",
-        "data": {"url": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/stocks.csv"},
-        "transform": [{"filter": "datum.symbol==='GOOG'"}],
-        "mark": "line",
-        "encoding": {
-          "x": {"field": "date", "type": "temporal"},
-          "y": {"field": "price", "type": "quantitative"}
-        }
-      }      
+    <div class="Code-Block">
+        <code class="prettyprint">
+            let spec = {
+                "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+                "description": "Google's stock price over time.",
+                "data": {"url": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/stocks.csv"},
+                "transform": [{"filter": "datum.symbol==='GOOG'"}],
+                "mark": "line",
+                "encoding": {
+                  "x": {"field": "date", "type": "temporal"},
+                  "y": {"field": "price", "type": "quantitative"}
+                }
+              }      
+        
+                let vegaSpec = vegaLite.compile(spec).spec
+                const runtime = vega.parse(vegaSpec);
+                const vegaRender = document.getElementById('Visualization-Vega-Lite');
+                let view = new vega.View(runtime)
+                    .logLevel(vega.Warn)
+                    .initialize(vegaRender)
+                    .renderer('svg')
+                    .hover()
+                    .runAsync()
+                    .then(v => {
+                        olli({
+                            visualization: OlliAdapters.VegaLiteAdapter(v.scenegraph().root.items[0], spec),
+                            renderType: "tree",
+                            domId: "AccessibilityTree-Vega-Lite"
+                        })
+                    });
+        </code>
+        </div>
+        <script>
+            let spec = {
+                "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+                "description": "Google's stock price over time.",
+                "data": { "url": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/stocks.csv" },
+                "transform": [{ "filter": "datum.symbol==='GOOG'" }],
+                "mark": "line",
+                "encoding": {
+                    "x": { "field": "date", "type": "temporal" },
+                    "y": { "field": "price", "type": "quantitative" }
+                }
+            }
 
-        let vegaSpec = vegaLite.compile(spec).spec
-        const runtime = vega.parse(vegaSpec);
-        const vegaRender = document.getElementById('Visualization-Vega-Lite');
-        let view = new vega.View(runtime)
-            .logLevel(vega.Warn)
-            .initialize(vegaRender)
-            .renderer('svg')
-            .hover()
-            .runAsync()
-            .then(v => {
-                olli({
-                    visualization: OlliAdapters.VegaLiteAdapter(v.scenegraph().root.items[0], spec),
-                    renderType: "tree",
-                    domId: "AccessibilityTree-Vega-Lite"
-                })
-            });
-    </script>
+            let vegaSpec = vegaLite.compile(spec).spec
+            const runtime = vega.parse(vegaSpec);
+            const vegaRender = document.getElementById('Visualization-Vega-Lite');
+            let view = new vega.View(runtime)
+                .logLevel(vega.Warn)
+                .initialize(vegaRender)
+                .renderer('svg')
+                .hover()
+                .runAsync()
+                .then(v => {
+                    olli({
+                        visualization: OlliAdapters.VegaLiteAdapter(v.scenegraph().root.items[0], spec),
+                        renderType: "tree",
+                        domId: "AccessibilityTree-Vega-Lite"
+                    })
+                });
+        </script>
 </body>
