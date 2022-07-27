@@ -2,6 +2,8 @@ body {
   font-size: 18px;
   padding: 0 1em;
   font-family: 'Cabin', sans-serif;
+  margin-left: 20%;
+  margin-right: 10%;
 }
 
 .Logo {
@@ -22,22 +24,20 @@ code {
 
 .Nav {
   /* display: inline-block; */
-  position: relative;
+  /* position: relative; */
 }
 
 .Links {
   float: right;
-  margin-right: 5%;
+  /* margin-right: 22%; */
 }
 
-.Links > a {
+.Links>a {
   font-weight: 700;
 }
 
 .Content {
   margin-top: 5%;
-  margin-left: 20%;
-  margin-right: 10%;
   height: fit-content;
 }
 
@@ -65,4 +65,25 @@ code {
 footer {
   margin-top: 60px;
   font-size: 0.8em;
+}
+
+/* Works on Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: gray lightgray;
+}
+
+/* Works on Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: lightgray;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: gray;
+  border-radius: 20px;
+  border: 3px solid lightgray;
 }
