@@ -1,5 +1,5 @@
 import { Spec, ScaleDataRef, Scale, ScaleData, Scene } from "vega";
-import { Guide, OlliVisSpec, VisAdapter, FacetedChart, Chart, Axis, Legend, facetedChart, nestedChart, NestedChart } from "./Types";
+import { Guide, OlliVisSpec, VisAdapter, chart, Chart, Axis, Legend, facetedChart, nestedChart, NestedChart } from "./Types";
 
 let view: any;
 let spec: Spec;
@@ -12,14 +12,14 @@ let spec: Spec;
 * generate the Accessibility Tree Encoding
 */
 export const VegaAdapter: VisAdapter = (visObject: Scene, helperVisInformation: Spec): OlliVisSpec => {
-        view = visObject;
-        spec = helperVisInformation;
-        if (view.items.some((el: any) => el.role === "scope")) {
-            return parseMultiViewChart();
-        } else {
-            return parseSingleChart(view);
-        }
+    view = visObject;
+    spec = helperVisInformation;
+    if (view.items.some((el: any) => el.role === "scope")) {
+        return parseMultiViewChart();
+    } else {
+        return parseSingleChart(view);
     }
+}
 
 function parseMultiViewChart(): NestedChart {
     const filterUniqueNodes = ((nodeArr: any[]) => {
@@ -39,7 +39,8 @@ function parseMultiViewChart(): NestedChart {
     const chartItems = view.items.filter((el: any) => el.role === "scope")[0].items;
     const charts: Chart[] = chartItems.map((chartNode: any) => {
         let chart: Chart = parseSingleChart(chartNode)
-        chart.title = findScenegraphNodes(chartNode, "title-text")[0].items[0].text;
+        chart.title = findScenegraphNodes(chartNode, "title-text").length > 0 ?
+            findScenegraphNodes(chartNode, "title-text")[0].items[0].text : '';
         return chart
     })
 
@@ -66,16 +67,16 @@ function parseMultiViewChart(): NestedChart {
     return multiViewChart;
 }
 
-function parseSingleChart(chart: any): Chart {
+function parseSingleChart(ch: any): Chart {
     const baseVisDescription = vegaVisDescription(spec);
-    const axes = findScenegraphNodes(chart, "axis").map((axisNode: any) => parseAxisInformation(axisNode));
-    const legends = findScenegraphNodes(chart, "legend").map((legendNode: any) => parseLegendInformation(legendNode))
+    const axes = findScenegraphNodes(ch, "axis").map((axisNode: any) => parseAxisInformation(axisNode));
+    const legends = findScenegraphNodes(ch, "legend").map((legendNode: any) => parseLegendInformation(legendNode))
     const gridNodes: Guide[] = getGridNodes(axes);
     const dataFields: string[] = getDataFields(axes, legends);
     const data: any[] = getData();
-    const chartTitle: string | null = findScenegraphNodes(chart, "title")[0] !== undefined ?
-        findScenegraphNodes(chart, "title")[0].items[0].items[0].items[0].text
-        : null;
+    const chartTitle: string | undefined = findScenegraphNodes(ch, "title").length > 0 ?
+        findScenegraphNodes(ch, "title")[0].items[0].items[0].items[0].text
+        : undefined;
     let chartNode = chart({
         data: data,
         axes: axes,
