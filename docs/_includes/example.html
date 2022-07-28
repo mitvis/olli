@@ -3,6 +3,7 @@
 <link rel="stylesheet" href="{{site.baseurl}}/css/example.css">
 
 <div>
+    <h4>Adapter Selection:</h4>
     <div class="Container-Adapters">
         {% for adapter in include.content.adapters %}
         <p class="Select-Adapter-Name" id="{{ adapter.name }}">
@@ -14,7 +15,9 @@
     {% for adapter in include.content.adapters %}
     <div id="Block-Example-{{adapter.name}}" class="Select-Vis-Disabled">
         <div class="Example-Block">
+            <h4>Visualization:</h4>
             <div id="Visualization-{{ adapter.name }}"></div>
+            <h4>Tree View:</h4>
             <div id="AccessibilityTree-{{ adapter.name }}"></div>
         </div>
         {% include {{ adapter.code }} %}

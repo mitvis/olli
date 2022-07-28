@@ -1,11 +1,77 @@
 ---
 layout: default
-title: "Usage"
+title: "Tutorial"
 ---
-
+{% include imports.html %}
 <div>
+    <h3>Overview</h3>
     <p>The default accessible rendering using <em>Olli</em> is an <em>Accessible Rich Internet Applications (ARIA)</em>
         Tree View based on the <a href="https://w3c.github.io/aria-practices/examples/treeview/treeview-navigation.html"
-            target="_blank">W3C Navigation TreeView Example</a>.
+            target="_blank">W3C Navigation TreeView Example</a>. Olli represents accessible visualizations
+        hierarchically, as
+        a tree structure containing descriptions at varying levels of information granularity. The root node contains a
+        high-level overview of the visualization. If the visualization has multiple views, the level below the root
+        contains a node for each view. The next level contains nodes representing guides (axes and legends). Each guide
+        node has children representing intervals and categories for continuous and discrete guides, respectively.
+        Finally, the leaves of the tree contains the individual data points that correspond to those intervals and
+        categories. The tree allows users to leverage a visualization's hierarchical structure to drill down into data,
+        rather than being restricted to reading individual data points linearly or in a table.
     </p>
+    <h3>Controls</h3>
+    <p>
+        The accessible rendering can be selected by clicking on the root tree node with your mouse, additionally
+        pressing the <code><strong>t</strong></code> key will also focus on the navigable structure. Once focused on a node, arrow keys
+        can then be used to traverse the tree structurally (i.e., <em>up and down</em> to move between levels, <em>left
+            and right</em> to move between siblings). As the AccessibilityTreeNode is traversed, tree nodes that have
+        children are rendered as a nested unordered list with a group role and aria-expanded attribute. Otherwise, a
+        node is rendered as a list item with a treeitem ARIA role. The addition of the ARIA roles and extra attributes
+        allow the screen reader to provide a more specific description of the node's position of the treeBelow is an
+        example of a simple scatterplot with the tree view structure to test the navigation:
+    </p>
+    <h4>Visualization:</h4>
+    <div id="Visualization"></div>
+    <h4>Tree View:</h4>
+    <div id="AccessibilityTree"></div>
+    <script>
+        let spec = {
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+            "description": "A scatterplot showing body mass and flipper lengths of penguins.",
+            "data": {
+                "url": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/penguins.json"
+            },
+            "mark": "point",
+            "encoding": {
+                "x": {
+                    "field": "Flipper Length (mm)",
+                    "type": "quantitative",
+                    "scale": { "zero": false }
+                },
+                "y": {
+                    "field": "Body Mass (g)",
+                    "type": "quantitative",
+                    "scale": { "zero": false }
+                },
+                "color": { "field": "Species", "type": "nominal" },
+                "shape": { "field": "Species", "type": "nominal" }
+            }
+        }
+
+
+        let vegaSpec = vegaLite.compile(spec).spec
+        const runtime = vega.parse(vegaSpec);
+        const vegaRender = document.getElementById('Visualization');
+        let view = new vega.View(runtime)
+            .logLevel(vega.Warn)
+            .initialize(vegaRender)
+            .renderer('svg')
+            .hover()
+            .runAsync()
+            .then(v => {
+                olli({
+                    visualization: OlliAdapters.VegaLiteAdapter(v.scenegraph().root.items[0], spec),
+                    renderType: "tree",
+                    domId: "AccessibilityTree"
+                })
+            });
+    </script>
 </div>

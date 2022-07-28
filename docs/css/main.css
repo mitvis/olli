@@ -30,6 +30,10 @@ code {
   white-space: pre-wrap;
 }
 
+h4 {
+  margin-bottom: 0px;
+}
+
 .Code-Block {
   background-color: lightgray;
   border-radius: 15px;
@@ -79,9 +83,19 @@ code {
   border: 2px solid #41a3db;
 }
 
+.Select-Adapter-Name-Selected {
+  background-color: lightgray;
+  border-radius: 10px;
+}
+
 footer {
   margin-top: 60px;
   font-size: 0.8em;
+}
+
+#Vis-Logo {
+  width: 3%;
+  padding-left: 0.5%;
 }
 
 * {
