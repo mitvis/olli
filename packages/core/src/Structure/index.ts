@@ -1,4 +1,4 @@
-import { Guide, Chart, CompositeChart, OlliVisSpec, Mark } from "@olli/adapters/src/Types";
+import { Guide, Chart, CompositeChart, OlliVisSpec, Mark, FacetedChart } from "@olli/adapters/src/Types";
 import { AccessibilityTreeNode, NodeType } from "./Types";
 
 /**
@@ -7,19 +7,25 @@ import { AccessibilityTreeNode, NodeType } from "./Types";
  * @returns The transormed {@link AccessibilityTreeNode}
  */
 export function olliVisSpecToTree(olliVisSpec: OlliVisSpec): AccessibilityTreeNode {
-    console.log(olliVisSpec)
     let node: AccessibilityTreeNode;
     if (olliVisSpec.type === "facetedChart" || olliVisSpec.type === "nestedChart") {
+        let facets: FacetedChart = olliVisSpec as FacetedChart
+        facets.charts.forEach((chart: Chart, k: string) => {
+            chart.data = chart.data.filter((val: any) => val[facets.facetedField] === k)
+            const updateNestedData = ((g: Guide) => g.data = JSON.parse(JSON.stringify(chart.data)))
+
+            chart.axes.forEach(updateNestedData)
+            chart.legends.forEach(updateNestedData)
+        })
         node = informationToNode(olliVisSpec.description, null, olliVisSpec.data, "multiView", olliVisSpec);
-        node.description += ` With ${node.children.length} nested charts`
+        node.description += ` with ${node.children.length} nested charts`
     } else {
-        // ${axes.length === 2 ? `${axes.length} axes`: `${axes[0].orient} axis`} ${legends.length > 0 ? `and ${legends.length} legends` : ''}`
         const axesString: string = olliVisSpec.axes.length > 0 ?
             olliVisSpec.axes.length == 2 ?
-                ` ${olliVisSpec.axes.length} axes titled ${olliVisSpec.axes.reduce((t: string, a: Guide) => { return `${t}, ${a.title}` }, "")}` :
-                ` ${olliVisSpec.axes[0].orient} axis titled '${olliVisSpec.axes[0].title}'` :
+                ` ${olliVisSpec.axes.length} axes` :
+                ` ${olliVisSpec.axes[0].orient} axis` :
             '';
-        const legendsString: string = olliVisSpec.legends.length === 1 ? ` and ${olliVisSpec.legends.length} legend titled ${olliVisSpec.legends[0].title}` : ''
+        const legendsString: string = olliVisSpec.legends.length === 1 ? ` and ${olliVisSpec.legends.length} legend` : ''
         node = informationToNode(olliVisSpec.description, null, olliVisSpec.data, "chart", olliVisSpec);
         node.description += ` with ${axesString} ${legendsString}`
     }
@@ -252,18 +258,6 @@ function generateChildNodes(type: NodeType, parent: AccessibilityTreeNode, gener
     if (type === "multiView") {
         return generateMultiViewChildren(parent, generationInformation);
     } else if (type === "chart") {
-        // if (parent.parent) {
-        //     generationInformation.axes.forEach((axis: Guide) => {
-        //         axis.data = axis.data.filter((val: any) => {
-        //             return Object.keys(val).some((key: string) => val[key] === generationInformation.facetedValue)
-        //         })
-        //     })
-        //     generationInformation.legends.forEach((legend: Guide) => {
-        //         legend.data = legend.data.filter((val: any) => {
-        //             return Object.keys(val).some((key: string) => val[key] === generationInformation.facetedValue)
-        //         })
-        //     })
-        // }
         return generateChartChildren([], parent, generationInformation.axes, generationInformation.legends, generationInformation.gridNodes);
     } else if (type === "xAxis" || type === "yAxis" || type === "legend") {
         return generateStructuredNodeChildren(parent, generationInformation.field, generationInformation.values, generationInformation.data, generationInformation.markUsed);

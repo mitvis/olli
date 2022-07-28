@@ -1,13 +1,11 @@
 import { Scene } from "vega";
 import { TopLevelSpec } from "vega-lite";
-import { debug } from "webpack";
 import {
     VisAdapter,
     OlliVisSpec,
     Chart,
     Mark,
     Guide,
-    FacetedChart,
     Axis,
     Legend,
     facetedChart,
@@ -75,14 +73,6 @@ function parseMultiView(scenegraph: any, spec: any): OlliVisSpec {
     })
 
     node.dataFieldsUsed.push(facetedField)
-    node.charts.forEach((chart: Chart) => {
-        const filterData = (val: any) => val[facetedField] === chart.title;
-        chart.data = chart.data.filter(filterData)
-        // const updateNestedData = ((g: Guide) => g.data = g.data.filter(filterData))
-
-        // chart.axes.forEach(updateNestedData)
-        // chart.legends.forEach(updateNestedData)
-    })
 
     constructChartDescription(node, spec)
     return node;
