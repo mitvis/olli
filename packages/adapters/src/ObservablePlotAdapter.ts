@@ -98,6 +98,7 @@ function plotToChart(plot: any, svg: Element, data?: any[]): Chart {
 
     if (identifyMark(plotMark.ariaLabel) !== "[Undefined]") {
         chart.markUsed = identifyMark(plotMark.ariaLabel);
+        modifyVisFromMark(chart, chart.markUsed)
     }
 
     return chart
@@ -230,14 +231,36 @@ function isMultiSeries(plot: any): boolean {
 }
 
 function identifyMark(m: string): Mark {
-    switch(m) {
+    switch (m) {
         case ('dot'):
             return "point";
         case ('bar'):
-             return "rect";
+            return "rect";
         case ('line'):
-             return "line";
+            return "line";
         default:
             return "[Undefined]"
+    }
+}
+
+/**
+ *
+ * @param vis The {@link Chart} to update
+ * @param mark The {@link Mark} used in the provided {@Link ChartInformation}
+ * @param spec The Vega-Lite specification of the provided visualization
+ */
+function modifyVisFromMark(vis: Chart, mark: Mark): void {
+    switch (mark) {
+        case 'rect':
+            vis.axes = vis.axes.filter((visAxis: Guide) => visAxis.scaleType === "band")
+            break;
+        case 'geoshape':
+            break;
+        case 'point':
+            if (vis.title) {
+                vis.title = `Scatter plot with title ${vis.title} `;
+            }
+            vis.gridNodes = [...vis.axes];
+            break;
     }
 }
