@@ -62,6 +62,8 @@ function plotToFacetedChart(plot: any, svg: Element): FacetedChart {
         facetedField: facetField,
     };
 
+    console.log(facetedChart)
+
     return facetedChart
 }
 
@@ -133,11 +135,12 @@ function parseAxis(plot: any, svg: Element): Axis {
                 tArr.push(tickValue)
             } else {
                 //@ts-ignore
-                tArr.push(parseFloat(tickValue));
+                tArr.push(parseInt(tickValue.replace(/,/g, '')));
             }
         }
         return tArr
     }, [])
+    console.log(ticks)
 
     let guide: Axis = {
         values: [...ticks] as string[] | number[],
@@ -165,11 +168,12 @@ function parseLegend(plot: any, svg: Element): Legend { //TODO: Does not support
     const channel = plotMark.channels.find((c: any) => c.scale === 'color');
     const values: string[] | number[] = Object.keys(svg.children).reduce((a: string[] | number[], k: string) => {
         let c = svg.children[parseInt(k)];
+        // console.log(c)
         if (c.nodeName !== 'STYLE') {
             if (isNaN(parseInt(c.textContent!))) {
                 a.push(c.textContent as never);
             } else {
-                a.push(parseInt(c.textContent!) as never);
+                a.push(parseInt(c.textContent!.replace(/,/g, '')) as never);
             }
         }
 
@@ -189,6 +193,9 @@ function parseLegend(plot: any, svg: Element): Legend { //TODO: Does not support
     }
 
     if (plot.color.type) guide.type = plot.color.type
+
+    console.log("legend", guide)
+
     return guide
 }
 
