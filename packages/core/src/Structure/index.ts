@@ -74,28 +74,24 @@ function generateChartChildren(childrenNodes: AccessibilityTreeNode[], parent: A
     axes: Guide[], legends: Guide[], grids: Guide[]): AccessibilityTreeNode[] {
     if (axes.length > 0) {
         const axis: Guide = axes.pop()!;
-        const scaleType = axis.scaleType ? `for a ${axis.scaleType} scale ` : "";
+        const scaleStr: string = axis.scaleType ? `for a ${axis.scaleType} scale ` : "";
         const axisField: string = Array.isArray(axis.field) ? axis.field[1] : (axis.field as string);
-        let minValue = axis.data.reduce((currentMin: any, currentVal: any) => {
-            if (currentVal[axisField] < currentMin) {
-                return currentVal[axisField]
-            } else {
-                return currentMin
-            }
+        let minValue: number | string = axis.data.reduce((min: any, val: any) => {
+            if (val[axisField] !== null && val[axisField] < min) return val[axisField]
+            return min
         }, axis.data[0][axisField])
-        let maxValue = axis.data.reduce((currentMax: any, currentVal: any) => {
-            if (currentVal[axisField] > currentMax) {
-                return currentVal[axisField]
-            } else {
-                return currentMax
-            }
+
+        let maxValue: number | string = axis.data.reduce((max: any, val: any) => {
+            if (val[axisField] !== null && val[axisField] > max) return val[axisField]
+            return max
         }, axis.data[0][axisField])
+
         if (axisField.toLowerCase().includes("date")) {
             minValue = new Date(minValue).toLocaleString("en-US", { year: 'numeric', month: 'short', day: 'numeric' });
             maxValue = new Date(maxValue).toLocaleString("en-US", { year: 'numeric', month: 'short', day: 'numeric' });
         }
 
-        const description = `${axis.title} ${scaleType}with values from ${minValue} to ${maxValue}`;
+        const description = `${axis.title} ${scaleStr}with values from ${minValue} to ${maxValue}`;
         childrenNodes.push(informationToNode(description, parent, axis.data, axis.title.includes("Y-Axis") ? "yAxis" : "xAxis", axis));
         return generateChartChildren(childrenNodes, parent, axes, legends, grids);
     } else if (legends.length > 0) {
@@ -132,8 +128,8 @@ function generateStructuredNodeChildren(parent: AccessibilityTreeNode, field: st
         const filterData = (lowerBound: number, upperBound: number): any[] => {
             return data.filter((val: any) => {
                 if ((parent.description.includes("date") || parent.description.includes("temporal")) && upperBound.toString().length === 4) {
-                        const d = new Date(val[field])
-                        return d.getFullYear() >= lowerBound && d.getFullYear() < upperBound;
+                    const d = new Date(val[field])
+                    return d.getFullYear() >= lowerBound && d.getFullYear() < upperBound;
                 }
                 return val[field] >= lowerBound && val[field] < upperBound;
             })

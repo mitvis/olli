@@ -98,8 +98,6 @@ function plotToChart(plot: any, svg: Element, data?: any[]): Chart {
         gridNodes: []
     }
 
-    console.log(chart.legends)
-
     if (identifyMark(plotMark.ariaLabel) !== "[Undefined]") {
         chart.markUsed = identifyMark(plotMark.ariaLabel);
         modifyVisFromMark(chart, chart.markUsed)
@@ -194,8 +192,6 @@ function parseLegend(plot: any, svg: Element): Legend { //TODO: Does not support
     }
 
     if (plot.color.type) guide.type = plot.color.type
-
-    console.log(guide)
 
     return guide
 }
