@@ -53,6 +53,8 @@ function plotToFacetedChart(plot: any, svg: Element): FacetedChart {
         charts = new Map(strokeValues.map((s: string) => [s, plotToChart(plot, chartSVG, plotMark.data.filter((d: any) => d[facetField] === s))]))
     }
 
+    charts.forEach((c: Chart) => c.legends = JSON.parse(JSON.stringify(legends)))
+
     let facetedChart: FacetedChart = {
         type: "facetedChart",
         charts: charts,
@@ -95,6 +97,8 @@ function plotToChart(plot: any, svg: Element, data?: any[]): Chart {
         description: `A chart with ${plotMark.ariaLabel} marks`,
         gridNodes: []
     }
+
+    console.log(chart.legends)
 
     if (identifyMark(plotMark.ariaLabel) !== "[Undefined]") {
         chart.markUsed = identifyMark(plotMark.ariaLabel);
@@ -175,12 +179,13 @@ function parseLegend(plot: any, svg: Element): Legend { //TODO: Does not support
 
         return a
     }, [])
+    const field: string = typeof channel.value === 'object' ? channel.value.label : channel.value
 
     let guide: Legend = {
         values: values,
         data: plotMark.data,
-        field: channel.value,
-        title: channel.value,
+        field: field,
+        title: field,
         type: 'ordinal',
     }
 
@@ -189,6 +194,8 @@ function parseLegend(plot: any, svg: Element): Legend { //TODO: Does not support
     }
 
     if (plot.color.type) guide.type = plot.color.type
+
+    console.log(guide)
 
     return guide
 }
