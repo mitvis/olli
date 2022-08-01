@@ -62,8 +62,6 @@ function plotToFacetedChart(plot: any, svg: Element): FacetedChart {
         facetedField: facetField,
     };
 
-    console.log(facetedChart)
-
     return facetedChart
 }
 
@@ -140,7 +138,6 @@ function parseAxis(plot: any, svg: Element): Axis {
         }
         return tArr
     }, [])
-    console.log(ticks)
 
     let guide: Axis = {
         values: [...ticks] as string[] | number[],
@@ -168,7 +165,6 @@ function parseLegend(plot: any, svg: Element): Legend { //TODO: Does not support
     const channel = plotMark.channels.find((c: any) => c.scale === 'color');
     const values: string[] | number[] = Object.keys(svg.children).reduce((a: string[] | number[], k: string) => {
         let c = svg.children[parseInt(k)];
-        // console.log(c)
         if (c.nodeName !== 'STYLE') {
             if (isNaN(parseInt(c.textContent!))) {
                 a.push(c.textContent as never);
@@ -193,8 +189,6 @@ function parseLegend(plot: any, svg: Element): Legend { //TODO: Does not support
     }
 
     if (plot.color.type) guide.type = plot.color.type
-
-    console.log("legend", guide)
 
     return guide
 }
@@ -267,7 +261,7 @@ function modifyVisFromMark(vis: Chart, mark: Mark): void {
             if (vis.title) {
                 vis.title = `Scatter plot with title ${vis.title} `;
             }
-            vis.gridNodes = [...vis.axes];
+            if (vis.axes.every((a: Axis) => typeof a.values[0] === "number")) vis.gridNodes = [...vis.axes];
             break;
     }
 }

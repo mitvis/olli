@@ -131,6 +131,10 @@ function generateStructuredNodeChildren(parent: AccessibilityTreeNode, field: st
     } else {
         const filterData = (lowerBound: number, upperBound: number): any[] => {
             return data.filter((val: any) => {
+                if ((parent.description.includes("date") || parent.description.includes("temporal")) && upperBound.toString().length === 4) {
+                        const d = new Date(val[field])
+                        return d.getFullYear() >= lowerBound && d.getFullYear() < upperBound;
+                }
                 return val[field] >= lowerBound && val[field] < upperBound;
             })
         }
@@ -143,11 +147,12 @@ function generateStructuredNodeChildren(parent: AccessibilityTreeNode, field: st
         }
         return valueIncrements.map((range: number[]) => {
             let desc = ``
-            if (parent.description.includes("date") || parent.description.includes("temporal")) {
+            if ((parent.description.includes("date") || parent.description.includes("temporal")) && range[0].toString().length > 4) {
                 range.forEach((val: number) => desc += `${new Date(val).toLocaleString("en-US", { year: 'numeric', month: 'short', day: 'numeric' })}, `)
             } else {
                 desc = `${range},`
             }
+
             return informationToNode(desc, parent, filterData(range[0], range[1]), "filteredData", filterData(range[0], range[1]));
         });
     }

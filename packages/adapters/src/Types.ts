@@ -68,7 +68,7 @@ export const nestedChart = (fields: Omit<NestedChart, 'type'>): NestedChart => {
  *   field: the object field that will be used to compare data values to range values
  */
 export type Guide = {
-    values: string[] | number[]
+    values: string[] | number[],
     title: string
     data: any[]
     field: string | string[],
