@@ -170,9 +170,6 @@ function constructChartDescription(node: OlliVisSpec, spec: any): void {
     if (node.type === "facetedChart") {
         desc = `${desc} with ${node.charts.size} faceted charts.`
         node.description = spec.description;
-    } else if (node.type === "nestedChart") {
-        desc = `${desc} with ${node.charts.length} nested charts.`
-        node.description = spec.description;
     } else {
         node.description = `${desc}`;
     }

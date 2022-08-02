@@ -1,4 +1,4 @@
-import { Guide, Chart, CompositeChart, OlliVisSpec, Mark, FacetedChart } from "@olli/adapters/src/Types";
+import { Guide, Chart, OlliVisSpec, Mark, FacetedChart } from "@olli/adapters/src/Types";
 import { AccessibilityTreeNode, NodeType } from "./Types";
 
 /**
@@ -8,7 +8,7 @@ import { AccessibilityTreeNode, NodeType } from "./Types";
  */
 export function olliVisSpecToTree(olliVisSpec: OlliVisSpec): AccessibilityTreeNode {
     let node: AccessibilityTreeNode;
-    if (olliVisSpec.type === "facetedChart" || olliVisSpec.type === "nestedChart") {
+    if (olliVisSpec.type === "facetedChart") {
         let facets: FacetedChart = olliVisSpec as FacetedChart
         facets.charts.forEach((chart: Chart, k: string) => {
             chart.data = chart.data.filter((val: any) => val[facets.facetedField] === k)
@@ -38,27 +38,19 @@ export function olliVisSpecToTree(olliVisSpec: OlliVisSpec): AccessibilityTreeNo
  * @param multiViewChart The {@link FacetedChart} of the abstracted visualization
  * @returns an array of {@link AccessibilityTreeNode} to be the given parent's children
  */
-function generateMultiViewChildren(parent: AccessibilityTreeNode, multiViewChart: CompositeChart): AccessibilityTreeNode[] {
-    if (multiViewChart.type === "facetedChart") {
-        let charts: AccessibilityTreeNode[] = []
-        multiViewChart.charts.forEach((c: Chart, k: string, m: Map<any, Chart>) => {
-            charts.push(informationToNode(
-                `A facet titled ${k}, ${charts.length + 1} of ${m.size}`,
-                parent,
-                multiViewChart.data,
-                "chart",
-                c))
-        })
-
-        return charts;
-    } else {
-        return multiViewChart.charts.map((singleChart: Chart, i) => informationToNode(
-            `A nested chart ${singleChart.title ? `titled ${singleChart.title}` : ''}, ${i + 1} of ${multiViewChart.charts.length}`,
+function generateMultiViewChildren(parent: AccessibilityTreeNode, multiViewChart: FacetedChart): AccessibilityTreeNode[] {
+    multiViewChart.type === "facetedChart"
+    let charts: AccessibilityTreeNode[] = []
+    multiViewChart.charts.forEach((c: Chart, k: string, m: Map<any, Chart>) => {
+        charts.push(informationToNode(
+            `A facet titled ${k}, ${charts.length + 1} of ${m.size}`,
             parent,
             multiViewChart.data,
             "chart",
-            singleChart));
-    }
+            c))
+    })
+
+    return charts;
 }
 
 /**
@@ -81,11 +73,11 @@ function generateChartChildren(childrenNodes: AccessibilityTreeNode[], parent: A
         // TODO: Re-used code from line 143. Make utility function and add try/catch since the data should not be undefined!
         if (defaultRange === undefined) {
             let updatedField = Object.keys(axis.data[0]).find((k: string) => k.includes(axisField) || axisField.includes(k))
-            if(updatedField) {
+            if (updatedField) {
                 axisField = updatedField
                 defaultRange = axis.data[0][axisField];
-            } 
-        } 
+            }
+        }
 
         let minValue: number | string = axis.data.reduce((min: any, val: any) => {
             if (val[axisField] !== null && val[axisField] < min) return val[axisField]
