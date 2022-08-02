@@ -20,7 +20,7 @@
             <h4>Visualization:</h4>
             <div id="Visualization-{{ adapter.name }}"></div>
             <h4>Tree View:</h4>
-            <div id="AccessibilityTree-{{ adapter.name }}"></div>
+            <div id="AccessibilityTree-{{ adapter.name }}" class="Tree"></div>
         </div>
         {% include {{ adapter.code }} %}
     </div>
@@ -47,5 +47,11 @@
             selectedAdapter.classList.add('Select-Adapter-Name-Selected')
             document.getElementById(`Block-Example-${newAdapter.id}`).classList.remove('Select-Vis-Disabled');
         }
+
+        document.addEventListener('keypress', (keyStroke) => {
+            if (keyStroke.key.toLowerCase() === 't') {
+                document.getElementById(`AccessibilityTree-${selectedAdapter.id}`).firstChild.firstChild.focus()
+            }
+        })
     </script>
 </div>
