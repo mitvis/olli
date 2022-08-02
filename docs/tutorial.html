@@ -20,7 +20,8 @@ title: "Tutorial"
     <h3>Controls</h3>
     <p>
         The accessible rendering can be selected by clicking on the root tree node with your mouse, additionally
-        pressing the <code><strong>t</strong></code> key will also focus on the navigable structure. Once focused on a node, arrow keys
+        pressing the <code><strong>t</strong></code> key will also focus on the navigable structure. Once focused on a
+        node, arrow keys
         can then be used to traverse the tree structurally (i.e., <em>up and down</em> to move between levels, <em>left
             and right</em> to move between siblings). As the AccessibilityTreeNode is traversed, tree nodes that have
         children are rendered as a nested unordered list with a group role and aria-expanded attribute. Otherwise, a
@@ -73,5 +74,11 @@ title: "Tutorial"
                     domId: "AccessibilityTree"
                 })
             });
+
+        document.addEventListener('keypress', (keyStroke) => {
+            if (keyStroke.key.toLowerCase() === 't') {
+                document.getElementById(`AccessibilityTree`).firstChild.firstChild.focus()
+            }
+        })
     </script>
 </div>
