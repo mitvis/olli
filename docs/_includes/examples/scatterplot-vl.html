@@ -7,28 +7,7 @@
 <body>
   <div class="Code-Block">
     <code class="prettyprint">
-    let spec = {
-        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-        "description": "A scatterplot showing body mass and flipper lengths of penguins.",
-        "data": {
-          "url": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/penguins.json"
-        },
-        "mark": "point",
-        "encoding": {
-          "x": {
-            "field": "Flipper Length (mm)",
-            "type": "quantitative",
-            "scale": {"zero": false}
-          },
-          "y": {
-            "field": "Body Mass (g)",
-            "type": "quantitative",
-            "scale": {"zero": false}
-          },
-          "color": {"field": "Species", "type": "nominal"},
-          "shape": {"field": "Species", "type": "nominal"}
-        }
-      }
+    let spec = { ... }
       
 
     let vegaSpec = vegaLite.compile(spec).spec
@@ -42,7 +21,7 @@
       .run();
   
     olli({ 
-      visualization: VegaLiteAdapter(view, spec),
+      visualization: OlliAdapters.VegaAdapter(view, spec),
       renderType: "tree", 
       domId: "AccessibilityTree-Vega-Lite"
     })

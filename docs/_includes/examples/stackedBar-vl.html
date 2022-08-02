@@ -7,16 +7,7 @@
 <body>
   <div class="Code-Block">
     <code class="prettyprint">
-    let spec = {
-        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-        "data": {"url": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/barley.json"},
-        "mark": "bar",
-        "encoding": {
-          "x": {"aggregate": "sum", "field": "yield"},
-          "y": {"field": "variety"},
-          "color": {"field": "site"}
-        }
-      }
+    let spec = { ... }
 
     let vegaSpec = vegaLite.compile(spec).spec
     const runtime = vega.parse(vegaSpec);
@@ -29,7 +20,7 @@
       .run();
   
     olli({ 
-      visualization: VegaLiteAdapter(view, spec),
+      visualization: OlliAdapters.VegaLiteAdapter(view, spec),
       renderType: "tree", 
       domId: "AccessibilityTree-Vega-Lite"
     })
@@ -39,6 +30,7 @@
         let spec = {
             "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
             "data": { "url": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/barley.json" },
+            "description": "A horizontally stacked bar chart of barley yields",
             "mark": "bar",
             "encoding": {
                 "x": { "aggregate": "sum", "field": "yield" },

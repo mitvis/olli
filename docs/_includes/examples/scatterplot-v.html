@@ -7,235 +7,9 @@
 <body>
     <div class="Code-Block">
         <code class="prettyprint">
-    let spec = {
-        "$schema": "https://vega.github.io/schema/vega/v5.json",
-        "description": "A scatterplot showing body mass and flipper lengths of penguins.",
-        "background": "white",
-        "padding": 5,
-        "width": 200,
-        "height": 200,
-        "style": "cell",
-        "data": [
-            {
-                "name": "source_0",
-                "url": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/penguins.json",
-                "transform": [
-                    {
-                        "type": "filter",
-                        "expr": "isValid(datum[\"Flipper Length (mm)\"]) && isFinite(+datum[\"Flipper Length (mm)\"]) && isValid(datum[\"Body Mass (g)\"]) && isFinite(+datum[\"Body Mass (g)\"])"
-                    }
-                ]
-            }
-        ],
-        "marks": [
-            {
-                "name": "marks",
-                "type": "symbol",
-                "style": [
-                    "point"
-                ],
-                "from": {
-                    "data": "source_0"
-                },
-                "encode": {
-                    "update": {
-                        "opacity": [
-                            {
-                                "test": "selected && length(selected) > 0 && indexof(selected, datum[\"Species\"] + \";\" + datum[\"Body Mass (g)\"] + \";\" + datum[\"Flipper Length (mm)\"]) >= 0",
-                                "value": 1
-                            },
-                            {
-                                "test": "!selected || length(selected) == 0",
-                                "value": 0.7
-                            },
-                            {
-                                "value": 0.1
-                            }
-                        ],
-                        "fill": {
-                            "value": "transparent"
-                        },
-                        "stroke": {
-                            "scale": "color",
-                            "field": "Species"
-                        },
-                        "ariaRoleDescription": {
-                            "value": "point"
-                        },
-                        "description": {
-                            "signal": "\"Flipper Length (mm): \" + (format(datum[\"Flipper Length (mm)\"], \"\")) + \"; Body Mass (g): \" + (format(datum[\"Body Mass (g)\"], \"\")) + \"; Species: \" + (isValid(datum[\"Species\"]) ? datum[\"Species\"] : \"\"+datum[\"Species\"])"
-                        },
-                        "x": [
-                            {
-                                "test": "!isValid(datum[\"Flipper Length (mm)\"]) || !isFinite(+datum[\"Flipper Length (mm)\"])",
-                                "value": 0
-                            },
-                            {
-                                "scale": "x",
-                                "field": "Flipper Length (mm)"
-                            }
-                        ],
-                        "y": [
-                            {
-                                "test": "!isValid(datum[\"Body Mass (g)\"]) || !isFinite(+datum[\"Body Mass (g)\"])",
-                                "field": {
-                                    "group": "height"
-                                }
-                            },
-                            {
-                                "scale": "y",
-                                "field": "Body Mass (g)"
-                            }
-                        ],
-                        "shape": {
-                            "scale": "shape",
-                            "field": "Species"
-                        }
-                    }
-                }
-            }
-        ],
-        "scales": [
-            {
-                "name": "x",
-                "type": "linear",
-                "domain": {
-                    "data": "source_0",
-                    "field": "Flipper Length (mm)"
-                },
-                "range": [
-                    0,
-                    {
-                        "signal": "width"
-                    }
-                ],
-                "zero": false,
-                "nice": true
-            },
-            {
-                "name": "y",
-                "type": "linear",
-                "domain": {
-                    "data": "source_0",
-                    "field": "Body Mass (g)"
-                },
-                "range": [
-                    {
-                        "signal": "height"
-                    },
-                    0
-                ],
-                "zero": false,
-                "nice": true
-            },
-            {
-                "name": "color",
-                "type": "ordinal",
-                "domain": {
-                    "data": "source_0",
-                    "field": "Species",
-                    "sort": true
-                },
-                "range": "category"
-            },
-            {
-                "name": "shape",
-                "type": "ordinal",
-                "domain": {
-                    "data": "source_0",
-                    "field": "Species",
-                    "sort": true
-                },
-                "range": "symbol"
-            }
-        ],
-        "axes": [
-            {
-                "scale": "x",
-                "orient": "bottom",
-                "gridScale": "y",
-                "grid": true,
-                "tickCount": {
-                    "signal": "ceil(width/40)"
-                },
-                "domain": false,
-                "labels": false,
-                "aria": false,
-                "maxExtent": 0,
-                "minExtent": 0,
-                "ticks": false,
-                "zindex": 0
-            },
-            {
-                "scale": "y",
-                "orient": "left",
-                "gridScale": "x",
-                "grid": true,
-                "tickCount": {
-                    "signal": "ceil(height/40)"
-                },
-                "domain": false,
-                "labels": false,
-                "aria": false,
-                "maxExtent": 0,
-                "minExtent": 0,
-                "ticks": false,
-                "zindex": 0
-            },
-            {
-                "scale": "x",
-                "orient": "bottom",
-                "grid": false,
-                "title": "Flipper Length (mm)",
-                "labelFlush": true,
-                "labelOverlap": true,
-                "tickCount": {
-                    "signal": "ceil(width/40)"
-                },
-                "zindex": 0
-            },
-            {
-                "scale": "y",
-                "orient": "left",
-                "grid": false,
-                "title": "Body Mass (g)",
-                "labelOverlap": true,
-                "tickCount": {
-                    "signal": "ceil(height/40)"
-                },
-                "zindex": 0
-            }
-        ],
-        "legends": [
-            {
-                "stroke": "color",
-                "symbolType": "circle",
-                "title": "Species",
-                "encode": {
-                    "symbols": {
-                        "update": {
-                            "fill": {
-                                "value": "transparent"
-                            },
-                            "opacity": {
-                                "value": 0.7
-                            }
-                        }
-                    }
-                },
-                "shape": "shape"
-            }
-        ],
-        "signals": [
-            {
-                "name": "selected",
-                "value": null
-            }
-        ]
-    }
+    let spec = { ... }
 
-    let vegaSpec = vegaLite.compile(spec).spec
-    const runtime = vega.parse(vegaSpec);
+    const runtime = vega.parse(spec);
     const vegaRender = document.getElementById('Visualization-Vega');
     let view = new vega.View(runtime)
       .logLevel(vega.Warn)
@@ -245,7 +19,7 @@
       .run();
   
     olli({ 
-      visualization: VegaLiteAdapter(view, spec),
+      visualization: OlliAdapters.VegaAdapter(view, spec),
       renderType: "tree", 
       domId: "AccessibilityTree-Vega"
     })
@@ -254,7 +28,7 @@
     <script type="module">
         let spec = {
             "$schema": "https://vega.github.io/schema/vega/v5.json",
-            "description": "A scatterplot showing body mass and flipper lengths of penguins.",
+            "description": "A scatterplot showing body mass and flipper lengths of penguins",
             "background": "white",
             "padding": 5,
             "width": 200,
@@ -284,19 +58,6 @@
                     },
                     "encode": {
                         "update": {
-                            "opacity": [
-                                {
-                                    "test": "selected && length(selected) > 0 && indexof(selected, datum[\"Species\"] + \";\" + datum[\"Body Mass (g)\"] + \";\" + datum[\"Flipper Length (mm)\"]) >= 0",
-                                    "value": 1
-                                },
-                                {
-                                    "test": "!selected || length(selected) == 0",
-                                    "value": 0.7
-                                },
-                                {
-                                    "value": 0.1
-                                }
-                            ],
                             "fill": {
                                 "value": "transparent"
                             },
@@ -400,9 +161,6 @@
                     "orient": "bottom",
                     "gridScale": "y",
                     "grid": true,
-                    "tickCount": {
-                        "signal": "ceil(width/40)"
-                    },
                     "domain": false,
                     "labels": false,
                     "aria": false,
@@ -416,9 +174,6 @@
                     "orient": "left",
                     "gridScale": "x",
                     "grid": true,
-                    "tickCount": {
-                        "signal": "ceil(height/40)"
-                    },
                     "domain": false,
                     "labels": false,
                     "aria": false,
@@ -434,9 +189,6 @@
                     "title": "Flipper Length (mm)",
                     "labelFlush": true,
                     "labelOverlap": true,
-                    "tickCount": {
-                        "signal": "ceil(width/40)"
-                    },
                     "zindex": 0
                 },
                 {
@@ -445,9 +197,6 @@
                     "grid": false,
                     "title": "Body Mass (g)",
                     "labelOverlap": true,
-                    "tickCount": {
-                        "signal": "ceil(height/40)"
-                    },
                     "zindex": 0
                 }
             ],
@@ -469,12 +218,6 @@
                         }
                     },
                     "shape": "shape"
-                }
-            ],
-            "signals": [
-                {
-                    "name": "selected",
-                    "value": null
                 }
             ]
         }

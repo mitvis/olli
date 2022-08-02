@@ -7,17 +7,7 @@
 <body>
   <div class="Code-Block">
     <code class="prettyprint">
-    let spec = {
-        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-        "description": "Stock prices of 5 Tech Companies over Time.",
-        "data": {"url": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/stocks.csv"},
-        "mark": "line",
-        "encoding": {
-          "x": {"field": "date", "type": "temporal"},
-          "y": {"field": "price", "type": "quantitative"},
-          "color": {"field": "symbol", "type": "nominal"}
-        }
-      }
+    let spec = { ... }
 
     let vegaSpec = vegaLite.compile(spec).spec
     const runtime = vega.parse(vegaSpec);
@@ -30,7 +20,7 @@
       .run();
   
     olli({ 
-      visualization: VegaLiteAdapter(view, spec),
+      visualization: OlliAdapters.VegaLiteAdapter(view, spec),
       renderType: "tree", 
       domId: "AccessibilityTree-Vega-Lite"
     })
