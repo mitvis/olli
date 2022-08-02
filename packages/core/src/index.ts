@@ -40,4 +40,13 @@ export function olli(config: OlliConfigOptions) {
 
 
     document.getElementById(config.domId)?.appendChild(htmlRendering);
+
+    document.addEventListener('keypress', (keyStroke) => {
+        if (keyStroke.key.toLowerCase() === 't') {
+            const treeview = document.getElementById('treeView');
+            if (treeview !== null) {
+                (treeview as any).firstChild!.focus()
+            }
+        }
+    })
 }

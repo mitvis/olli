@@ -1,5 +1,5 @@
-import { Spec, ScaleDataRef, Scale, ScaleData, Scene } from "vega";
-import { Guide, OlliVisSpec, VisAdapter, FacetedChart, Chart, Axis, Legend, facetedChart, nestedChart, NestedChart } from "./Types";
+import { Spec, ScaleDataRef, Scale, ScaleData, Scene, Mark } from "vega";
+import { Guide, OlliVisSpec, VisAdapter, chart, Chart, Axis, Legend, facetedChart, FacetedChart } from "./Types";
 
 let view: any;
 let spec: Spec;
@@ -12,16 +12,16 @@ let spec: Spec;
 * generate the Accessibility Tree Encoding
 */
 export const VegaAdapter: VisAdapter = (visObject: Scene, helperVisInformation: Spec): OlliVisSpec => {
-        view = visObject;
-        spec = helperVisInformation;
-        if (view.items.some((el: any) => el.role === "scope")) {
-            return parseMultiViewChart();
-        } else {
-            return parseSingleChart(view);
-        }
+    view = visObject;
+    spec = helperVisInformation;
+    if (view.items.some((el: any) => el.role === "scope")) {
+        return parseFacets();
+    } else {
+        return parseSingleChart(view);
     }
+}
 
-function parseMultiViewChart(): NestedChart {
+function parseFacets(): FacetedChart {
     const filterUniqueNodes = ((nodeArr: any[]) => {
         let uniqueNodes: any[] = []
         nodeArr.forEach((node: any) => {
@@ -32,23 +32,6 @@ function parseMultiViewChart(): NestedChart {
 
         return uniqueNodes
     })
-    const baseVisDescription = vegaVisDescription(spec);
-    const axes = filterUniqueNodes(findScenegraphNodes(view, "axis").map((axisNode: any) => parseAxisInformation(axisNode)));
-    const legends = filterUniqueNodes(findScenegraphNodes(view, "legend").map((legendNode: any) => parseLegendInformation(legendNode)));
-
-    const chartItems = view.items.filter((el: any) => el.role === "scope")[0].items;
-    const charts: Chart[] = chartItems.map((chartNode: any) => {
-        let chart: Chart = parseSingleChart(chartNode)
-        chart.title = findScenegraphNodes(chartNode, "title-text")[0].items[0].text;
-        return chart
-    })
-
-    let multiViewChart = nestedChart({
-        charts: charts,
-        data: getData(),
-        dataFieldsUsed: getDataFields(axes, legends),
-        description: baseVisDescription,
-    })
 
     const shallowCopyArray = (objToCopy: any[], arrToPush: any[]): void => {
         objToCopy.forEach((obj: any) => {
@@ -58,24 +41,52 @@ function parseMultiViewChart(): NestedChart {
         })
     }
 
-    multiViewChart.charts.forEach((chart: Chart) => {
-        shallowCopyArray(axes, chart.axes);
-        shallowCopyArray(legends, chart.legends);
+    const baseVisDescription = vegaVisDescription(spec);
+    const axes = filterUniqueNodes(findScenegraphNodes(view, "axis").map((axisNode: any) => parseAxisInformation(axisNode)));
+    const legends = filterUniqueNodes(findScenegraphNodes(view, "legend").map((legendNode: any) => parseLegendInformation(legendNode)));
+    const chartItems = view.items.filter((el: any) => el.role === "scope")[0].items;
+    const fields: string[] = getDataFields(axes, legends);
+    let facetField: string
+    const facetMark = (spec.marks?.find((m: any, i: number) => m.from && m.from.facet)!.from! as any).facet.groupby
+    if(Array.isArray(facetMark)) {
+        facetField = facetMark[0]
+    } else {
+        facetField = facetMark
+    }
+    fields.push(facetField)
+
+    const charts: Map<any, Chart> = new Map(
+        chartItems.map((chartNode: any) => {
+            let chart: Chart = parseSingleChart(chartNode);
+            let key = chartNode.datum[facetField];
+            chart.title = findScenegraphNodes(chartNode, "title-text").length > 0 ?
+                findScenegraphNodes(chartNode, "title-text")[0].items[0].text : '';
+            shallowCopyArray(axes, chart.axes);
+            shallowCopyArray(legends, chart.legends);
+            return [key, chart]
+        }))
+
+    let multiViewChart = facetedChart({
+        charts: charts,
+        data: getData(),
+        dataFieldsUsed: fields,
+        description: baseVisDescription,
+        facetedField: facetField
     })
 
     return multiViewChart;
 }
 
-function parseSingleChart(chart: any): Chart {
+function parseSingleChart(ch: any): Chart {
     const baseVisDescription = vegaVisDescription(spec);
-    const axes = findScenegraphNodes(chart, "axis").map((axisNode: any) => parseAxisInformation(axisNode));
-    const legends = findScenegraphNodes(chart, "legend").map((legendNode: any) => parseLegendInformation(legendNode))
-    const gridNodes: Guide[] = getGridNodes(axes);
+    const axes = findScenegraphNodes(ch, "axis").map((axisNode: any) => parseAxisInformation(axisNode));
+    const legends = findScenegraphNodes(ch, "legend").map((legendNode: any) => parseLegendInformation(legendNode))
+    const gridNodes: Guide[] = []// getGridNodes(axes);
     const dataFields: string[] = getDataFields(axes, legends);
     const data: any[] = getData();
-    const chartTitle: string | null = findScenegraphNodes(chart, "title")[0] !== undefined ?
-        findScenegraphNodes(chart, "title")[0].items[0].items[0].items[0].text
-        : null;
+    const chartTitle: string | undefined = findScenegraphNodes(ch, "title").length > 0 ?
+        findScenegraphNodes(ch, "title")[0].items[0].items[0].items[0].text
+        : undefined;
     let chartNode = chart({
         data: data,
         axes: axes,
@@ -96,7 +107,7 @@ function getData(): any[] {
         // const datasets = spec.data?.map((set: any) => set.name)!
         // datasets.map((key: string) => data.set(key, view.context.data[key].values.value));
         // return data
-        return view.context.data['source_0'].values.value
+        return [...view.context.data['source_0'].values.value]
         // TODO hardcoded dataset name
     } catch (error) {
         throw new Error(`No data defined in the Vega Spec \n ${error}`)
@@ -119,6 +130,17 @@ function parseAxisInformation(axis: any): Axis {
     const title = axisView.items.find((n: any) => n.role === "axis-title");
     const scale = axisView.datum.scale
     let scaleDomain: any = (spec.scales?.find((specScale: Scale) => specScale.name === scale)?.domain as ScaleData)!
+
+    if (!scaleDomain) {
+        spec.marks?.forEach((m: any) => {
+            const markScales: Scale[] = m.scales;
+            if (markScales) {
+                let s = markScales.find((specScale: Scale) => specScale.name === scale)
+                if (s) scaleDomain = s.domain as ScaleData
+            }
+        })
+    }
+
     let fields: string | string[]
     if (scaleDomain.field !== undefined) {
         fields = scaleDomain.field

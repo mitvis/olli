@@ -6,7 +6,6 @@ import {
     Chart,
     Mark,
     Guide,
-    FacetedChart,
     Axis,
     Legend,
     facetedChart,
@@ -74,9 +73,6 @@ function parseMultiView(scenegraph: any, spec: any): OlliVisSpec {
     })
 
     node.dataFieldsUsed.push(facetedField)
-    node.charts.forEach((chart: Chart) => {
-        chart.data = chart.data.filter((val: any) => val[facetedField] === chart.title)
-    })
 
     constructChartDescription(node, spec)
     return node;
@@ -173,9 +169,6 @@ function constructChartDescription(node: OlliVisSpec, spec: any): void {
     let desc: string = spec.description ? spec.description : "";
     if (node.type === "facetedChart") {
         desc = `${desc} with ${node.charts.size} faceted charts.`
-        node.description = spec.description;
-    } else if (node.type === "nestedChart") {
-        desc = `${desc} with ${node.charts.length} nested charts.`
         node.description = spec.description;
     } else {
         node.description = `${desc}`;
