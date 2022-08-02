@@ -45,6 +45,7 @@ function parseFacets(): FacetedChart {
     const axes = filterUniqueNodes(findScenegraphNodes(view, "axis").map((axisNode: any) => parseAxisInformation(axisNode)));
     const legends = filterUniqueNodes(findScenegraphNodes(view, "legend").map((legendNode: any) => parseLegendInformation(legendNode)));
     const chartItems = view.items.filter((el: any) => el.role === "scope")[0].items;
+    const fields: string[] = getDataFields(axes, legends);
     let facetField: string
     const facetMark = (spec.marks?.find((m: any, i: number) => m.from && m.from.facet)!.from! as any).facet.groupby
     if(Array.isArray(facetMark)) {
@@ -52,6 +53,7 @@ function parseFacets(): FacetedChart {
     } else {
         facetField = facetMark
     }
+    fields.push(facetField)
 
     const charts: Map<any, Chart> = new Map(
         chartItems.map((chartNode: any) => {
@@ -67,7 +69,7 @@ function parseFacets(): FacetedChart {
     let multiViewChart = facetedChart({
         charts: charts,
         data: getData(),
-        dataFieldsUsed: getDataFields(axes, legends),
+        dataFieldsUsed: fields,
         description: baseVisDescription,
         facetedField: facetField
     })

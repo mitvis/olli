@@ -39,10 +39,11 @@ function plotToFacetedChart(plot: any, svg: Element): FacetedChart {
             plot.facet.y :
             plot.facet.x :
         plot.marks.find((mark: any) => mark.ariaLabel === 'line').channels.find((c: any) => c.name === "stroke").value;
+    fields.push(facetField)
     if (hasFacets(plot)) {
         charts = new Map(Object.values(chartSVG.children)
             .filter((n) => n.getAttribute('aria-label') === 'facet')
-            .map((n: any) => [n.__data__, plotToChart(plot, chartSVG, plotMark.data.filter((d: any) => d[facetField] === n.__data__))])); // TODO: Check if filter is needed
+            .map((n: any) => [n.__data__, plotToChart(plot, chartSVG)]));
     } else {
         const strokeValues = plotMark.data.reduce((values: string[], d: any) => {
             if (!values.includes(d[facetField])) {
@@ -50,7 +51,7 @@ function plotToFacetedChart(plot: any, svg: Element): FacetedChart {
             }
             return values
         }, [])
-        charts = new Map(strokeValues.map((s: string) => [s, plotToChart(plot, chartSVG, plotMark.data.filter((d: any) => d[facetField] === s))]))
+        charts = new Map(strokeValues.map((s: string) => [s, plotToChart(plot, chartSVG)]))
     }
 
     charts.forEach((c: Chart) => c.legends = JSON.parse(JSON.stringify(legends)))
@@ -74,7 +75,7 @@ function plotToFacetedChart(plot: any, svg: Element): FacetedChart {
  * @param data A filtered data set used in the chart
  * @returns the generated {@link Chart}
  */
-function plotToChart(plot: any, svg: Element, data?: any[]): Chart {
+function plotToChart(plot: any, svg: Element): Chart {
     const axes: Axis[] = ['x-axis', 'y-axis'].reduce((parsedAxes: Axis[], s: string) => {
         const chartSVG = svg.tagName !== 'svg' ? Object.values(svg.children).find((n) => n.tagName === 'svg')! : svg;
         let axisSVG = findHtmlElement(chartSVG, s);
@@ -92,7 +93,7 @@ function plotToChart(plot: any, svg: Element, data?: any[]): Chart {
         axes: axes,
         type: "chart",
         legends: legends,
-        data: data ? data : plotMark.data,
+        data: plotMark.data,
         dataFieldsUsed: fields,
         description: `A chart with ${plotMark.ariaLabel} marks`,
         gridNodes: []
