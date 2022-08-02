@@ -1,5 +1,5 @@
 {
-  "name": "@olli/adapters",
+  "name": "olli-adapters",
   "version": "1.0.0",
   "description": "The adapters to be imported to transform visualizations from concrete libraries into an OlliVisSpec",
   "main": "./dist/adapters.js",

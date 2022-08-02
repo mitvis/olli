@@ -1,4 +1,4 @@
-import { Guide, Chart, OlliVisSpec, Mark, FacetedChart } from "@olli/adapters/src/Types";
+import { Guide, Chart, OlliVisSpec, Mark, FacetedChart } from "olli-adapters/src/Types";
 import { AccessibilityTreeNode, NodeType } from "./Types";
 
 /**

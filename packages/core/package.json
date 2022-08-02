@@ -1,5 +1,5 @@
 {
-  "name": "@olli/core",
+  "name": "olli-core",
   "version": "1.0.0",
   "description": "The core of Olli handling the creation of the Accessibility Tree and rendering the accessible output to the DOM",
   "main": "./dist/olli.js",
