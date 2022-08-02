@@ -36,7 +36,7 @@ export interface FacetedChart extends BaseOlliVisSpec {
     type: "facetedChart",
     // maps faceted value to chart
     charts: Map<any, Chart>,
-    facetedField: string
+    facetedField: string,
 }
 
 export type OlliVisSpec = Chart | FacetedChart;
@@ -58,25 +58,25 @@ export const facetedChart = (fields: Omit<FacetedChart, 'type'>): FacetedChart =
  */
 export type Guide = {
     values: string[] | number[],
-    title: string
-    data: any[]
+    title: string,
+    data: any[],
     field: string | string[],
     markUsed?: Mark,
-    scaleType?: string
+    scaleType?: string,
 }
 
 /**
  * Extending the {@link Guide} interface for visualization axes
  */
 export interface Axis extends Guide {
-    orient: string
+    orient: string,
 }
 
 /**
  * Extending the {@link Guide} interface for visualization legends
  */
 export interface Legend extends Guide {
-    type: string
+    type: string,
 }
 
 /**

@@ -25,21 +25,21 @@ export type BaseAccessibilityTreeNode = {
     children: AccessibilityTreeNode[],
     selected: any[],
     type: NodeType,
-    fieldsUsed: string[]
+    fieldsUsed: string[],
 }
 
 /**
  * Node for visual elements such as marks, or anything that relates to the visual aspects of a chart
  */
 export interface VisualEncodingNode extends BaseAccessibilityTreeNode {
-    chartType: string
+    chartType: string,
 }
 
 /**
  * Node for structured elements such as axes and legends
  */
 export interface StructuralTreeNode extends BaseAccessibilityTreeNode {
-    field: string
+    field: string,
 }
 
 /**
