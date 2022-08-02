@@ -1,4 +1,4 @@
-import { Spec, ScaleDataRef, Scale, ScaleData, Scene } from "vega";
+import { Spec, ScaleDataRef, Scale, ScaleData, Scene, Mark } from "vega";
 import { Guide, OlliVisSpec, VisAdapter, chart, Chart, Axis, Legend, facetedChart, FacetedChart } from "./Types";
 
 let view: any;
@@ -45,7 +45,14 @@ function parseFacets(): FacetedChart {
     const axes = filterUniqueNodes(findScenegraphNodes(view, "axis").map((axisNode: any) => parseAxisInformation(axisNode)));
     const legends = filterUniqueNodes(findScenegraphNodes(view, "legend").map((legendNode: any) => parseLegendInformation(legendNode)));
     const chartItems = view.items.filter((el: any) => el.role === "scope")[0].items;
-    const facetField: string = (spec.marks?.find((m: any, i: number) => m.from && m.from.facet)!.from! as any).facet.groupby[0]
+    let facetField: string
+    const facetMark = (spec.marks?.find((m: any, i: number) => m.from && m.from.facet)!.from! as any).facet.groupby
+    if(Array.isArray(facetMark)) {
+        facetField = facetMark[0]
+    } else {
+        facetField = facetMark
+    }
+
     const charts: Map<any, Chart> = new Map(
         chartItems.map((chartNode: any) => {
             let chart: Chart = parseSingleChart(chartNode);
@@ -56,7 +63,6 @@ function parseFacets(): FacetedChart {
             shallowCopyArray(legends, chart.legends);
             return [key, chart]
         }))
-    console.log(charts)
 
     let multiViewChart = facetedChart({
         charts: charts,
@@ -65,9 +71,6 @@ function parseFacets(): FacetedChart {
         description: baseVisDescription,
         facetedField: facetField
     })
-
-    console.log(multiViewChart)
-    console.log(multiViewChart.charts)
 
     return multiViewChart;
 }
@@ -125,6 +128,17 @@ function parseAxisInformation(axis: any): Axis {
     const title = axisView.items.find((n: any) => n.role === "axis-title");
     const scale = axisView.datum.scale
     let scaleDomain: any = (spec.scales?.find((specScale: Scale) => specScale.name === scale)?.domain as ScaleData)!
+
+    if (!scaleDomain) {
+        spec.marks?.forEach((m: any) => {
+            const markScales: Scale[] = m.scales;
+            if (markScales) {
+                let s = markScales.find((specScale: Scale) => specScale.name === scale)
+                if (s) scaleDomain = s.domain as ScaleData
+            }
+        })
+    }
+
     let fields: string | string[]
     if (scaleDomain.field !== undefined) {
         fields = scaleDomain.field
@@ -133,8 +147,6 @@ function parseAxisInformation(axis: any): Axis {
     }
     const axisStr = axisView.orient === "bottom" || axisView.orient === "top" ? "X-Axis" : "Y-Axis";
     const orient = axisView.orient
-
-    console.log(getData());
 
     return {
         values: ticks,
