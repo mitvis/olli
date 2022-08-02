@@ -8,6 +8,7 @@ import { AccessibilityTreeNode, NodeType } from "./Types";
  */
 export function olliVisSpecToTree(olliVisSpec: OlliVisSpec): AccessibilityTreeNode {
     let node: AccessibilityTreeNode;
+    console.log(olliVisSpec)
     if (olliVisSpec.type === "facetedChart" || olliVisSpec.type === "nestedChart") {
         let facets: FacetedChart = olliVisSpec as FacetedChart
         facets.charts.forEach((chart: Chart, k: string) => {

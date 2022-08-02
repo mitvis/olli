@@ -42,7 +42,7 @@ function plotToFacetedChart(plot: any, svg: Element): FacetedChart {
     if (hasFacets(plot)) {
         charts = new Map(Object.values(chartSVG.children)
             .filter((n) => n.getAttribute('aria-label') === 'facet')
-            .map((n: any) => [n.__data__, plotToChart(plot, chartSVG, plotMark.data.filter((d: any) => d[facetField] === n.__data__))]));
+            .map((n: any) => [n.__data__, plotToChart(plot, chartSVG, plotMark.data.filter((d: any) => d[facetField] === n.__data__))])); // TODO: Check if filter is needed
     } else {
         const strokeValues = plotMark.data.reduce((values: string[], d: any) => {
             if (!values.includes(d[facetField])) {

@@ -1,5 +1,5 @@
 import { Spec, ScaleDataRef, Scale, ScaleData, Scene } from "vega";
-import { Guide, OlliVisSpec, VisAdapter, chart, Chart, Axis, Legend, facetedChart, nestedChart, NestedChart } from "./Types";
+import { Guide, OlliVisSpec, VisAdapter, chart, Chart, Axis, Legend, facetedChart, FacetedChart } from "./Types";
 
 let view: any;
 let spec: Spec;
@@ -15,13 +15,13 @@ export const VegaAdapter: VisAdapter = (visObject: Scene, helperVisInformation: 
     view = visObject;
     spec = helperVisInformation;
     if (view.items.some((el: any) => el.role === "scope")) {
-        return parseMultiViewChart();
+        return parseFacets();
     } else {
         return parseSingleChart(view);
     }
 }
 
-function parseMultiViewChart(): NestedChart {
+function parseFacets(): FacetedChart {
     const filterUniqueNodes = ((nodeArr: any[]) => {
         let uniqueNodes: any[] = []
         nodeArr.forEach((node: any) => {
@@ -32,24 +32,6 @@ function parseMultiViewChart(): NestedChart {
 
         return uniqueNodes
     })
-    const baseVisDescription = vegaVisDescription(spec);
-    const axes = filterUniqueNodes(findScenegraphNodes(view, "axis").map((axisNode: any) => parseAxisInformation(axisNode)));
-    const legends = filterUniqueNodes(findScenegraphNodes(view, "legend").map((legendNode: any) => parseLegendInformation(legendNode)));
-
-    const chartItems = view.items.filter((el: any) => el.role === "scope")[0].items;
-    const charts: Chart[] = chartItems.map((chartNode: any) => {
-        let chart: Chart = parseSingleChart(chartNode)
-        chart.title = findScenegraphNodes(chartNode, "title-text").length > 0 ?
-            findScenegraphNodes(chartNode, "title-text")[0].items[0].text : '';
-        return chart
-    })
-
-    let multiViewChart = nestedChart({
-        charts: charts,
-        data: getData(),
-        dataFieldsUsed: getDataFields(axes, legends),
-        description: baseVisDescription,
-    })
 
     const shallowCopyArray = (objToCopy: any[], arrToPush: any[]): void => {
         objToCopy.forEach((obj: any) => {
@@ -59,10 +41,33 @@ function parseMultiViewChart(): NestedChart {
         })
     }
 
-    multiViewChart.charts.forEach((chart: Chart) => {
-        shallowCopyArray(axes, chart.axes);
-        shallowCopyArray(legends, chart.legends);
+    const baseVisDescription = vegaVisDescription(spec);
+    const axes = filterUniqueNodes(findScenegraphNodes(view, "axis").map((axisNode: any) => parseAxisInformation(axisNode)));
+    const legends = filterUniqueNodes(findScenegraphNodes(view, "legend").map((legendNode: any) => parseLegendInformation(legendNode)));
+    const chartItems = view.items.filter((el: any) => el.role === "scope")[0].items;
+    const facetField: string = (spec.marks?.find((m: any, i: number) => m.from && m.from.facet)!.from! as any).facet.groupby[0]
+    const charts: Map<any, Chart> = new Map(
+        chartItems.map((chartNode: any) => {
+            let chart: Chart = parseSingleChart(chartNode);
+            let key = chartNode.datum[facetField];
+            chart.title = findScenegraphNodes(chartNode, "title-text").length > 0 ?
+                findScenegraphNodes(chartNode, "title-text")[0].items[0].text : '';
+            shallowCopyArray(axes, chart.axes);
+            shallowCopyArray(legends, chart.legends);
+            return [key, chart]
+        }))
+    console.log(charts)
+
+    let multiViewChart = facetedChart({
+        charts: charts,
+        data: getData(),
+        dataFieldsUsed: getDataFields(axes, legends),
+        description: baseVisDescription,
+        facetedField: facetField
     })
+
+    console.log(multiViewChart)
+    console.log(multiViewChart.charts)
 
     return multiViewChart;
 }
@@ -71,7 +76,7 @@ function parseSingleChart(ch: any): Chart {
     const baseVisDescription = vegaVisDescription(spec);
     const axes = findScenegraphNodes(ch, "axis").map((axisNode: any) => parseAxisInformation(axisNode));
     const legends = findScenegraphNodes(ch, "legend").map((legendNode: any) => parseLegendInformation(legendNode))
-    const gridNodes: Guide[] = getGridNodes(axes);
+    const gridNodes: Guide[] = []// getGridNodes(axes);
     const dataFields: string[] = getDataFields(axes, legends);
     const data: any[] = getData();
     const chartTitle: string | undefined = findScenegraphNodes(ch, "title").length > 0 ?
@@ -97,7 +102,7 @@ function getData(): any[] {
         // const datasets = spec.data?.map((set: any) => set.name)!
         // datasets.map((key: string) => data.set(key, view.context.data[key].values.value));
         // return data
-        return view.context.data['source_0'].values.value
+        return [...view.context.data['source_0'].values.value]
         // TODO hardcoded dataset name
     } catch (error) {
         throw new Error(`No data defined in the Vega Spec \n ${error}`)
@@ -128,6 +133,8 @@ function parseAxisInformation(axis: any): Axis {
     }
     const axisStr = axisView.orient === "bottom" || axisView.orient === "top" ? "X-Axis" : "Y-Axis";
     const orient = axisView.orient
+
+    console.log(getData());
 
     return {
         values: ticks,
