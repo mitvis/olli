@@ -75,7 +75,18 @@ function generateChartChildren(childrenNodes: AccessibilityTreeNode[], parent: A
     if (axes.length > 0) {
         const axis: Guide = axes.pop()!;
         const scaleStr: string = axis.scaleType ? `for a ${axis.scaleType} scale ` : "";
-        const axisField: string = Array.isArray(axis.field) ? axis.field[1] : (axis.field as string);
+        let axisField: string = Array.isArray(axis.field) ? axis.field[1] : (axis.field as string);
+        let defaultRange: number | string = axis.data[0][axisField]
+
+        // TODO: Re-used code from line 143. Make utility function and add try/catch since the data should not be undefined!
+        if (defaultRange === undefined) {
+            let updatedField = Object.keys(axis.data[0]).find((k: string) => k.includes(axisField) || axisField.includes(k))
+            if(updatedField) {
+                axisField = updatedField
+                defaultRange = axis.data[0][axisField];
+            } 
+        } 
+
         let minValue: number | string = axis.data.reduce((min: any, val: any) => {
             if (val[axisField] !== null && val[axisField] < min) return val[axisField]
             return min
@@ -120,16 +131,21 @@ function generateChartChildren(childrenNodes: AccessibilityTreeNode[], parent: A
  * @returns an array of {@link AccessibilityTreeNode} to be the given parent's children
  */
 function generateStructuredNodeChildren(parent: AccessibilityTreeNode, field: string, values: string[] | number[], data: any[], markUsed: Mark): AccessibilityTreeNode[] {
-    if (isStringArray(values) || parent.type === "legend") {
+    const lowerCaseDesc: string = parent.description.toLowerCase();
+    if (isStringArray(values) && !field.includes("date") || parent.type === "legend") {
         return values.map((grouping: any) => {
             return informationToNode(`${[[grouping]]}`, parent, data.filter((node: any) => node[field] === grouping), "filteredData", data.filter((node: any) => node[field] === grouping))
         })
     } else {
+        const ticks: number[] = values as number[]
         const filterData = (lowerBound: number, upperBound: number): any[] => {
             return data.filter((val: any) => {
-                if ((parent.description.includes("date") || parent.description.includes("temporal")) && upperBound.toString().length === 4) {
+                if ((lowerCaseDesc.includes("date") || lowerCaseDesc.includes("temporal")) && upperBound.toString().length === 4) {
                     const d = new Date(val[field])
                     return d.getFullYear() >= lowerBound && d.getFullYear() < upperBound;
+                } else if (val[field] === undefined) {
+                    let updatedField = Object.keys(val).find((k: string) => k.includes(field) || field.includes(k))
+                    if (updatedField) return val[updatedField] >= lowerBound && val[updatedField] < upperBound;
                 }
                 return val[field] >= lowerBound && val[field] < upperBound;
             })
@@ -137,13 +153,17 @@ function generateStructuredNodeChildren(parent: AccessibilityTreeNode, field: st
 
         let valueIncrements: any[];
         if (markUsed !== 'bar') {
-            valueIncrements = (values as number[]).reduce(getEncodingValueIncrements, []);
+            valueIncrements = ticks.reduce(getEncodingValueIncrements, []);
         } else {
-            valueIncrements = values.map((val: number) => [val, val]);
+            if (lowerCaseDesc.includes("date") || field.includes("date")) {
+                valueIncrements = ticks.reduce(getEncodingValueIncrements, []);
+            } else {
+                valueIncrements = ticks.map((val: number) => [val, val]);
+            }
         }
         return valueIncrements.map((range: number[]) => {
             let desc = ``
-            if ((parent.description.includes("date") || parent.description.includes("temporal")) && range[0].toString().length > 4) {
+            if ((lowerCaseDesc.includes("date") || field.includes("date") || parent.description.includes("temporal")) && range[0].toString().length > 4) {
                 range.forEach((val: number) => desc += `${new Date(val).toLocaleString("en-US", { year: 'numeric', month: 'short', day: 'numeric' })}, `)
             } else {
                 desc = `${range},`
