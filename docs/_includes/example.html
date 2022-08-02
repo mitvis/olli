@@ -3,18 +3,25 @@
 <link rel="stylesheet" href="{{site.baseurl}}/css/example.css">
 
 <div>
-    {% for adapter in include.content.adapters %}
-    <div class="Select-Adapters">
-        <span class="Select-Adapter-Name" id="{{ adapter.name }}">
+    <!-- <h4>Overview:</h4> -->
+    {% include exampleDescription.html %}
+    <h4>Adapter Selection:</h4>
+    <div class="Container-Adapters">
+        {% for adapter in include.content.adapters %}
+        <p class="Select-Adapter-Name" id="{{ adapter.name }}">
             {{ adapter.name }}
-        </span>
+        </p>
+        {% endfor %}
     </div>
-    {% endfor %}
 
     {% for adapter in include.content.adapters %}
     <div id="Block-Example-{{adapter.name}}" class="Select-Vis-Disabled">
-        <div id="Visualization-{{ adapter.name }}"></div>
-        <div id="AccessibilityTree-{{ adapter.name }}"></div>
+        <div class="Example-Block">
+            <h4>Visualization:</h4>
+            <div id="Visualization-{{ adapter.name }}"></div>
+            <h4>Tree View:</h4>
+            <div id="AccessibilityTree-{{ adapter.name }}" class="Tree"></div>
+        </div>
         {% include {{ adapter.code }} %}
     </div>
     {% endfor %}
@@ -40,5 +47,11 @@
             selectedAdapter.classList.add('Select-Adapter-Name-Selected')
             document.getElementById(`Block-Example-${newAdapter.id}`).classList.remove('Select-Vis-Disabled');
         }
+
+        document.addEventListener('keypress', (keyStroke) => {
+            if (keyStroke.key.toLowerCase() === 't') {
+                document.getElementById(`AccessibilityTree-${selectedAdapter.id}`).firstChild.firstChild.focus()
+            }
+        })
     </script>
 </div>

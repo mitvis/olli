@@ -1,20 +1,16 @@
 <!DOCTYPE html>
 
 <head>
-    <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
-    <script type="text/javascript" src="../Olli/olli.js"></script>
-    <script type="text/javascript" src="../Olli/Adapters/VegaAdapter.js"></script>
+    {% include imports.html %}
 </head>
 
 <body>
-    <code style="white-space: pre-wrap;">
+    <div class="Code-Block">
+        <code class="prettyprint">
     let spec = { ... }
 
-    let vegaSpec = vegaLite.compile(spec).spec
-    const runtime = vega.parse(vegaSpec);
-    const vegaRender = document.getElementById('Visualization-Vega-Lite');
+    const runtime = vega.parse(spec);
+    const vegaRender = document.getElementById('Visualization-Vega');
     let view = new vega.View(runtime)
       .logLevel(vega.Warn)
       .initialize(vegaRender)
@@ -23,15 +19,16 @@
       .run();
   
     olli({ 
-      visualization: VegaLiteAdapter(view, spec),
+      visualization: OlliAdapters.VegaAdapter(view, spec),
       renderType: "tree", 
-      domId: "AccessibilityTree-Vega-Lite"
+      domId: "AccessibilityTree-Vega"
     })
-  </code>
+    </code>
+    </div>
     <script type="module">
         let spec = {
             "$schema": "https://vega.github.io/schema/vega/v5.json",
-            "description": "A small multiples view of barley yields by site and variety.",
+            "description": "A small multiples view of barley yields by site and variety",
             "width": 200,
             "padding": 5,
 
@@ -40,14 +37,12 @@
                 { "name": "cellHeight", "value": 100 },
                 { "name": "height", "update": "6 * (offset + cellHeight)" }
             ],
-
             "data": [
                 {
-                    "name": "barley",
+                    "name": "source_0",
                     "url": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/barley.json"
                 }
             ],
-
             "scales": [
                 {
                     "name": "gscale",
@@ -55,7 +50,7 @@
                     "range": [0, { "signal": "height" }],
                     "round": true,
                     "domain": {
-                        "data": "barley",
+                        "data": "source_0",
                         "field": "site",
                         "sort": {
                             "field": "yield",
@@ -70,13 +65,13 @@
                     "nice": true,
                     "range": "width",
                     "round": true,
-                    "domain": { "data": "barley", "field": "yield" }
+                    "domain": { "data": "source_0", "field": "yield" }
                 },
                 {
                     "name": "cscale",
                     "type": "ordinal",
                     "range": "category",
-                    "domain": { "data": "barley", "field": "year" }
+                    "domain": { "data": "source_0", "field": "year" }
                 }
             ],
 
@@ -107,7 +102,7 @@
 
                     "from": {
                         "facet": {
-                            "data": "barley",
+                            "data": "source_0",
                             "name": "sites",
                             "groupby": "site"
                         }
@@ -130,7 +125,7 @@
                             "padding": 1,
                             "round": true,
                             "domain": {
-                                "data": "barley",
+                                "data": "source_0",
                                 "field": "variety",
                                 "sort": {
                                     "field": "yield",
@@ -208,7 +203,7 @@
             .runAsync()
             .then(v => {
                 olli({
-                    visualization: VegaAdapter(v.scenegraph().root.items[0], spec),
+                    visualization: OlliAdapters.VegaAdapter(v.scenegraph().root.items[0], spec),
                     renderType: "tree",
                     domId: "AccessibilityTree-Vega"
                 })

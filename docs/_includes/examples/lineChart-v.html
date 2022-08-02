@@ -1,20 +1,16 @@
 <!DOCTYPE html>
 
 <head>
-    <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
-    <script type="text/javascript" src="../Olli/olli.js"></script>
-    <script type="text/javascript" src="../Olli/Adapters/VegaAdapter.js"></script>
+    {% include imports.html %}
 </head>
 
 <body>
-    <code style="white-space: pre-wrap;">
+    <div class="Code-Block">
+        <code class="prettyprint">
     let spec = { ... }
 
-    let vegaSpec = vegaLite.compile(spec).spec
-    const runtime = vega.parse(vegaSpec);
-    const vegaRender = document.getElementById('Visualization-Vega-Lite');
+    const runtime = vega.parse(spec);
+    const vegaRender = document.getElementById('Visualization-Vega');
     let view = new vega.View(runtime)
       .logLevel(vega.Warn)
       .initialize(vegaRender)
@@ -23,77 +19,117 @@
       .run();
   
     olli({ 
-      visualization: VegaLiteAdapter(view, spec),
+      visualization: OlliAdapters.VegaAdapter(view, spec),
       renderType: "tree", 
-      domId: "AccessibilityTree-Vega-Lite"
+      domId: "AccessibilityTree-Vega"
     })
-  </code>
+    </code>
+    </div>
     <script type="module">
         let spec = {
             "$schema": "https://vega.github.io/schema/vega/v5.json",
-            "description": "A basic line chart example.",
-            "width": 500,
-            "height": 200,
+            "description": "Google's stock price over time.",
+            "background": "white",
             "padding": 5,
+            "width": 200,
+            "height": 200,
+            "style": "cell",
             "data": [
                 {
-                    "name": "table",
-                    "values": [
-                        { "x": 0, "y": 28, "c": 0 },
-                        { "x": 1, "y": 43, "c": 0 },
-                        { "x": 2, "y": 81, "c": 0 },
-                        { "x": 3, "y": 19, "c": 0 },
-                        { "x": 4, "y": 52, "c": 0 },
-                        { "x": 5, "y": 24, "c": 0 },
-                        { "x": 6, "y": 87, "c": 0 },
-                        { "x": 7, "y": 17, "c": 0 },
-                        { "x": 8, "y": 68, "c": 0 },
-                        { "x": 9, "y": 49, "c": 0 }
-                    ]
+                    "name": "source_0",
+                    "url": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/stocks.csv",
+                    "format": { "type": "csv", "parse": { "date": "date" } },
+                    "transform": [{ "type": "filter", "expr": "datum.symbol==='GOOG'" }]
                 }
             ],
-
+            "marks": [
+                {
+                    "name": "marks",
+                    "type": "line",
+                    "style": ["line"],
+                    "sort": { "field": "datum[\"date\"]" },
+                    "from": { "data": "source_0" },
+                    "encode": {
+                        "update": {
+                            "stroke": { "value": "#4c78a8" },
+                            "description": {
+                                "signal": "\"date: \" + (timeFormat(datum[\"date\"], '%b %d, %Y')) + \"; price: \" + (format(datum[\"price\"], \"\"))"
+                            },
+                            "x": { "scale": "x", "field": "date" },
+                            "y": { "scale": "y", "field": "price" },
+                            "defined": {
+                                "signal": "isValid(datum[\"date\"]) && isFinite(+datum[\"date\"]) && isValid(datum[\"price\"]) && isFinite(+datum[\"price\"])"
+                            }
+                        }
+                    }
+                }
+            ],
             "scales": [
                 {
                     "name": "x",
-                    "type": "point",
-                    "range": "width",
-                    "domain": { "data": "table", "field": "x" }
+                    "type": "time",
+                    "domain": { "data": "source_0", "field": "date" },
+                    "range": [0, { "signal": "width" }]
                 },
                 {
                     "name": "y",
                     "type": "linear",
-                    "range": "height",
+                    "domain": { "data": "source_0", "field": "price" },
+                    "range": [{ "signal": "height" }, 0],
                     "nice": true,
-                    "zero": true,
-                    "domain": { "data": "table", "field": "y" }
+                    "zero": true
+                }
+            ],
+            "axes": [
+                {
+                    "scale": "x",
+                    "orient": "bottom",
+                    "gridScale": "y",
+                    "grid": true,
+                    "tickCount": { "signal": "ceil(width/40)" },
+                    "domain": false,
+                    "labels": false,
+                    "aria": false,
+                    "maxExtent": 0,
+                    "minExtent": 0,
+                    "ticks": false,
+                    "zindex": 0
                 },
                 {
-                    "name": "color",
-                    "type": "ordinal",
-                    "range": "category",
-                    "domain": { "data": "table", "field": "c" }
-                }
-            ],
-
-            "axes": [
-                { "orient": "bottom", "scale": "x" },
-                { "orient": "left", "scale": "y" }
-            ],
-            "marks": [
+                    "scale": "y",
+                    "orient": "left",
+                    "gridScale": "x",
+                    "grid": true,
+                    "tickCount": { "signal": "ceil(height/40)" },
+                    "domain": false,
+                    "labels": false,
+                    "aria": false,
+                    "maxExtent": 0,
+                    "minExtent": 0,
+                    "ticks": false,
+                    "zindex": 0
+                },
                 {
-                    "type": "line",
-                    "from": { "data": "table" },
-                    "encode": {
-                        "enter": {
-                            "x": { "scale": "x", "field": "x" },
-                            "y": { "scale": "y", "field": "y" },
-                            "strokeWidth": { "value": 2 }
-                        }
-                    }
+                    "scale": "x",
+                    "orient": "bottom",
+                    "grid": false,
+                    "title": "date",
+                    "labelFlush": true,
+                    "labelOverlap": true,
+                    "tickCount": { "signal": "ceil(width/40)" },
+                    "zindex": 0
+                },
+                {
+                    "scale": "y",
+                    "orient": "left",
+                    "grid": false,
+                    "title": "price",
+                    "labelOverlap": true,
+                    "tickCount": { "signal": "ceil(height/40)" },
+                    "zindex": 0
                 }
             ]
-        }
+        }    
 
         const runtime = vega.parse(spec);
         const vegaRender = document.getElementById('Visualization-Vega');
@@ -105,7 +141,7 @@
             .runAsync()
             .then(v => {
                 olli({
-                    visualization: VegaAdapter(v.scenegraph().root.items[0], spec),
+                    visualization: OlliAdapters.VegaAdapter(v.scenegraph().root.items[0], spec),
                     renderType: "tree",
                     domId: "AccessibilityTree-Vega"
                 })

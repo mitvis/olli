@@ -1,26 +1,13 @@
 <!DOCTYPE html>
 
 <head>
-    <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
-    <script type="text/javascript" src="../Olli/olli.js"></script>
-    <script type="text/javascript" src="../Olli/Adapters/VegaLiteAdapter.js"></script>
+  {% include imports.html %}
 </head>
 
 <body>
-    <code style="white-space: pre-wrap;">
-    let spec = {
-        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-        "description": "Stock prices of 5 Tech Companies over Time.",
-        "data": {"url": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/stocks.csv"},
-        "mark": "line",
-        "encoding": {
-          "x": {"field": "date", "type": "temporal"},
-          "y": {"field": "price", "type": "quantitative"},
-          "color": {"field": "symbol", "type": "nominal"}
-        }
-      }
+  <div class="Code-Block">
+    <code class="prettyprint">
+    let spec = { ... }
 
     let vegaSpec = vegaLite.compile(spec).spec
     const runtime = vega.parse(vegaSpec);
@@ -33,11 +20,12 @@
       .run();
   
     olli({ 
-      visualization: VegaLiteAdapter(view, spec),
+      visualization: OlliAdapters.VegaLiteAdapter(view, spec),
       renderType: "tree", 
       domId: "AccessibilityTree-Vega-Lite"
     })
   </code>
+  </div>
     <script>
 
         let spec = {
@@ -63,7 +51,7 @@
             .runAsync()
             .then(v => {
                 olli({
-                    visualization: VegaLiteAdapter(v.scenegraph().root.items[0], spec),
+                    visualization: OlliAdapters.VegaLiteAdapter(v.scenegraph().root.items[0], spec),
                     renderType: "tree",
                     domId: "AccessibilityTree-Vega-Lite"
                 })

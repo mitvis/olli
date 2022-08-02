@@ -1,83 +1,57 @@
 <!DOCTYPE html>
 
 <head>
-    <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
-    <script type="text/javascript" src="../Olli/olli.js"></script>
-    <script type="text/javascript" src="../Olli/Adapters/ObservablePlotAdapter.js"></script>
+    {% include imports.html %}
 </head>
 
 <body>
-    <code style="white-space: pre-wrap;">
-        const data = [ ... ] ]
+    <div class="Code-Block">
+    <code class="prettyprint">
+        import * as Plot from "https://cdn.skypack.dev/@observablehq/plot@0.5";
 
-        let spec = {
-            color: {
-                type: "ordinal",
-                scheme: "category10",
-                legend: true
-            },
-            marks: [
-                Plot.dot(data1, { x: "letter", y: "freq", fill: "vowel" }),
-                Plot.ruleY([0])
-            ]
-        }
+        d3.json("https://raw.githubusercontent.com/vega/vega-datasets/next/data/penguins.json").then((data) => {
+            let spec = { ... }
 
-        olli({
-            visualization: ObservablePlotAdapter(spec, Plot.plot(spec)),
-            renderType: "tree",
-            domId: "AccessibilityTree-ObservablePlot"
+            document.getElementById("Visualization-ObservablePlot").append(Plot.plot(spec))
+
+            olli({
+                visualization: OlliAdapters.ObservablePlotAdapter(spec, Plot.plot(spec)),
+                renderType: "tree",
+                domId: "AccessibilityTree-ObservablePlot"
+            })
         })
   </code>
+    </div>
     <script type="module">
         import * as Plot from "https://cdn.skypack.dev/@observablehq/plot@0.5";
 
-        const data = [
-            { letter: 'E', freq: 0.12702, vowel: 'Vowel' },
-            { letter: 'T', freq: 0.09056, vowel: 'Not Vowel' },
-            { letter: 'A', freq: 0.08167, vowel: 'Vowel' },
-            { letter: 'O', freq: 0.07507, vowel: 'Vowel' },
-            { letter: 'I', freq: 0.06966, vowel: 'Vowel' },
-            { letter: 'N', freq: 0.06749, vowel: 'Not Vowel' },
-            { letter: 'S', freq: 0.06327, vowel: 'Not Vowel' },
-            { letter: 'H', freq: 0.06094, vowel: 'Not Vowel' },
-            { letter: 'R', freq: 0.05987, vowel: 'Not Vowel' },
-            { letter: 'D', freq: 0.04253, vowel: 'Not Vowel' },
-            { letter: 'L', freq: 0.04025, vowel: 'Not Vowel' },
-            { letter: 'C', freq: 0.02782, vowel: 'Not Vowel' },
-            { letter: 'U', freq: 0.02758, vowel: 'Vowel' },
-            { letter: 'M', freq: 0.02406, vowel: 'Not Vowel' },
-            { letter: 'W', freq: 0.0236, vowel: 'Not Vowel' },
-            { letter: 'F', freq: 0.02288, vowel: 'Not Vowel' },
-            { letter: 'G', freq: 0.02015, vowel: 'Not Vowel' },
-            { letter: 'Y', freq: 0.01974, vowel: 'Not Vowel' },
-            { letter: 'P', freq: 0.01929, vowel: 'Not Vowel' },
-            { letter: 'B', freq: 0.01492, vowel: 'Not Vowel' },
-            { letter: 'V', freq: 0.00978, vowel: 'Not Vowel' },
-            { letter: 'K', freq: 0.00772, vowel: 'Not Vowel' },
-            { letter: 'J', freq: 0.00153, vowel: 'Not Vowel' },
-            { letter: 'X', freq: 0.0015, vowel: 'Not Vowel' },
-            { letter: 'Q', freq: 0.00095, vowel: 'Not Vowel' },
-            { letter: 'Z', freq: 0.00074, vowel: 'Not Vowel' }
-        ]
+        d3.json("https://raw.githubusercontent.com/vega/vega-datasets/next/data/penguins.json").then((data) => {
+            let spec = {
+                // color: {
+                //   legend: true,
+                // },
+                grid: true,
+                color: {
+                    type: "ordinal",
+                    scheme: "category10",
+                    legend: true
+                },
+                y: {
+                    format: d => d.toLocaleString(undefined, { useGrouping: false })
+                },
+                marks: [
+                    Plot.dot(data, { x: "Flipper Length (mm)", y: "Body Mass (g)", fill: "Species" }),
+                    Plot.ruleY([0])
+                ]
+            }
 
-        let spec = {
-            color: {
-                type: "ordinal",
-                scheme: "category10",
-                legend: true
-            },
-            marks: [
-                Plot.dot(data1, { x: "letter", y: "freq", fill: "vowel" }),
-                Plot.ruleY([0])
-            ]
-        }
+            document.getElementById("Visualization-ObservablePlot").append(Plot.plot(spec))
 
-        olli({
-            visualization: ObservablePlotAdapter(spec, Plot.plot(spec)),
-            renderType: "tree",
-            domId: "AccessibilityTree-ObservablePlot"
+            olli({
+                visualization: OlliAdapters.ObservablePlotAdapter(spec, Plot.plot(spec)),
+                renderType: "tree",
+                domId: "AccessibilityTree-ObservablePlot"
+            })
         })
     </script>
 </body>
