@@ -1,4 +1,4 @@
-import { Guide, Chart, CompositeChart, OlliVisSpec, Mark } from "@olli/adapters/src/Types";
+import { Guide, Chart, OlliVisSpec, Mark, FacetedChart } from "@olli/adapters/src/Types";
 import { AccessibilityTreeNode, NodeType } from "./Types";
 
 /**
@@ -8,13 +8,25 @@ import { AccessibilityTreeNode, NodeType } from "./Types";
  */
 export function olliVisSpecToTree(olliVisSpec: OlliVisSpec): AccessibilityTreeNode {
     let node: AccessibilityTreeNode;
-    if (olliVisSpec.type === "facetedChart" || olliVisSpec.type === "nestedChart") {
+    if (olliVisSpec.type === "facetedChart") {
+        let facets: FacetedChart = olliVisSpec as FacetedChart
+        facets.charts.forEach((chart: Chart, k: string) => {
+            chart.data = chart.data.filter((val: any) => val[facets.facetedField] === k)
+            const updateNestedData = ((g: Guide) => g.data = JSON.parse(JSON.stringify(chart.data)))
+
+            chart.axes.forEach(updateNestedData)
+            chart.legends.forEach(updateNestedData)
+        })
         node = informationToNode(olliVisSpec.description, null, olliVisSpec.data, "multiView", olliVisSpec);
-        node.description += ` With ${node.children.length} nested charts`
+        node.description += ` with ${node.children.length} nested charts`
     } else {
-        const axesString: string = olliVisSpec.axes.length > 0 ? ` ${olliVisSpec.axes.length} axes and` : '';
-        const legendsString: string = olliVisSpec.legends.length > 0 ? ` ${olliVisSpec.legends.length} legends` : ''
-        node = informationToNode(olliVisSpec.description, null, [], "chart", olliVisSpec);
+        const axesString: string = olliVisSpec.axes.length > 0 ?
+            olliVisSpec.axes.length == 2 ?
+                ` ${olliVisSpec.axes.length} axes` :
+                ` ${olliVisSpec.axes[0].orient} axis` :
+            '';
+        const legendsString: string = olliVisSpec.legends.length === 1 ? ` and ${olliVisSpec.legends.length} legend` : ''
+        node = informationToNode(olliVisSpec.description, null, olliVisSpec.data, "chart", olliVisSpec);
         node.description += ` with ${axesString} ${legendsString}`
     }
     return node
@@ -26,23 +38,19 @@ export function olliVisSpecToTree(olliVisSpec: OlliVisSpec): AccessibilityTreeNo
  * @param multiViewChart The {@link FacetedChart} of the abstracted visualization
  * @returns an array of {@link AccessibilityTreeNode} to be the given parent's children
  */
-function generateMultiViewChildren(parent: AccessibilityTreeNode, multiViewChart: CompositeChart): AccessibilityTreeNode[] {
-    if (multiViewChart.type === "facetedChart") {
-        return Object.entries(multiViewChart.charts).map(([facetedValue, singleChart]: [any, Chart], i) => informationToNode(
-            `A facet titled ${facetedValue}, ${i + 1} of ${multiViewChart.charts.size}`,
+function generateMultiViewChildren(parent: AccessibilityTreeNode, multiViewChart: FacetedChart): AccessibilityTreeNode[] {
+    multiViewChart.type === "facetedChart"
+    let charts: AccessibilityTreeNode[] = []
+    multiViewChart.charts.forEach((c: Chart, k: string, m: Map<any, Chart>) => {
+        charts.push(informationToNode(
+            `A facet titled ${k}, ${charts.length + 1} of ${m.size}`,
             parent,
-            [],
+            multiViewChart.data,
             "chart",
-            singleChart));
-    } else {
-        // if (multiViewChart.type === "nestedChart")
-        return multiViewChart.charts.map((singleChart: Chart, i) => informationToNode(
-            `A nested chart ${singleChart.title ? `titled ${singleChart.title}` : ''}, ${i + 1} of ${multiViewChart.charts.length}`,
-            parent,
-            [],
-            "chart",
-            singleChart));
-    }
+            c))
+    })
+
+    return charts;
 }
 
 /**
@@ -58,28 +66,35 @@ function generateChartChildren(childrenNodes: AccessibilityTreeNode[], parent: A
     axes: Guide[], legends: Guide[], grids: Guide[]): AccessibilityTreeNode[] {
     if (axes.length > 0) {
         const axis: Guide = axes.pop()!;
-        const scaleType = axis.scaleType ? `for a ${axis.scaleType} scale ` : "";
-        const axisField: string = Array.isArray(axis.field) ? axis.field[1] : (axis.field as string);
-        let minValue = axis.data.reduce((currentMin: any, currentVal: any) => {
-            if (currentVal[axisField] < currentMin) {
-                return currentVal[axisField]
-            } else {
-                return currentMin
+        const scaleStr: string = axis.scaleType ? `for a ${axis.scaleType} scale ` : "";
+        let axisField: string = Array.isArray(axis.field) ? axis.field[1] : (axis.field as string);
+        let defaultRange: number | string = axis.data[0][axisField]
+
+        // TODO: Re-used code from line 143. Make utility function and add try/catch since the data should not be undefined!
+        if (defaultRange === undefined) {
+            let updatedField = Object.keys(axis.data[0]).find((k: string) => k.includes(axisField) || axisField.includes(k))
+            if (updatedField) {
+                axisField = updatedField
+                defaultRange = axis.data[0][axisField];
             }
+        }
+
+        let minValue: number | string = axis.data.reduce((min: any, val: any) => {
+            if (val[axisField] !== null && val[axisField] < min) return val[axisField]
+            return min
         }, axis.data[0][axisField])
-        let maxValue = axis.data.reduce((currentMax: any, currentVal: any) => {
-            if (currentVal[axisField] > currentMax) {
-                return currentVal[axisField]
-            } else {
-                return currentMax
-            }
+
+        let maxValue: number | string = axis.data.reduce((max: any, val: any) => {
+            if (val[axisField] !== null && val[axisField] > max) return val[axisField]
+            return max
         }, axis.data[0][axisField])
+
         if (axisField.toLowerCase().includes("date")) {
             minValue = new Date(minValue).toLocaleString("en-US", { year: 'numeric', month: 'short', day: 'numeric' });
             maxValue = new Date(maxValue).toLocaleString("en-US", { year: 'numeric', month: 'short', day: 'numeric' });
         }
 
-        const description = `${axis.title} ${scaleType}with values from ${minValue} to ${maxValue}`;
+        const description = `${axis.title} ${scaleStr}with values from ${minValue} to ${maxValue}`;
         childrenNodes.push(informationToNode(description, parent, axis.data, axis.title.includes("Y-Axis") ? "yAxis" : "xAxis", axis));
         return generateChartChildren(childrenNodes, parent, axes, legends, grids);
     } else if (legends.length > 0) {
@@ -108,30 +123,44 @@ function generateChartChildren(childrenNodes: AccessibilityTreeNode[], parent: A
  * @returns an array of {@link AccessibilityTreeNode} to be the given parent's children
  */
 function generateStructuredNodeChildren(parent: AccessibilityTreeNode, field: string, values: string[] | number[], data: any[], markUsed: Mark): AccessibilityTreeNode[] {
-    if (isStringArray(values) || parent.type === "legend") {
+    const lowerCaseDesc: string = parent.description.toLowerCase();
+    if (isStringArray(values) && !field.includes("date") || parent.type === "legend") {
         return values.map((grouping: any) => {
             return informationToNode(`${[[grouping]]}`, parent, data.filter((node: any) => node[field] === grouping), "filteredData", data.filter((node: any) => node[field] === grouping))
         })
     } else {
+        const ticks: number[] = values as number[]
         const filterData = (lowerBound: number, upperBound: number): any[] => {
             return data.filter((val: any) => {
+                if ((lowerCaseDesc.includes("date") || lowerCaseDesc.includes("temporal")) && upperBound.toString().length === 4) {
+                    const d = new Date(val[field])
+                    return d.getFullYear() >= lowerBound && d.getFullYear() < upperBound;
+                } else if (val[field] === undefined) {
+                    let updatedField = Object.keys(val).find((k: string) => k.includes(field) || field.includes(k))
+                    if (updatedField) return val[updatedField] >= lowerBound && val[updatedField] < upperBound;
+                }
                 return val[field] >= lowerBound && val[field] < upperBound;
             })
         }
 
         let valueIncrements: any[];
         if (markUsed !== 'bar') {
-            valueIncrements = (values as number[]).reduce(getEncodingValueIncrements, []);
+            valueIncrements = ticks.reduce(getEncodingValueIncrements, []);
         } else {
-            valueIncrements = values.map((val: number) => [val, val]);
+            if (lowerCaseDesc.includes("date") || field.includes("date")) {
+                valueIncrements = ticks.reduce(getEncodingValueIncrements, []);
+            } else {
+                valueIncrements = ticks.map((val: number) => [val, val]);
+            }
         }
         return valueIncrements.map((range: number[]) => {
             let desc = ``
-            if (parent.description.includes("date") || parent.description.includes("temporal")) {
+            if ((lowerCaseDesc.includes("date") || field.includes("date") || parent.description.includes("temporal")) && range[0].toString().length > 4) {
                 range.forEach((val: number) => desc += `${new Date(val).toLocaleString("en-US", { year: 'numeric', month: 'short', day: 'numeric' })}, `)
             } else {
                 desc = `${range},`
             }
+
             return informationToNode(desc, parent, filterData(range[0], range[1]), "filteredData", filterData(range[0], range[1]));
         });
     }
@@ -215,6 +244,7 @@ function getEncodingValueIncrements(incrementArray: any[][], currentValue: any, 
  */
 function generateFilteredDataChildren(childrenNodes: AccessibilityTreeNode[], filteredSelection: any[], parent: AccessibilityTreeNode): AccessibilityTreeNode[] {
     if (filteredSelection.length > 0) {
+        // const dataPoint: any = filteredSelection.pop();
         const dataPoint: any = filteredSelection.pop();
         let objCopy: any = {};
         Object.keys(dataPoint).forEach((key: string) => {
@@ -241,18 +271,6 @@ function generateChildNodes(type: NodeType, parent: AccessibilityTreeNode, gener
     if (type === "multiView") {
         return generateMultiViewChildren(parent, generationInformation);
     } else if (type === "chart") {
-        if (parent.parent) {
-            generationInformation.axes.forEach((axis: Guide) => {
-                axis.data = axis.data.filter((val: any) => {
-                    return Object.keys(val).some((key: string) => val[key] === generationInformation.facetedValue)
-                })
-            })
-            generationInformation.legends.forEach((legend: Guide) => {
-                legend.data = legend.data.filter((val: any) => {
-                    return Object.keys(val).some((key: string) => val[key] === generationInformation.facetedValue)
-                })
-            })
-        }
         return generateChartChildren([], parent, generationInformation.axes, generationInformation.legends, generationInformation.gridNodes);
     } else if (type === "xAxis" || type === "yAxis" || type === "legend") {
         return generateStructuredNodeChildren(parent, generationInformation.field, generationInformation.values, generationInformation.data, generationInformation.markUsed);

@@ -39,10 +39,11 @@ function plotToFacetedChart(plot: any, svg: Element): FacetedChart {
             plot.facet.y :
             plot.facet.x :
         plot.marks.find((mark: any) => mark.ariaLabel === 'line').channels.find((c: any) => c.name === "stroke").value;
+    fields.push(facetField)
     if (hasFacets(plot)) {
         charts = new Map(Object.values(chartSVG.children)
             .filter((n) => n.getAttribute('aria-label') === 'facet')
-            .map((n: any) => [n.__data__, plotToChart(plot, chartSVG, plotMark.data.filter((d: any) => d[facetField] === n.__data__))]));
+            .map((n: any) => [n.__data__, plotToChart(plot, chartSVG)]));
     } else {
         const strokeValues = plotMark.data.reduce((values: string[], d: any) => {
             if (!values.includes(d[facetField])) {
@@ -50,15 +51,17 @@ function plotToFacetedChart(plot: any, svg: Element): FacetedChart {
             }
             return values
         }, [])
-        charts = new Map(strokeValues.map((s: string) => [s, plotToChart(plot, chartSVG, plotMark.data.filter((d: any) => d[facetField] === s))]))
+        charts = new Map(strokeValues.map((s: string) => [s, plotToChart(plot, chartSVG)]))
     }
+
+    charts.forEach((c: Chart) => c.legends = JSON.parse(JSON.stringify(legends)))
 
     let facetedChart: FacetedChart = {
         type: "facetedChart",
         charts: charts,
         data: plotMark.data,
         dataFieldsUsed: fields,
-        description: `Faceted chart with ${charts.size} nested charts`,
+        description: `Faceted chart`,
         facetedField: facetField,
     };
 
@@ -72,7 +75,7 @@ function plotToFacetedChart(plot: any, svg: Element): FacetedChart {
  * @param data A filtered data set used in the chart
  * @returns the generated {@link Chart}
  */
-function plotToChart(plot: any, svg: Element, data?: any[]): Chart {
+function plotToChart(plot: any, svg: Element): Chart {
     const axes: Axis[] = ['x-axis', 'y-axis'].reduce((parsedAxes: Axis[], s: string) => {
         const chartSVG = svg.tagName !== 'svg' ? Object.values(svg.children).find((n) => n.tagName === 'svg')! : svg;
         let axisSVG = findHtmlElement(chartSVG, s);
@@ -90,15 +93,15 @@ function plotToChart(plot: any, svg: Element, data?: any[]): Chart {
         axes: axes,
         type: "chart",
         legends: legends,
-        data: data ? data : plotMark.data,
+        data: plotMark.data,
         dataFieldsUsed: fields,
-        description: `A chart with ${axes.length === 2 ? `${axes.length} axes`: `${axes[0].orient} axis`} ${legends.length > 0 ? `and ${legends.length} legends` : ''}`,
-        gridNodes: [],
-        markUsed: plotMark.ariaLabel
+        description: `A chart with ${plotMark.ariaLabel} marks`,
+        gridNodes: []
     }
 
     if (identifyMark(plotMark.ariaLabel) !== "[Undefined]") {
         chart.markUsed = identifyMark(plotMark.ariaLabel);
+        modifyVisFromMark(chart, chart.markUsed)
     }
 
     return chart
@@ -133,7 +136,7 @@ function parseAxis(plot: any, svg: Element): Axis {
                 tArr.push(tickValue)
             } else {
                 //@ts-ignore
-                tArr.push(parseFloat(tickValue));
+                tArr.push(parseInt(tickValue.replace(/,/g, '')));
             }
         }
         return tArr
@@ -167,20 +170,23 @@ function parseLegend(plot: any, svg: Element): Legend { //TODO: Does not support
         let c = svg.children[parseInt(k)];
         if (c.nodeName !== 'STYLE') {
             if (isNaN(parseInt(c.textContent!))) {
-                a.push(c.textContent as never);
+                //@ts-ignore -> array "a" is considered to have type "never[]" unsure how to fix, so used ts-ignore
+                a.push(c.textContent);
             } else {
-                a.push(parseInt(c.textContent!) as never);
+                //@ts-ignore
+                a.push(parseInt(c.textContent!.replace(/,/g, '')));
             }
         }
 
         return a
     }, [])
+    const field: string = typeof channel.value === 'object' ? channel.value.label : channel.value
 
     let guide: Legend = {
         values: values,
         data: plotMark.data,
-        field: channel.value,
-        title: channel.value,
+        field: field,
+        title: field,
         type: 'ordinal',
     }
 
@@ -189,6 +195,7 @@ function parseLegend(plot: any, svg: Element): Legend { //TODO: Does not support
     }
 
     if (plot.color.type) guide.type = plot.color.type
+
     return guide
 }
 
@@ -231,14 +238,36 @@ function isMultiSeries(plot: any): boolean {
 }
 
 function identifyMark(m: string): Mark {
-    switch(m) {
+    switch (m) {
         case ('dot'):
             return "point";
         case ('bar'):
-             return "rect";
+            return "rect";
         case ('line'):
-             return "line";
+            return "line";
         default:
             return "[Undefined]"
+    }
+}
+
+/**
+ *
+ * @param vis The {@link Chart} to update
+ * @param mark The {@link Mark} used in the provided {@Link ChartInformation}
+ * @param spec The Vega-Lite specification of the provided visualization
+ */
+function modifyVisFromMark(vis: Chart, mark: Mark): void {
+    switch (mark) {
+        case 'rect':
+            vis.axes = vis.axes.filter((visAxis: Guide) => visAxis.scaleType === "band")
+            break;
+        case 'geoshape':
+            break;
+        case 'point':
+            if (vis.title) {
+                vis.title = `Scatter plot with title ${vis.title} `;
+            }
+            if (vis.axes.every((a: Axis) => typeof a.values[0] === "number")) vis.gridNodes = [...vis.axes];
+            break;
     }
 }

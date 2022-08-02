@@ -36,17 +36,10 @@ export interface FacetedChart extends BaseOlliVisSpec {
     type: "facetedChart",
     // maps faceted value to chart
     charts: Map<any, Chart>,
-    facetedField: string
+    facetedField: string,
 }
 
-export interface NestedChart extends BaseOlliVisSpec {
-    type: "nestedChart",
-    charts: Chart[],
-}
-
-export type CompositeChart = FacetedChart | NestedChart;
-
-export type OlliVisSpec = Chart | CompositeChart;
+export type OlliVisSpec = Chart | FacetedChart;
 
 export const chart = (fields: Omit<Chart, 'type'>): Chart => {
     return { ...fields, type: "chart" }
@@ -54,10 +47,6 @@ export const chart = (fields: Omit<Chart, 'type'>): Chart => {
 
 export const facetedChart = (fields: Omit<FacetedChart, 'type'>): FacetedChart => {
     return { ...fields, type: "facetedChart" }
-}
-
-export const nestedChart = (fields: Omit<NestedChart, 'type'>): NestedChart => {
-    return { ...fields, type: "nestedChart" }
 }
 
 /**
@@ -68,26 +57,26 @@ export const nestedChart = (fields: Omit<NestedChart, 'type'>): NestedChart => {
  *   field: the object field that will be used to compare data values to range values
  */
 export type Guide = {
-    values: string[] | number[]
-    title: string
-    data: any[]
+    values: string[] | number[],
+    title: string,
+    data: any[],
     field: string | string[],
     markUsed?: Mark,
-    scaleType?: string
+    scaleType?: string,
 }
 
 /**
  * Extending the {@link Guide} interface for visualization axes
  */
 export interface Axis extends Guide {
-    orient: string
+    orient: string,
 }
 
 /**
  * Extending the {@link Guide} interface for visualization legends
  */
 export interface Legend extends Guide {
-    type: string
+    type: string,
 }
 
 /**
