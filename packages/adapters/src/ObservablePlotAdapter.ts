@@ -170,9 +170,11 @@ function parseLegend(plot: any, svg: Element): Legend { //TODO: Does not support
         let c = svg.children[parseInt(k)];
         if (c.nodeName !== 'STYLE') {
             if (isNaN(parseInt(c.textContent!))) {
-                a.push(c.textContent as never);
+                //@ts-ignore -> array "a" is considered to have type "never[]" unsure how to fix, so used ts-ignore
+                a.push(c.textContent);
             } else {
-                a.push(parseInt(c.textContent!.replace(/,/g, '')) as never);
+                //@ts-ignore
+                a.push(parseInt(c.textContent!.replace(/,/g, '')));
             }
         }
 
