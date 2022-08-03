@@ -11,9 +11,9 @@ let spec: Spec;
 * @returns the {@link OlliVisSpec}, the non-concrete visualization information that can be later used to
 * generate the Accessibility Tree Encoding
 */
-export const VegaAdapter: VisAdapter = (visObject: Scene, helperVisInformation: Spec): OlliVisSpec => {
-    view = visObject;
-    spec = helperVisInformation;
+export const VegaAdapter: VisAdapter = (view: Scene, spec: Spec): OlliVisSpec => {
+    view = view;
+    spec = spec;
     if (view.items.some((el: any) => el.role === "scope")) {
         return parseFacets();
     } else {

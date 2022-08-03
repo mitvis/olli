@@ -14,15 +14,15 @@ import {
 
 /**
  * Adapter to deconstruct Vega-Lite visualizations into an {@link OlliVisSpec}
- * @param visObject The Vega Scenegraph from the view
- * @param helperVisInformation The Vega-Lite Spec that rendered the visualization
+ * @param vlView The Vega Scenegraph from the view
+ * @param spec The Vega-Lite Spec that rendered the visualization
  * @returns An {@link OlliVisSpec} of the deconstructed Vega-Lite visualization
  */
-export const VegaLiteAdapter: VisAdapter = (visObject: Scene, helperVisInformation: TopLevelSpec): OlliVisSpec => {
-    if (visObject.items.some((node: any) => node.role === 'scope')) {
-        return parseMultiView(visObject, helperVisInformation)
+export const VegaLiteAdapter: VisAdapter = (vlView: Scene, spec: TopLevelSpec): OlliVisSpec => {
+    if (vlView.items.some((node: any) => node.role === 'scope')) {
+        return parseMultiView(vlView, spec)
     } else {
-        return parseChart(visObject, helperVisInformation)
+        return parseChart(vlView, spec)
     }
 }
 
