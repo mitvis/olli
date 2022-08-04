@@ -1,7 +1,7 @@
 [
   {
     "title": "Bar Chart",
-    "img": "/img/barChart.jpg",
+    "img": "/img/barChart.JPG",
     "url": "/gallery/barChart.html",
     "adapters": [
       {
@@ -20,7 +20,7 @@
   },
   {
     "title": "Line Chart",
-    "img": "/img/lineChart.jpg",
+    "img": "/img/lineChart.JPG",
     "url": "/gallery/lineChart.html",
     "adapters": [
       {
@@ -39,7 +39,7 @@
   },
   {
     "title": "Scatterplot",
-    "img": "/img/scatterplot.jpg",
+    "img": "/img/scatterplot.JPG",
     "url": "/gallery/scatterplot.html",
     "adapters": [
       {
@@ -58,7 +58,7 @@
   },
   {
     "title": "Multi-Series Line Chart",
-    "img": "/img/multiSeriesLineChart.jpg",
+    "img": "/img/multiSeriesLineChart.JPG",
     "url": "/gallery/multiSeriesLine.html",
     "adapters": [
       {
@@ -77,7 +77,7 @@
   },
   {
     "title": "Stacked Bar Chart",
-    "img": "/img/stackedBarChart.jpg",
+    "img": "/img/stackedBarChart.JPG",
     "url": "/gallery/stackedBar.html",
     "adapters": [
       {
@@ -96,7 +96,7 @@
   },
   {
     "title": "Faceted Chart",
-    "img": "/img/facetedChart.jpg",
+    "img": "/img/facetedChart.JPG",
     "url": "/gallery/facet.html",
     "adapters": [
       {
