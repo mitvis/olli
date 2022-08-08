@@ -1,6 +1,6 @@
 {
   "name": "olli-core",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "The core of Olli handling the creation of the Accessibility Tree and rendering the accessible output to the DOM",
   "main": "./dist/olli.js",
   "types": "./dist/index.d.ts",
