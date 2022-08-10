@@ -1,4 +1,4 @@
-import { Spec, ScaleDataRef, Scale, ScaleData, Scene, Mark } from "vega";
+import { Spec, ScaleDataRef, Scale, ScaleData } from "vega";
 import { Guide, OlliVisSpec, VisAdapter, chart, Chart, Axis, Legend, facetedChart, FacetedChart } from "./Types";
 
 let view: any;
@@ -11,8 +11,8 @@ let spec: Spec;
 * @returns the {@link OlliVisSpec}, the non-concrete visualization information that can be later used to
 * generate the Accessibility Tree Encoding
 */
-export const VegaAdapter: VisAdapter = (view: Scene, spec: Spec): OlliVisSpec => {
-    view = view;
+export const VegaAdapter: VisAdapter = (view: any, spec: Spec): OlliVisSpec => {
+    view = view.scenegraph().root.items[0];
     spec = spec;
     if (view.items.some((el: any) => el.role === "scope")) {
         return parseFacets();
