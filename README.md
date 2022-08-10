@@ -65,7 +65,7 @@ to different visualization libaries break down a chart where an accessible rende
 
 ## How It Works
 
-1. Using an adapter design pattern, visualizations are deconstructed into a `VisualizationStructure` type
+1. Using an adapter design pattern, visualizations are deconstructed into a `OlliVisSpec` type
    detailing a chart's structural, hierarchical, and visual components.
 2. The deconstructed chart is then transformed into a tree following the design dimensions outlined in
    [this paper from EuroVis2022](http://vis.csail.mit.edu/pubs/rich-screen-reader-vis-experiences/)
@@ -90,7 +90,8 @@ The most basic way to use Olli is to add it to any basic HTML page.
       ...
       <head>
          ...
-         <script src="..." />
+         <script src="https://cdn.jsdelivr.net/npm/olli-core@1.0.2/" />
+         <script src="https://cdn.jsdelivr.net/npm/olli-adapters@1.0.2/" />
          ...
       </head>
       ...
@@ -104,7 +105,7 @@ The most basic way to use Olli is to add it to any basic HTML page.
     <script>
       ...
       olli({
-        visualization: vegaLiteAdapter(visSpec, additionalInfo),
+        visualization: olliAdapters.VegaLiteAdapter(visSpec, additionalInfo),
         renderType: 'tree'
         domId: 'Accessible-Vis'
       })
@@ -122,13 +123,13 @@ Olli can also be easily added to normal JavaScript applications.
 1. Install the preset:
 
     ```sh
-    npm install olli
+    npm install olli-core olli-adapters
     ```
 
 2. Import `olli`, and the adapter you want to use, into the file you want to use it in
 
     ```js
-    import {olli, vegaLiteAdater} from 'olli'
+    import {olli-core, olli-adapters} from 'olli'
     
     ...
     ```
@@ -139,7 +140,7 @@ Olli can also be easily added to normal JavaScript applications.
     ...
 
       olli({
-        visualization: vegaLiteAdapter(visSpec, additionalInfo),
+        visualization: OlliAdapters.VegaLiteAdapter(visSpec, additionalInfo),
         renderType: 'tree'
         domId: 'Accessible-Vis'
       })
@@ -235,7 +236,7 @@ The adapter interface is as follows:
 
 ```js
 
-export type VisAdapter = (visObject: any, helperVisInformation: any) => VisualizationStructure
+export type VisAdapter = (visObject: any, helperVisInformation: any) => OlliVisSpec
 
 ```
 

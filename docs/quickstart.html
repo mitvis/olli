@@ -15,10 +15,9 @@ title: "Quickstart"
 
           &lt;head&gt;
             ....
-
-            &lt;script src="https://.../olli.js" /&gt;
-            &lt;script src="https://.../olli/OlliAdapters.js" /&gt;
-
+            &lt;script src="https://cdn.jsdelivr.net/npm/olli-core@1.0.2/" /&gt;
+            &lt;script src="https://cdn.jsdelivr.net/npm/olli-adapters@1.0.2/" /&gt;
+            ....
           &lt;/head&gt;
 
         &lt;/html&gt;
@@ -46,14 +45,14 @@ title: "Quickstart"
       <p>1. Install the preset:</p>
       <div class="Code-Block">
         <code class="prettyprint">
-          npm install olli
+          npm install olli-core olli-adapters
         </code>
       </div>
       <p>2. Import `olli`, and the adapter you want to use, into the file you want to use it in:</p>
       <div class="Code-Block">
         <code class="prettyprint">
-          import { olli } from 'olli';
-          import { VegaLiteAdater } from 'olli/OlliAdapters'
+          import { olli } from 'olli-core';
+          import { OlliAdapters } from 'olli-adapters'
         </code>
       </div>
       <p>3. Call `olli` and set-up your configuration object:</p>
@@ -61,7 +60,7 @@ title: "Quickstart"
         <code class="prettyprint">
           ...
           olli({
-            visualization: VegaLiteAdapter(visSpec, additionalInfo),
+            visualization: OlliAdapters.VegaLiteAdapter(visSpec, additionalInfo),
             renderType: 'tree'
             domId: 'Accessible-Vis'
           })
@@ -77,14 +76,14 @@ title: "Quickstart"
     <p>1. Install preset:</p>
     <div class="Code-Block">
       <code class="prettyprint">
-        npm install olli
+        npm install olli-core olli-adapters
       </code>
     </div>
     <p>2. Import `olli`, and the adapter you want to use, into the component you want to use it in</p>
     <div class="Code-Block">
       <code class="prettyprint">
-        import { olli } from 'olli';
-        import { VegaLiteAdater } from 'olli/OlliAdapters'
+        import { olli } from 'olli-core';
+        import { OlliAdapters } from 'olli-adapters'
       </code>
     </div>
     <p>3. Call `olli` and set-up your configuration object inside the `useEffect(() => {})` hook:</p>
@@ -93,7 +92,7 @@ title: "Quickstart"
         ...
           useEffect(() => {
             olli({
-              visualization: VegaLiteAdapter(visSpec, additionalInfo),
+              visualization: OlliAdapters.VegaLiteAdapter(visSpec, additionalInfo),
               renderType: 'tree'
               domId: 'Accessible-Vis'
             })

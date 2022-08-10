@@ -6,7 +6,7 @@ import { olliVisSpecToTree } from "./Structure"
 import { AccessibilityTreeNode } from "./Structure/Types"
 
 /**
- * The configuration object outlining how an accessible visualization should be rendered based on a {@link VisualizationStructure}.
+ * The configuration object outlining how an accessible visualization should be rendered based on a {@link OlliVisSpec}.
  */
 type OlliConfigOptions = {
     visualization: OlliVisSpec,
