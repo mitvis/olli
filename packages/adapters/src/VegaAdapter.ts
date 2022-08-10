@@ -1,4 +1,4 @@
-import { Spec, ScaleDataRef, Scale, ScaleData } from "vega";
+import { Spec, ScaleDataRef, Scale, ScaleData, Scene } from "vega";
 import { Guide, OlliVisSpec, VisAdapter, chart, Chart, Axis, Legend, facetedChart, FacetedChart } from "./Types";
 
 let view: any;
@@ -12,9 +12,9 @@ let spec: Spec;
 * generate the Accessibility Tree Encoding
 */
 export const VegaAdapter: VisAdapter = (view: any, spec: Spec): OlliVisSpec => {
-    view = view.scenegraph().root.items[0];
-    spec = spec;
-    if (view.items.some((el: any) => el.role === "scope")) {
+    const scene: Scene = (view.scenegraph() as any).root.items[0];
+        spec = spec;
+    if (scene.items.some((el: any) => el.role === "scope")) {
         return parseFacets();
     } else {
         return parseSingleChart(view);

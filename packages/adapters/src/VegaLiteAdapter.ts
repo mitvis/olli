@@ -1,3 +1,4 @@
+import { Scene, View } from "vega";
 import { TopLevelSpec } from "vega-lite";
 import {
     VisAdapter,
@@ -17,9 +18,10 @@ import {
  * @param spec The Vega-Lite Spec that rendered the visualization
  * @returns An {@link OlliVisSpec} of the deconstructed Vega-Lite visualization
  */
-export const VegaLiteAdapter: VisAdapter = (vlView: any, spec: TopLevelSpec): OlliVisSpec => {
-    let view: any = vlView.scenegraph().root.items[0];
-    if (vlView.items.some((node: any) => node.role === 'scope')) {
+export const VegaLiteAdapter: VisAdapter = (vlView: View, spec: TopLevelSpec): OlliVisSpec => {
+    const scene: Scene = (vlView.scenegraph() as any).root.items[0];
+
+    if (scene.items.some((node: any) => node.role === 'scope')) {
         return parseMultiView(vlView, spec)
     } else {
         return parseChart(vlView, spec)

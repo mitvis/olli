@@ -82,4 +82,4 @@ export interface Legend extends Guide {
 /**
  * Interface describing how a visualization adapter should be created
  */
-export type VisAdapter = (visObject: any, helperVisInformation: any) => OlliVisSpec;
+export type VisAdapter = (arg1: any, arg2: any) => OlliVisSpec;
