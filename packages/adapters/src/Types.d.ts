@@ -1,54 +1,41 @@
 /**
  * Detailing the different marks that can exist in a chart
  */
-export type Mark = "point" | "bar" | "rect" | "line" | "geoshape" | "circle" | "area" | "[Undefined]";
-
+export declare type Mark = "point" | "bar" | "rect" | "line" | "geoshape" | "circle" | "area" | "[Undefined]";
 /**
  * A simple union type that when implemented a concrete adapter class can be used with any visualization library to
  * later be used to create an explorable Accessibility Tree.
  */
- type BaseOlliVisSpec = {
-    type: string,
-    description: string,
-    data: any[],
-    dataFieldsUsed: string[],
- }
-
-
+declare type BaseOlliVisSpec = {
+    type: string;
+    description: string;
+    data: any[];
+    dataFieldsUsed: string[];
+};
 /**
  * Outlines the grammar of graphics information that has to be parsed from a visualization.
  */
- export interface Chart extends BaseOlliVisSpec {
-    type: "chart",
-    axes: Axis[] ,
-    legends: Legend[],
-    description: string,
-    gridNodes: Guide[],
-    dataFieldsUsed: string[],
-    markUsed?: Mark,
-    title? : string
+export interface Chart extends BaseOlliVisSpec {
+    type: "chart";
+    axes: Axis[];
+    legends: Legend[];
+    description: string;
+    gridNodes: Guide[];
+    dataFieldsUsed: string[];
+    markUsed?: Mark;
+    title?: string;
 }
-
 /**
  * plots that may have multiple charts contained within a single specification
  */
 export interface FacetedChart extends BaseOlliVisSpec {
-    type: "facetedChart",
-    // maps faceted value to chart
-    charts: Map<any, Chart>,
-    facetedField: string,
+    type: "facetedChart";
+    charts: Map<any, Chart>;
+    facetedField: string;
 }
-
-export type OlliVisSpec = Chart | FacetedChart;
-
-export const chart = (fields: Omit<Chart, 'type'>): Chart => {
-    return { ...fields, type: "chart" }
-}
-
-export const facetedChart = (fields: Omit<FacetedChart, 'type'>): FacetedChart => {
-    return { ...fields, type: "facetedChart" }
-}
-
+export declare type OlliVisSpec = Chart | FacetedChart;
+export declare const chart: (fields: Omit<Chart, 'type'>) => Chart;
+export declare const facetedChart: (fields: Omit<FacetedChart, 'type'>) => FacetedChart;
 /**
  * The {@link Guide} is an the information needed for generating various nodes on the Accessibility Tree where
  *   values: is the array of values on the data source (ex: tick values for an Axis)
@@ -56,35 +43,33 @@ export const facetedChart = (fields: Omit<FacetedChart, 'type'>): FacetedChart =
  *   data: an array of data from the visualization to eventually be filtered using the range
  *   field: the object field that will be used to compare data values to range values
  */
-export type Guide = {
-    values: string[] | number[],
-    title: string,
-    data: any[],
-    field: string | string[],
-    markUsed?: Mark,
-    scaleType?: string,
-}
-
+export declare type Guide = {
+    values: string[] | number[];
+    title: string;
+    data: any[];
+    field: string | string[];
+    markUsed?: Mark;
+    scaleType?: string;
+};
 /**
  * Extending the {@link Guide} interface for visualization axes
  */
 export interface Axis extends Guide {
-    orient: string,
+    orient: string;
 }
-
 /**
  * Extending the {@link Guide} interface for visualization legends
  */
 export interface Legend extends Guide {
-    type: string,
+    type: string;
 }
-
 /**
  * Interface describing how a visualization adapter should be created
  */
-export type VisAdapter<T> = (arg1: T) => Promise<OlliVisSpec>;
-
+export declare type VisAdapter<T> = (arg1: T) => Promise<OlliVisSpec>;
 /**
  * Observable-Plot does not have any exported types
  */
-export type ObservablePlotSpec = any;
+export declare type ObservablePlotSpec = any;
+export {};
+//# sourceMappingURL=Types.d.ts.map

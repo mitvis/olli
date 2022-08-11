@@ -19,13 +19,9 @@ import { getVegaScene } from "./utils";
  * @param spec The Vega-Lite Spec that rendered the visualization
  * @returns An {@link OlliVisSpec} of the deconstructed Vega-Lite visualization
  */
-export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = (spec: TopLevelSpec): OlliVisSpec => {
+export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSpec): Promise<OlliVisSpec> => {
 
-    getVegaScene(spec).then((scene: Scene) => {
-        console.log(scene)
-    })
-
-    const scene: any = getVegaScene(spec);
+    const scene: Scene = await getVegaScene(spec);
     if (scene.items.some((node: any) => node.role === 'scope')) {
         return parseMultiView(scene, spec)
     } else {

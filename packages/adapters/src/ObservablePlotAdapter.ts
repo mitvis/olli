@@ -8,8 +8,8 @@ const Plot = require("@observablehq/plot")
  * @param svg the rendered SVGElement of the visualization 
  * @returns the generated {@link OlliVisSpec}
  */
-export const ObservablePlotAdapter: VisAdapter<ObservablePlotSpec> = (plotObject: ObservablePlotSpec): OlliVisSpec => {
-    const plotSVG = Plot.plot(plotObject)
+export const ObservablePlotAdapter: VisAdapter<ObservablePlotSpec> = async (plotObject: ObservablePlotSpec): Promise<OlliVisSpec> => {
+    const plotSVG = await Plot.plot(plotObject)
     if (hasFacets(plotObject) || isMultiSeries(plotObject)) {
         return plotToFacetedChart(plotObject, plotSVG);
     } else {
