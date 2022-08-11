@@ -82,4 +82,9 @@ export interface Legend extends Guide {
 /**
  * Interface describing how a visualization adapter should be created
  */
-export type VisAdapter = (arg1: any, arg2: any) => OlliVisSpec;
+export type VisAdapter<T> = (arg1: T) => OlliVisSpec;
+
+/**
+ * Observable-Plot does not have any exported types
+ */
+export type ObservablePlotSpec = any;
