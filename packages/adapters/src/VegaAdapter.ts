@@ -1,7 +1,8 @@
 import { Spec, ScaleDataRef, Scale, ScaleData, Scene } from "vega";
 import { Guide, OlliVisSpec, VisAdapter, chart, Chart, Axis, Legend, facetedChart, FacetedChart } from "./Types";
+import { getVegaScene } from "./utils";
 
-let view: any;
+let scene: any;
 let spec: Spec;
 
 /**
@@ -11,13 +12,14 @@ let spec: Spec;
 * @returns the {@link OlliVisSpec}, the non-concrete visualization information that can be later used to
 * generate the Accessibility Tree Encoding
 */
-export const VegaAdapter: VisAdapter = (view: any, spec: Spec): OlliVisSpec => {
-    const scene: Scene = (view.scenegraph() as any).root.items[0];
-        spec = spec;
+export const VegaAdapter: VisAdapter<Spec> = (spec: Spec): OlliVisSpec => {
+    // const vegaScene: Scene = (view.scenegraph() as any).root.items[0];
+    scene = getVegaScene(spec);
+    spec = spec;
     if (scene.items.some((el: any) => el.role === "scope")) {
         return parseFacets();
     } else {
-        return parseSingleChart(view);
+        return parseSingleChart(scene);
     }
 }
 
@@ -42,13 +44,13 @@ function parseFacets(): FacetedChart {
     }
 
     const baseVisDescription = vegaVisDescription(spec);
-    const axes = filterUniqueNodes(findScenegraphNodes(view, "axis").map((axisNode: any) => parseAxisInformation(axisNode)));
-    const legends = filterUniqueNodes(findScenegraphNodes(view, "legend").map((legendNode: any) => parseLegendInformation(legendNode)));
-    const chartItems = view.items.filter((el: any) => el.role === "scope")[0].items;
+    const axes = filterUniqueNodes(findScenegraphNodes(scene, "axis").map((axisNode: any) => parseAxisInformation(axisNode)));
+    const legends = filterUniqueNodes(findScenegraphNodes(scene, "legend").map((legendNode: any) => parseLegendInformation(legendNode)));
+    const chartItems = scene.items.filter((el: any) => el.role === "scope")[0].items;
     const fields: string[] = getDataFields(axes, legends);
     let facetField: string
     const facetMark = (spec.marks?.find((m: any, i: number) => m.from && m.from.facet)!.from! as any).facet.groupby
-    if(Array.isArray(facetMark)) {
+    if (Array.isArray(facetMark)) {
         facetField = facetMark[0]
     } else {
         facetField = facetMark
@@ -107,7 +109,7 @@ function getData(): any[] {
         // const datasets = spec.data?.map((set: any) => set.name)!
         // datasets.map((key: string) => data.set(key, view.context.data[key].values.value));
         // return data
-        return [...view.context.data['source_0'].values.value]
+        return [...scene.context.data['source_0'].values.value]
         // TODO hardcoded dataset name
     } catch (error) {
         throw new Error(`No data defined in the Vega Spec \n ${error}`)
@@ -200,17 +202,6 @@ function getScaleData(data: Map<string, any[]>, scale: string): any[] {
     const dataRef = (scaleDomain as ScaleDataRef).data
 
     return data.get(dataRef)!;
-}
-
-/**
- * Determines if the chart has the eligible qualities to have a navigable grid node
- * @returns the {@link Guide} nodes of that are used for the grid
- */
-function getGridNodes(axes: Guide[]): Guide[] {
-    const gridAxes = view.items.filter((el: any) => el.role === "axis" && el.items[0].items.some((it: any) => it.role === "axis-grid"))
-    return gridAxes.map((axis: any) => {
-        return axes[axis.items[0].orient]
-    })
 }
 
 /**

@@ -11,6 +11,7 @@ import {
     facetedChart,
     chart
 } from "./Types";
+import { getVegaScene } from "./utils";
 
 /**
  * Adapter to deconstruct Vega-Lite visualizations into an {@link OlliVisSpec}
@@ -18,13 +19,17 @@ import {
  * @param spec The Vega-Lite Spec that rendered the visualization
  * @returns An {@link OlliVisSpec} of the deconstructed Vega-Lite visualization
  */
-export const VegaLiteAdapter: VisAdapter = (vlView: View, spec: TopLevelSpec): OlliVisSpec => {
-    const scene: Scene = (vlView.scenegraph() as any).root.items[0];
+export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = (spec: TopLevelSpec): OlliVisSpec => {
 
+    getVegaScene(spec).then((scene: Scene) => {
+        console.log(scene)
+    })
+
+    const scene: any = getVegaScene(spec);
     if (scene.items.some((node: any) => node.role === 'scope')) {
-        return parseMultiView(vlView, spec)
+        return parseMultiView(scene, spec)
     } else {
-        return parseChart(vlView, spec)
+        return parseChart(scene, spec)
     }
 }
 
