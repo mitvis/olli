@@ -1,4 +1,6 @@
-import { VisAdapter, OlliVisSpec, FacetedChart, Chart, Axis, Legend, Guide, Mark } from "./Types";
+import { VisAdapter, OlliVisSpec, FacetedChart, Chart, Axis, Legend, Guide, Mark, ObservablePlotSpec } from "./Types";
+// Observable-Plot has no type declaration file :/
+const Plot = require("@observablehq/plot")
 
 /**
  * * Adapter to deconstruct ObservablePlot visualizations into an {@link OlliVisSpec}
@@ -6,11 +8,12 @@ import { VisAdapter, OlliVisSpec, FacetedChart, Chart, Axis, Legend, Guide, Mark
  * @param svg the rendered SVGElement of the visualization 
  * @returns the generated {@link OlliVisSpec}
  */
-export const ObservablePlotAdapter: VisAdapter = (plot: any, svg: Element): OlliVisSpec => {
-    if (hasFacets(plot) || isMultiSeries(plot)) {
-        return plotToFacetedChart(plot, svg);
+export const ObservablePlotAdapter: VisAdapter<ObservablePlotSpec> = (plotObject: ObservablePlotSpec): OlliVisSpec => {
+    const plotSVG = Plot.plot(plotObject)
+    if (hasFacets(plotObject) || isMultiSeries(plotObject)) {
+        return plotToFacetedChart(plotObject, plotSVG);
     } else {
-        return plotToChart(plot, svg);
+        return plotToChart(plotObject, plotSVG);
     }
 }
 
