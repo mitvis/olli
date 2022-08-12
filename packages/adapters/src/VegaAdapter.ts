@@ -7,13 +7,11 @@ let spec: Spec;
 
 /**
 * Adapter function that breaks down a Vega visualization into it's basic visual grammar
-* @param view The Vega Scenegraph object used in the visualization
 * @param spec The Vega Specification used to generate the visualization
 * @returns the {@link OlliVisSpec}, the non-concrete visualization information that can be later used to
 * generate the Accessibility Tree Encoding
 */
 export const VegaAdapter: VisAdapter<Spec> = async (spec: Spec): Promise<OlliVisSpec> => {
-    // const vegaScene: Scene = (view.scenegraph() as any).root.items[0];
     scene = await getVegaScene(spec);
     spec = spec;
     if (scene.items.some((el: any) => el.role === "scope")) {

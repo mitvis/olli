@@ -5,7 +5,6 @@ const Plot = require("@observablehq/plot")
 /**
  * * Adapter to deconstruct ObservablePlot visualizations into an {@link OlliVisSpec}
  * @param plot The ObservablePlot spec to render the visualization
- * @param svg the rendered SVGElement of the visualization 
  * @returns the generated {@link OlliVisSpec}
  */
 export const ObservablePlotAdapter: VisAdapter<ObservablePlotSpec> = async (plotObject: ObservablePlotSpec): Promise<OlliVisSpec> => {
