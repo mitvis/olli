@@ -62,14 +62,14 @@ title: "Quickstart"
           npm install olli-core olli-adapters
         </code>
       </div>
-      <p>2. Import `olli`, and the adapter you want to use, into the file you want to use it in:</p>
+      <p>2. Import <code>olli-core</code> and the adapter you want into the file you'll Olli in:</p>
       <div class="Code-Block">
         <code class="prettyprint">
           import { olli } from 'olli-core'
           import { VegaLiteAdapter } from 'olli-adapters' // Or import VegaAdapter or ObservableAdapter
         </code>
       </div>
-      <p>3. Call `olli` and set-up your configuration object:</p>
+      <p>3. Call <code>olli</code> and set-up your configuration object:</p>
       <div class="Code-Block">
         <code class="prettyprint">
 
@@ -96,14 +96,15 @@ title: "Quickstart"
         npm install olli-core olli-adapters
       </code>
     </div>
-    <p>2. Import `olli`, and the adapter you want to use, into the component you want to use it in</p>
+    <p>2. Import<code>olli-core</code> and adapter you want to use into the component you want to use it in</p>
     <div class="Code-Block">
       <code class="prettyprint">
         import { olli } from 'olli-core'
         import { VegaLiteAdapter} from 'olli-adapters' // Or import VegaAdapter or ObservableAdapter
       </code>
     </div>
-    <p>3. Call `olli` and set-up your configuration object inside the `useEffect(() => {})` hook:</p>
+    <p>3. Call <code>>olli</code> and set-up your configuration object inside the <code>useEffect(() => {})</code> hook:
+    </p>
     <div class="Code-Block">
       <code class="prettyprint">
 
@@ -115,5 +116,83 @@ title: "Quickstart"
         
       </code>
     </div>
+  </div>
+  <div>
+    <h2 id="writingAdapters">Writing Your Own Adapter:</h2>
+    <p>
+      It's likely that Olli may not support your visualization just yet. Luckily following a simply interface you can
+      write your own and help make more visualizations accessible across the web. Below you'll find the interface for an
+      adapter:
+    </p>
+    <div class="Code-Block">
+      <code class="prettyprint">
+        type VisAdapter<T> = (spec: T) => Promise&lt;OlliVisSpec&gt;
+      </code>
+    </div>
+    <p>
+      The parameter <code>spec: T</code> is the specification used to render your visualization. For Vega and Vega-Lite
+      this is the visualization grammar JSON object, and for Observable Plot it's the Object passed into the
+      <code>Plot.plot(...)</code> function.
+    </p>
+    <p>
+      The reason the adapters return <code>Promise&lt;OlliVisSpec&gt;</code> is in case you need make an asynchronous
+      call such as retreiving a dataset from a URL.
+    </p>
+    <h3>The <code>OlliVisSpec</code> Type</h3>
+    <p>
+      The <code>OlliVisSpec</code> is an object that contains many of the Grammar of Graphics elements of a
+      visualization such as <code>Guides</code> like Axes and Legends, the data used in the chart, a high-level title or
+      description, and other information about the visualization. There's a seperate interface for charts that contain
+      facets too. Below you can see each interface:
+    </p>
+    <p>
+      For a full breakdown on the additional types such as <code>Guides</code> you can look at the
+      <code><a href="https://github.com/mitvis/olli/blob/main/packages/adapters/src/Types.ts" target="_blank">Types.ts</a></code>.
+    </p>
+    <div class="Code-Block">
+      <code class="prettyprint">
+        /**
+        * A simple union type that when implemented a concrete adapter class can be used 
+        * with any visualization library to later be used to create
+        * an explorable Accessibility Tree.
+        */
+        type BaseOlliVisSpec = {
+            type: string,
+            description: string,
+            data: any[],
+            dataFieldsUsed: string[],
+        }
+
+        /**
+        * Outlines the grammar of graphics information that has to be parsed from a visualization.
+        */
+        export interface Chart extends BaseOlliVisSpec {
+            type: "chart",
+            axes: Axis[] ,
+            legends: Legend[],
+            description: string,
+            gridNodes: Guide[],
+            dataFieldsUsed: string[],
+            markUsed?: Mark,
+            title? : string
+        }
+
+        /**
+        * plots that may have multiple charts contained within a single specification
+        */
+        export interface FacetedChart extends BaseOlliVisSpec {
+            type: "facetedChart",
+            // maps faceted value to chart
+            charts: Map<any, Chart>,
+            facetedField: string,
+        }
+      </code>
+    </div>
+    <p>
+      When writing your own adapter to transform your visualization into an <code>OlliVisSpec</code> it can be helpful
+      to have functions that parse the chart for individual axes, legends, and non-faceted charts. For an example you
+      can look at the <a href="https://github.com/mitvis/olli/blob/main/packages/adapters/src/VegaLiteAdapter.ts"
+        target="_blank">Vega-Lite adapter</a>.
+    </p>
   </div>
 </div>
