@@ -7,18 +7,29 @@ title: "Quickstart"
   <div>
     <h3>HTML <code>&lt;script&gt;</code> Tags</h3>
     <p>The most basic way to use Olli is to add it to any basic HTML page.</p>
+    <p><a href="" target="_blank">Fully functional HTML example with CodePen</a></p>
     <p>1. Add the script tag inside the document <code>&lt;head&gt;</code>:</p>
     <div class="Code-Block">
       <code class="prettyprint">
         &lt;html&gt;
-          ....
+          
 
           &lt;head&gt;
-            ....
+            &lt;!-- Imports for Vega or Vega-Lite --&gt;
+            &lt;script src="https://cdn.jsdelivr.net/npm/vega@5"&gt;&lt;/script&gt;
+            &lt;script src="https://cdn.jsdelivr.net/npm/vega-lite@5"&gt;&lt;/script&gt;
+            &lt;script src="https://cdn.jsdelivr.net/npm/vega-embed@6"&gt;&lt;/script&gt;
+
+            &lt;!-- Imports for Olli --&gt;
             &lt;script src="https://cdn.jsdelivr.net/npm/olli-core@1.0.2/" /&gt;
             &lt;script src="https://cdn.jsdelivr.net/npm/olli-adapters@1.0.2/" /&gt;
-            ....
+            
           &lt;/head&gt;
+
+          &lt;body&gt;
+          &lt;div id="visualization"&gt;&lt;/div&gt; &lt;!-- The div where your visualization is rendered --&gt;
+          &lt;div id="accessibleVisTree"&gt;&lt;/div&gt; &lt;!-- The div where the accessible tree is rendered --&gt;
+          &lt;/body&gt;
 
         &lt;/html&gt;
       </code>
@@ -26,21 +37,24 @@ title: "Quickstart"
     <p>2. Call Olli from a &lt;script&gt; tag:</p>
     <div class="Code-Block">
       <code class="prettyprint">
-        ....
+
         &lt;script&gt;
-          olli({
-            visualization: OlliAdapters.VegaLiteAdapter(visSpec, additionalInfo),
-            renderType: 'tree'
-            domId: 'Accessible-Vis'
+          OlliAdapters.VegaLiteAdapter(vegaLiteSpec).then(olliVisSpec => {
+            document.getElementById("accessibleVisTree").append(olli(olliVisSpec))
           })
         &lt;/script&gt;
-        ...
+        
       </code>
     </div>
+    <p><strong>NOTE:</strong> If using Vega or ObservablePlot the adapters are
+      <strong><code>OlliAdapters.VegaAdapter</code></strong> and
+      <strong><code>OlliAdapters.ObservableAdapter</code></strong> respectively.
+    </p>
   </div>
   <div>
-    <h3>JavaScript Applications</h3>
+    <h3>NodeJS Applications</h3>
     <p>Olli can also be easily added to normal JavaScript applications.</p>
+    <p><a href="" target="_blank">Fully functional example with CodePen</a></p>
     <div>
       <p>1. Install the preset:</p>
       <div class="Code-Block">
@@ -51,28 +65,31 @@ title: "Quickstart"
       <p>2. Import `olli`, and the adapter you want to use, into the file you want to use it in:</p>
       <div class="Code-Block">
         <code class="prettyprint">
-          import { olli } from 'olli-core';
-          import { OlliAdapters } from 'olli-adapters'
+          import { olli } from 'olli-core'
+          import { VegaLiteAdapter } from 'olli-adapters' // Or import VegaAdapter or ObservableAdapter
         </code>
       </div>
       <p>3. Call `olli` and set-up your configuration object:</p>
       <div class="Code-Block">
         <code class="prettyprint">
-          ...
-          olli({
-            visualization: OlliAdapters.VegaLiteAdapter(visSpec, additionalInfo),
-            renderType: 'tree'
-            domId: 'Accessible-Vis'
+
+          VegaLiteAdapter(vegaLiteSpec).then(olliVisSpec => {
+            document.getElementById("accessibleVisTree").append(olli(olliVisSpec))
           })
-          ...
+          
         </code>
       </div>
+      <p><strong>NOTE:</strong> Within any JavaScript file, an adapter can be called using an <code>async/await</code>
+        function instead of within a promise reaction.
     </div>
   </div>
   <div>
     <h3>React</h3>
-    <p>Olli can even be used with React, but due to how React handles the state of the DOM, `olli` has to be called
-      inside the `useEffect(() => {}) hook.</p>
+    <p>Olli can even be used with React, but due to how React handles the state of the DOM, <code>olli</code> has to be
+      called
+      inside the <code>useEffect(() => {})</code> hook.
+    </p>
+    <p><a href="" target="_blank">Fully functional example with CodePen</a></p>
     <p>1. Install preset:</p>
     <div class="Code-Block">
       <code class="prettyprint">
@@ -82,22 +99,20 @@ title: "Quickstart"
     <p>2. Import `olli`, and the adapter you want to use, into the component you want to use it in</p>
     <div class="Code-Block">
       <code class="prettyprint">
-        import { olli } from 'olli-core';
-        import { OlliAdapters } from 'olli-adapters'
+        import { olli } from 'olli-core'
+        import { VegaLiteAdapter} from 'olli-adapters' // Or import VegaAdapter or ObservableAdapter
       </code>
     </div>
     <p>3. Call `olli` and set-up your configuration object inside the `useEffect(() => {})` hook:</p>
     <div class="Code-Block">
       <code class="prettyprint">
-        ...
+
           useEffect(() => {
-            olli({
-              visualization: OlliAdapters.VegaLiteAdapter(visSpec, additionalInfo),
-              renderType: 'tree'
-              domId: 'Accessible-Vis'
+            VegaLiteAdapter(vegaLiteSpec).then(olliVisSpec => {
+              document.getElementById("accessibleVisTree").append(olli(olliVisSpec))
             })
           })
-        ...
+        
       </code>
     </div>
   </div>
