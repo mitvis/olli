@@ -7,7 +7,7 @@
 <body>
     <div class="Code-Block">
         <code class="prettyprint">
-        d3. csv("https://raw.githubusercontent.com/vega/vega-datasets/next/data/stocks.csv").then(data => {
+        d3.csv("https://raw.githubusercontent.com/vega/vega-datasets/next/data/stocks.csv").then(data => {
             let googleData = data.filter(d => d.symbol === "GOOG");
     
             let spec = { ... } // spec using googleData
