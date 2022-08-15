@@ -11,7 +11,7 @@
 
     let vegaSpec = vegaLite.compile(spec).spec
     const runtime = vega.parse(vegaSpec);
-    const vegaRender = document.getElementById('Visualization-Vega-Lite');
+    const vegaRender = document.getElementById('visualizationVegaLite');
     let view = new vega.View(runtime)
       .logLevel(vega.Warn)
       .initialize(vegaRender)
@@ -19,10 +19,8 @@
       .hover()
       .run();
   
-    olli({ 
-      visualization: VegaLiteAdapter(view, spec),
-      renderType: "tree", 
-      domId: "AccessibilityTree-Vega-Lite"
+      OlliAdapters.VegaLiteAdapter(spec).then(olliVisSpec => {
+        document.getElementById("accessibilityTreeVegaLite").append(olli(olliVisSpec))
     })
     </code>
   </div>
@@ -42,7 +40,6 @@
           "sort": { "op": "median", "field": "yield" }
         },
         "x": {
-          "aggregate": "median",
           "field": "yield",
           "type": "quantitative",
           "scale": { "zero": false }
@@ -67,10 +64,8 @@
       .hover()
       .runAsync()
       .then(v => {
-        olli({
-          visualization: OlliAdapters.VegaLiteAdapter(v.scenegraph().root.items[0], spec),
-          renderType: "tree",
-          domId: "AccessibilityTree-Vega-Lite"
+        OlliAdapters.VegaLiteAdapter(spec).then(olliVisSpec => {
+          document.getElementById("AccessibilityTree-Vega-Lite").append(olli(olliVisSpec))
         })
       });
   </script>

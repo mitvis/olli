@@ -1,4 +1,4 @@
-import { Scene, View } from "vega";
+import { Scene } from "vega";
 import { TopLevelSpec } from "vega-lite";
 import {
     VisAdapter,
@@ -62,6 +62,7 @@ function parseMultiView(scenegraph: any, spec: any): OlliVisSpec {
             shallowCopyArray(axes, chartData.axes)
             shallowCopyArray(legends, chartData.legends)
             modifyVisFromMark(chartData, chartData.markUsed!, spec)
+            chartData.dataFieldsUsed = [...fields]
             return [chart.datum[facetedField], chartData]
         })
     );

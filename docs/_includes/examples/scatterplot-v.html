@@ -10,7 +10,7 @@
     let spec = { ... }
 
     const runtime = vega.parse(spec);
-    const vegaRender = document.getElementById('Visualization-Vega');
+    const vegaRender = document.getElementById('visualizationVega');
     let view = new vega.View(runtime)
       .logLevel(vega.Warn)
       .initialize(vegaRender)
@@ -18,11 +18,9 @@
       .hover()
       .run();
   
-    olli({ 
-      visualization: OlliAdapters.VegaAdapter(view, spec),
-      renderType: "tree", 
-      domId: "AccessibilityTree-Vega"
-    })
+      OlliAdapters.VegaAdapter(spec).then(olliVisSpec => {
+        document.getElementById("accessibilityTreeVega").append(olli(olliVisSpec))
+      })
   </code>
     </div>
     <script type="module">

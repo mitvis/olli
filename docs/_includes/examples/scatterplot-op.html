@@ -6,19 +6,17 @@
 
 <body>
     <div class="Code-Block">
-    <code class="prettyprint">
+        <code class="prettyprint">
         import * as Plot from "https://cdn.skypack.dev/@observablehq/plot@0.5";
 
         d3.json("https://raw.githubusercontent.com/vega/vega-datasets/next/data/penguins.json").then((data) => {
             let spec = { ... }
 
-            document.getElementById("Visualization-ObservablePlot").append(Plot.plot(spec))
+            document.getElementById("visualizationObservablePlot").append(Plot.plot(spec))
 
-            olli({
-                visualization: OlliAdapters.ObservablePlotAdapter(spec, Plot.plot(spec)),
-                renderType: "tree",
-                domId: "AccessibilityTree-ObservablePlot"
-            })
+            OlliAdapters.ObservablePlotAdapter(spec).then(olliVisSpec => {
+                document.getElementById("accessibilityTreeVegaLite").append(olli(olliVisSpec))
+              })
         })
   </code>
     </div>
@@ -47,10 +45,8 @@
 
             document.getElementById("Visualization-ObservablePlot").append(Plot.plot(spec))
 
-            olli({
-                visualization: OlliAdapters.ObservablePlotAdapter(spec, Plot.plot(spec)),
-                renderType: "tree",
-                domId: "AccessibilityTree-ObservablePlot"
+            OlliAdapters.ObservablePLotAdapter(spec).then(olliVisSpec => {
+                document.getElementById("AccessibilityTree-ObservablePlot").append(olli(olliVisSpec))
             })
         })
     </script>
