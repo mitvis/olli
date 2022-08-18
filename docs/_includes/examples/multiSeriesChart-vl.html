@@ -4,6 +4,11 @@ let spec = {
   "description": "Stock prices of 5 Tech Companies over Time.",
   "data": { "url": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/stocks.csv" },
   "mark": "line",
+  "config": {
+    "legend": {
+      "disable": true
+    }
+  },
   "encoding": {
     "x": { "field": "date", "type": "temporal" },
     "y": { "field": "price", "type": "quantitative" },
