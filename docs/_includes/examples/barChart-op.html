@@ -1,39 +1,22 @@
-<!DOCTYPE html>
+<script type="module">
+import * as Plot from "https://cdn.skypack.dev/@observablehq/plot@0.5";
 
-<body>
-    <div class="Code-Block">
-        <code class="prettyprint">
-        const data = [ ... ]
-    
-        let spec = { ... }
+const data = [
+    { "a": "A", "b": 28 }, { "a": "B", "b": 55 }, { "a": "C", "b": 43 },
+    { "a": "D", "b": 91 }, { "a": "E", "b": 81 }, { "a": "F", "b": 53 },
+    { "a": "G", "b": 19 }, { "a": "H", "b": 87 }, { "a": "I", "b": 52 }
+]
 
-        document.getElementById("visualizationObservablePlot").append(Plot.plot(spec))
-            
-        OlliAdapters.ObservablePlotAdapter(spec).then(olliVisSpec => {
-            document.getElementById("accessibilityTreeObservablePlot").append(olli(olliVisSpec))
-        })
-      </code>
-    </div>
-    <script type="module">
-        import * as Plot from "https://cdn.skypack.dev/@observablehq/plot@0.5";
+let spec = {
+    marks: [
+        Plot.barY(data, { x: "a", y: "b", fill: "steelblue" }),
+        Plot.ruleY([0])
+    ]
+}
 
-        const data = [
-            { "a": "A", "b": 28 }, { "a": "B", "b": 55 }, { "a": "C", "b": 43 },
-            { "a": "D", "b": 91 }, { "a": "E", "b": 81 }, { "a": "F", "b": 53 },
-            { "a": "G", "b": 19 }, { "a": "H", "b": 87 }, { "a": "I", "b": 52 }
-        ]
+document.getElementById("Visualization-ObservablePlot").append(Plot.plot(spec))
 
-        let spec = {
-            marks: [
-                Plot.barY(data, { x: "a", y: "b", fill: "steelblue" }),
-                Plot.ruleY([0])
-            ]
-        }
-
-        document.getElementById("Visualization-ObservablePlot").append(Plot.plot(spec))
-
-        OlliAdapters.ObservablePlotAdapter(spec).then(olliVisSpec => {
-            document.getElementById("AccessibilityTree-ObservablePlot").append(olli(olliVisSpec))
-        })
-    </script>
-</body>
+OlliAdapters.ObservablePlotAdapter(spec).then(olliVisSpec => {
+    document.getElementById("AccessibilityTree-ObservablePlot").append(olli(olliVisSpec))
+})
+</script>

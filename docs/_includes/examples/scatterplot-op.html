@@ -1,46 +1,30 @@
-<!DOCTYPE html>
+<script type="module">
+import * as Plot from "https://cdn.skypack.dev/@observablehq/plot@0.5";
 
-<body>
-    <div class="Code-Block">
-        <code class="prettyprint">
-        import * as Plot from "https://cdn.skypack.dev/@observablehq/plot@0.5";
+d3.json("https://raw.githubusercontent.com/vega/vega-datasets/next/data/penguins.json").then((data) => {
+    let spec = {
+        // color: {
+        //   legend: true,
+        // },
+        grid: true,
+        color: {
+            type: "ordinal",
+            scheme: "category10",
+            legend: true
+        },
+        y: {
+            format: d => d.toLocaleString(undefined, { useGrouping: false })
+        },
+        marks: [
+            Plot.dot(data, { x: "Flipper Length (mm)", y: "Body Mass (g)", fill: "Species" }),
+            Plot.ruleY([0])
+        ]
+    }
 
-        d3.json("https://raw.githubusercontent.com/vega/vega-datasets/next/data/penguins.json").then((data) => {
-            let spec = { ... }
+    document.getElementById("Visualization-ObservablePlot").append(Plot.plot(spec))
 
-            document.getElementById("visualizationObservablePlot").append(Plot.plot(spec))
-
-            OlliAdapters.ObservablePlotAdapter(spec).then(olliVisSpec => {
-                document.getElementById("accessibilityTreeVegaLite").append(olli(olliVisSpec))
-              })
-        })
-  </code>
-    </div>
-    <script type="module">
-        import * as Plot from "https://cdn.skypack.dev/@observablehq/plot@0.5";
-
-        d3.json("https://raw.githubusercontent.com/vega/vega-datasets/next/data/penguins.json").then((data) => {
-            let spec = {
-                grid: true,
-                color: {
-                    type: "ordinal",
-                    scheme: "category10",
-                    legend: true
-                },
-                y: {
-                    format: d => d.toLocaleString(undefined, { useGrouping: false })
-                },
-                marks: [
-                    Plot.dot(data, { x: "Flipper Length (mm)", y: "Body Mass (g)", fill: "Species" }),
-                    Plot.ruleY([0])
-                ]
-            }
-
-            document.getElementById("Visualization-ObservablePlot").append(Plot.plot(spec))
-
-            OlliAdapters.ObservablePlotAdapter(spec).then(olliVisSpec => {
-                document.getElementById("AccessibilityTree-ObservablePlot").append(olli(olliVisSpec))
-            })
-        })
-    </script>
-</body>
+    OlliAdapters.ObservablePlotAdapter(spec).then(olliVisSpec => {
+        document.getElementById("AccessibilityTree-ObservablePlot").append(olli(olliVisSpec))
+    })
+})
+</script>

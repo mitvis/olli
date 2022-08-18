@@ -1,54 +1,36 @@
-<!DOCTYPE html>
+<script type="module">
+import * as Plot from "https://cdn.skypack.dev/@observablehq/plot@0.5";
 
-<body>
-    <div class="Code-Block">
-        <code class="prettyprint">
-        d3.csv("https://raw.githubusercontent.com/vega/vega-datasets/next/data/stocks.csv").then(data => {
-
-            let spec = { ... }
-
-            document.getElementById("visualizationObservablePlot").append(Plot.plot(spec))
-
-            OlliAdapters.ObservablePlotAdapter(spec).then(olliVisSpec => {
-                document.getElementById("accessibilityTreeVegaLite").append(olli(olliVisSpec))
-              })
-        })
-  </code>
-    </div>
-    <script type="module">
-        import * as Plot from "https://cdn.skypack.dev/@observablehq/plot@0.5";
-
-        d3.csv("https://raw.githubusercontent.com/vega/vega-datasets/next/data/stocks.csv").then(data => {
+d3.csv("https://raw.githubusercontent.com/vega/vega-datasets/next/data/stocks.csv").then(data => {
 
 
-            let stockData = data.map(d => {
-                d.price = parseInt(d.price)
-                d.date = new Date(d.date)
-                return d;
-            })
-            let spec = {
-                x: {
-                    type: 'time',
-                },
-                y: {
-                    grid: true
-                },
-                marks: [
-                    Plot.ruleY([1]),
-                    Plot.line(stockData, {
-                        x: "date",
-                        y: "price",
-                        sort: "date",
-                        stroke: "symbol"
-                    }),
-                ]
-            }
+    let stockData = data.map(d => {
+        d.price = parseInt(d.price)
+        d.date = new Date(d.date)
+        return d;
+    })
+    let spec = {
+        x: {
+            type: 'time',
+        },
+        y: {
+            grid: true
+        },
+        marks: [
+            Plot.ruleY([1]),
+            Plot.line(stockData, {
+                x: "date",
+                y: "price",
+                sort: "date",
+                stroke: "symbol"
+            }),
+        ]
+    }
 
-            document.getElementById("Visualization-ObservablePlot").append(Plot.plot(spec))
+    document.getElementById("Visualization-ObservablePlot").append(Plot.plot(spec))
 
-            OlliAdapters.ObservablePlotAdapter(spec).then(olliVisSpec => {
-                document.getElementById("AccessibilityTree-ObservablePlot").append(olli(olliVisSpec))
-            })
-        })
-    </script>
-</body>
+    OlliAdapters.ObservablePlotAdapter(spec).then(olliVisSpec => {
+        document.getElementById("AccessibilityTree-ObservablePlot").append(olli(olliVisSpec))
+    })
+})
+</script>

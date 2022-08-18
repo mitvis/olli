@@ -23,7 +23,14 @@
 }
 
 .Code-Block {
-  margin-top: 3%;
-  background-color: lightgray;
+  padding: 15px;
+  border: 1px solid black;
   border-radius: 15px;
+  line-height: 1;
+  font-size: 14px;
+}
+
+code {
+  white-space: pre-wrap;
+  line-height: 1.5;
 }

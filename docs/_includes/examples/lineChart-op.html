@@ -1,49 +1,31 @@
-<!DOCTYPE html>
+<script type="module">
+import * as Plot from "https://cdn.skypack.dev/@observablehq/plot@0.5";
 
-<body>
-    <div class="Code-Block">
-        <code class="prettyprint">
-        d3.csv("https://raw.githubusercontent.com/vega/vega-datasets/next/data/stocks.csv").then(data => {
-            let googleData = data.filter(d => d.symbol === "GOOG");
-    
-            let spec = { ... } // spec using googleData
-    
-            document.getElementById("visualizationObservablePlot").append(Plot.plot(spec))
-    
-            OlliAdapters.ObservablePlotAdapter(spec).then(olliVisSpec => {
-                document.getElementById("accessibilityTreeObservablePlot").append(olli(olliVisSpec))
-              })
-    </code>
-    </div>
-    <script type="module">
-        import * as Plot from "https://cdn.skypack.dev/@observablehq/plot@0.5";
+d3.csv("https://raw.githubusercontent.com/vega/vega-datasets/next/data/stocks.csv").then(data => {
+    let googleData = data.filter(d => d.symbol === "GOOG").map(d => {
+        d.price = parseFloat(d.price);
+        d.date = new Date(d.date)
+        return d
+    });
 
-        d3.csv("https://raw.githubusercontent.com/vega/vega-datasets/next/data/stocks.csv").then(data => {
-            let googleData = data.filter(d => d.symbol === "GOOG").map(d => {
-                d.price = parseFloat(d.price);
-                d.date = new Date(d.date)
-                return d
-            });
+    let spec = {
+        caption: `Google's stock prices over time.`,
+        x: {
+            type: 'time',
+        },
+    y: {
+            grid: true
+        },
+        marks: [
+            Plot.line(googleData, { x: "date", y: "price", sort: "date" }),
+        ]
+    }
 
-            let spec = {
-                caption: `Google's stock prices over time.`,
-                x: {
-                    type: 'time',
-                },
-                y: {
-                    grid: true
-                },
-                marks: [
-                    Plot.line(googleData, { x: "date", y: "price", sort: "date" }),
-                ]
-            }
+    document.getElementById("Visualization-ObservablePlot").append(Plot.plot(spec))
 
-            document.getElementById("Visualization-ObservablePlot").append(Plot.plot(spec))
+    OlliAdapters.ObservablePlotAdapter(spec).then(olliVisSpec => {
+        document.getElementById("AccessibilityTree-ObservablePlot").append(olli(olliVisSpec))
+    })
 
-            OlliAdapters.ObservablePlotAdapter(spec).then(olliVisSpec => {
-                document.getElementById("AccessibilityTree-ObservablePlot").append(olli(olliVisSpec))
-            })
-
-        })
-    </script>
-</body>
+})
+</script>

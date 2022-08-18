@@ -1,52 +1,34 @@
-<!DOCTYPE html>
+<script type="module">
+import * as Plot from "https://cdn.skypack.dev/@observablehq/plot@0.5";
 
-<body>
-    <div class="Code-Block">
-        <code class="prettyprint">
+d3.json("https://raw.githubusercontent.com/vega/vega-datasets/next/data/barley.json").then(data => {
+    let spec = {
+        grid: true,
+        color: {
+            type: "ordinal",
+            scheme: "category10",
+            legend: true
+        },
+        x: {
+            domain: [0, 70],
+            grid: true
+        },
+        y: {
+            grid: true
+        },
+        facet: {
+            data: data,
+            y: 'site',
+        },
+        marks: [
+            Plot.dot(data, { x: "yield", y: "variety", fill: "year" })
+        ]
+    }
 
-            d3.json("https://raw.githubusercontent.com/vega/vega-datasets/next/data/barley.json").then(data => {
-                let spec = { ... }
+    document.getElementById("Visualization-ObservablePlot").append(Plot.plot(spec))
 
-                document.getElementById("visualizationObservablePlot").append(Plot.plot(spec))
-
-                OlliAdapters.ObservablePlotAdapter(spec).then(olliVisSpec => {
-                    document.getElementById("accessibilityTreeObservablePlot").append(olli(olliVisSpec))
-                  })
-            }
-        </code>
-    </div>
-    <script type="module">
-        import * as Plot from "https://cdn.skypack.dev/@observablehq/plot@0.5";
-
-        d3.json("https://raw.githubusercontent.com/vega/vega-datasets/next/data/barley.json").then(data => {
-            let spec = {
-                grid: true,
-                color: {
-                    type: "ordinal",
-                    scheme: "category10",
-                    legend: true
-                },
-                x: {
-                    domain: [0, 70],
-                    grid: true
-                },
-                y: {
-                    grid: true
-                },
-                facet: {
-                    data: data,
-                    y: 'site',
-                },
-                marks: [
-                    Plot.dot(data, { x: "yield", y: "variety", fill: "year" }),
-                ]
-            }
-
-            document.getElementById("Visualization-ObservablePlot").append(Plot.plot(spec))
-
-            OlliAdapters.ObservablePlotAdapter(spec).then(olliVisSpec => {
-                document.getElementById("AccessibilityTree-ObservablePlot").append(olli(olliVisSpec))
-            })
-        })
-    </script>
-</body>
+    OlliAdapters.ObservablePlotAdapter(spec).then(olliVisSpec => {
+        document.getElementById("AccessibilityTree-ObservablePlot").append(olli(olliVisSpec))
+    })
+})
+</script>

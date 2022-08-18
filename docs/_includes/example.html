@@ -2,6 +2,8 @@
 
 <link rel="stylesheet" href="{{site.baseurl}}/css/example.css">
 
+{% include imports.html %}
+
 <div>
     <!-- <h4>Overview:</h4> -->
     {% include exampleDescription.html %}
@@ -15,7 +17,7 @@
     </div>
 
     {% for adapter in include.content.adapters %}
-    <div id="Block-Example-{{adapter.name}}" class="Select-Vis-Disabled">
+    <div id="Block-Example-{{adapter.name}}" class="Block-Example Select-Vis-Disabled">
         <div class="Example-Block">
             <h4>Visualization:</h4>
             <div id="Visualization-{{ adapter.name }}"></div>
@@ -23,10 +25,12 @@
             <div id="AccessibilityTree-{{ adapter.name }}" class="Tree"></div>
         </div>
         <h4>Code:</h4>
+
+        <div class="Code-Block"><code class="language-js"></code></div>
         {% include {{ adapter.code }} %}
     </div>
     {% endfor %}
-    <script>
+    <script type="module">
         let selectedAdapter = document.getElementById('Vega-Lite');
         selectedAdapter.classList.add('Select-Adapter-Name-Selected');
         document.getElementById('Block-Example-Vega-Lite').classList.remove('Select-Vis-Disabled');
@@ -56,5 +60,28 @@
                 document.getElementById(`AccessibilityTree-${selectedAdapter.id}`).firstChild.firstChild.focus()
             }
         })
+
+        import prettier from "https://unpkg.com/prettier@2.7.1/esm/standalone.mjs";
+        import parserBabel from "https://unpkg.com/prettier@2.7.1/esm/parser-babel.mjs";
+
+        const formatCodeBlock = () => {
+            const blocks = document.querySelectorAll('.Block-Example');
+            blocks.forEach((el) => {
+                const scriptTag = el.querySelector('script');
+                const codeTag = el.querySelector('.Code-Block code');
+                const code = scriptTag.innerHTML.trim();
+
+                const fmt = prettier.format(code, {
+                    parser: "babel",
+                    plugins: [parserBabel],
+                });
+
+                codeTag.innerHTML = fmt;
+
+                hljs.highlightElement(codeTag);
+            })
+        }
+
+        formatCodeBlock();
     </script>
 </div>
