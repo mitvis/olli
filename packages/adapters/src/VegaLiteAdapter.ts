@@ -1,5 +1,5 @@
 import { Scene } from "vega";
-import { TopLevelSpec } from "vega-lite";
+import { TopLevelSpec, compile } from "vega-lite";
 import {
     VisAdapter,
     OlliVisSpec,
@@ -20,7 +20,7 @@ import { getVegaScene } from "./utils";
  */
 export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSpec): Promise<OlliVisSpec> => {
 
-    const scene: Scene = await getVegaScene(spec);
+    const scene: Scene = await getVegaScene(compile(spec as TopLevelSpec).spec);
     if (scene.items.some((node: any) => node.role === 'scope')) {
         return parseMultiView(scene, spec)
     } else {
