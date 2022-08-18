@@ -213,7 +213,9 @@ function getEncodingValueIncrements(incrementArray: any[][], currentValue: any, 
     } else {
         let bounds: [number, number]
         let reducedIndex = index - 1;
-        if (reducedIndex === -1 && currentValue !== 0) {
+        if (index === 0 && currentValue === 0) {
+            return incrementArray
+        } else if (reducedIndex === -1 && currentValue !== 0) {
             const incrementDifference: number = (array[index + 1] as number) - currentValue
             bounds = [(currentValue - incrementDifference), currentValue];
         } else if (index === array.length - 1) {
