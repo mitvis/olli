@@ -320,7 +320,7 @@ function nodeToDesc(node: AccessibilityTreeNode): string {
     } else if (node.type === `legend`) {
         return node.description
     } else if (node.type === "filteredData") {
-        return `Range ${node.description} ${node.selected.length} values in the interval`
+        return `Range ${node.description} ${node.selected.length} ${node.selected.length === 1 ? 'value' : 'values'} in the interval`
     } else if (node.type === `grid`) {
         return node.description
     } else if (node.type === 'data') {
