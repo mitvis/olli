@@ -30,6 +30,7 @@
         let selectedAdapter = document.getElementById('Vega-Lite');
         selectedAdapter.classList.add('Select-Adapter-Name-Selected');
         document.getElementById('Block-Example-Vega-Lite').classList.remove('Select-Vis-Disabled');
+        document.getElementById('Block-Example-Vega-Lite').classList.add('Select-Vis-Enabled');
 
         window.onload = () => {
             let adapters = document.getElementsByClassName('Select-Adapter-Name');
@@ -47,6 +48,7 @@
             selectedAdapter = newAdapter;
             selectedAdapter.classList.add('Select-Adapter-Name-Selected')
             document.getElementById(`Block-Example-${newAdapter.id}`).classList.remove('Select-Vis-Disabled');
+            document.getElementById(`Block-Example-${newAdapter.id}`).classList.add('Select-Vis-Enabled');
         }
 
         document.addEventListener('keypress', (keyStroke) => {

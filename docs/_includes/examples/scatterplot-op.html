@@ -1,9 +1,5 @@
 <!DOCTYPE html>
 
-<head>
-    {% include imports.html %}
-</head>
-
 <body>
     <div class="Code-Block">
         <code class="prettyprint">
@@ -25,9 +21,6 @@
 
         d3.json("https://raw.githubusercontent.com/vega/vega-datasets/next/data/penguins.json").then((data) => {
             let spec = {
-                // color: {
-                //   legend: true,
-                // },
                 grid: true,
                 color: {
                     type: "ordinal",
@@ -45,7 +38,7 @@
 
             document.getElementById("Visualization-ObservablePlot").append(Plot.plot(spec))
 
-            OlliAdapters.ObservablePLotAdapter(spec).then(olliVisSpec => {
+            OlliAdapters.ObservablePlotAdapter(spec).then(olliVisSpec => {
                 document.getElementById("AccessibilityTree-ObservablePlot").append(olli(olliVisSpec))
             })
         })

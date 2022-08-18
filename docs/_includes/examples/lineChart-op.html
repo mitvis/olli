@@ -1,9 +1,5 @@
 <!DOCTYPE html>
 
-<head>
-    {% include imports.html %}
-</head>
-
 <body>
     <div class="Code-Block">
         <code class="prettyprint">
@@ -14,7 +10,7 @@
     
             document.getElementById("visualizationObservablePlot").append(Plot.plot(spec))
     
-            OlliAdapters.ObervablePlotAdapter(spec).then(olliVisSpec => {
+            OlliAdapters.ObservablePlotAdapter(spec).then(olliVisSpec => {
                 document.getElementById("accessibilityTreeObservablePlot").append(olli(olliVisSpec))
               })
     </code>
