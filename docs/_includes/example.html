@@ -4,24 +4,36 @@
 
 {% include imports.html %}
 
+<h1>{{include.content.title}} Example</h1>
+
 <div>
     <!-- <h4>Overview:</h4> -->
     {% include exampleDescription.html %}
-    <h4>Adapter Selection:</h4>
-    <div class="Container-Adapters">
+    <h4><label for="adapter">Select an adapter:</label></h4>
+
+    <script>
+        const onSelectAdapter = (newAdapter) => {
+            document.querySelectorAll('.Block-Example').forEach((el) => {
+                el.classList.remove('Select-Vis-Enabled');
+            })
+            document.getElementById(`Block-Example-${newAdapter}`).classList.add('Select-Vis-Enabled');
+        }
+    </script>
+
+    <select name="adapter" id="adapter" onchange="onSelectAdapter(this.value)">
         {% for adapter in include.content.adapters %}
-        <p class="Select-Adapter-Name" id="{{ adapter.name }}">
-            {{ adapter.name }}
-        </p>
+            <option value="{{ adapter.name }}" id="{{ adapter.name }}">
+                {{ adapter.name }}
+            </option>
         {% endfor %}
-    </div>
+    </select>
 
     {% for adapter in include.content.adapters %}
-    <div id="Block-Example-{{adapter.name}}" class="Block-Example Select-Vis-Disabled">
+    <div id="Block-Example-{{adapter.name}}" class="Block-Example">
         <div class="Example-Block">
-            <h4>Visualization:</h4>
+            <h4>{{adapter.name}} Visualization:</h4>
             <div id="Visualization-{{ adapter.name }}"></div>
-            <h4>Tree View:</h4>
+            <h4>Olli tree view:</h4>
             <div id="AccessibilityTree-{{ adapter.name }}" class="Tree"></div>
         </div>
         <h4>Code:</h4>
@@ -31,29 +43,7 @@
     </div>
     {% endfor %}
     <script type="module">
-        let selectedAdapter = document.getElementById('Vega-Lite');
-        selectedAdapter.classList.add('Select-Adapter-Name-Selected');
-        document.getElementById('Block-Example-Vega-Lite').classList.remove('Select-Vis-Disabled');
         document.getElementById('Block-Example-Vega-Lite').classList.add('Select-Vis-Enabled');
-
-        window.onload = () => {
-            let adapters = document.getElementsByClassName('Select-Adapter-Name');
-            for (let i = 0; i < adapters.length; i++) {
-                let ad = adapters.item(i);
-                ad.addEventListener('click', () => {
-                    updateSelectedAdapter(ad)
-                })
-            }
-        }
-
-        const updateSelectedAdapter = (newAdapter) => {
-            selectedAdapter.classList.remove('Select-Adapter-Name-Selected')
-            document.getElementById(`Block-Example-${selectedAdapter.id}`).classList.add('Select-Vis-Disabled');
-            selectedAdapter = newAdapter;
-            selectedAdapter.classList.add('Select-Adapter-Name-Selected')
-            document.getElementById(`Block-Example-${newAdapter.id}`).classList.remove('Select-Vis-Disabled');
-            document.getElementById(`Block-Example-${newAdapter.id}`).classList.add('Select-Vis-Enabled');
-        }
 
         document.addEventListener('keypress', (keyStroke) => {
             if (keyStroke.key.toLowerCase() === 't') {

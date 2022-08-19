@@ -18,6 +18,10 @@
   width: 100%;
 }
 
-.Select-Vis-Disabled {
+.Block-Example {
   display: none;
+}
+
+.Select-Vis-Enabled {
+  display: block;
 }
