@@ -11,25 +11,23 @@ title: "Quickstart"
     <p><a href="https://codepen.io/matt-blanco/pen/abYQOEM" target="_blank">Fully functional HTML example with CodePen</a></p>
     <p>1. Add the script tag inside the document <code>&lt;head&gt;</code>:</p>
     <div class="Code-Block">
-      <code class="prettyprint">
+      <code class="language-xml">
         &lt;html&gt;
-          
+
 
           &lt;head&gt;
-            &lt;!-- Imports for Vega or Vega-Lite --&gt;
             &lt;script src="https://cdn.jsdelivr.net/npm/vega@5"&gt;&lt;/script&gt;
             &lt;script src="https://cdn.jsdelivr.net/npm/vega-lite@5"&gt;&lt;/script&gt;
             &lt;script src="https://cdn.jsdelivr.net/npm/vega-embed@6"&gt;&lt;/script&gt;
 
-            &lt;!-- Imports for Olli --&gt;
             &lt;script src="https://cdn.jsdelivr.net/npm/olli-core@1.0.2"&gt;&lt;/script&gt;
             &lt;script src="https://cdn.jsdelivr.net/npm/olli-adapters@1.0.2"&gt;&lt;/script&gt;
-            
+
           &lt;/head&gt;
 
           &lt;body&gt;
-            &lt;div id="visualization"&gt;&lt;/div&gt; &lt;!-- The div where your visualization is rendered --&gt;
-            &lt;div id="accessibleVisTree"&gt;&lt;/div&gt; &lt;!-- The div where the accessible tree is rendered --&gt;
+            &lt;div id="visualization"&gt;&lt;/div&gt;
+            &lt;div id="accessibleVisTree"&gt;&lt;/div&gt;
           &lt;/body&gt;
 
         &lt;/html&gt;
@@ -37,7 +35,7 @@ title: "Quickstart"
     </div>
     <p>2. Call Olli from a &lt;script&gt; tag:</p>
     <div class="Code-Block">
-      <code class="prettyprint">
+      <code class="language-xml">
 
         &lt;script&gt;
           let spec = {
@@ -56,7 +54,7 @@ title: "Quickstart"
               "y": { "field": "b", "type": "quantitative" }
             }
           }
-      
+
           let vegaSpec = vegaLite.compile(spec).spec
           const runtime = vega.parse(vegaSpec);
           const vegaRender = document.getElementById('visualization');
@@ -71,7 +69,7 @@ title: "Quickstart"
             document.getElementById("accessibleVisTree").append(olli(olliVisSpec))
           })
         &lt;/script&gt;
-        
+
       </code>
     </div>
     <p><strong>NOTE:</strong> If using Vega or ObservablePlot the adapters are
@@ -86,25 +84,25 @@ title: "Quickstart"
     <div>
       <p>1. Install the preset:</p>
       <div class="Code-Block">
-        <code class="prettyprint">
+        <code class="language-bash">
           npm install olli-core olli-adapters
         </code>
       </div>
       <p>2. Import <code>olli-core</code> and the adapter you want into the file you'll Olli in:</p>
       <div class="Code-Block">
-        <code class="prettyprint">
+        <code class="language-javascript">
           import { olli } from 'olli-core'
           import { VegaLiteAdapter } from 'olli-adapters' // Or import VegaAdapter or ObservableAdapter
         </code>
       </div>
       <p>3. Call <code>olli</code> and set-up your configuration object:</p>
       <div class="Code-Block">
-        <code class="prettyprint">
+        <code class="language-javascript">
 
           VegaLiteAdapter(vegaLiteSpec).then(olliVisSpec => {
             document.getElementById("accessibleVisTree").append(olli(olliVisSpec))
           })
-          
+
         </code>
       </div>
       <p><strong>NOTE:</strong> Within any JavaScript file, an adapter can be called using an <code>async/await</code>
@@ -120,13 +118,13 @@ title: "Quickstart"
     <p><a href="https://codepen.io/matt-blanco/pen/jOzQPdx" target="_blank">Fully functional example with CodePen</a></p>
     <p>1. Install preset:</p>
     <div class="Code-Block">
-      <code class="prettyprint">
+      <code class="language-bash">
         npm install olli-core olli-adapters
       </code>
     </div>
     <p>2. Import<code>olli-core</code> and adapter you want to use into the component you want to use it in</p>
     <div class="Code-Block">
-      <code class="prettyprint">
+      <code class="language-javascript">
         import { olli } from 'olli-core'
         import { VegaLiteAdapter} from 'olli-adapters' // Or import VegaAdapter or ObservableAdapter
       </code>
@@ -134,14 +132,14 @@ title: "Quickstart"
     <p>3. Call <code>>olli</code> and set-up your configuration object inside the <code>useEffect(() => {})</code> hook:
     </p>
     <div class="Code-Block">
-      <code class="prettyprint">
+      <code class="language-javascript">
 
           useEffect(() => {
             VegaLiteAdapter(vegaLiteSpec).then(olliVisSpec => {
               document.getElementById("accessibleVisTree").append(olli(olliVisSpec))
             })
           })
-        
+
       </code>
     </div>
   </div>
@@ -153,8 +151,8 @@ title: "Quickstart"
       adapter:
     </p>
     <div class="Code-Block">
-      <code class="prettyprint">
-        type VisAdapter<T> = (spec: T) => Promise&lt;OlliVisSpec&gt;
+      <code class="language-typescript">
+        type VisAdapter&lt;T&gt; = (spec: T) => Promise&lt;OlliVisSpec&gt;;
       </code>
     </div>
     <p>
@@ -178,14 +176,14 @@ title: "Quickstart"
       <code><a href="https://github.com/mitvis/olli/blob/main/packages/adapters/src/Types.ts" target="_blank">Types.ts</a></code>.
     </p>
     <div class="Code-Block">
-      <code class="prettyprint">
+      <code class="language-typescript">
         /**
-        * A simple union type that when implemented a concrete adapter class can be used 
+        * A simple union type that when implemented a concrete adapter class can be used
         * with any visualization library to later be used to create
         * an explorable Accessibility Tree.
         */
         type BaseOlliVisSpec = {
-            type: string,
+                type: string,
             description: string,
             data: any[],
             dataFieldsUsed: string[],
@@ -211,7 +209,7 @@ title: "Quickstart"
         export interface FacetedChart extends BaseOlliVisSpec {
             type: "facetedChart",
             // maps faceted value to chart
-            charts: Map<any, Chart>,
+            charts: Map&lt;any, Chart&gt;,
             facetedField: string,
         }
       </code>
@@ -224,3 +222,37 @@ title: "Quickstart"
     </p>
   </div>
 </div>
+
+<script type="module">
+  import prettier from "https://unpkg.com/prettier@2.7.1/esm/standalone.mjs";
+  import parserBabel from "https://unpkg.com/prettier@2.7.1/esm/parser-babel.mjs";
+  import parserHtml from "https://unpkg.com/prettier@2.7.1/esm/parser-html.mjs";
+  import parserTypescript from "https://unpkg.com/prettier@2.7.1/esm/parser-typescript.mjs";
+
+
+  const blocks = document.querySelectorAll('.Code-Block');
+  blocks.forEach((el) => {
+      const codeTag = el.querySelector('code');
+      const code = codeTag.innerHTML.trim().replaceAll('&lt;', '<').replaceAll('&gt;', '>');
+
+      const fmt = codeTag.classList.contains('language-javascript') ?
+        prettier.format(code, {
+            parser: "babel",
+            plugins: [parserBabel],
+        }) : (
+          codeTag.classList.contains('language-typescript') ?
+            prettier.format(code, {
+                parser: "typescript",
+                plugins: [parserTypescript],
+            }) :
+            prettier.format(code, {
+                parser: "html",
+                plugins: [parserHtml],
+            })
+      );
+
+      codeTag.textContent = fmt;
+
+      hljs.highlightElement(codeTag);
+  })
+</script>

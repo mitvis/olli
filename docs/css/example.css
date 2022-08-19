@@ -21,16 +21,3 @@
 .Select-Vis-Disabled {
   display: none;
 }
-
-.Code-Block {
-  padding: 15px;
-  border: 1px solid black;
-  border-radius: 15px;
-  line-height: 1;
-  font-size: 14px;
-}
-
-code {
-  white-space: pre-wrap;
-  line-height: 1.5;
-}
