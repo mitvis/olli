@@ -59,9 +59,9 @@ to different visualization libaries break down a chart where an accessible rende
 
 ## Current Visualization Library Support
 
-* [Vega](https://vega.github.io/vega/)
-* [Vega-Lite](https://vega.github.io/vega-lite)
-* [ObservablePlot](https://observablehq.com/@observablehq/plot)
+- [Vega](https://vega.github.io/vega/)
+- [Vega-Lite](https://vega.github.io/vega-lite)
+- [ObservablePlot](https://observablehq.com/@observablehq/plot)
 
 ## How It Works
 
@@ -85,32 +85,32 @@ The most basic way to use Olli is to add it to any basic HTML page.
 
 1. Add the script tag inside the document `<head>`:
 
-    ```html
-    <html>
-      ...
-      <head>
-         ...
-         <script src="https://cdn.jsdelivr.net/npm/olli-core@1.0.2/" />
-         <script src="https://cdn.jsdelivr.net/npm/olli-adapters@1.0.2/" />
-         ...
-      </head>
-      ...
-    </html>
-    ```
+   ```html
+   <html>
+     ...
+     <head>
+       ...
+       <script src="https://cdn.jsdelivr.net/npm/olli@1.0.2/" />
+       <script src="https://cdn.jsdelivr.net/npm/olli-adapters@1.0.2/" />
+       ...
+     </head>
+     ...
+   </html>
+   ```
 
 2. Call Olli from a `<script>` tag:
 
-    ```html
-    ...
-    <script>
-      ...
-      olli({
-        visualization: olliAdapters.VegaLiteAdapter(visSpec, additionalInfo),
-        renderType: 'tree'
-        domId: 'Accessible-Vis'
-      })
-    </script>
-    ```
+   ```html
+   ...
+   <script>
+     ...
+     olli({
+       visualization: olliAdapters.VegaLiteAdapter(visSpec, additionalInfo),
+       renderType: 'tree'
+       domId: 'Accessible-Vis'
+     })
+   </script>
+   ```
 
 </details>
 
@@ -122,30 +122,30 @@ Olli can also be easily added to normal JavaScript applications.
 
 1. Install the preset:
 
-    ```sh
-    npm install olli-core olli-adapters
-    ```
+   ```sh
+   npm install olli olli-adapters
+   ```
 
 2. Import `olli`, and the adapter you want to use, into the file you want to use it in
 
-    ```js
-    import {olli-core, olli-adapters} from 'olli'
-    
-    ...
-    ```
+   ```js
+   import {olli, olli-adapters} from 'olli'
+
+   ...
+   ```
 
 3. Call `olli` and set-up your configuration object:
 
-    ```js
-    ...
+   ```js
+   ...
 
-      olli({
-        visualization: OlliAdapters.VegaLiteAdapter(visSpec, additionalInfo),
-        renderType: 'tree'
-        domId: 'Accessible-Vis'
-      })
-    ...   
-    ```
+     olli({
+       visualization: OlliAdapters.VegaLiteAdapter(visSpec, additionalInfo),
+       renderType: 'tree'
+       domId: 'Accessible-Vis'
+     })
+   ...
+   ```
 
 </details>
 
@@ -158,32 +158,32 @@ inside the `useEffect(() => {}) hook.
 
 1. Install preset:
 
-    ```sh
-    npm install olli
-    ```
+   ```sh
+   npm install olli
+   ```
 
 2. Import `olli`, and the adapter you want to use, into the component you want to use it in
 
-    ```js
-    import {olli, vegaLiteAdater} from 'olli'
-    
-    ...
-    ```
+   ```js
+   import {olli, vegaLiteAdater} from 'olli'
+
+   ...
+   ```
 
 3. Call `olli` and set-up your configuration object inside the `useEffect(() => {})` hook:
 
-    ```js
-    ...
+   ```js
+   ...
 
-    useEffect(() => {
-      olli({
-        visualization: vegaLiteAdapter(visSpec, additionalInfo),
-        renderType: 'tree'
-        domId: 'Accessible-Vis'
-      })
-    })
-    ...   
-    ```
+   useEffect(() => {
+     olli({
+       visualization: vegaLiteAdapter(visSpec, additionalInfo),
+       renderType: 'tree'
+       domId: 'Accessible-Vis'
+     })
+   })
+   ...
+   ```
 
 </details>
 
@@ -195,23 +195,21 @@ Type specification of the configuration:
 
 ```ts
 type OlliConfigOptions = {
-    visualization: OlliVisSpec,
-    domId: string,
-    renderType?: 'tree' | 'table',
-    ariaLabel?: string
-}
+  visualization: OlliVisSpec;
+  domId: string;
+  renderType?: "tree" | "table";
+  ariaLabel?: string;
+};
 ```
 
 Configuration Example:
 
 ```ts
-
 let olliConfig: OlliConfigOptions = {
   visualization: VegaLiteAdapter(vlScenegraph, vlSpec),
-  domId: 'Accessible-Vis',
-  renderType: 'tree'
-}
-
+  domId: "Accessible-Vis",
+  renderType: "tree",
+};
 ```
 
 ## Contributing
@@ -235,9 +233,10 @@ add support for your library.
 The adapter interface is as follows:
 
 ```js
-
-export type VisAdapter = (visObject: any, helperVisInformation: any) => OlliVisSpec
-
+export type VisAdapter = (
+  visObject: any,
+  helperVisInformation: any
+) => OlliVisSpec;
 ```
 
 For an explanation on the types that exist for Olli and how visualizations are decontructed check out the
