@@ -1,5 +1,5 @@
 import { Scene } from "vega";
-import { TopLevelSpec } from "vega-lite";
+import { TopLevelSpec, compile } from "vega-lite";
 import {
     VisAdapter,
     OlliVisSpec,
@@ -11,18 +11,20 @@ import {
     facetedChart,
     chart
 } from "./Types";
+import { getVegaScene } from "./utils";
 
 /**
  * Adapter to deconstruct Vega-Lite visualizations into an {@link OlliVisSpec}
- * @param vlView The Vega Scenegraph from the view
  * @param spec The Vega-Lite Spec that rendered the visualization
  * @returns An {@link OlliVisSpec} of the deconstructed Vega-Lite visualization
  */
-export const VegaLiteAdapter: VisAdapter = (vlView: Scene, spec: TopLevelSpec): OlliVisSpec => {
-    if (vlView.items.some((node: any) => node.role === 'scope')) {
-        return parseMultiView(vlView, spec)
+export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSpec): Promise<OlliVisSpec> => {
+
+    const scene: Scene = await getVegaScene(compile(spec).spec);
+    if (scene.items.some((node: any) => node.role === 'scope')) {
+        return parseMultiView(scene, spec)
     } else {
-        return parseChart(vlView, spec)
+        return parseChart(scene, spec)
     }
 }
 
@@ -60,6 +62,7 @@ function parseMultiView(scenegraph: any, spec: any): OlliVisSpec {
             shallowCopyArray(axes, chartData.axes)
             shallowCopyArray(legends, chartData.legends)
             modifyVisFromMark(chartData, chartData.markUsed!, spec)
+            chartData.dataFieldsUsed = [...fields]
             return [chart.datum[facetedField], chartData]
         })
     );

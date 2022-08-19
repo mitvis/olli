@@ -2,6 +2,7 @@ body {
   font-size: 18px;
   padding: 0 1em;
   font-family: 'Cabin', sans-serif;
+  line-height: 1.5;
   margin-left: 20%;
   margin-right: 10%;
 }
@@ -26,17 +27,8 @@ p {
   max-width: 800px;
 }
 
-code {
-  white-space: pre-wrap;
-}
-
 h4 {
   margin-bottom: 0px;
-}
-
-.Code-Block {
-  background-color: lightgray;
-  border-radius: 15px;
 }
 
 .Links {
@@ -115,4 +107,22 @@ footer {
   background-color: gray;
   border-radius: 20px;
   border: 3px solid lightgray;
+}
+
+
+.Code-Block {
+  padding: 15px;
+  border: 1px solid black;
+  border-radius: 15px;
+  line-height: 1;
+  font-size: 14px;
+}
+
+code {
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+code.hljs {
+  padding: 0 !important;
 }

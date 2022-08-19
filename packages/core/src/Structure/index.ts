@@ -213,7 +213,9 @@ function getEncodingValueIncrements(incrementArray: any[][], currentValue: any, 
     } else {
         let bounds: [number, number]
         let reducedIndex = index - 1;
-        if (reducedIndex === -1 && currentValue !== 0) {
+        if (index === 0 && currentValue === 0) {
+            return incrementArray
+        } else if (reducedIndex === -1 && currentValue !== 0) {
             const incrementDifference: number = (array[index + 1] as number) - currentValue
             bounds = [(currentValue - incrementDifference), currentValue];
         } else if (index === array.length - 1) {
@@ -320,7 +322,7 @@ function nodeToDesc(node: AccessibilityTreeNode): string {
     } else if (node.type === `legend`) {
         return node.description
     } else if (node.type === "filteredData") {
-        return `Range ${node.description} ${node.selected.length} values in the interval`
+        return `Range ${node.description} ${node.selected.length} ${node.selected.length === 1 ? 'value' : 'values'} in the interval`
     } else if (node.type === `grid`) {
         return node.description
     } else if (node.type === 'data') {

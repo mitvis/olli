@@ -18,12 +18,10 @@
   width: 100%;
 }
 
-.Select-Vis-Disabled {
+.Block-Example {
   display: none;
 }
 
-.Code-Block {
-  margin-top: 3%;
-  background-color: lightgray;
-  border-radius: 15px;
+.Select-Vis-Enabled {
+  display: block;
 }
