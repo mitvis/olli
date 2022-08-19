@@ -50,7 +50,8 @@
 
         document.addEventListener('keypress', (keyStroke) => {
             if (keyStroke.key.toLowerCase() === 't') {
-                document.getElementById(`AccessibilityTree-${selectedAdapter.id}`).firstChild.firstChild.focus()
+                const selectedAdapter = localStorage.getItem('selectedAdapter') ?? 'Vega-Lite';
+                document.getElementById(`AccessibilityTree-${selectedAdapter}`).firstChild.firstChild.focus()
             }
         })
 
