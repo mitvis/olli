@@ -20,25 +20,28 @@ type OlliConfigOptions = {
 export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTMLElement {
     let chartEncodingTree: AccessibilityTreeNode = olliVisSpecToTree(olliVisSpec);
 
-    let htmlRendering: HTMLElement;
+    const htmlRendering: HTMLElement = document.createElement("div");
+    htmlRendering.classList.add('olli-vis');
 
-    if (config) {
-        switch (config.renderType) {
-            case ("table"):
-                htmlRendering = renderTable(chartEncodingTree);
-                break;
-            case ('tree'):
-            default:
-                htmlRendering = document.createElement("ul").appendChild(renderTree(chartEncodingTree));
-                new TreeLinks(htmlRendering).init();
-        }
+    config = {
+        renderType: config?.renderType ?? 'tree',
+        ariaLabel: config?.ariaLabel ?? undefined
+    }
 
-        if (config.ariaLabel) {
-            htmlRendering.setAttribute("aria-label", config.ariaLabel);
-        }
-    } else {
-        htmlRendering = document.createElement("ul").appendChild(renderTree(chartEncodingTree));
-        new TreeLinks(htmlRendering).init();
+    switch (config.renderType) {
+        case ("table"):
+            htmlRendering.appendChild(renderTable(chartEncodingTree));
+            break;
+        case ('tree'):
+        default:
+            const ul = renderTree(chartEncodingTree);
+            htmlRendering.appendChild(ul);
+            new TreeLinks(ul).init();
+            break;
+    }
+
+    if (config.ariaLabel) {
+        htmlRendering.setAttribute("aria-label", config.ariaLabel);
     }
 
     document.addEventListener('keypress', (keyStroke) => {
@@ -50,5 +53,5 @@ export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTML
         }
     })
 
-    return htmlRendering
+    return htmlRendering;
 }

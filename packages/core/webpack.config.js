@@ -2,7 +2,7 @@ const path = require('path');
 
 module.exports = {
     entry: './src/index.ts',
-    mode: 'production',
+    mode: 'development',
     watch: true,
     module: {
         rules: [
@@ -11,6 +11,13 @@ module.exports = {
                 use: 'ts-loader',
                 exclude: /node_modules/,
             },
+            {
+                test: /\.css$/,
+                use: [
+                    'style-loader',
+                    'css-loader'
+                ]
+            }
         ],
     },
     resolve: {

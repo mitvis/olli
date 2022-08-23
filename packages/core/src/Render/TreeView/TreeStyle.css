@@ -1,0 +1,66 @@
+.olli-vis ul[role="tree"] {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.olli-vis ul[role="tree"] li {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.olli-vis ul[role="tree"] a {
+  text-decoration: underline;
+  border-color: transparent;
+}
+
+.olli-vis [role="treeitem"] ul {
+  margin: 0;
+  padding: 0;
+  margin-left: 0.9em;
+}
+
+.olli-vis [role="treeitem"][aria-expanded="false"] > ul {
+  display: none;
+}
+
+.olli-vis [role="treeitem"][aria-expanded="true"] > ul {
+  display: block;
+}
+
+.olli-vis [role="treeitem"][aria-expanded="false"] > span::before {
+  position: relative;
+  left: -0.25em;
+}
+
+.olli-vis [role="treeitem"][aria-expanded="true"] > span::before {
+  position: relative;
+  left: -0.25em;
+}
+
+/* .olli-vis [role="treeitem"], */
+.olli-vis [role="treeitem"] span {
+  width: 16em;
+  margin: 0;
+  padding: 0.125em;
+  border: 2px transparent solid;
+  display: block;
+}
+
+/* disable default keyboard focus styling for treeitems
+    Keyboard focus is styled with the following CSS */
+.olli-vis [role="treeitem"]:focus {
+  outline: 0;
+}
+
+.olli-vis [role="treeitem"].focus,
+.olli-vis [role="treeitem"] span.focus {
+  border-color: black;
+  background-color: #ddd;
+}
+
+.olli-vis [role="treeitem"].hover,
+.olli-vis [role="treeitem"] span.hover {
+  background-color: #ddd;
+}
