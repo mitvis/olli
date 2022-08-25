@@ -61,7 +61,7 @@ function parseMultiView(scenegraph: any, spec: any): OlliVisSpec {
             let chartData = parseChart(chart, spec)
             shallowCopyArray(axes, chartData.axes)
             shallowCopyArray(legends, chartData.legends)
-            modifyVisFromMark(chartData, chartData.markUsed!, spec)
+            modifyVisFromMark(chartData, chartData.mark!, spec)
             chartData.dataFieldsUsed = [...fields]
             return [chart.datum[facetedField], chartData]
         })
@@ -94,7 +94,7 @@ function parseChart(scenegraph: any, spec: any): Chart {
         dataFieldsUsed: fields,
         gridNodes: [],
         data: getVisualizationData(scenegraph, spec),
-        markUsed: mark
+        mark: mark
     })
     modifyVisFromMark(node, mark, spec);
     return node
@@ -127,7 +127,6 @@ function parseAxis(scenegraph: any, axisScenegraphNode: any, spec: any): Axis {
     return {
         values: ticks,
         title: title === undefined ? axisStr : `${axisStr} titled '${title}'`,
-        data: axisData,
         field: field,
         scaleType: spec.encoding[encodingKey].type,
         orient: orient,
@@ -150,7 +149,6 @@ function parseLegend(scenegraph: any, legendScenegraphNode: any, spec: any): Leg
     return {
         values: labels.map((n: any) => n.items.find((el: any) => el.role === "legend-label").items[0].datum.value),
         title: spec.encoding['color'].title ? spec.encoding['color'].title : spec.encoding['color'].field,
-        data: data,
         field: spec.encoding['color'].field,
         scaleType: spec.scales?.find((specScale: any) => specScale.name === scale)?.type,
         type: spec.encoding['color'].type,

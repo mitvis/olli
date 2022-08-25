@@ -1,6 +1,11 @@
-import { VisAdapter, OlliVisSpec, FacetedChart, Chart, Axis, Legend, Guide, Mark, ObservablePlotSpec } from "./Types";
+import { VisAdapter, OlliVisSpec, FacetedChart, Chart, Axis, Legend, Guide, Mark } from "./Types";
 // Observable-Plot has no type declaration file :/
 const Plot = require("@observablehq/plot")
+
+/**
+ * Observable-Plot does not have any exported types
+ */
+ type ObservablePlotSpec = any;
 
 /**
  * * Adapter to deconstruct ObservablePlot visualizations into an {@link OlliVisSpec}
@@ -100,8 +105,8 @@ function plotToChart(plot: any, svg: Element): Chart {
     }
 
     if (identifyMark(plotMark.ariaLabel) !== "[Undefined]") {
-        chart.markUsed = identifyMark(plotMark.ariaLabel);
-        modifyVisFromMark(chart, chart.markUsed)
+        chart.mark = identifyMark(plotMark.ariaLabel);
+        modifyVisFromMark(chart, chart.mark)
     }
 
     return chart
@@ -145,7 +150,6 @@ function parseAxis(plot: any, svg: Element): Axis {
     let guide: Axis = {
         values: [...ticks] as string[] | number[],
         title: `${svg?.getAttribute('aria-label')} titled ${field}`,
-        data: plotMark.data,
         field: field,
         orient: orient
     }
@@ -184,7 +188,6 @@ function parseLegend(plot: any, svg: Element): Legend { //TODO: Does not support
 
     let guide: Legend = {
         values: values,
-        data: plotMark.data,
         field: field,
         title: field,
         type: 'symbol' // TODO hardcoded legend type

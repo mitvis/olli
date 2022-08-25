@@ -7,27 +7,21 @@ import { AccessibilityTreeNode, NodeType } from "./Types";
  * @returns The transormed {@link AccessibilityTreeNode}
  */
 export function olliVisSpecToTree(olliVisSpec: OlliVisSpec): AccessibilityTreeNode {
-    let node: AccessibilityTreeNode;
-    if (olliVisSpec.type === "facetedChart") {
-        let facets: FacetedChart = olliVisSpec as FacetedChart
-        facets.charts.forEach((chart: Chart, k: string) => {
-            chart.data = chart.data.filter((val: any) => val[facets.facetedField] === k)
-            const updateNestedData = ((g: Guide) => g.data = JSON.parse(JSON.stringify(chart.data)))
+    switch (olliVisSpec.type) {
+        case "facetedChart":
+            olliVisSpec.charts.forEach((chart: Chart, facetValue: string) => {
+                chart.data = chart.data.filter((val: any) => val[olliVisSpec.facetedField] === facetValue)
+                const updateNestedData = ((g: Guide) => g.data = JSON.parse(JSON.stringify(chart.data)))
 
-            chart.axes.forEach(updateNestedData)
-            chart.legends.forEach(updateNestedData)
-        })
-        node = informationToNode(olliVisSpec.description, null, olliVisSpec.data, "multiView", olliVisSpec);
-    } else {
-        const axesString: string = olliVisSpec.axes.length > 0 ?
-            olliVisSpec.axes.length == 2 ?
-                ` ${olliVisSpec.axes.length} axes` :
-                ` ${olliVisSpec.axes[0].orient} axis` :
-            '';
-        const legendsString: string = olliVisSpec.legends.length === 1 ? ` and ${olliVisSpec.legends.length} legend` : ''
-        node = informationToNode(olliVisSpec.description, null, olliVisSpec.data, "chart", olliVisSpec);
+                chart.axes.forEach(updateNestedData)
+                chart.legends.forEach(updateNestedData)
+            })
+            return informationToNode(null, olliVisSpec.data, "multiView", olliVisSpec);
+        case "chart":
+            return informationToNode(null, olliVisSpec.data, "chart", olliVisSpec);
+        default:
+            throw `olliVisSpec.type ${(olliVisSpec as any).type} not handled in olliVisSpecToTree`;
     }
-    return node
 }
 
 /**
@@ -39,13 +33,12 @@ export function olliVisSpecToTree(olliVisSpec: OlliVisSpec): AccessibilityTreeNo
 function generateMultiViewChildren(parent: AccessibilityTreeNode, multiViewChart: FacetedChart): AccessibilityTreeNode[] {
     multiViewChart.type === "facetedChart"
     let charts: AccessibilityTreeNode[] = []
-    multiViewChart.charts.forEach((c: Chart, k: string, m: Map<any, Chart>) => {
+    multiViewChart.charts.forEach((chart: Chart, field: string, m: Map<string, Chart>) => {
         charts.push(informationToNode(
-            `A facet titled ${k}, ${charts.length + 1} of ${m.size}`,
             parent,
             multiViewChart.data,
             "chart",
-            c))
+            chart))
     })
 
     return charts;
@@ -92,17 +85,16 @@ function generateChartChildren(childrenNodes: AccessibilityTreeNode[], parent: A
             maxValue = new Date(maxValue).toLocaleString("en-US", { year: 'numeric', month: 'short', day: 'numeric' });
         }
 
-        const description = `${axis.title} ${scaleStr}with values from ${minValue} to ${maxValue}`;
-        childrenNodes.push(informationToNode(description, parent, axis.data, axis.title.includes("Y-Axis") ? "yAxis" : "xAxis", axis));
+        childrenNodes.push(informationToNode(parent, axis.data, axis.title.includes("Y-Axis") ? "yAxis" : "xAxis", axis));
         return generateChartChildren(childrenNodes, parent, axes, legends, grids);
     } else if (legends.length > 0) {
         const legend: Guide = legends.pop()!;
-        let node: AccessibilityTreeNode = informationToNode(legend.title, parent, legend.data, "legend", legend)
+        let node: AccessibilityTreeNode = informationToNode(parent, legend.data, "legend", legend)
         childrenNodes.push(node);
         return generateChartChildren(childrenNodes, parent, axes, legends, grids);
     } else if (grids.length > 0 && grids.length === 2) {
         const grid: Guide[] = [grids.pop()!, grids.pop()!];
-        childrenNodes.push(informationToNode("Grid view of the data", parent, grid[0].data, "grid", grid))
+        childrenNodes.push(informationToNode(parent, grid[0].data, "grid", grid))
         return generateChartChildren(childrenNodes, parent, axes, legends, grids);
     } else {
         return childrenNodes;
@@ -122,7 +114,7 @@ function generateStructuredNodeChildren(parent: AccessibilityTreeNode, field: st
     const lowerCaseDesc: string = parent.description.toLowerCase();
     if (isStringArray(values) && !field.includes("date") || parent.type === "legend") {
         return values.map((grouping: any) => {
-            return informationToNode(`${[[grouping]]}`, parent, data.filter((node: any) => node[field] === grouping), "filteredData", data.filter((node: any) => node[field] === grouping))
+            return informationToNode(parent, data.filter((node: any) => node[field] === grouping), "filteredData", data.filter((node: any) => node[field] === grouping))
         })
     } else {
         const ticks: number[] = values as number[]
@@ -157,7 +149,7 @@ function generateStructuredNodeChildren(parent: AccessibilityTreeNode, field: st
                 desc = `${range},`
             }
 
-            return informationToNode(desc, parent, filterData(range[0], range[1]), "filteredData", filterData(range[0], range[1]));
+            return informationToNode(parent, filterData(range[0], range[1]), "filteredData", filterData(range[0], range[1]));
         });
     }
 }
@@ -192,7 +184,7 @@ function generateGridChildren(parent: AccessibilityTreeNode, fields: string[], f
     yIncrements.forEach((yIncrement: number[] | string[]) => {
         xIncrements.forEach((xIncrement: number[] | string[]) => {
             const filteredSelection: any[] = filterData(xIncrement[0], yIncrement[0], xIncrement[1], yIncrement[1]);
-            childNodes.push(informationToNode(`${[yIncrement, xIncrement]}`, parent, filteredSelection, "filteredData", filteredSelection));
+            childNodes.push(informationToNode(parent, filteredSelection, "filteredData", filteredSelection));
         })
     })
     return childNodes;
@@ -252,7 +244,7 @@ function generateFilteredDataChildren(childrenNodes: AccessibilityTreeNode[], fi
                 objCopy[key] = dataPoint[key]
             }
         })
-        childrenNodes.push(informationToNode(nodeToDesc(dataPoint), parent, [objCopy], "data"))
+        childrenNodes.push(informationToNode(parent, [objCopy], "data"))
         generateFilteredDataChildren(childrenNodes, filteredSelection, parent)
     }
     return childrenNodes
@@ -292,7 +284,7 @@ function generateChildNodes(type: NodeType, parent: AccessibilityTreeNode, gener
  */
 function informationToNode(parent: AccessibilityTreeNode | null, selected: any[], type: NodeType, childrenInformation?: any): AccessibilityTreeNode {
     let node: AccessibilityTreeNode = {
-        description: "",
+        description: "", // TODO
         parent: parent,
         children: [],
         selected: selected,

@@ -10,7 +10,7 @@ export type Mark = "point" | "bar" | "rect" | "line" | "geoshape" | "circle" | "
  * later be used to create an explorable Accessibility Tree.
  */
  type BaseOlliVisSpec = {
-    type: string,
+    type: "chart" | "facetedChart",
     data: any[],
     dataFieldsUsed: string[],
  }
@@ -24,7 +24,7 @@ export type Mark = "point" | "bar" | "rect" | "line" | "geoshape" | "circle" | "
     axes: Axis[] ,
     legends: Legend[],
     gridNodes: Guide[],
-    markUsed?: Mark,
+    mark?: Mark,
     title? : string
 }
 
@@ -34,7 +34,7 @@ export type Mark = "point" | "bar" | "rect" | "line" | "geoshape" | "circle" | "
 export interface FacetedChart extends BaseOlliVisSpec {
     type: "facetedChart",
     // maps faceted value to chart
-    charts: Map<any, Chart>,
+    charts: Map<string, Chart>,
     facetedField: string,
 }
 
@@ -58,7 +58,6 @@ export const facetedChart = (fields: Omit<FacetedChart, 'type'>): FacetedChart =
 export type Guide = {
     values: string[] | number[],
     title: string,
-    data: any[],
     field: string | string[],
     markUsed?: Mark,
     scaleType?: string,
@@ -82,8 +81,3 @@ export interface Legend extends Guide {
  * Interface describing how a visualization adapter should be created
  */
 export type VisAdapter<T> = (spec: T) => Promise<OlliVisSpec>;
-
-/**
- * Observable-Plot does not have any exported types
- */
-export type ObservablePlotSpec = any;

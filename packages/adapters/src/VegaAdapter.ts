@@ -142,7 +142,6 @@ function parseAxisInformation(axis: any): Axis {
     return {
         values: ticks,
         title: title === undefined ? axisStr : `${axisStr} titled '${title.items[0].text}'`,
-        data: getData(),
         field: fields,
         scaleType: spec.scales?.find((specScale: any) => specScale.name === scale)?.type,
         orient: orient
@@ -171,7 +170,6 @@ function parseLegendInformation(legendNode: any): Legend {
     return {
         values: labels.map((n: any) => n.items.find((el: any) => el.role === "legend-label").items[0].datum.value),
         title: title,
-        data: data,
         field: (field as string),
         scaleType: spec.scales?.find((specScale: any) => specScale.name === scale)?.type,
         type: "symbol" // TODO hardcoded legend type
