@@ -18,7 +18,6 @@ export function olliVisSpecToTree(olliVisSpec: OlliVisSpec): AccessibilityTreeNo
             chart.legends.forEach(updateNestedData)
         })
         node = informationToNode(olliVisSpec.description, null, olliVisSpec.data, "multiView", olliVisSpec);
-        node.description += ` with ${node.children.length} nested charts`
     } else {
         const axesString: string = olliVisSpec.axes.length > 0 ?
             olliVisSpec.axes.length == 2 ?
@@ -27,7 +26,6 @@ export function olliVisSpecToTree(olliVisSpec: OlliVisSpec): AccessibilityTreeNo
             '';
         const legendsString: string = olliVisSpec.legends.length === 1 ? ` and ${olliVisSpec.legends.length} legend` : ''
         node = informationToNode(olliVisSpec.description, null, olliVisSpec.data, "chart", olliVisSpec);
-        node.description += ` with ${axesString} ${legendsString}`
     }
     return node
 }
@@ -99,9 +97,7 @@ function generateChartChildren(childrenNodes: AccessibilityTreeNode[], parent: A
         return generateChartChildren(childrenNodes, parent, axes, legends, grids);
     } else if (legends.length > 0) {
         const legend: Guide = legends.pop()!;
-        const scaleType = legend.scaleType ? `for ${legend.scaleType} scale ` : "";
         let node: AccessibilityTreeNode = informationToNode(legend.title, parent, legend.data, "legend", legend)
-        node.description = `Legend titled '${node.description}' ${scaleType}with ${node.children.length} values`;
         childrenNodes.push(node);
         return generateChartChildren(childrenNodes, parent, axes, legends, grids);
     } else if (grids.length > 0 && grids.length === 2) {
@@ -294,9 +290,9 @@ function generateChildNodes(type: NodeType, parent: AccessibilityTreeNode, gener
  * @param childrenInformation changing variable to assist with generating more nodes of the tree
  * @returns The {@link AccessibilityTreeNode} from the provided parameters
  */
-function informationToNode(desc: string, parent: AccessibilityTreeNode | null, selected: any[], type: NodeType, childrenInformation?: any): AccessibilityTreeNode {
+function informationToNode(parent: AccessibilityTreeNode | null, selected: any[], type: NodeType, childrenInformation?: any): AccessibilityTreeNode {
     let node: AccessibilityTreeNode = {
-        description: desc,
+        description: "",
         parent: parent,
         children: [],
         selected: selected,
@@ -305,7 +301,6 @@ function informationToNode(desc: string, parent: AccessibilityTreeNode | null, s
     }
 
     if (childrenInformation) node.children = generateChildNodes(type, node, childrenInformation);
-    node.description = nodeToDesc(node);
     return node
 }
 

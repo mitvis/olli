@@ -1,3 +1,5 @@
+import { AxisOrient, LegendType } from "vega";
+
 /**
  * Detailing the different marks that can exist in a chart
  */
@@ -9,7 +11,6 @@ export type Mark = "point" | "bar" | "rect" | "line" | "geoshape" | "circle" | "
  */
  type BaseOlliVisSpec = {
     type: string,
-    description: string,
     data: any[],
     dataFieldsUsed: string[],
  }
@@ -22,9 +23,7 @@ export type Mark = "point" | "bar" | "rect" | "line" | "geoshape" | "circle" | "
     type: "chart",
     axes: Axis[] ,
     legends: Legend[],
-    description: string,
     gridNodes: Guide[],
-    dataFieldsUsed: string[],
     markUsed?: Mark,
     title? : string
 }
@@ -69,14 +68,14 @@ export type Guide = {
  * Extending the {@link Guide} interface for visualization axes
  */
 export interface Axis extends Guide {
-    orient: string,
+    orient: AxisOrient
 }
 
 /**
  * Extending the {@link Guide} interface for visualization legends
  */
 export interface Legend extends Guide {
-    type: string,
+    type: LegendType
 }
 
 /**

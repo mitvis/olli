@@ -68,7 +68,6 @@ function parseMultiView(scenegraph: any, spec: any): OlliVisSpec {
     );
 
     let node = facetedChart({
-        description: "",
         data: getVisualizationData(scenegraph, spec),
         dataFieldsUsed: fields,
         charts: nestedHeirarchies,
@@ -76,8 +75,6 @@ function parseMultiView(scenegraph: any, spec: any): OlliVisSpec {
     })
 
     node.dataFieldsUsed.push(facetedField)
-
-    constructChartDescription(node, spec)
     return node;
 }
 
@@ -94,13 +91,11 @@ function parseChart(scenegraph: any, spec: any): Chart {
     let node = chart({
         axes: axes.filter((axis: Axis) => axis.field !== undefined),
         legends: legends,
-        description: "",
         dataFieldsUsed: fields,
         gridNodes: [],
         data: getVisualizationData(scenegraph, spec),
         markUsed: mark
     })
-    constructChartDescription(node, spec);
     modifyVisFromMark(node, mark, spec);
     return node
 }
@@ -160,21 +155,6 @@ function parseLegend(scenegraph: any, legendScenegraphNode: any, spec: any): Leg
         scaleType: spec.scales?.find((specScale: any) => specScale.name === scale)?.type,
         type: spec.encoding['color'].type,
         markUsed: spec.mark
-    }
-}
-
-/**
- *
- * @param node The {@link OlliVisSpec} whose description is being modified
- * @param spec The specification of the Vega-Lite visualization being deconstructed
- */
-function constructChartDescription(node: OlliVisSpec, spec: any): void {
-    let desc: string = spec.description ? spec.description : "";
-    if (node.type === "facetedChart") {
-        desc = `${desc} with ${node.charts.size} faceted charts.`
-        node.description = spec.description;
-    } else {
-        node.description = `${desc}`;
     }
 }
 

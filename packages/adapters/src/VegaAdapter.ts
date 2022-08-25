@@ -41,7 +41,6 @@ function parseFacets(): FacetedChart {
         })
     }
 
-    const baseVisDescription = vegaVisDescription(spec);
     const axes = filterUniqueNodes(findScenegraphNodes(scene, "axis").map((axisNode: any) => parseAxisInformation(axisNode)));
     const legends = filterUniqueNodes(findScenegraphNodes(scene, "legend").map((legendNode: any) => parseLegendInformation(legendNode)));
     const chartItems = scene.items.filter((el: any) => el.role === "scope")[0].items;
@@ -70,7 +69,6 @@ function parseFacets(): FacetedChart {
         charts: charts,
         data: getData(),
         dataFieldsUsed: fields,
-        description: baseVisDescription,
         facetedField: facetField
     })
 
@@ -78,7 +76,6 @@ function parseFacets(): FacetedChart {
 }
 
 function parseSingleChart(ch: any): Chart {
-    const baseVisDescription = vegaVisDescription(spec);
     const axes = findScenegraphNodes(ch, "axis").map((axisNode: any) => parseAxisInformation(axisNode));
     const legends = findScenegraphNodes(ch, "legend").map((legendNode: any) => parseLegendInformation(legendNode))
     const gridNodes: Guide[] = []// getGridNodes(axes);
@@ -91,7 +88,6 @@ function parseSingleChart(ch: any): Chart {
         data: data,
         axes: axes,
         legends: legends,
-        description: baseVisDescription,
         gridNodes: gridNodes,
         dataFieldsUsed: dataFields
     })
@@ -112,13 +108,6 @@ function getData(): any[] {
     } catch (error) {
         throw new Error(`No data defined in the Vega Spec \n ${error}`)
     }
-}
-
-/**
- * @returns the general high-level description of the visualization
- */
-function vegaVisDescription(spec: Spec): string {
-    return spec.description ? spec.description : "[Root]";
 }
 
 /**
@@ -185,7 +174,7 @@ function parseLegendInformation(legendNode: any): Legend {
         data: data,
         field: (field as string),
         scaleType: spec.scales?.find((specScale: any) => specScale.name === scale)?.type,
-        type: ""
+        type: "symbol" // TODO hardcoded legend type
     }
 
 }

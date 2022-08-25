@@ -19,7 +19,7 @@ export const ObservablePlotAdapter: VisAdapter<ObservablePlotSpec> = async (plot
 /**
  * Specifies that the provided visualization information relates to a faceted chart
  * @param plot The ObservablePlot spec to render the visualization
- * @param svg the rendered SVGElement of the visualization 
+ * @param svg the rendered SVGElement of the visualization
  * @returns the generated {@link FacetedChart}
  */
 function plotToFacetedChart(plot: any, svg: Element): FacetedChart {
@@ -63,7 +63,6 @@ function plotToFacetedChart(plot: any, svg: Element): FacetedChart {
         charts: charts,
         data: plotMark.data,
         dataFieldsUsed: fields,
-        description: `Faceted chart`,
         facetedField: facetField,
     };
 
@@ -73,7 +72,7 @@ function plotToFacetedChart(plot: any, svg: Element): FacetedChart {
 /**
  * Specifies that the provided visualization information relates to a single chart
  * @param plot The ObservablePlot spec to render the visualization
- * @param svg the rendered Element of the visualization 
+ * @param svg the rendered Element of the visualization
  * @param data A filtered data set used in the chart
  * @returns the generated {@link Chart}
  */
@@ -97,7 +96,6 @@ function plotToChart(plot: any, svg: Element): Chart {
         legends: legends,
         data: plotMark.data,
         dataFieldsUsed: fields,
-        description: `A chart with ${plotMark.ariaLabel} marks`,
         gridNodes: []
     }
 
@@ -112,7 +110,7 @@ function plotToChart(plot: any, svg: Element): Chart {
 /**
  * Creates an {@link Axis} from the provided spec and svg
  * @param plot The ObservablePlot spec to render the visualization
- * @param svg the SVG element of an axis 
+ * @param svg the SVG element of an axis
  * @returns A {@link Axis} of the visualization
  */
 function parseAxis(plot: any, svg: Element): Axis {
@@ -162,7 +160,7 @@ function parseAxis(plot: any, svg: Element): Axis {
 /**
  * Creates an {@link Legend} from the provided spec and svg
  * @param plot The ObservablePlot spec to render the visualization
- * @param svg the SVG element of an legend 
+ * @param svg the SVG element of an legend
  * @returns A {@link Legend} of the visualization
  */
 function parseLegend(plot: any, svg: Element): Legend { //TODO: Does not support 'ramp' legend types when the legend is rendered as an SVG
@@ -189,7 +187,7 @@ function parseLegend(plot: any, svg: Element): Legend { //TODO: Does not support
         data: plotMark.data,
         field: field,
         title: field,
-        type: 'ordinal',
+        type: 'symbol' // TODO hardcoded legend type
     }
 
     if (identifyMark(plotMark.ariaLabel) !== "[Undefined]") {
