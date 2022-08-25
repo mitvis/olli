@@ -1,6 +1,6 @@
 {
   "name": "olli-adapters",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "The adapters to be imported to transform visualizations from concrete libraries into an OlliVisSpec",
   "main": "./dist/adapters.js",
   "types": "./dist/index.d.ts",
