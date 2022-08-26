@@ -23,7 +23,7 @@ export type Mark = "point" | "bar" | "rect" | "line" | "geoshape" | "circle" | "
     type: "chart",
     axes: Axis[] ,
     legends: Legend[],
-    gridNodes: Guide[],
+    gridCells: Guide[],
     mark?: Mark,
     title? : string
 }
@@ -56,9 +56,10 @@ export const facetedChart = (fields: Omit<FacetedChart, 'type'>): FacetedChart =
  *   field: the object field that will be used to compare data values to range values
  */
 export type Guide = {
+    type: 'discrete' | 'continuous',
     values: string[] | number[],
     title: string,
-    field: string | string[],
+    field: string,
     markUsed?: Mark,
     scaleType?: string,
 }
@@ -67,14 +68,14 @@ export type Guide = {
  * Extending the {@link Guide} interface for visualization axes
  */
 export interface Axis extends Guide {
-    orient: AxisOrient
+    axisType: 'x' | 'y'
 }
 
 /**
  * Extending the {@link Guide} interface for visualization legends
  */
 export interface Legend extends Guide {
-    type: LegendType
+    legendType: LegendType
 }
 
 /**

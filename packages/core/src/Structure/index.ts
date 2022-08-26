@@ -1,105 +1,40 @@
-import { Guide, Chart, OlliVisSpec, Mark, FacetedChart } from "olli-adapters/src/Types";
-import { AccessibilityTreeNode, NodeType } from "./Types";
+import { Guide, Chart, OlliVisSpec, Mark, FacetedChart, chart, Axis, Legend } from "olli-adapters/src/Types";
+import { AccessibilityTree, AccessibilityTreeNode, NodeType } from "./Types";
 
 /**
  * Constructs an {@link AccessibilityTreeNode} based off of a generalized visualization
  * @param olliVisSpec the {@link Chart} or {@link CompositeChart} to transform into a tree
  * @returns The transormed {@link AccessibilityTreeNode}
  */
-export function olliVisSpecToTree(olliVisSpec: OlliVisSpec): AccessibilityTreeNode {
+export function olliVisSpecToTree(olliVisSpec: OlliVisSpec): AccessibilityTree {
     switch (olliVisSpec.type) {
         case "facetedChart":
-            olliVisSpec.charts.forEach((chart: Chart, facetValue: string) => {
-                chart.data = chart.data.filter((val: any) => val[olliVisSpec.facetedField] === facetValue)
-                const updateNestedData = ((g: Guide) => g.data = JSON.parse(JSON.stringify(chart.data)))
-
-                chart.axes.forEach(updateNestedData)
-                chart.legends.forEach(updateNestedData)
-            })
-            return informationToNode(null, olliVisSpec.data, "multiView", olliVisSpec);
+            return {
+                root: olliVisSpecToNode("multiView", olliVisSpec.data, null, olliVisSpec),
+                fieldsUsed: olliVisSpec.dataFieldsUsed // TODO this should probably not be in the adapter
+            }
         case "chart":
-            return informationToNode(null, olliVisSpec.data, "chart", olliVisSpec);
+            return {
+                root: olliVisSpecToNode("chart", olliVisSpec.data, null, olliVisSpec),
+                fieldsUsed: olliVisSpec.dataFieldsUsed
+            }
         default:
             throw `olliVisSpec.type ${(olliVisSpec as any).type} not handled in olliVisSpecToTree`;
     }
 }
 
-/**
- * Generates children tree nodes for the given parent node.
- * @param parent The root faceted chart to be the parent of each nested chart
- * @param multiViewChart The {@link FacetedChart} of the abstracted visualization
- * @returns an array of {@link AccessibilityTreeNode} to be the given parent's children
- */
-function generateMultiViewChildren(parent: AccessibilityTreeNode, multiViewChart: FacetedChart): AccessibilityTreeNode[] {
-    multiViewChart.type === "facetedChart"
-    let charts: AccessibilityTreeNode[] = []
-    multiViewChart.charts.forEach((chart: Chart, field: string, m: Map<string, Chart>) => {
-        charts.push(informationToNode(
-            parent,
-            multiViewChart.data,
-            "chart",
-            chart))
-    })
-
-    return charts;
-}
-
-/**
- * Recursively generates children nodes of a chart's structured elements for the provided parent
- * @param childrenNodes the array of children nodes to eventually return to the parent
- * @param parent The root chart to be the parent of each nested chart
- * @param axes The {@link Guide}s of axes to be transformed into {@link AccessibilityTreeNode}s
- * @param legends The {@link Guide}s of legends to be transformed into {@link AccessibilityTreeNode}s
- * @param grids The {@link Guide}s of axes with grid lines to be transformed into {@link AccessibilityTreeNode}s
- * @returns an array of {@link AccessibilityTreeNode} to be the given parent's children
- */
-function generateChartChildren(childrenNodes: AccessibilityTreeNode[], parent: AccessibilityTreeNode,
-    axes: Guide[], legends: Guide[], grids: Guide[]): AccessibilityTreeNode[] {
-    if (axes.length > 0) {
-        const axis: Guide = axes.pop()!;
-        const scaleStr: string = axis.scaleType ? `for a ${axis.scaleType} scale ` : "";
-        let axisField: string = Array.isArray(axis.field) ? axis.field[1] : (axis.field as string);
-        let defaultRange: number | string = axis.data[0][axisField]
-
-        // TODO: Re-used code from line 143. Make utility function and add try/catch since the data should not be undefined!
-        if (defaultRange === undefined) {
-            let updatedField = Object.keys(axis.data[0]).find((k: string) => k.includes(axisField) || axisField.includes(k))
-            if (updatedField) {
-                axisField = updatedField
-                defaultRange = axis.data[0][axisField];
-            }
-        }
-
-        let minValue: number | string = axis.data.reduce((min: any, val: any) => {
-            if (val[axisField] !== null && val[axisField] < min) return val[axisField]
-            return min
-        }, axis.data[0][axisField])
-
-        let maxValue: number | string = axis.data.reduce((max: any, val: any) => {
-            if (val[axisField] !== null && val[axisField] > max) return val[axisField]
-            return max
-        }, axis.data[0][axisField])
-
-        if (axisField.toLowerCase().includes("date")) {
-            minValue = new Date(minValue).toLocaleString("en-US", { year: 'numeric', month: 'short', day: 'numeric' });
-            maxValue = new Date(maxValue).toLocaleString("en-US", { year: 'numeric', month: 'short', day: 'numeric' });
-        }
-
-        childrenNodes.push(informationToNode(parent, axis.data, axis.title.includes("Y-Axis") ? "yAxis" : "xAxis", axis));
-        return generateChartChildren(childrenNodes, parent, axes, legends, grids);
-    } else if (legends.length > 0) {
-        const legend: Guide = legends.pop()!;
-        let node: AccessibilityTreeNode = informationToNode(parent, legend.data, "legend", legend)
-        childrenNodes.push(node);
-        return generateChartChildren(childrenNodes, parent, axes, legends, grids);
-    } else if (grids.length > 0 && grids.length === 2) {
-        const grid: Guide[] = [grids.pop()!, grids.pop()!];
-        childrenNodes.push(informationToNode(parent, grid[0].data, "grid", grid))
-        return generateChartChildren(childrenNodes, parent, axes, legends, grids);
-    } else {
-        return childrenNodes;
+function getFieldsUsedForChart(olliVisSpec: OlliVisSpec): string[] {
+    switch (olliVisSpec.type) {
+        case "facetedChart":
+            return [olliVisSpec.facetedField, ...[...olliVisSpec.charts.values()].flatMap((chart: Chart) => getFieldsUsedForChart(chart))];
+        case "chart":
+            return (olliVisSpec.axes as Guide[]).concat(olliVisSpec.legends).reduce((fields: string[], guide: Guide) => fields.concat(guide.field), []);
+        default:
+            throw `olliVisSpec.type ${(olliVisSpec as any).type} not handled in olliVisSpecToTree`;
     }
 }
+
+
 
 /**
  * Generates the incremental children for each structured element of a visualization
@@ -114,7 +49,7 @@ function generateStructuredNodeChildren(parent: AccessibilityTreeNode, field: st
     const lowerCaseDesc: string = parent.description.toLowerCase();
     if (isStringArray(values) && !field.includes("date") || parent.type === "legend") {
         return values.map((grouping: any) => {
-            return informationToNode(parent, data.filter((node: any) => node[field] === grouping), "filteredData", data.filter((node: any) => node[field] === grouping))
+            return olliVisSpecToNode(parent, data.filter((node: any) => node[field] === grouping), "filteredData", data.filter((node: any) => node[field] === grouping))
         })
     } else {
         const ticks: number[] = values as number[]
@@ -149,7 +84,7 @@ function generateStructuredNodeChildren(parent: AccessibilityTreeNode, field: st
                 desc = `${range},`
             }
 
-            return informationToNode(parent, filterData(range[0], range[1]), "filteredData", filterData(range[0], range[1]));
+            return olliVisSpecToNode(parent, filterData(range[0], range[1]), "filteredData", filterData(range[0], range[1]));
         });
     }
 }
@@ -184,7 +119,7 @@ function generateGridChildren(parent: AccessibilityTreeNode, fields: string[], f
     yIncrements.forEach((yIncrement: number[] | string[]) => {
         xIncrements.forEach((xIncrement: number[] | string[]) => {
             const filteredSelection: any[] = filterData(xIncrement[0], yIncrement[0], xIncrement[1], yIncrement[1]);
-            childNodes.push(informationToNode(parent, filteredSelection, "filteredData", filteredSelection));
+            childNodes.push(olliVisSpecToNode(parent, filteredSelection, "filteredData", filteredSelection));
         })
     })
     return childNodes;
@@ -244,7 +179,7 @@ function generateFilteredDataChildren(childrenNodes: AccessibilityTreeNode[], fi
                 objCopy[key] = dataPoint[key]
             }
         })
-        childrenNodes.push(informationToNode(parent, [objCopy], "data"))
+        childrenNodes.push(olliVisSpecToNode(parent, [objCopy], "data"))
         generateFilteredDataChildren(childrenNodes, filteredSelection, parent)
     }
     return childrenNodes
@@ -282,18 +217,75 @@ function generateChildNodes(type: NodeType, parent: AccessibilityTreeNode, gener
  * @param childrenInformation changing variable to assist with generating more nodes of the tree
  * @returns The {@link AccessibilityTreeNode} from the provided parameters
  */
-function informationToNode(parent: AccessibilityTreeNode | null, selected: any[], type: NodeType, childrenInformation?: any): AccessibilityTreeNode {
+function olliVisSpecToNode(type: NodeType, selected: any[], parent: AccessibilityTreeNode | null, olliVisSpec: OlliVisSpec, guide?: Guide): AccessibilityTreeNode {
     let node: AccessibilityTreeNode = {
-        description: "", // TODO
-        parent: parent,
-        children: [],
-        selected: selected,
         type: type,
-        fieldsUsed: parent !== null ? parent.fieldsUsed : childrenInformation.dataFieldsUsed
+        parent: parent,
+        selected: selected,
+        //
+        description: nodeToDesc(type, selected, parent, olliVisSpec),
+        children: [],
     }
 
-    if (childrenInformation) node.children = generateChildNodes(type, node, childrenInformation);
-    return node
+    switch (type) {
+        case "multiView":
+            const facetedChart = olliVisSpec as FacetedChart;
+            node.children = [...facetedChart.charts.entries()].map(([facetValue, chart]: [string, Chart]) => {
+                return olliVisSpecToNode(
+                    "chart",
+                    selected.filter((datum: any) => datum[facetedChart.facetedField] === facetValue),
+                    node,
+                    chart);
+            });
+            break;
+        case "chart":
+            const chart = olliVisSpec as Chart;
+            node.children = [
+                ...chart.axes.map(axis => {
+                    return olliVisSpecToNode(
+                        axis.type === 'x' ? 'xAxis' : 'yAxis',
+                        selected,
+                        node,
+                        chart,
+                        axis);
+                }),
+                ...chart.legends.map(legend => {
+                    return olliVisSpecToNode(
+                        'legend',
+                        selected,
+                        node,
+                        chart,
+                        legend);
+                }),
+                ...chart.gridCells.map(gridCell => {
+                    return olliVisSpecToNode(
+                        'grid',
+                        selected,
+                        node,
+                        chart,
+                        gridCell);
+                }),
+            ]
+            break;
+        case "xAxis":
+        case "yAxis":
+            const axis = guide as Axis;
+            break;
+        case "legend":
+            const legend = guide as Legend;
+            break;
+        case "filteredData":
+            break;
+        case "grid":
+            break;
+        case "data":
+            // pass; no children to generate
+            break;
+        default:
+            throw `Node type ${type} not handled in olliVisSpecToNode`;
+    }
+
+    return node;
 }
 
 /**
@@ -301,19 +293,19 @@ function informationToNode(parent: AccessibilityTreeNode | null, selected: any[]
  * @param node The node whose description is being created
  * @returns A description based on the provided {@link AccessibilityTreeNode}
  */
-function nodeToDesc(node: AccessibilityTreeNode): string {
-    if (node.type === "multiView" || node.type === "chart") {
-        return node.description
-    } else if (node.type === "xAxis" || node.type === "yAxis") {
-        return node.description
-    } else if (node.type === `legend`) {
-        return node.description
-    } else if (node.type === "filteredData") {
-        return `Range ${node.description} ${node.selected.length} ${node.selected.length === 1 ? 'value' : 'values'} in the interval`
-    } else if (node.type === `grid`) {
-        return node.description
-    } else if (node.type === 'data') {
-        return node.fieldsUsed.reduce((desc: string, currentKey: string) => `${desc} ${currentKey}: ${node.selected[0][currentKey]}`, "");
-    }
+function nodeToDesc(type: NodeType, selected: any[], parent: AccessibilityTreeNode | null, olliVisSpec: OlliVisSpec): string {
+    // if (node.type === "multiView" || node.type === "chart") {
+    //     return node.description
+    // } else if (node.type === "xAxis" || node.type === "yAxis") {
+    //     return node.description
+    // } else if (node.type === `legend`) {
+    //     return node.description
+    // } else if (node.type === "filteredData") {
+    //     return `Range ${node.description} ${node.selected.length} ${node.selected.length === 1 ? 'value' : 'values'} in the interval`
+    // } else if (node.type === `grid`) {
+    //     return node.description
+    // } else if (node.type === 'data') {
+    //     return node.fieldsUsed.reduce((desc: string, currentKey: string) => `${desc} ${currentKey}: ${node.selected[0][currentKey]}`, "");
+    // }
     return "";
 }

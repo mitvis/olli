@@ -18,7 +18,7 @@ type OlliConfigOptions = {
  * @param config The {@link OlliConfigOptions} object to specify how an accessible visualization should be generated.
  */
 export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTMLElement {
-    let chartEncodingTree: AccessibilityTreeNode = olliVisSpecToTree(olliVisSpec);
+    const chartEncodingRoot: AccessibilityTreeNode = olliVisSpecToTree(olliVisSpec).root;
 
     const htmlRendering: HTMLElement = document.createElement("div");
     htmlRendering.classList.add('olli-vis');
@@ -30,11 +30,11 @@ export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTML
 
     switch (config.renderType) {
         case ("table"):
-            htmlRendering.appendChild(renderTable(chartEncodingTree));
+            htmlRendering.appendChild(renderTable(chartEncodingRoot));
             break;
         case ('tree'):
         default:
-            const ul = renderTree(chartEncodingTree);
+            const ul = renderTree(chartEncodingRoot);
             htmlRendering.appendChild(ul);
             new TreeLinks(ul).init();
             break;

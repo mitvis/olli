@@ -1,3 +1,4 @@
+import { isNumeric } from "vega-lite";
 import { VisAdapter, OlliVisSpec, FacetedChart, Chart, Axis, Legend, Guide, Mark } from "./Types";
 // Observable-Plot has no type declaration file :/
 const Plot = require("@observablehq/plot")
@@ -101,7 +102,7 @@ function plotToChart(plot: any, svg: Element): Chart {
         legends: legends,
         data: plotMark.data,
         dataFieldsUsed: fields,
-        gridNodes: []
+        gridCells: []
     }
 
     if (identifyMark(plotMark.ariaLabel) !== "[Undefined]") {
@@ -120,11 +121,10 @@ function plotToChart(plot: any, svg: Element): Chart {
  */
 function parseAxis(plot: any, svg: Element): Axis {
     const axisType = svg?.getAttribute('aria-label') === 'y-axis' ? 'y' : 'x'
-    const orient = axisType === 'y' ? 'left' : 'bottom';
     const plotMark = plot.marks.filter((mark: any) => mark.ariaLabel !== 'rule')[0]
     const channel = plotMark.channels.find((c: any) => c.scale === axisType)
     const field: string = typeof channel.value === 'object' ? channel.value.label : channel.value
-    const ticks: string[] | number[] = Object.keys(svg.children).reduce((tArr: number[] | string[], k: string) => {
+    const ticks: string[] = Object.keys(svg.children).map((k: string) => {
         const cObj: Element = svg.children[parseInt(k)]
         let tickValue: string = '';
         if (cObj.classList[0] === 'tick') {
@@ -135,23 +135,17 @@ function parseAxis(plot: any, svg: Element): Axis {
             })
         }
 
-        if (tickValue !== '') {
-            if (isNaN(parseInt(tickValue))) {
-                //@ts-ignore
-                tArr.push(tickValue)
-            } else {
-                //@ts-ignore
-                tArr.push(parseInt(tickValue.replace(/,/g, '')));
-            }
-        }
-        return tArr
-    }, [])
+        return tickValue;
+    }).filter(t => t.length);
+
+    const type = ticks.every(t => isNumeric(t)) ? 'continuous' : 'discrete';
 
     let guide: Axis = {
-        values: [...ticks] as string[] | number[],
+        type,
+        values: type === 'discrete' ? ticks : ticks.map(t => parseFloat(t)),
         title: `${svg?.getAttribute('aria-label')} titled ${field}`,
         field: field,
-        orient: orient
+        axisType: axisType
     }
 
     if (channel.type) {
@@ -170,27 +164,23 @@ function parseAxis(plot: any, svg: Element): Axis {
 function parseLegend(plot: any, svg: Element): Legend { //TODO: Does not support 'ramp' legend types when the legend is rendered as an SVG
     const plotMark = plot.marks.filter((mark: any) => mark.ariaLabel !== 'rule')[0];
     const channel = plotMark.channels.find((c: any) => c.scale === 'color');
-    const values: string[] | number[] = Object.keys(svg.children).reduce((a: string[] | number[], k: string) => {
+    const values: string[] = Object.keys(svg.children).map((k: string) => {
         let c = svg.children[parseInt(k)];
         if (c.nodeName !== 'STYLE') {
-            if (isNaN(parseInt(c.textContent!))) {
-                //@ts-ignore -> array "a" is considered to have type "never[]" unsure how to fix, so used ts-ignore
-                a.push(c.textContent);
-            } else {
-                //@ts-ignore
-                a.push(parseInt(c.textContent!.replace(/,/g, '')));
-            }
+            return c.textContent!;
         }
-
-        return a
-    }, [])
+        return '';
+    }).filter(x => x.length);
     const field: string = typeof channel.value === 'object' ? channel.value.label : channel.value
 
+    const type = values.every(v => isNumeric(v)) ? 'continuous' : 'discrete';
+
     let guide: Legend = {
-        values: values,
+        type,
+        values: type === 'discrete' ? values : values.map(v => parseFloat(v.replace(/,/g, ''))),
         field: field,
         title: field,
-        type: 'symbol' // TODO hardcoded legend type
+        legendType: type === 'discrete' ? 'symbol' : 'gradient'
     }
 
     if (identifyMark(plotMark.ariaLabel) !== "[Undefined]") {
@@ -270,7 +260,7 @@ function modifyVisFromMark(vis: Chart, mark: Mark): void {
             if (vis.title) {
                 vis.title = `Scatter plot with title ${vis.title} `;
             }
-            if (vis.axes.every((a: Axis) => typeof a.values[0] === "number")) vis.gridNodes = [...vis.axes];
+            if (vis.axes.every((a: Axis) => typeof a.values[0] === "number")) vis.gridCells = [...vis.axes];
             break;
     }
 }
