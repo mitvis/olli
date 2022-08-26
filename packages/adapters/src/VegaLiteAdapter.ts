@@ -3,7 +3,7 @@ import {
     VisAdapter,
     OlliVisSpec,
     Chart,
-    Mark,
+    OlliMark,
     Guide,
     Axis,
     Legend,
@@ -53,7 +53,7 @@ function parseMultiView(spec: any, scene: SceneGroup, data: any[]): OlliVisSpec 
         })
     }
 
-    let axes: Axis[] = filterUniqueNodes(findScenegraphNodes(scene, "axis").map((axis: any) => parseAxis(scene, axis, spec)))
+    let axes: Axis[] = filterUniqueNodes(findScenegraphNodes(scene, "axis").map((axis: any) => parseAxis(scene, axis, spec, data)))
     let legends: Legend[] = filterUniqueNodes(findScenegraphNodes(scene, "legend").map((legend: any) => parseLegend(legend, spec)))
     let fields = (axes as any[]).concat(legends).reduce((fieldArr: string[], guide: Guide) => fieldArr.concat(guide.field), [])
     let facetedField = spec.encoding.facet !== undefined ? spec.encoding.facet.field : spec.encoding['color'].field
@@ -95,7 +95,7 @@ function parseChart(spec: any, scene: SceneGroup, data: any[]): Chart {
         dataFieldsUsed: fields,
         gridCells: [],
         data,
-        mark: mark
+        mark
     })
     modifyVisFromMark(node, mark, spec);
     return node
@@ -131,8 +131,7 @@ function parseAxis(scene: SceneGroup, axisScenegraphNode: any, spec: any, data: 
         title: title,
         field: field,
         scaleType: spec.encoding[encodingKey].type,
-        axisType: axisType,
-        markUsed: spec.mark
+        axisType: axisType
     }
 }
 
@@ -162,27 +161,24 @@ function parseLegend(legendScenegraphNode: any, spec: any): Legend {
         values,
         title: spec.encoding['color'].title ? spec.encoding['color'].title : spec.encoding['color'].field,
         field: spec.encoding['color'].field,
-        scaleType: ?.type,
-        legendType: spec.encoding['color'].type,
-        markUsed: spec.mark
+        scaleType: scaleSpec?.type,
+        legendType: spec.encoding['color'].type
     }
 }
 
 /**
  *
  * @param vis The {@link ChartInformation} to update
- * @param mark The {@link Mark} used in the provided {@Link ChartInformation}
+ * @param mark The {@link OlliMark} used in the provided {@Link ChartInformation}
  * @param spec The Vega-Lite specification of the provided visualization
  */
-function modifyVisFromMark(vis: Chart, mark: Mark, spec: any): void {
+function modifyVisFromMark(vis: Chart, mark: OlliMark, spec: any): void {
     switch (mark) {
         case 'bar':
             const nomAxis = Object.keys(spec.encoding).filter((key: string) => {
                 return spec.encoding[key].type === "nominal" || spec.encoding[key].aggregate === undefined
             })[0]
             vis.axes = vis.axes.filter((visAxis: Guide) => visAxis.title.toLowerCase().includes(`${nomAxis}-axis`))
-            break;
-        case 'geoshape':
             break;
         case 'point':
             if (vis.title) {

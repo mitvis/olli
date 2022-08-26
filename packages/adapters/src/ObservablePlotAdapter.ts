@@ -1,5 +1,5 @@
 import { isNumeric } from "vega-lite";
-import { VisAdapter, OlliVisSpec, FacetedChart, Chart, Axis, Legend, Guide, Mark } from "./Types";
+import { VisAdapter, OlliVisSpec, FacetedChart, Chart, Axis, Legend, Guide, OlliMark } from "./Types";
 // Observable-Plot has no type declaration file :/
 const Plot = require("@observablehq/plot")
 
@@ -96,19 +96,17 @@ function plotToChart(plot: any, svg: Element): Chart {
     const plotMark = plot.marks.filter((mark: any) => mark.ariaLabel !== 'rule')[0]
     let fields: string[] = (axes as any[]).concat(legends).reduce((fieldArr: string[], guide: Guide) => fieldArr.concat(guide.field), []) //TODO: Same code as vega-lite adapter, create utility functions that can be reused accross adapters
 
-    let chart: Chart = {
+    const chart: Chart = {
         axes: axes,
         type: "chart",
+        mark: identifyMark(plotMark.ariaLabel),
         legends: legends,
         data: plotMark.data,
         dataFieldsUsed: fields,
         gridCells: []
     }
 
-    if (identifyMark(plotMark.ariaLabel) !== "[Undefined]") {
-        chart.mark = identifyMark(plotMark.ariaLabel);
-        modifyVisFromMark(chart, chart.mark)
-    }
+    modifyVisFromMark(chart, chart.mark)
 
     return chart
 }
@@ -183,10 +181,6 @@ function parseLegend(plot: any, svg: Element): Legend { //TODO: Does not support
         legendType: type === 'discrete' ? 'symbol' : 'gradient'
     }
 
-    if (identifyMark(plotMark.ariaLabel) !== "[Undefined]") {
-        guide.markUsed = identifyMark(plotMark.ariaLabel);
-    }
-
     if (plot.color.type) guide.type = plot.color.type
 
     return guide
@@ -230,31 +224,29 @@ function isMultiSeries(plot: any): boolean {
     return lineMarks && lineMarks.channels.some((c: any) => c.name === "stroke");
 }
 
-function identifyMark(m: string): Mark {
+function identifyMark(m: string): OlliMark {
     switch (m) {
         case ('dot'):
             return "point";
         case ('bar'):
-            return "rect";
+            return "bar";
         case ('line'):
             return "line";
         default:
-            return "[Undefined]"
+            return undefined
     }
 }
 
 /**
  *
  * @param vis The {@link Chart} to update
- * @param mark The {@link Mark} used in the provided {@Link ChartInformation}
+ * @param mark The {@link OlliMark} used in the provided {@Link ChartInformation}
  * @param spec The Vega-Lite specification of the provided visualization
  */
-function modifyVisFromMark(vis: Chart, mark: Mark): void {
+function modifyVisFromMark(vis: Chart, mark: OlliMark): void {
     switch (mark) {
-        case 'rect':
+        case 'bar':
             vis.axes = vis.axes.filter((visAxis: Guide) => visAxis.scaleType === "band")
-            break;
-        case 'geoshape':
             break;
         case 'point':
             if (vis.title) {

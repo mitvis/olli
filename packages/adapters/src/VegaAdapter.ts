@@ -1,6 +1,7 @@
-import { Spec, ScaleDataRef, Scale, ScaleData, Scene, SceneItem } from "vega";
+import { Spec, ScaleDataRef, Scale, ScaleData, Scene, SceneItem, Mark } from "vega";
 import { isNumeric } from "vega-lite";
-import { Guide, OlliVisSpec, VisAdapter, chart, Chart, Axis, Legend, facetedChart, FacetedChart } from "./Types";
+import { AnyMark } from "vega-lite/build/src/mark";
+import { Guide, OlliVisSpec, VisAdapter, chart, Chart, Axis, Legend, facetedChart, FacetedChart, OlliMark } from "./Types";
 import { findScenegraphNodes, getData, getVegaScene, scaleHasDiscreteRange, SceneGroup } from "./utils";
 
 /**
@@ -80,8 +81,12 @@ function parseSingleChart(spec: Spec, scene: Scene | SceneItem, data: any[]): Ch
     const chartTitle: string | undefined = findScenegraphNodes(scene, "title").length > 0 ?
         findScenegraphNodes(scene, "title")[0].items[0].items[0].items[0].text
         : undefined;
+
+    let mark: OlliMark = vegaMarkToOlliMark(spec.marks?.map(mark => mark.type)[0]); // TODO this is very lazy, write a better way to get the mark type
+
     let chartNode = chart({
         data,
+        mark,
         axes,
         legends,
         gridCells: [],
@@ -91,6 +96,15 @@ function parseSingleChart(spec: Spec, scene: Scene | SceneItem, data: any[]): Ch
         chartNode.title = chartTitle;
     }
     return chartNode;
+}
+
+function vegaMarkToOlliMark(mark?: string): OlliMark {
+    switch (mark) {
+        case 'symbol': return 'point';
+        case 'line': return 'line';
+        case 'rect': return 'bar';
+        default: return undefined;
+    }
 }
 
 /**

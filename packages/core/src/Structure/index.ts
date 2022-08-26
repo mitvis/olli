@@ -1,4 +1,4 @@
-import { Guide, Chart, OlliVisSpec, Mark, FacetedChart, chart, Axis, Legend } from "olli-adapters/src/Types";
+import { Guide, Chart, OlliVisSpec, OlliMark, FacetedChart, chart, Axis, Legend } from "olli-adapters/src/Types";
 import { AccessibilityTree, AccessibilityTreeNode, NodeType } from "./Types";
 
 /**
@@ -42,10 +42,10 @@ function getFieldsUsedForChart(olliVisSpec: OlliVisSpec): string[] {
  * @param field The data field used to compare idividual data points
  * @param values The groupings or increments of values for the structured element (ex: for axes these are the array of ticks)
  * @param data The array of data used in the visualization
- * @param markUsed {@link Mark} of the visualization
+ * @param markUsed {@link OlliMark} of the visualization
  * @returns an array of {@link AccessibilityTreeNode} to be the given parent's children
  */
-function generateStructuredNodeChildren(parent: AccessibilityTreeNode, field: string, values: string[] | number[], data: any[], markUsed: Mark): AccessibilityTreeNode[] {
+function generateStructuredNodeChildren(parent: AccessibilityTreeNode, field: string, values: string[] | number[], data: any[], markUsed: OlliMark): AccessibilityTreeNode[] {
     const lowerCaseDesc: string = parent.description.toLowerCase();
     if (isStringArray(values) && !field.includes("date") || parent.type === "legend") {
         return values.map((grouping: any) => {
@@ -241,9 +241,15 @@ function olliVisSpecToNode(type: NodeType, selected: any[], parent: Accessibilit
         case "chart":
             const chart = olliVisSpec as Chart;
             node.children = [
-                ...chart.axes.map(axis => {
+                ...chart.axes.filter(axis => {
+                    if (chart.mark === 'bar' && axis.type === 'continuous') {
+                        // don't show continuous axis for bar charts
+                        return false;
+                    }
+                    return true;
+                }).map(axis => {
                     return olliVisSpecToNode(
-                        axis.type === 'x' ? 'xAxis' : 'yAxis',
+                        axis.axisType === 'x' ? 'xAxis' : 'yAxis',
                         selected,
                         node,
                         chart,
@@ -270,9 +276,44 @@ function olliVisSpecToNode(type: NodeType, selected: any[], parent: Accessibilit
         case "xAxis":
         case "yAxis":
             const axis = guide as Axis;
+            switch (axis.type) {
+                case "discrete":
+                    node.children = axis.values.map(value => {
+                        return olliVisSpecToNode(
+                            'filteredData',
+                            selected.filter(d => d[axis.field] === value),
+                            node,
+                            chart);
+                    });
+                    break;
+                case "continuous":
+                    const intervals = axisValuesToIntervals(axis.values);
+                    node.children = axis.values.map(value => {
+                        return olliVisSpecToNode(
+                            'filteredData',
+                            selected.filter(d => d[axis.field] === value),
+                            node,
+                            chart);
+                    });
+                    break;
+            }
             break;
         case "legend":
             const legend = guide as Legend;
+            switch (legend.type) {
+                case "discrete":
+                    node.children = legend.values.map(value => {
+                        return olliVisSpecToNode(
+                            'filteredData',
+                            selected.filter(d => d[axis.field] === value),
+                            node,
+                            chart);
+                    });
+                    break;
+                case "continuous":
+                    // TODO currently unsupported
+                    break;
+            }
             break;
         case "filteredData":
             break;

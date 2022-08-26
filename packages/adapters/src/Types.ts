@@ -1,9 +1,9 @@
-import { AxisOrient, LegendType } from "vega";
+import { LegendType } from "vega";
 
 /**
  * Detailing the different marks that can exist in a chart
  */
-export type Mark = "point" | "bar" | "rect" | "line" | "geoshape" | "circle" | "area" | "[Undefined]";
+export type OlliMark = "point" | "bar" | "line" | undefined;
 
 /**
  * A simple union type that when implemented a concrete adapter class can be used with any visualization library to
@@ -24,7 +24,7 @@ export type Mark = "point" | "bar" | "rect" | "line" | "geoshape" | "circle" | "
     axes: Axis[] ,
     legends: Legend[],
     gridCells: Guide[],
-    mark?: Mark,
+    mark: OlliMark,
     title? : string
 }
 
@@ -60,7 +60,6 @@ export type Guide = {
     values: string[] | number[],
     title: string,
     field: string,
-    markUsed?: Mark,
     scaleType?: string,
 }
 
