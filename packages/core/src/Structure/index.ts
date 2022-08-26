@@ -48,15 +48,15 @@ const filterInterval = (selection: any[], field: string, lowerBound: number, upp
     })
 }
 
-function ensureAxisValuesNumeric(values: any[]): number[] {
-    const isStringArr = values.every(v => typeof v === 'string' || v instanceof String);
-    if (isStringArr) {
-        return values.map(s => parseFloat(s.replaceAll(',', '')));
-    }
-    return values;
-}
-
 function axisValuesToIntervals(values: string[] | number[]): [number, number][] {
+
+    const ensureAxisValuesNumeric = (values: any[]): number[] => {
+        const isStringArr = values.every(v => typeof v === 'string' || v instanceof String);
+        if (isStringArr) {
+            return values.map(s => parseFloat(s.replaceAll(',', '')));
+        }
+        return values;
+    }
 
     const getEncodingValueIncrements = (incrementArray: [number, number][], currentValue: number, index: number, array: number[]): [number, number][] => {
         let bounds: [number, number]
