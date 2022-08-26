@@ -3,7 +3,7 @@ import { renderTable } from "./Render/Table"
 import { renderTree } from "./Render/TreeView"
 import { TreeLinks } from "./Render/TreeView/TreeLink"
 import { olliVisSpecToTree } from "./Structure"
-import { AccessibilityTreeNode } from "./Structure/Types"
+import { AccessibilityTree, AccessibilityTreeNode } from "./Structure/Types"
 
 /**
  * The configuration object outlining how an accessible visualization should be rendered based on a {@link OlliVisSpec}.
@@ -18,7 +18,9 @@ type OlliConfigOptions = {
  * @param config The {@link OlliConfigOptions} object to specify how an accessible visualization should be generated.
  */
 export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTMLElement {
-    const chartEncodingRoot: AccessibilityTreeNode = olliVisSpecToTree(olliVisSpec).root;
+    const tree: AccessibilityTree = olliVisSpecToTree(olliVisSpec);
+
+    console.log(tree);
 
     const htmlRendering: HTMLElement = document.createElement("div");
     htmlRendering.classList.add('olli-vis');
@@ -30,11 +32,11 @@ export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTML
 
     switch (config.renderType) {
         case ("table"):
-            htmlRendering.appendChild(renderTable(chartEncodingRoot));
+            htmlRendering.appendChild(renderTable(tree.root, tree.fieldsUsed));
             break;
         case ('tree'):
         default:
-            const ul = renderTree(chartEncodingRoot);
+            const ul = renderTree(tree.root, tree.fieldsUsed);
             htmlRendering.appendChild(ul);
             new TreeLinks(ul).init();
             break;

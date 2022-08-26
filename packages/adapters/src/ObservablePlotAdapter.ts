@@ -170,18 +170,18 @@ function parseLegend(plot: any, svg: Element): Legend { //TODO: Does not support
         return '';
     }).filter(x => x.length);
     const field: string = typeof channel.value === 'object' ? channel.value.label : channel.value
+    const scaleType = plot?.color?.type;
 
-    const type = values.every(v => isNumeric(v)) ? 'continuous' : 'discrete';
+    const type = values.every(v => isNumeric(v)) ? 'continuous' : 'discrete'; // TODO better to use scaletype if available
 
     let guide: Legend = {
         type,
         values: type === 'discrete' ? values : values.map(v => parseFloat(v.replace(/,/g, ''))),
         field: field,
         title: field,
-        legendType: type === 'discrete' ? 'symbol' : 'gradient'
+        legendType: type === 'discrete' ? 'symbol' : 'gradient',
+        scaleType
     }
-
-    if (plot.color.type) guide.type = plot.color.type
 
     return guide
 }

@@ -45,49 +45,49 @@ function getFieldsUsedForChart(olliVisSpec: OlliVisSpec): string[] {
  * @param markUsed {@link OlliMark} of the visualization
  * @returns an array of {@link AccessibilityTreeNode} to be the given parent's children
  */
-function generateStructuredNodeChildren(parent: AccessibilityTreeNode, field: string, values: string[] | number[], data: any[], markUsed: OlliMark): AccessibilityTreeNode[] {
-    const lowerCaseDesc: string = parent.description.toLowerCase();
-    if (isStringArray(values) && !field.includes("date") || parent.type === "legend") {
-        return values.map((grouping: any) => {
-            return olliVisSpecToNode(parent, data.filter((node: any) => node[field] === grouping), "filteredData", data.filter((node: any) => node[field] === grouping))
-        })
-    } else {
-        const ticks: number[] = values as number[]
-        const filterData = (lowerBound: number, upperBound: number): any[] => {
-            return data.filter((val: any) => {
-                if ((lowerCaseDesc.includes("date") || lowerCaseDesc.includes("temporal")) && upperBound.toString().length === 4) {
-                    const d = new Date(val[field])
-                    return d.getFullYear() >= lowerBound && d.getFullYear() < upperBound;
-                } else if (val[field] === undefined) {
-                    let updatedField = Object.keys(val).find((k: string) => k.includes(field) || field.includes(k))
-                    if (updatedField) return val[updatedField] >= lowerBound && val[updatedField] < upperBound;
-                }
-                return val[field] >= lowerBound && val[field] < upperBound;
-            })
-        }
+// function generateStructuredNodeChildren(parent: AccessibilityTreeNode, field: string, values: string[] | number[], data: any[], markUsed: OlliMark): AccessibilityTreeNode[] {
+//     const lowerCaseDesc: string = parent.description.toLowerCase();
+//     if (isStringArray(values) && !field.includes("date") || parent.type === "legend") {
+//         return values.map((grouping: any) => {
+//             return olliVisSpecToNode(parent, data.filter((node: any) => node[field] === grouping), "filteredData", data.filter((node: any) => node[field] === grouping))
+//         })
+//     } else {
+//         const ticks: number[] = values as number[]
+//         const filterData = (lowerBound: number, upperBound: number): any[] => {
+//             return data.filter((val: any) => {
+//                 if ((lowerCaseDesc.includes("date") || lowerCaseDesc.includes("temporal")) && upperBound.toString().length === 4) {
+//                     const d = new Date(val[field])
+//                     return d.getFullYear() >= lowerBound && d.getFullYear() < upperBound;
+//                 } else if (val[field] === undefined) {
+//                     let updatedField = Object.keys(val).find((k: string) => k.includes(field) || field.includes(k))
+//                     if (updatedField) return val[updatedField] >= lowerBound && val[updatedField] < upperBound;
+//                 }
+//                 return val[field] >= lowerBound && val[field] < upperBound;
+//             })
+//         }
 
-        let valueIncrements: any[];
-        if (markUsed !== 'bar') {
-            valueIncrements = ticks.reduce(getEncodingValueIncrements, []);
-        } else {
-            if (lowerCaseDesc.includes("date") || field.includes("date")) {
-                valueIncrements = ticks.reduce(getEncodingValueIncrements, []);
-            } else {
-                valueIncrements = ticks.map((val: number) => [val, val]);
-            }
-        }
-        return valueIncrements.map((range: number[]) => {
-            let desc = ``
-            if ((lowerCaseDesc.includes("date") || field.includes("date") || parent.description.includes("temporal")) && range[0].toString().length > 4) {
-                range.forEach((val: number) => desc += `${new Date(val).toLocaleString("en-US", { year: 'numeric', month: 'short', day: 'numeric' })}, `)
-            } else {
-                desc = `${range},`
-            }
+//         let valueIncrements: any[];
+//         if (markUsed !== 'bar') {
+//             valueIncrements = ticks.reduce(getEncodingValueIncrements, []);
+//         } else {
+//             if (lowerCaseDesc.includes("date") || field.includes("date")) {
+//                 valueIncrements = ticks.reduce(getEncodingValueIncrements, []);
+//             } else {
+//                 valueIncrements = ticks.map((val: number) => [val, val]);
+//             }
+//         }
+//         // return valueIncrements.map((range: number[]) => {
+//         //     let desc = ``
+//         //     if ((lowerCaseDesc.includes("date") || field.includes("date") || parent.description.includes("temporal")) && range[0].toString().length > 4) {
+//         //         range.forEach((val: number) => desc += `${new Date(val).toLocaleString("en-US", { year: 'numeric', month: 'short', day: 'numeric' })}, `)
+//         //     } else {
+//         //         desc = `${range},`
+//         //     }
 
-            return olliVisSpecToNode(parent, filterData(range[0], range[1]), "filteredData", filterData(range[0], range[1]));
-        });
-    }
-}
+//         //     // return olliVisSpecToNode(parent, filterData(range[0], range[1]), "filteredData", filterData(range[0], range[1]));
+//         // });
+//     }
+// }
 
 /**
  * Generates the incremental children for a pair of axes forming an explorable grid
@@ -119,7 +119,7 @@ function generateGridChildren(parent: AccessibilityTreeNode, fields: string[], f
     yIncrements.forEach((yIncrement: number[] | string[]) => {
         xIncrements.forEach((xIncrement: number[] | string[]) => {
             const filteredSelection: any[] = filterData(xIncrement[0], yIncrement[0], xIncrement[1], yIncrement[1]);
-            childNodes.push(olliVisSpecToNode(parent, filteredSelection, "filteredData", filteredSelection));
+            // childNodes.push(olliVisSpecToNode(parent, filteredSelection, "filteredData", filteredSelection));
         })
     })
     return childNodes;
@@ -129,35 +129,48 @@ function isStringArray(data: any[]): data is string[] {
     return data.every((pnt: string | number) => typeof pnt === "string")
 }
 
-function getEncodingValueIncrements(incrementArray: any[][], currentValue: any, index: number, array: number[] | string[]): any[][] {
-    if (isStringArray(array)) {
-        incrementArray.push([currentValue])
-        return incrementArray
-    } else {
-        let bounds: [number, number]
-        let reducedIndex = index - 1;
-        if (index === 0 && currentValue === 0) {
-            return incrementArray
-        } else if (reducedIndex === -1 && currentValue !== 0) {
-            const incrementDifference: number = (array[index + 1] as number) - currentValue
-            bounds = [(currentValue - incrementDifference), currentValue];
-        } else if (index === array.length - 1) {
-            const incrementDifference: number = currentValue - (array[index - 1] as number)
-            let finalIncrement;
-            if (currentValue instanceof Date) {
-                finalIncrement = currentValue.getTime() + incrementDifference;
-            } else {
-                finalIncrement = currentValue + incrementDifference;
-            }
-            incrementArray.push([array[reducedIndex] as number, currentValue])
-            bounds = [currentValue, finalIncrement];
+const filterInterval = (selection: any[], field: string, lowerBound: number, upperBound: number): any[] => {
+    return selection.filter((val: any) => {
+        // TODO: commented out date handling and value not found thingy
+        // if ((lowerCaseDesc.includes("date") || lowerCaseDesc.includes("temporal")) && upperBound.toString().length === 4) {
+        //     const d = new Date(val[field])
+        //     return d.getFullYear() >= lowerBound && d.getFullYear() < upperBound;
+        // } else if (val[field] === undefined) {
+        //     let updatedField = Object.keys(val).find((k: string) => k.includes(field) || field.includes(k))
+        //     if (updatedField) return val[updatedField] >= lowerBound && val[updatedField] < upperBound;
+        // }
+        return val[field] >= lowerBound && val[field] < upperBound;
+    })
+}
 
-        } else {
-            bounds = [array[reducedIndex] as number, array[reducedIndex + 1] as number];
-        }
-        incrementArray.push([bounds[0], bounds[1]])
+function axisValuesToIntervals(array: any[]): [any, any][] {
+    return array.reduce(getEncodingValueIncrements, []);
+}
+
+function getEncodingValueIncrements(incrementArray: [any, any][], currentValue: any, index: number, array: any[]): [any, any][] {
+    let bounds: [number, number]
+    let reducedIndex = index - 1;
+    if (index === 0 && currentValue === 0) {
         return incrementArray
+    } else if (reducedIndex === -1 && currentValue !== 0) {
+        const incrementDifference: number = (array[index + 1] as number) - currentValue
+        bounds = [(currentValue - incrementDifference), currentValue];
+    } else if (index === array.length - 1) {
+        const incrementDifference: number = currentValue - (array[index - 1] as number)
+        let finalIncrement;
+        if (currentValue instanceof Date) {
+            finalIncrement = currentValue.getTime() + incrementDifference;
+        } else {
+            finalIncrement = currentValue + incrementDifference;
+        }
+        incrementArray.push([array[reducedIndex] as number, currentValue])
+        bounds = [currentValue, finalIncrement];
+
+    } else {
+        bounds = [array[reducedIndex] as number, array[reducedIndex + 1] as number];
     }
+    incrementArray.push([bounds[0], bounds[1]])
+    return incrementArray
 }
 
 /**
@@ -167,23 +180,23 @@ function getEncodingValueIncrements(incrementArray: any[][], currentValue: any, 
  * @param parent The parent whose children are being generated
  * @returns
  */
-function generateFilteredDataChildren(childrenNodes: AccessibilityTreeNode[], filteredSelection: any[], parent: AccessibilityTreeNode): AccessibilityTreeNode[] {
-    if (filteredSelection.length > 0) {
-        // const dataPoint: any = filteredSelection.pop();
-        const dataPoint: any = filteredSelection.pop();
-        let objCopy: any = {};
-        Object.keys(dataPoint).forEach((key: string) => {
-            if (key.toLowerCase().includes("date")) {
-                objCopy[key] = new Date(dataPoint[key]).toLocaleString("en-US", { year: 'numeric', month: 'short', day: 'numeric' });
-            } else {
-                objCopy[key] = dataPoint[key]
-            }
-        })
-        childrenNodes.push(olliVisSpecToNode(parent, [objCopy], "data"))
-        generateFilteredDataChildren(childrenNodes, filteredSelection, parent)
-    }
-    return childrenNodes
-}
+// function generateFilteredDataChildren(childrenNodes: AccessibilityTreeNode[], filteredSelection: any[], parent: AccessibilityTreeNode): AccessibilityTreeNode[] {
+//     if (filteredSelection.length > 0) {
+//         // const dataPoint: any = filteredSelection.pop();
+//         const dataPoint: any = filteredSelection.pop();
+//         let objCopy: any = {};
+//         Object.keys(dataPoint).forEach((key: string) => {
+//             if (key.toLowerCase().includes("date")) {
+//                 objCopy[key] = new Date(dataPoint[key]).toLocaleString("en-US", { year: 'numeric', month: 'short', day: 'numeric' });
+//             } else {
+//                 objCopy[key] = dataPoint[key]
+//             }
+//         })
+//         childrenNodes.push(olliVisSpecToNode(parent, [objCopy], "data"))
+//         generateFilteredDataChildren(childrenNodes, filteredSelection, parent)
+//     }
+//     return childrenNodes
+// }
 
 /**
  * Creates specific children nodes based on a provided {@link NodeType}
@@ -192,21 +205,21 @@ function generateFilteredDataChildren(childrenNodes: AccessibilityTreeNode[], fi
  * @param generationInformation A changing variable that assists in generating children nodes at all levels
  * @returns an array of {@link AccessibilityTreeNode}
  */
-function generateChildNodes(type: NodeType, parent: AccessibilityTreeNode, generationInformation: any): AccessibilityTreeNode[] {
-    if (type === "multiView") {
-        return generateMultiViewChildren(parent, generationInformation);
-    } else if (type === "chart") {
-        return generateChartChildren([], parent, generationInformation.axes, generationInformation.legends, generationInformation.gridNodes);
-    } else if (type === "xAxis" || type === "yAxis" || type === "legend") {
-        return generateStructuredNodeChildren(parent, generationInformation.field, generationInformation.values, generationInformation.data, generationInformation.markUsed);
-    } else if (type === "filteredData") {
-        return generateFilteredDataChildren([], generationInformation.map((val: any) => Object.assign({}, val)), parent);
-    } else if (type === "grid") {
-        return generateGridChildren(parent, [generationInformation[0].field, generationInformation[1].field], generationInformation[0].values, generationInformation[1].values, generationInformation[0].data)
-    } else {
-        return [];
-    }
-}
+// function generateChildNodes(type: NodeType, parent: AccessibilityTreeNode, generationInformation: any): AccessibilityTreeNode[] {
+//     if (type === "multiView") {
+//         return generateMultiViewChildren(parent, generationInformation);
+//     } else if (type === "chart") {
+//         return generateChartChildren([], parent, generationInformation.axes, generationInformation.legends, generationInformation.gridNodes);
+//     } else if (type === "xAxis" || type === "yAxis" || type === "legend") {
+//         return generateStructuredNodeChildren(parent, generationInformation.field, generationInformation.values, generationInformation.data, generationInformation.markUsed);
+//     } else if (type === "filteredData") {
+//         return generateFilteredDataChildren([], generationInformation.map((val: any) => Object.assign({}, val)), parent);
+//     } else if (type === "grid") {
+//         return generateGridChildren(parent, [generationInformation[0].field, generationInformation[1].field], generationInformation[0].values, generationInformation[1].values, generationInformation[0].data)
+//     } else {
+//         return [];
+//     }
+// }
 
 /**
  * Creates a {@link AccessibilityTreeNode} of the given parameters
@@ -242,6 +255,7 @@ function olliVisSpecToNode(type: NodeType, selected: any[], parent: Accessibilit
             const chart = olliVisSpec as Chart;
             node.children = [
                 ...chart.axes.filter(axis => {
+                    console.log(axis, chart.mark, axis.type)
                     if (chart.mark === 'bar' && axis.type === 'continuous') {
                         // don't show continuous axis for bar charts
                         return false;
@@ -263,14 +277,14 @@ function olliVisSpecToNode(type: NodeType, selected: any[], parent: Accessibilit
                         chart,
                         legend);
                 }),
-                ...chart.gridCells.map(gridCell => {
-                    return olliVisSpecToNode(
-                        'grid',
-                        selected,
-                        node,
-                        chart,
-                        gridCell);
-                }),
+                // ...chart.gridCells.map(gridCell => {
+                //     return olliVisSpecToNode(
+                //         'grid',
+                //         selected,
+                //         node,
+                //         chart,
+                //         gridCell);
+                // }),
             ]
             break;
         case "xAxis":
@@ -288,10 +302,10 @@ function olliVisSpecToNode(type: NodeType, selected: any[], parent: Accessibilit
                     break;
                 case "continuous":
                     const intervals = axisValuesToIntervals(axis.values);
-                    node.children = axis.values.map(value => {
+                    node.children = intervals.map(([a, b]) => {
                         return olliVisSpecToNode(
                             'filteredData',
-                            selected.filter(d => d[axis.field] === value),
+                            filterInterval(selected, axis.field, a, b),
                             node,
                             chart);
                     });
@@ -305,7 +319,7 @@ function olliVisSpecToNode(type: NodeType, selected: any[], parent: Accessibilit
                     node.children = legend.values.map(value => {
                         return olliVisSpecToNode(
                             'filteredData',
-                            selected.filter(d => d[axis.field] === value),
+                            selected.filter(d => d[legend.field] === value),
                             node,
                             chart);
                     });
@@ -334,7 +348,7 @@ function olliVisSpecToNode(type: NodeType, selected: any[], parent: Accessibilit
  * @param node The node whose description is being created
  * @returns A description based on the provided {@link AccessibilityTreeNode}
  */
-function nodeToDesc(type: NodeType, selected: any[], parent: AccessibilityTreeNode | null, olliVisSpec: OlliVisSpec): string {
+function nodeToDesc(type: NodeType, selected: any[], parent: AccessibilityTreeNode | null, olliVisSpec: OlliVisSpec, guide?: Guide): string {
     // if (node.type === "multiView" || node.type === "chart") {
     //     return node.description
     // } else if (node.type === "xAxis" || node.type === "yAxis") {
@@ -348,5 +362,5 @@ function nodeToDesc(type: NodeType, selected: any[], parent: AccessibilityTreeNo
     // } else if (node.type === 'data') {
     //     return node.fieldsUsed.reduce((desc: string, currentKey: string) => `${desc} ${currentKey}: ${node.selected[0][currentKey]}`, "");
     // }
-    return "";
+    return type;
 }

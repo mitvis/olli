@@ -10,7 +10,7 @@ import {
     facetedChart,
     chart
 } from "./Types";
-import { findScenegraphNodes, getData, getVegaScene, scaleHasDiscreteRange, SceneGroup } from "./utils";
+import { findScenegraphNodes, getData, getVegaScene, axisTypeFromScale, SceneGroup } from "./utils";
 
 /**
  * Adapter to deconstruct Vega-Lite visualizations into an {@link OlliVisSpec}
@@ -112,25 +112,26 @@ function parseAxis(scene: SceneGroup, axisScenegraphNode: any, spec: any, data: 
     const axisView = axisScenegraphNode.items[0]
     const orient = axisView.orient
     const encodingKey = orient === 'bottom' ? 'x' : 'y';
+    const encoding = spec.encoding[encodingKey];
     const ticks = axisView.items.find((n: any) => n.role === 'axis-tick').items.map((n: any) => n.datum.value);
-    const title = spec.encoding[encodingKey].title;
+    const title = encoding.title;
     const axisType = axisView.orient === "bottom" || axisView.orient === "top" ? "x" : "y";
     let field;
 
-    if (spec.encoding[encodingKey].aggregate) {
-        field = Object.keys(data[0]).filter((key: string) => key.includes(spec.encoding[encodingKey].field))
+    if (encoding.aggregate) {
+        field = Object.keys(data[0]).filter((key: string) => key.includes(encoding.field))
     } else {
-        field = spec.encoding[encodingKey].field
+        field = encoding.field
     }
 
-    const type = spec.encoding[encodingKey].type === 'quantitative' ? 'continuous' : 'discrete';
+    const type = (encoding.type === 'quantitative' || encoding.aggregate) ? 'continuous' : 'discrete';
 
     return {
         type,
         values: ticks,
         title: title,
         field: field,
-        scaleType: spec.encoding[encodingKey].type,
+        scaleType: encoding.type,
         axisType: axisType
     }
 }
@@ -150,9 +151,7 @@ function parseLegend(legendScenegraphNode: any, spec: any): Legend {
 
     const scaleSpec = spec.scales?.find((specScale: any) => specScale.name === scaleName);
 
-    const type = scaleSpec ? (
-        scaleHasDiscreteRange(scaleSpec) ? 'discrete' : 'continuous'
-    ) : (
+    const type = scaleSpec?.type ? axisTypeFromScale(scaleSpec): (
         values.every((t: any) => isNumeric(t)) ? 'continuous' : 'discrete'
     );
 
@@ -175,10 +174,10 @@ function parseLegend(legendScenegraphNode: any, spec: any): Legend {
 function modifyVisFromMark(vis: Chart, mark: OlliMark, spec: any): void {
     switch (mark) {
         case 'bar':
-            const nomAxis = Object.keys(spec.encoding).filter((key: string) => {
-                return spec.encoding[key].type === "nominal" || spec.encoding[key].aggregate === undefined
-            })[0]
-            vis.axes = vis.axes.filter((visAxis: Guide) => visAxis.title.toLowerCase().includes(`${nomAxis}-axis`))
+            // const nomAxis = Object.keys(spec.encoding).filter((key: string) => {
+            //     return spec.encoding[key].type === "nominal" || spec.encoding[key].aggregate === undefined
+            // })[0]
+            // vis.axes = vis.axes.filter((visAxis: Guide) => visAxis.title.toLowerCase().includes(`${nomAxis}-axis`))
             break;
         case 'point':
             if (vis.title) {

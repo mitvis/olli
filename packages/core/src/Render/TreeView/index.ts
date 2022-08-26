@@ -6,7 +6,7 @@ import "./TreeStyle.css";
  * @param tree A {@link AccessibilityTreeNode} to generate a navigable tree view from
  * @returns An {@link HTMLElement} ARIA TreeView of the navigable tree view for a visualization
  */
- export function renderTree(tree: AccessibilityTreeNode): HTMLElement {
+ export function renderTree(tree: AccessibilityTreeNode, fieldsUsed: string[]): HTMLElement {
     const nodeToAppend: HTMLElement = document.createElement("li")
     nodeToAppend.setAttribute("role", "treeitem");
     nodeToAppend.setAttribute("aria-expanded", "false");
@@ -23,7 +23,7 @@ import "./TreeStyle.css";
 
         const tableBody = document.createElement("tbody");
         const rowHeaders = document.createElement("tr");
-        tree.fieldsUsed.forEach((key: string) => {
+        fieldsUsed.forEach((key: string) => {
             const header = document.createElement("th")
             header.setAttribute("class", "tableInformation");
             header.innerText = key
@@ -33,7 +33,7 @@ import "./TreeStyle.css";
 
         dataChildren.forEach((dataPoint: AccessibilityTreeNode) => {
             const dataRow = document.createElement("tr")
-            tree.fieldsUsed.forEach((key: string) => {
+            fieldsUsed.forEach((key: string) => {
                 const headerData = document.createElement("td")
                 headerData.setAttribute("class", "tableInformation");
                 const value = dataPoint.selected[0][key];
@@ -56,7 +56,7 @@ import "./TreeStyle.css";
 
     if (treeChildren.length > 0) {
         treeChildren.filter((child: AccessibilityTreeNode) => child.type !== `data`).forEach((child: AccessibilityTreeNode) => {
-            nestedChildElements.appendChild(renderTree(child));
+            nestedChildElements.appendChild(renderTree(child, fieldsUsed));
         })
         nodeToAppend.appendChild(nestedChildElements);
     }

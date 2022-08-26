@@ -2,7 +2,7 @@ import { Spec, ScaleDataRef, Scale, ScaleData, Scene, SceneItem, Mark } from "ve
 import { isNumeric } from "vega-lite";
 import { AnyMark } from "vega-lite/build/src/mark";
 import { Guide, OlliVisSpec, VisAdapter, chart, Chart, Axis, Legend, facetedChart, FacetedChart, OlliMark } from "./Types";
-import { findScenegraphNodes, getData, getVegaScene, scaleHasDiscreteRange, SceneGroup } from "./utils";
+import { findScenegraphNodes, getData, getVegaScene, axisTypeFromScale, SceneGroup } from "./utils";
 
 /**
 * Adapter function that breaks down a Vega visualization into it's basic visual grammar
@@ -138,9 +138,7 @@ function parseAxisInformation(spec: Spec, axis: any): Axis {
     }
     //
 
-    const type = scaleSpec ? (
-        scaleHasDiscreteRange(scaleSpec) ? 'discrete' : 'continuous'
-    ) : (
+    const type = scaleSpec?.type ? axisTypeFromScale(scaleSpec) : (
         ticks.every((t: any) => isNumeric(t)) ? 'continuous' : 'discrete'
     );
 
@@ -177,9 +175,7 @@ function parseLegendInformation(spec: Spec, legendNode: any, data: any[]): Legen
 
     const values = labels.map((n: any) => n.items.find((el: any) => el.role === "legend-label").items[0].datum.value);
 
-    const type = scaleSpec ? (
-        scaleHasDiscreteRange(scaleSpec) ? 'discrete' : 'continuous'
-    ) : (
+    const type = scaleSpec?.type ? axisTypeFromScale(scaleSpec) : (
         values.every((t: any) => isNumeric(t)) ? 'continuous' : 'discrete'
     );
 

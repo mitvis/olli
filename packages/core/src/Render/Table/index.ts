@@ -5,11 +5,11 @@ import { AccessibilityTreeNode } from "../../Structure/Types";
  * @param tree The {@link AccessibilityTreeNode} to generate a table from
  * @returns An {@link HTMLElement} table of the data used in a visualization
  */
-export function renderTable(tree: AccessibilityTreeNode): HTMLElement {
+export function renderTable(tree: AccessibilityTreeNode, fieldsUsed: string[]): HTMLElement {
     const table = document.createElement("table");
     const tableBody = document.createElement("tbody");
     const tableHeaders = document.createElement("tr");
-    tree.fieldsUsed.forEach((field: string) => {
+    fieldsUsed.forEach((field: string) => {
         const header = document.createElement("th");
         header.innerText = field;
         tableHeaders.appendChild(header);
@@ -18,7 +18,7 @@ export function renderTable(tree: AccessibilityTreeNode): HTMLElement {
     tableBody.appendChild(tableHeaders)
     tree.selected.forEach((data: any) => {
         const dataRow = document.createElement("tr")
-        tree.fieldsUsed.forEach((field: string) => {
+        fieldsUsed.forEach((field: string) => {
             const tableData = document.createElement("td")
             tableData.innerText = data[field];
             dataRow.appendChild(tableData);

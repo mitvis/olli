@@ -68,14 +68,25 @@ export function getData(scene: SceneGroup): any[] {
     }
 }
 
-export const scaleHasDiscreteRange = (scaleSpec: Scale): boolean => {
-	switch (scaleSpec.type) {
-		case "ordinal":
-		case "bin-ordinal":
-		case "quantile":
-		case "quantize":
-		case "threshold":
-			return true; // if the scale has a discrete output range, don't lerp with it
-	}
-	return false;
-}
+export const axisTypeFromScale = (scaleSpec: Scale): 'discrete' | 'continuous' => {
+    switch (scaleSpec.type) {
+        case 'linear':
+        case 'log':
+        case 'pow':
+        case 'sqrt':
+        case 'symlog':
+        case 'time':
+        case 'utc':
+        case 'sequential':
+            return 'continuous';
+        case 'ordinal':
+        case 'band':
+        case 'point':
+        case 'quantile':
+        case 'quantize':
+        case 'threshold':
+        case 'bin-ordinal':
+        default:
+            return 'discrete';
+    }
+  }
