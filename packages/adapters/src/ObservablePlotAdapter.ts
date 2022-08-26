@@ -40,14 +40,12 @@ function plotToFacetedChart(plot: any, svg: Element): FacetedChart {
     let legends: Legend[] = []
     if (plot.color && plot.color.legend) legends.push(parseLegend(plot, svg.children[0]))
     const plotMark = plot.marks.filter((mark: any) => mark.ariaLabel !== 'rule')[0]
-    let fields = (axes as any[]).concat(legends).reduce((fieldArr: string[], guide: Guide) => fieldArr.concat(guide.field), []);
     let charts: Map<any, Chart> = new Map();
     let facetField = plot.facet ?
         plot.facet.y ?
             plot.facet.y :
             plot.facet.x :
         plot.marks.find((mark: any) => mark.ariaLabel === 'line').channels.find((c: any) => c.name === "stroke").value;
-    fields.push(facetField)
     if (hasFacets(plot)) {
         charts = new Map(Object.values(chartSVG.children)
             .filter((n) => n.getAttribute('aria-label') === 'facet')
@@ -68,7 +66,6 @@ function plotToFacetedChart(plot: any, svg: Element): FacetedChart {
         type: "facetedChart",
         charts: charts,
         data: plotMark.data,
-        dataFieldsUsed: fields,
         facetedField: facetField,
     };
 
@@ -94,15 +91,13 @@ function plotToChart(plot: any, svg: Element): Chart {
     let legends: Legend[] = []
     if (plot.color && plot.color.legend) legends.push(parseLegend(plot, svg.children[0]))
     const plotMark = plot.marks.filter((mark: any) => mark.ariaLabel !== 'rule')[0]
-    let fields: string[] = (axes as any[]).concat(legends).reduce((fieldArr: string[], guide: Guide) => fieldArr.concat(guide.field), []) //TODO: Same code as vega-lite adapter, create utility functions that can be reused accross adapters
 
     const chart: Chart = {
         axes: axes,
         type: "chart",
         mark: identifyMark(plotMark.ariaLabel),
         legends: legends,
-        data: plotMark.data,
-        dataFieldsUsed: fields
+        data: plotMark.data
     }
 
     return chart

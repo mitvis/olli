@@ -11,8 +11,7 @@ export type OlliMark = "point" | "bar" | "line" | undefined;
  */
  type BaseOlliVisSpec = {
     type: "chart" | "facetedChart",
-    data: any[],
-    dataFieldsUsed: string[],
+    data: any[]
  }
 
 

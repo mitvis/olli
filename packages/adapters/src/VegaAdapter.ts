@@ -41,7 +41,6 @@ function parseFacets(spec: Spec, scene: SceneGroup, data: any[]): FacetedChart {
     const axes = filterUniqueNodes(findScenegraphNodes(scene, "axis").map((axisNode: any) => parseAxisInformation(spec, axisNode)));
     const legends = filterUniqueNodes(findScenegraphNodes(scene, "legend").map((legendNode: any) => parseLegendInformation(spec, legendNode, data)));
     const chartItems = scene.items.filter((el: any) => el.role === "scope")[0].items;
-    const fields: string[] = getDataFields(axes, legends);
     let facetField: string
     const facetMark = (spec.marks?.find((m: any, i: number) => m.from && m.from.facet)!.from! as any).facet.groupby
     if (Array.isArray(facetMark)) {
@@ -49,7 +48,6 @@ function parseFacets(spec: Spec, scene: SceneGroup, data: any[]): FacetedChart {
     } else {
         facetField = facetMark
     }
-    fields.push(facetField)
 
     const charts: Map<any, Chart> = new Map(
         chartItems.map((chartNode) => {
@@ -65,7 +63,6 @@ function parseFacets(spec: Spec, scene: SceneGroup, data: any[]): FacetedChart {
     let multiViewChart = facetedChart({
         charts: charts,
         data,
-        dataFieldsUsed: fields,
         facetedField: facetField
     })
 
@@ -75,7 +72,6 @@ function parseFacets(spec: Spec, scene: SceneGroup, data: any[]): FacetedChart {
 function parseSingleChart(spec: Spec, scene: Scene | SceneItem, data: any[]): Chart {
     const axes = findScenegraphNodes(scene, "axis").map((axisNode: any) => parseAxisInformation(spec, axisNode));
     const legends = findScenegraphNodes(scene, "legend").map((legendNode: any) => parseLegendInformation(spec, legendNode, data))
-    const dataFields: string[] = getDataFields(axes, legends);
     const chartTitle: string | undefined = findScenegraphNodes(scene, "title").length > 0 ?
         findScenegraphNodes(scene, "title")[0].items[0].items[0].items[0].text
         : undefined;
@@ -86,8 +82,7 @@ function parseSingleChart(spec: Spec, scene: Scene | SceneItem, data: any[]): Ch
         data,
         mark,
         axes,
-        legends,
-        dataFieldsUsed: dataFields
+        legends
     })
     if (chartTitle) {
         chartNode.title = chartTitle;
@@ -187,24 +182,3 @@ function parseLegendInformation(spec: Spec, legendNode: any, data: any[]): Legen
 
 }
 
-/**
- * @returns the fields of the data object that are used throughout the visualization axes legends
- */
-function getDataFields(axes: Guide[], legends: Guide[]): string[] {
-    let fields: string[] = [];
-    const pushFields = (obj: any) => {
-        Object.keys(obj).forEach((key: string) => {
-            const usedFields = obj[key].field;
-            if (typeof usedFields !== "string") {
-                usedFields.forEach((field: string) => {
-                    fields.push(field);
-                })
-            } else {
-                fields.push(usedFields);
-            }
-        })
-    }
-    pushFields(axes);
-    pushFields(legends);
-    return fields;
-}

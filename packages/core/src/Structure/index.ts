@@ -11,12 +11,12 @@ export function olliVisSpecToTree(olliVisSpec: OlliVisSpec): AccessibilityTree {
         case "facetedChart":
             return {
                 root: olliVisSpecToNode("multiView", olliVisSpec.data, null, olliVisSpec),
-                fieldsUsed: olliVisSpec.dataFieldsUsed // TODO this should probably not be in the adapter
+                fieldsUsed: getFieldsUsedForChart(olliVisSpec)
             }
         case "chart":
             return {
                 root: olliVisSpecToNode("chart", olliVisSpec.data, null, olliVisSpec),
-                fieldsUsed: olliVisSpec.dataFieldsUsed
+                fieldsUsed: getFieldsUsedForChart(olliVisSpec)
             }
         default:
             throw `olliVisSpec.type ${(olliVisSpec as any).type} not handled in olliVisSpecToTree`;
@@ -33,8 +33,6 @@ function getFieldsUsedForChart(olliVisSpec: OlliVisSpec): string[] {
             throw `olliVisSpec.type ${(olliVisSpec as any).type} not handled in olliVisSpecToTree`;
     }
 }
-
-
 
 /**
  * Generates the incremental children for each structured element of a visualization
@@ -147,12 +145,12 @@ function ensureAxisValuesNumeric(values: any[]): number[] {
     return values;
 }
 
-function axisValuesToIntervals(values: any[]): [any, any][] {
+function axisValuesToIntervals(values: string[] | number[]): [number, number][] {
     values = ensureAxisValuesNumeric(values);
     return values.reduce(getEncodingValueIncrements, []);
 }
 
-function getEncodingValueIncrements(incrementArray: [any, any][], currentValue: any, index: number, array: any[]): [any, any][] {
+function getEncodingValueIncrements(incrementArray: [number, number][], currentValue: number, index: number, array: number[]): [number, number][] {
     let bounds: [number, number]
     let reducedIndex = index - 1;
     if (index === 0 && currentValue === 0) {
@@ -163,11 +161,12 @@ function getEncodingValueIncrements(incrementArray: [any, any][], currentValue: 
     } else if (index === array.length - 1) {
         const incrementDifference: number = currentValue - (array[index - 1] as number)
         let finalIncrement;
-        if (currentValue instanceof Date) {
-            finalIncrement = currentValue.getTime() + incrementDifference;
-        } else {
+        // TODO i commented out date handling. it will require changes to typings
+        // if (currentValue instanceof Date) {
+            // finalIncrement = currentValue.getTime() + incrementDifference;
+        // } else {
             finalIncrement = currentValue + incrementDifference;
-        }
+        // }
         incrementArray.push([array[reducedIndex] as number, currentValue])
         bounds = [currentValue, finalIncrement];
 

@@ -3,8 +3,6 @@ import {
     VisAdapter,
     OlliVisSpec,
     Chart,
-    OlliMark,
-    Guide,
     Axis,
     Legend,
     facetedChart,
@@ -48,24 +46,20 @@ function parseMultiView(spec: any, scene: SceneGroup, data: any[]): OlliVisSpec 
 
     let axes: Axis[] = filterUniqueNodes(findScenegraphNodes(scene, "axis").map((axis: any) => parseAxis(scene, axis, spec, data)))
     let legends: Legend[] = filterUniqueNodes(findScenegraphNodes(scene, "legend").map((legend: any) => parseLegend(legend, spec)))
-    let fields = (axes as any[]).concat(legends).reduce((fieldArr: string[], guide: Guide) => fieldArr.concat(guide.field), [])
     let facetedField = spec.encoding.facet !== undefined ? spec.encoding.facet.field : spec.encoding['color'].field
     let nestedHeirarchies: Map<any, Chart> = new Map(scene.items.filter((el: any) => el.role === "scope")[0].items
         .map((chart: any) => {
             let chartData = parseChart(chart, spec, data)
-            chartData.dataFieldsUsed = [...fields]
             return [chart.datum[facetedField], chartData]
         })
     );
 
     let node = facetedChart({
         data,
-        dataFieldsUsed: fields,
         charts: nestedHeirarchies,
         facetedField: facetedField
     })
 
-    node.dataFieldsUsed.push(facetedField)
     return node;
 }
 
@@ -77,12 +71,10 @@ function parseMultiView(spec: any, scene: SceneGroup, data: any[]): OlliVisSpec 
 function parseChart(spec: any, scene: SceneGroup, data: any[]): Chart {
     let axes: Axis[] = findScenegraphNodes(scene, "axis").map((axis: any) => parseAxis(scene, axis, spec, data))
     let legends: Legend[] = findScenegraphNodes(scene, "legend").map((legend: any) => parseLegend(legend, spec))
-    let fields: string[] = (axes as any[]).concat(legends).reduce((fieldArr: string[], guide: Guide) => fieldArr.concat(guide.field), [])
     let mark: any = spec.mark // TODO vega-lite mark type exceeds olli mark type, should do some validation
     let node = chart({
         axes: axes.filter((axis: Axis) => axis.field !== undefined),
         legends: legends,
-        dataFieldsUsed: fields,
         data,
         mark
     })
