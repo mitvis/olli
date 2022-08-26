@@ -1,5 +1,6 @@
 import { isNumeric } from "vega-lite";
 import { VisAdapter, OlliVisSpec, FacetedChart, Chart, Axis, Legend, Guide, OlliMark } from "./Types";
+import { guideTypeFromScale } from "./utils";
 // Observable-Plot has no type declaration file :/
 const Plot = require("@observablehq/plot")
 
@@ -172,7 +173,8 @@ function parseLegend(plot: any, svg: Element): Legend { //TODO: Does not support
     const field: string = typeof channel.value === 'object' ? channel.value.label : channel.value
     const scaleType = plot?.color?.type;
 
-    const type = values.every(v => isNumeric(v)) ? 'continuous' : 'discrete'; // TODO better to use scaletype if available
+    const type = scaleType ? guideTypeFromScale(scaleType) :
+        (values.every(v => isNumeric(v)) ? 'continuous' : 'discrete');
 
     let guide: Legend = {
         type,

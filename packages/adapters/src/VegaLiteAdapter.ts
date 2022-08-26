@@ -10,7 +10,7 @@ import {
     facetedChart,
     chart
 } from "./Types";
-import { findScenegraphNodes, getData, getVegaScene, axisTypeFromScale, SceneGroup } from "./utils";
+import { findScenegraphNodes, getData, getVegaScene, guideTypeFromScale, SceneGroup } from "./utils";
 
 /**
  * Adapter to deconstruct Vega-Lite visualizations into an {@link OlliVisSpec}
@@ -151,7 +151,7 @@ function parseLegend(legendScenegraphNode: any, spec: any): Legend {
 
     const scaleSpec = spec.scales?.find((specScale: any) => specScale.name === scaleName);
 
-    const type = scaleSpec?.type ? axisTypeFromScale(scaleSpec): (
+    const type = scaleSpec?.type ? guideTypeFromScale(scaleSpec.type): (
         values.every((t: any) => isNumeric(t)) ? 'continuous' : 'discrete'
     );
 

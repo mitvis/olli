@@ -68,8 +68,8 @@ export function getData(scene: SceneGroup): any[] {
     }
 }
 
-export const axisTypeFromScale = (scaleSpec: Scale): 'discrete' | 'continuous' => {
-    switch (scaleSpec.type) {
+export const guideTypeFromScale = (scaleType: string): 'discrete' | 'continuous' => {
+    switch (scaleType) {
         case 'linear':
         case 'log':
         case 'pow':

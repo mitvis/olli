@@ -255,7 +255,6 @@ function olliVisSpecToNode(type: NodeType, selected: any[], parent: Accessibilit
             const chart = olliVisSpec as Chart;
             node.children = [
                 ...chart.axes.filter(axis => {
-                    console.log(axis, chart.mark, axis.type)
                     if (chart.mark === 'bar' && axis.type === 'continuous') {
                         // don't show continuous axis for bar charts
                         return false;
@@ -329,9 +328,17 @@ function olliVisSpecToNode(type: NodeType, selected: any[], parent: Accessibilit
                     break;
             }
             break;
-        case "filteredData":
-            break;
         case "grid":
+            break;
+        case "filteredData":
+            node.children = selected.map(datum => {
+                return olliVisSpecToNode(
+                    'data',
+                    [datum],
+                    node,
+                    chart
+                )
+            })
             break;
         case "data":
             // pass; no children to generate

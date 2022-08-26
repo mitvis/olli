@@ -20,8 +20,6 @@ type OlliConfigOptions = {
 export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTMLElement {
     const tree: AccessibilityTree = olliVisSpecToTree(olliVisSpec);
 
-    console.log(tree);
-
     const htmlRendering: HTMLElement = document.createElement("div");
     htmlRendering.classList.add('olli-vis');
 
