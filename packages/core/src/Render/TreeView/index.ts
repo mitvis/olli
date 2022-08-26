@@ -65,10 +65,3 @@ import "./TreeStyle.css";
     treeDom.appendChild(nodeToAppend);
     return treeDom;
 }
-
-// function appendStyle() {
-//     const style = document.createElement('style')
-//     style.innerHTML = treeStyle;
-//     document.head.appendChild(style)
-
-// }

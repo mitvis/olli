@@ -19,7 +19,7 @@ export type NodeType = "chart" | "xAxis" | "yAxis" | "data" | "filteredData" | "
  *
  * fieldsUsed: The data fields used (assists with rendering data tables)
  */
-export type BaseAccessibilityTreeNode = {
+export type AccessibilityTreeNode = {
     type: NodeType,
     parent: AccessibilityTreeNode | null,
     selected: any[],
@@ -27,25 +27,6 @@ export type BaseAccessibilityTreeNode = {
     children: AccessibilityTreeNode[],
 
 }
-
-/**
- * Node for visual elements such as marks, or anything that relates to the visual aspects of a chart
- */
-export interface VisualEncodingNode extends BaseAccessibilityTreeNode {
-    chartType: string,
-}
-
-/**
- * Node for structured elements such as axes and legends
- */
-export interface StructuralTreeNode extends BaseAccessibilityTreeNode {
-    field: string,
-}
-
-/**
- * Union type of different tree nodes that all share {@link BaseAccessibilityTreeNode} attributes
- */
-export type AccessibilityTreeNode = BaseAccessibilityTreeNode | VisualEncodingNode | StructuralTreeNode;
 
 export type AccessibilityTree = {
     root: AccessibilityTreeNode,
