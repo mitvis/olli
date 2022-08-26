@@ -1,4 +1,4 @@
-import { TopLevelSpec, compile, isNumeric } from "vega-lite";
+import { TopLevelSpec, compile } from "vega-lite";
 import {
     VisAdapter,
     OlliVisSpec,
@@ -10,7 +10,7 @@ import {
     facetedChart,
     chart
 } from "./Types";
-import { findScenegraphNodes, getData, getVegaScene, guideTypeFromScale, SceneGroup } from "./utils";
+import { findScenegraphNodes, getData, getVegaScene, guideTypeFromScale, isNumeric, SceneGroup } from "./utils";
 
 /**
  * Adapter to deconstruct Vega-Lite visualizations into an {@link OlliVisSpec}
@@ -45,13 +45,6 @@ function parseMultiView(spec: any, scene: SceneGroup, data: any[]): OlliVisSpec 
 
         return uniqueNodes
     })
-    const shallowCopyArray = (objToCopy: any[], arrToPush: any[]): void => {
-        objToCopy.forEach((obj: any) => {
-            const objCopy = Object.assign({}, obj);
-            objCopy.data = JSON.parse(JSON.stringify(obj.data))
-            arrToPush.push(objCopy);
-        })
-    }
 
     let axes: Axis[] = filterUniqueNodes(findScenegraphNodes(scene, "axis").map((axis: any) => parseAxis(scene, axis, spec, data)))
     let legends: Legend[] = filterUniqueNodes(findScenegraphNodes(scene, "legend").map((legend: any) => parseLegend(legend, spec)))
@@ -60,9 +53,6 @@ function parseMultiView(spec: any, scene: SceneGroup, data: any[]): OlliVisSpec 
     let nestedHeirarchies: Map<any, Chart> = new Map(scene.items.filter((el: any) => el.role === "scope")[0].items
         .map((chart: any) => {
             let chartData = parseChart(chart, spec, data)
-            shallowCopyArray(axes, chartData.axes)
-            shallowCopyArray(legends, chartData.legends)
-            modifyVisFromMark(chartData, chartData.mark!, spec)
             chartData.dataFieldsUsed = [...fields]
             return [chart.datum[facetedField], chartData]
         })
@@ -93,11 +83,9 @@ function parseChart(spec: any, scene: SceneGroup, data: any[]): Chart {
         axes: axes.filter((axis: Axis) => axis.field !== undefined),
         legends: legends,
         dataFieldsUsed: fields,
-        gridCells: [],
         data,
         mark
     })
-    modifyVisFromMark(node, mark, spec);
     return node
 }
 
@@ -162,28 +150,5 @@ function parseLegend(legendScenegraphNode: any, spec: any): Legend {
         field: spec.encoding['color'].field,
         scaleType: scaleSpec?.type,
         legendType: spec.encoding['color'].type
-    }
-}
-
-/**
- *
- * @param vis The {@link ChartInformation} to update
- * @param mark The {@link OlliMark} used in the provided {@Link ChartInformation}
- * @param spec The Vega-Lite specification of the provided visualization
- */
-function modifyVisFromMark(vis: Chart, mark: OlliMark, spec: any): void {
-    switch (mark) {
-        case 'bar':
-            // const nomAxis = Object.keys(spec.encoding).filter((key: string) => {
-            //     return spec.encoding[key].type === "nominal" || spec.encoding[key].aggregate === undefined
-            // })[0]
-            // vis.axes = vis.axes.filter((visAxis: Guide) => visAxis.title.toLowerCase().includes(`${nomAxis}-axis`))
-            break;
-        case 'point':
-            if (vis.title) {
-                vis.title = `Scatter plot with title ${vis.title} `;
-            }
-            vis.gridCells = [...vis.axes];
-            break;
     }
 }

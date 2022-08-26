@@ -1,4 +1,5 @@
 import { Scene, Spec, parse, View, SceneItem, SceneContext, Scale } from "vega";
+import { isNumeric as vlIsNumeric } from "vega-lite";
 
 export async function getVegaScene(spec: Spec): Promise<SceneGroup> {
     const runtime = parse(spec);
@@ -89,4 +90,8 @@ export const guideTypeFromScale = (scaleType: string): 'discrete' | 'continuous'
         default:
             return 'discrete';
     }
+  }
+
+  export function isNumeric(value: string): boolean {
+    return vlIsNumeric(value.replaceAll(',', ''));
   }

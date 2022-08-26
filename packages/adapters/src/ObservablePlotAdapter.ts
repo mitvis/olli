@@ -1,13 +1,12 @@
-import { isNumeric } from "vega-lite";
 import { VisAdapter, OlliVisSpec, FacetedChart, Chart, Axis, Legend, Guide, OlliMark } from "./Types";
-import { guideTypeFromScale } from "./utils";
+import { guideTypeFromScale, isNumeric } from "./utils";
 // Observable-Plot has no type declaration file :/
 const Plot = require("@observablehq/plot")
 
 /**
  * Observable-Plot does not have any exported types
  */
- type ObservablePlotSpec = any;
+type ObservablePlotSpec = any;
 
 /**
  * * Adapter to deconstruct ObservablePlot visualizations into an {@link OlliVisSpec}
@@ -103,11 +102,8 @@ function plotToChart(plot: any, svg: Element): Chart {
         mark: identifyMark(plotMark.ariaLabel),
         legends: legends,
         data: plotMark.data,
-        dataFieldsUsed: fields,
-        gridCells: []
+        dataFieldsUsed: fields
     }
-
-    modifyVisFromMark(chart, chart.mark)
 
     return chart
 }
@@ -236,25 +232,5 @@ function identifyMark(m: string): OlliMark {
             return "line";
         default:
             return undefined
-    }
-}
-
-/**
- *
- * @param vis The {@link Chart} to update
- * @param mark The {@link OlliMark} used in the provided {@Link ChartInformation}
- * @param spec The Vega-Lite specification of the provided visualization
- */
-function modifyVisFromMark(vis: Chart, mark: OlliMark): void {
-    switch (mark) {
-        case 'bar':
-            vis.axes = vis.axes.filter((visAxis: Guide) => visAxis.scaleType === "band")
-            break;
-        case 'point':
-            if (vis.title) {
-                vis.title = `Scatter plot with title ${vis.title} `;
-            }
-            if (vis.axes.every((a: Axis) => typeof a.values[0] === "number")) vis.gridCells = [...vis.axes];
-            break;
     }
 }

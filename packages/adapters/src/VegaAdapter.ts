@@ -1,8 +1,6 @@
-import { Spec, ScaleDataRef, Scale, ScaleData, Scene, SceneItem, Mark } from "vega";
-import { isNumeric } from "vega-lite";
-import { AnyMark } from "vega-lite/build/src/mark";
+import { Spec, ScaleDataRef, Scale, ScaleData, Scene, SceneItem } from "vega";
 import { Guide, OlliVisSpec, VisAdapter, chart, Chart, Axis, Legend, facetedChart, FacetedChart, OlliMark } from "./Types";
-import { findScenegraphNodes, getData, getVegaScene, guideTypeFromScale, SceneGroup } from "./utils";
+import { findScenegraphNodes, getData, getVegaScene, guideTypeFromScale, isNumeric, SceneGroup } from "./utils";
 
 /**
 * Adapter function that breaks down a Vega visualization into it's basic visual grammar
@@ -89,7 +87,6 @@ function parseSingleChart(spec: Spec, scene: Scene | SceneItem, data: any[]): Ch
         mark,
         axes,
         legends,
-        gridCells: [],
         dataFieldsUsed: dataFields
     })
     if (chartTitle) {

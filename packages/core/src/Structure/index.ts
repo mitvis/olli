@@ -125,10 +125,6 @@ function generateGridChildren(parent: AccessibilityTreeNode, fields: string[], f
     return childNodes;
 }
 
-function isStringArray(data: any[]): data is string[] {
-    return data.every((pnt: string | number) => typeof pnt === "string")
-}
-
 const filterInterval = (selection: any[], field: string, lowerBound: number, upperBound: number): any[] => {
     return selection.filter((val: any) => {
         // TODO: commented out date handling and value not found thingy
@@ -143,8 +139,17 @@ const filterInterval = (selection: any[], field: string, lowerBound: number, upp
     })
 }
 
-function axisValuesToIntervals(array: any[]): [any, any][] {
-    return array.reduce(getEncodingValueIncrements, []);
+function ensureAxisValuesNumeric(values: any[]): number[] {
+    const isStringArr = values.every(v => typeof v === 'string' || v instanceof String);
+    if (isStringArr) {
+        return values.map(s => parseFloat(s.replaceAll(',', '')));
+    }
+    return values;
+}
+
+function axisValuesToIntervals(values: any[]): [any, any][] {
+    values = ensureAxisValuesNumeric(values);
+    return values.reduce(getEncodingValueIncrements, []);
 }
 
 function getEncodingValueIncrements(incrementArray: [any, any][], currentValue: any, index: number, array: any[]): [any, any][] {
@@ -240,9 +245,11 @@ function olliVisSpecToNode(type: NodeType, selected: any[], parent: Accessibilit
         children: [],
     }
 
+    const facetedChart = olliVisSpec as FacetedChart;
+    const chart = olliVisSpec as Chart;
+
     switch (type) {
         case "multiView":
-            const facetedChart = olliVisSpec as FacetedChart;
             node.children = [...facetedChart.charts.entries()].map(([facetValue, chart]: [string, Chart]) => {
                 return olliVisSpecToNode(
                     "chart",
@@ -252,15 +259,16 @@ function olliVisSpecToNode(type: NodeType, selected: any[], parent: Accessibilit
             });
             break;
         case "chart":
-            const chart = olliVisSpec as Chart;
+            // remove some axes depending on mark type
+            chart.axes = chart.axes.filter(axis => {
+                if (chart.mark === 'bar' && axis.type === 'continuous') {
+                    // don't show continuous axis for bar charts
+                    return false;
+                }
+                return true;
+            });
             node.children = [
-                ...chart.axes.filter(axis => {
-                    if (chart.mark === 'bar' && axis.type === 'continuous') {
-                        // don't show continuous axis for bar charts
-                        return false;
-                    }
-                    return true;
-                }).map(axis => {
+                ...chart.axes.map(axis => {
                     return olliVisSpecToNode(
                         axis.axisType === 'x' ? 'xAxis' : 'yAxis',
                         selected,
@@ -276,14 +284,9 @@ function olliVisSpecToNode(type: NodeType, selected: any[], parent: Accessibilit
                         chart,
                         legend);
                 }),
-                // ...chart.gridCells.map(gridCell => {
-                //     return olliVisSpecToNode(
-                //         'grid',
-                //         selected,
-                //         node,
-                //         chart,
-                //         gridCell);
-                // }),
+                ...(chart.mark === 'point' && chart.axes.length === 2 ? [
+                    olliVisSpecToNode('grid', selected, node, chart)
+                ] : [])
             ]
             break;
         case "xAxis":
@@ -329,6 +332,22 @@ function olliVisSpecToNode(type: NodeType, selected: any[], parent: Accessibilit
             }
             break;
         case "grid":
+            const xAxis = chart.axes.find(axis => axis.axisType === 'x')!;
+            const xIntervals = axisValuesToIntervals(xAxis.values);
+            const yAxis = chart.axes.find(axis => axis.axisType === 'y')!;
+            const yIntervals = axisValuesToIntervals(yAxis.values);
+            const cartesian = (...a: any[][]) => a.reduce((a: any[], b: any[]) => a.flatMap((d: any) => b.map((e: any) => [d, e].flat())));
+            node.children = cartesian(xIntervals, yIntervals).map(([x1, x2, y1, y2]) => {
+                return olliVisSpecToNode(
+                    'filteredData',
+                    filterInterval(
+                        filterInterval(selected, xAxis.field, x1, x2),
+                        yAxis.field,
+                        y1,
+                        y2),
+                    node,
+                    chart);
+            });
             break;
         case "filteredData":
             node.children = selected.map(datum => {

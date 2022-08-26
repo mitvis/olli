@@ -23,7 +23,6 @@ export type OlliMark = "point" | "bar" | "line" | undefined;
     type: "chart",
     axes: Axis[] ,
     legends: Legend[],
-    gridCells: Guide[],
     mark: OlliMark,
     title? : string
 }
@@ -58,8 +57,8 @@ export const facetedChart = (fields: Omit<FacetedChart, 'type'>): FacetedChart =
 export type Guide = {
     type: 'discrete' | 'continuous',
     values: string[] | number[],
-    title: string,
     field: string,
+    title?: string,
     scaleType?: string,
 }
 
