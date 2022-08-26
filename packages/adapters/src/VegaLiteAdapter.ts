@@ -33,19 +33,6 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
  * @returns An {@link OlliVisSpec} of the deconstructed Vega-Lite visualization
  */
 function parseMultiView(spec: any, scene: SceneGroup, data: any[]): OlliVisSpec {
-    const filterUniqueNodes = ((nodeArr: any[]) => {
-        let uniqueNodes: any[] = []
-        nodeArr.forEach((node: any) => {
-            if (uniqueNodes.every((un: any) => JSON.stringify(un) !== JSON.stringify(node))) {
-                uniqueNodes.push(node)
-            }
-        })
-
-        return uniqueNodes
-    })
-
-    let axes: Axis[] = filterUniqueNodes(findScenegraphNodes(scene, "axis").map((axis: any) => parseAxis(scene, axis, spec, data)))
-    let legends: Legend[] = filterUniqueNodes(findScenegraphNodes(scene, "legend").map((legend: any) => parseLegend(legend, spec)))
     let facetedField = spec.encoding.facet !== undefined ? spec.encoding.facet.field : spec.encoding['color'].field
     let nestedHeirarchies: Map<any, Chart> = new Map(scene.items.filter((el: any) => el.role === "scope")[0].items
         .map((chart: any) => {
@@ -69,7 +56,7 @@ function parseMultiView(spec: any, scene: SceneGroup, data: any[]): OlliVisSpec 
  * @returns An {@link OlliVisSpec} of the deconstructed Vega-Lite visualization
  */
 function parseChart(spec: any, scene: SceneGroup, data: any[]): Chart {
-    let axes: Axis[] = findScenegraphNodes(scene, "axis").map((axis: any) => parseAxis(scene, axis, spec, data))
+    let axes: Axis[] = findScenegraphNodes(scene, "axis").map((axis: any) => parseAxis(axis, spec, data))
     let legends: Legend[] = findScenegraphNodes(scene, "legend").map((legend: any) => parseLegend(legend, spec))
     let mark: any = spec.mark // TODO vega-lite mark type exceeds olli mark type, should do some validation
     let node = chart({
@@ -88,7 +75,7 @@ function parseChart(spec: any, scene: SceneGroup, data: any[]): Chart {
  * @param spec The Vega-Lite Spec that rendered the visualization
  * @returns A {@link Axis} from the converted axisScenegraphNode
  */
-function parseAxis(scene: SceneGroup, axisScenegraphNode: any, spec: any, data: any[]): Axis {
+function parseAxis(axisScenegraphNode: any, spec: any, data: any[]): Axis {
     const axisView = axisScenegraphNode.items[0]
     const orient = axisView.orient
     const encodingKey = orient === 'bottom' ? 'x' : 'y';

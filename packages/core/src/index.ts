@@ -3,14 +3,14 @@ import { renderTable } from "./Render/Table"
 import { renderTree } from "./Render/TreeView"
 import { TreeLinks } from "./Render/TreeView/TreeLink"
 import { olliVisSpecToTree } from "./Structure"
-import { AccessibilityTree, AccessibilityTreeNode } from "./Structure/Types"
+import { AccessibilityTree } from "./Structure/Types"
 
 /**
  * The configuration object outlining how an accessible visualization should be rendered based on a {@link OlliVisSpec}.
  */
 type OlliConfigOptions = {
     renderType?: 'tree' | 'table',
-    ariaLabel?: string
+    ariaLabel?: string // TODO
 }
 
 /**
