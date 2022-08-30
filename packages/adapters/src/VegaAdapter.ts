@@ -1,6 +1,6 @@
 import { Spec, ScaleDataRef, Scale, ScaleData, Scene, SceneItem, isString } from "vega";
 import { Guide, OlliVisSpec, VisAdapter, chart, Chart, Axis, Legend, facetedChart, FacetedChart, OlliMark } from "./Types";
-import { findScenegraphNodes, getData, getVegaScene, guideTypeFromScale, isNumeric, SceneGroup } from "./utils";
+import { filterUniqueNodes, findScenegraphNodes, getData, getVegaScene, guideTypeFromScale, isNumeric, SceneGroup } from "./utils";
 
 /**
 * Adapter function that breaks down a Vega visualization into it's basic visual grammar
@@ -19,44 +19,31 @@ export const VegaAdapter: VisAdapter<Spec> = async (vSpec: Spec): Promise<OlliVi
 }
 
 function parseFacets(spec: Spec, scene: SceneGroup, data: any[]): FacetedChart {
-    const filterUniqueNodes = ((nodeArr: any[]) => {
-        let uniqueNodes: any[] = []
-        nodeArr.forEach((node: any) => {
-            if (uniqueNodes.every((un: any) => JSON.stringify(un) !== JSON.stringify(node))) {
-                uniqueNodes.push(node)
-            }
-        })
-
-        return uniqueNodes
-    })
-
-    const shallowCopyArray = (objToCopy: any[], arrToPush: any[]): void => {
-        objToCopy.forEach((obj: any) => {
-            const objCopy = Object.assign({}, obj);
-            objCopy.data = JSON.parse(JSON.stringify(obj.data))
-            arrToPush.push(objCopy);
-        })
-    }
-
     const axes = filterUniqueNodes(findScenegraphNodes(scene, "axis").map((axisNode: any) => parseAxisInformation(spec, axisNode)));
     const legends = filterUniqueNodes(findScenegraphNodes(scene, "legend").map((legendNode: any) => parseLegendInformation(spec, legendNode, data)));
     const chartItems = scene.items.filter((el: any) => el.role === "scope")[0].items;
     let facetField: string
-    const facetMark = (spec.marks?.find((m: any, i: number) => m.from && m.from.facet)!.from! as any).facet.groupby
-    if (Array.isArray(facetMark)) {
-        facetField = facetMark[0]
+    const facetMarkSpec = spec.marks?.find((m: any, i: number) => m.from && m.from.facet)! as any;
+
+    const mark = vegaMarkToOlliMark(facetMarkSpec.marks[0].type);
+
+    const facetDef = (facetMarkSpec.from! as any).facet.groupby
+
+    if (Array.isArray(facetDef)) {
+        facetField = facetDef[0]
     } else {
-        facetField = facetMark
+        facetField = facetDef
     }
 
-    const charts: Map<any, Chart> = new Map(
+    const charts: Map<string, Chart> = new Map(
         chartItems.map((chartNode) => {
             const chart: Chart = parseSingleChart(spec, chartNode, data);
             const key = (chartNode.datum as any)[facetField];
             chart.title = findScenegraphNodes(chartNode, "title-text").length > 0 ?
                 findScenegraphNodes(chartNode, "title-text")[0].items[0].text : '';
-            shallowCopyArray(axes, chart.axes);
-            shallowCopyArray(legends, chart.legends);
+            chart.axes = axes;
+            chart.legends = legends;
+            chart.mark = mark;
             return [key, chart]
         }))
 
@@ -76,7 +63,7 @@ function parseSingleChart(spec: Spec, scene: Scene | SceneItem, data: any[]): Ch
         findScenegraphNodes(scene, "title")[0].items[0].items[0].items[0].text
         : undefined;
 
-    let mark: OlliMark = vegaMarkToOlliMark(spec.marks?.map(mark => mark.type)[0]); // TODO this is very lazy, write a better way to get the mark type
+    let mark: OlliMark = vegaMarkToOlliMark(spec.marks?.map(mark => mark.type)[0]); // TODO write a better way to get the mark type
 
     let chartNode = chart({
         data,
@@ -175,8 +162,7 @@ function parseLegendInformation(spec: Spec, legendNode: any, data: any[]): Legen
         type,
         values,
         title: title,
-        field: (field as string),
-        legendType: "symbol" // TODO hardcoded legend type
+        field: (field as string)
     }
 
 }

@@ -20,6 +20,17 @@ export type SceneGroup = SceneItem & {
     stroke?: string;
 };
 
+export const filterUniqueNodes = ((nodeArr: any[]) => {
+    let uniqueNodes: any[] = []
+    nodeArr.forEach((node: any) => {
+        if (uniqueNodes.every((un: any) => JSON.stringify(un) !== JSON.stringify(node))) {
+            uniqueNodes.push(node)
+        }
+    })
+
+    return uniqueNodes
+})
+
 export function findScenegraphNodes(scenegraphNode: Scene | SceneGroup | SceneItem, passRole: string): any[] {
     let nodes: any[] = [];
     const cancelRoles: string[] = ["cell", "axis-grid"]

@@ -72,7 +72,6 @@ export interface Axis extends Guide {
  * Extending the {@link Guide} interface for visualization legends
  */
 export interface Legend extends Guide {
-    legendType: LegendType,
     channel?: string // e.g. color, opacity
 }
 

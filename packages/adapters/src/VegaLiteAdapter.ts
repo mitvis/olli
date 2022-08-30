@@ -8,7 +8,7 @@ import {
     facetedChart,
     chart
 } from "./Types";
-import { findScenegraphNodes, getData, getVegaScene, guideTypeFromScale, isNumeric, SceneGroup } from "./utils";
+import { filterUniqueNodes, findScenegraphNodes, getData, getVegaScene, guideTypeFromScale, isNumeric, SceneGroup } from "./utils";
 
 /**
  * Adapter to deconstruct Vega-Lite visualizations into an {@link OlliVisSpec}
@@ -33,10 +33,14 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
  * @returns An {@link OlliVisSpec} of the deconstructed Vega-Lite visualization
  */
 function parseMultiView(spec: any, scene: SceneGroup, data: any[]): OlliVisSpec {
+    const axes = filterUniqueNodes(findScenegraphNodes(scene, "axis").map((axis: any) => parseAxis(axis, spec, data)));
+    const legends = filterUniqueNodes(findScenegraphNodes(scene, "legend").map((legend: any) => parseLegend(legend, spec, data)));
     let facetedField = spec.encoding.facet !== undefined ? spec.encoding.facet.field : spec.encoding['color'].field
     let nestedHeirarchies: Map<any, Chart> = new Map(scene.items.filter((el: any) => el.role === "scope")[0].items
         .map((chart: any) => {
-            let chartData = parseChart(chart, spec, data)
+            const chartData = parseChart(spec, chart, data)
+            chartData.axes = axes;
+            chartData.legends = legends;
             return [chart.datum[facetedField], chartData]
         })
     );
@@ -65,6 +69,7 @@ function parseChart(spec: any, scene: SceneGroup, data: any[]): Chart {
         data,
         mark
     })
+    console.log(node);
     return node
 }
 
@@ -81,7 +86,6 @@ function parseAxis(axisScenegraphNode: any, spec: any, data: any[]): Axis {
     const encodingKey = orient === 'bottom' ? 'x' : 'y';
     const encoding = spec.encoding[encodingKey];
     const ticks = axisView.items.find((n: any) => n.role === 'axis-tick').items.map((n: any) => n.datum.value);
-    const title = encoding.title;
     const axisType = axisView.orient === "bottom" || axisView.orient === "top" ? "x" : "y";
     let field;
 
@@ -96,7 +100,7 @@ function parseAxis(axisScenegraphNode: any, spec: any, data: any[]): Axis {
     return {
         type,
         values: ticks,
-        title: title,
+        title: encoding.title || undefined,
         field: field,
         scaleType: encoding.type,
         axisType: axisType
@@ -115,12 +119,12 @@ function parseLegend(legendScenegraphNode: any, spec: any): Legend {
     const labels: any[] = legendScenegraphNode.items[0].items.find((n: any) => n.role === "legend-entry").items[0].items[0].items;
 
     const values = labels.map((n: any) => n.items.find((el: any) => el.role === "legend-label").items[0].datum.value);
+    console.log(values);
 
-    const scaleSpec = spec.scales?.find((specScale: any) => specScale.name === scaleName);
+    const encType = spec.encoding['color'].type;
 
-    const type = scaleSpec?.type ? guideTypeFromScale(scaleSpec.type): (
-        values.every((t: any) => isNumeric(t)) ? 'continuous' : 'discrete'
-    );
+    const type = encType ? (encType === 'quantitative' ? 'continuous' : 'discrete') :
+        (values.every((t: any) => isNumeric(String(t))) ? 'continuous' : 'discrete');
 
     // TODO legend channel currently hardcoded to color
     return {
@@ -128,7 +132,6 @@ function parseLegend(legendScenegraphNode: any, spec: any): Legend {
         values,
         title: spec.encoding['color'].title ? spec.encoding['color'].title : spec.encoding['color'].field,
         field: spec.encoding['color'].field,
-        channel: 'color',
-        legendType: spec.encoding['color'].type
+        channel: 'color'
     }
 }

@@ -30,13 +30,13 @@ export const ObservablePlotAdapter: VisAdapter<ObservablePlotSpec> = async (plot
  */
 function plotToFacetedChart(plot: any, svg: Element): FacetedChart {
     const chartSVG = svg.tagName !== 'svg' ? Object.values(svg.children).find((n) => n.tagName === 'svg')! : svg;
-    const axes: Axis[] = ['x-axis', 'y-axis'].reduce((parsedAxes: Axis[], s: string) => {
-        let axisSVG = findHtmlElement(chartSVG, s);
-        if (axisSVG) {
-            parsedAxes.push(parseAxis(plot, axisSVG))
-        }
-        return parsedAxes
-    }, [])
+    // const axes: Axis[] = ['x-axis', 'y-axis'].reduce((parsedAxes: Axis[], s: string) => {
+    //     let axisSVG = findHtmlElement(chartSVG, s);
+    //     if (axisSVG) {
+    //         parsedAxes.push(parseAxis(plot, axisSVG))
+    //     }
+    //     return parsedAxes
+    // }, [])
     let legends: Legend[] = []
     if (plot.color && plot.color.legend) legends.push(parseLegend(plot, svg.children[0]))
     const plotMark = plot.marks.filter((mark: any) => mark.ariaLabel !== 'rule')[0]
@@ -132,7 +132,7 @@ function parseAxis(plot: any, svg: Element): Axis {
 
     let guide: Axis = {
         type,
-        values: type === 'discrete' ? ticks : ticks.map(t => Number(t)),
+        values: type === 'discrete' ? ticks : ticks.map(t => Number(t.replace(/,/g, ''))),
         field: field,
         axisType: axisType
     }
@@ -171,7 +171,6 @@ function parseLegend(plot: any, svg: Element): Legend { //TODO: Does not support
         values: type === 'discrete' ? values : values.map(v => Number(v.replace(/,/g, ''))),
         field: field,
         channel: 'color', // TODO
-        legendType: type === 'discrete' ? 'symbol' : 'gradient'
     }
 
     return guide

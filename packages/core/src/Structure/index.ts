@@ -178,7 +178,8 @@ function olliVisSpecToNode(type: NodeType, selected: any[], parent: Accessibilit
                             node,
                             chart,
                             facetValue,
-                            String(value));
+                            String(value),
+                            axis);
                     });
                     break;
                 case "continuous":
@@ -190,7 +191,8 @@ function olliVisSpecToNode(type: NodeType, selected: any[], parent: Accessibilit
                             node,
                             chart,
                             facetValue,
-                            [a, b]);
+                            [a, b],
+                            axis);
                     });
                     break;
             }
@@ -206,7 +208,8 @@ function olliVisSpecToNode(type: NodeType, selected: any[], parent: Accessibilit
                             node,
                             chart,
                             facetValue,
-                            String(value));
+                            String(value),
+                            legend);
                     });
                     break;
                 case "continuous":
@@ -243,7 +246,7 @@ function olliVisSpecToNode(type: NodeType, selected: any[], parent: Accessibilit
                     chart,
                     facetValue,
                     undefined,
-                    undefined,
+                    guide,
                     index,
                     array.length
                 )
@@ -286,10 +289,10 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
                 return chart.mark ? `${chart.mark} chart` : '';
             }
         }
-        const chartTitle = (chart: OlliVisSpec) => chart.title ? `titled "${chart.title}"` : '';
-        const listAxes = (chart: Chart) => chart.axes.length === 1 ? `with axis "${chart.axes[0].title ?? chart.axes[0].field}"` : `with axes ${chart.axes.map(axis => `"${axis.title ?? axis.field}"`).join(' and ')}`;
-        const guideTitle = (guide: Guide) => `titled "${guide.title ?? guide.field}"`;
-        const axisScaleType = (axis: Axis) => `for a ${axis.scaleType ?? axis.type} scale`;
+        const chartTitle = (chart: OlliVisSpec) => (chart.title || facetValue) ? `titled "${chart.title || facetValue}"` : '';
+        const listAxes = (chart: Chart) => chart.axes.length === 1 ? `with axis "${chart.axes[0].title || chart.axes[0].field}"` : `with axes ${chart.axes.map(axis => `"${axis.title || axis.field}"`).join(' and ')}`;
+        const guideTitle = (guide: Guide) => `titled "${guide.title || guide.field}"`;
+        const axisScaleType = (axis: Axis) => `for a ${axis.scaleType || axis.type} scale`;
         const legendChannel = (legend: Legend) => legend.channel ? `for ${legend.channel}` : '';
         const pluralize = (count: number, noun: string, suffix = 's') => `${count} ${noun}${count !== 1 ? suffix : ''}`;
         const guideValues = (guide: Guide) => guide.type === 'discrete' ?
@@ -314,8 +317,15 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
             return `in ${filteredValues(gridFilterValues[0])} and ${gridFilterValues[1]}`;
         }
         const indexStr = (index?: number, length?: number) => index !== undefined && length !== undefined ? `${index + 1} of ${length}.` : '';
-        const datum = (datum: any, olliVisSpec: OlliVisSpec) => {
-            const fieldsUsed = getFieldsUsedForChart(olliVisSpec);
+        const datum = (datum: any, olliVisSpec: OlliVisSpec, guide?: Guide) => {
+            let fieldsUsed = getFieldsUsedForChart(olliVisSpec);
+            // put the filter values last, since user already knows the value
+            if (guide) {
+                fieldsUsed = fieldsUsed.filter(f => f !== guide.field).concat([guide.field]);
+            }
+            if (olliVisSpec.type === 'facetedChart') {
+                fieldsUsed = fieldsUsed.filter(f => f !== olliVisSpec.facetedField).concat([olliVisSpec.facetedField]);
+            }
             fieldsUsed.map(field => {
                 return `"${field}": "${datum[field]}"`;
             }).join(', ');
@@ -345,7 +355,8 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
                     return `${filteredValues(filterValue as EncodingFilterValue)} ${pluralize(node.children.length, 'value')}. ${facetValueStr(facetValue)}`;
                 }
             case 'data':
-                return `${indexStr(index, length)} ${datum(node.selected[0], olliVisSpec)}`;
+                // note: the datum description is not used by the table renderer
+                return `${indexStr(index, length)} ${datum(node.selected[0], olliVisSpec, guide)}`;
             default:
                 throw `Node type ${node.type} not handled in nodeToDesc`;
         }
