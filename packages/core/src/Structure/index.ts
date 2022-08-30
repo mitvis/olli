@@ -1,6 +1,10 @@
 import { Guide, Chart, OlliVisSpec, OlliMark, FacetedChart, chart, Axis, Legend } from "olli-adapters/src/Types";
 import { AccessibilityTree, AccessibilityTreeNode, NodeType } from "./Types";
 
+type EncodingFilterValue = string | [number, number];
+type GridFilterValue = [EncodingFilterValue, EncodingFilterValue];
+type FilterValue = EncodingFilterValue | GridFilterValue;
+
 /**
  * Constructs an {@link AccessibilityTreeNode} based off of a generalized visualization
  * @param olliVisSpec the {@link Chart} or {@link CompositeChart} to transform into a tree
@@ -10,12 +14,12 @@ export function olliVisSpecToTree(olliVisSpec: OlliVisSpec): AccessibilityTree {
     switch (olliVisSpec.type) {
         case "facetedChart":
             return {
-                root: olliVisSpecToNode("multiView", olliVisSpec.data, {}, null, olliVisSpec),
+                root: olliVisSpecToNode("multiView", olliVisSpec.data, null, olliVisSpec),
                 fieldsUsed: getFieldsUsedForChart(olliVisSpec)
             }
         case "chart":
             return {
-                root: olliVisSpecToNode("chart", olliVisSpec.data, {}, null, olliVisSpec),
+                root: olliVisSpecToNode("chart", olliVisSpec.data, null, olliVisSpec),
                 fieldsUsed: getFieldsUsedForChart(olliVisSpec)
             }
         default:
@@ -98,12 +102,11 @@ function axisValuesToIntervals(values: string[] | number[]): [number, number][] 
  * @param childrenInformation changing variable to assist with generating more nodes of the tree
  * @returns The {@link AccessibilityTreeNode} from the provided parameters
  */
-function olliVisSpecToNode(type: NodeType, selected: any[], filterValues: any, parent: AccessibilityTreeNode | null, olliVisSpec: OlliVisSpec, guide?: Guide): AccessibilityTreeNode {
+function olliVisSpecToNode(type: NodeType, selected: any[], parent: AccessibilityTreeNode | null, olliVisSpec: OlliVisSpec, facetValue?: string, filterValue?: FilterValue, guide?: Guide, index?: number, length?: number): AccessibilityTreeNode {
     let node: AccessibilityTreeNode = {
         type: type,
         parent: parent,
         selected: selected,
-        filterValues: filterValues,
         //
         description: type,
         children: [],
@@ -114,13 +117,18 @@ function olliVisSpecToNode(type: NodeType, selected: any[], filterValues: any, p
 
     switch (type) {
         case "multiView":
-            node.children = [...facetedChart.charts.entries()].map(([facetValue, chart]: [string, Chart]) => {
+            node.children = [...facetedChart.charts.entries()].map(([facetValue, chart]: [string, Chart], index, array) => {
                 return olliVisSpecToNode(
                     "chart",
                     selected.filter((datum: any) => datum[facetedChart.facetedField] === facetValue),
-                    { ...filterValues, facet: facetValue },
                     node,
-                    chart);
+                    chart,
+                    facetValue,
+                    undefined,
+                    undefined,
+                    index,
+                    array.length
+                    );
             });
             break;
         case "chart":
@@ -137,22 +145,24 @@ function olliVisSpecToNode(type: NodeType, selected: any[], filterValues: any, p
                     return olliVisSpecToNode(
                         axis.axisType === 'x' ? 'xAxis' : 'yAxis',
                         selected,
-                        filterValues,
                         node,
                         chart,
+                        facetValue,
+                        undefined,
                         axis);
                 }),
                 ...chart.legends.map(legend => {
                     return olliVisSpecToNode(
                         'legend',
                         selected,
-                        filterValues,
                         node,
                         chart,
+                        facetValue,
+                        undefined,
                         legend);
                 }),
                 ...(chart.mark === 'point' && filteredAxes.length === 2 ? [
-                    olliVisSpecToNode('grid', selected, filterValues, node, chart)
+                    olliVisSpecToNode('grid', selected, node, chart, facetValue)
                 ] : [])
             ]
             break;
@@ -165,9 +175,10 @@ function olliVisSpecToNode(type: NodeType, selected: any[], filterValues: any, p
                         return olliVisSpecToNode(
                             'filteredData',
                             selected.filter(d => d[axis.field] === value),
-                            { ...filterValues, guide: value },
                             node,
-                            chart);
+                            chart,
+                            facetValue,
+                            String(value));
                     });
                     break;
                 case "continuous":
@@ -176,9 +187,10 @@ function olliVisSpecToNode(type: NodeType, selected: any[], filterValues: any, p
                         return olliVisSpecToNode(
                             'filteredData',
                             filterInterval(selected, axis.field, a, b),
-                            { ...filterValues, guide: [a, b] },
                             node,
-                            chart);
+                            chart,
+                            facetValue,
+                            [a, b]);
                     });
                     break;
             }
@@ -191,9 +203,10 @@ function olliVisSpecToNode(type: NodeType, selected: any[], filterValues: any, p
                         return olliVisSpecToNode(
                             'filteredData',
                             selected.filter(d => d[legend.field] === value),
-                            { ...filterValues, guide: value },
                             node,
-                            chart);
+                            chart,
+                            facetValue,
+                            String(value));
                     });
                     break;
                 case "continuous":
@@ -215,19 +228,24 @@ function olliVisSpecToNode(type: NodeType, selected: any[], filterValues: any, p
                         yAxis.field,
                         y1,
                         y2),
-                    { ...filterValues, grid: [[x1, x2], [y1, y2]] },
                     node,
-                    chart);
+                    chart,
+                    facetValue,
+                    [[x1, x2], [y1, y2]]);
             });
             break;
         case "filteredData":
-            node.children = selected.map(datum => {
+            node.children = selected.map((datum, index, array) => {
                 return olliVisSpecToNode(
                     'data',
                     [datum],
-                    filterValues,
                     node,
-                    chart
+                    chart,
+                    facetValue,
+                    undefined,
+                    undefined,
+                    index,
+                    array.length
                 )
             })
             break;
@@ -238,7 +256,7 @@ function olliVisSpecToNode(type: NodeType, selected: any[], filterValues: any, p
             throw `Node type ${type} not handled in olliVisSpecToNode`;
     }
 
-    node.description = nodeToDesc(node, olliVisSpec, guide);
+    node.description = nodeToDesc(node, olliVisSpec, facetValue,filterValue, guide, index, length);
 
     return node;
 }
@@ -248,16 +266,16 @@ function olliVisSpecToNode(type: NodeType, selected: any[], filterValues: any, p
  * @param node The node whose description is being created
  * @returns A description based on the provided {@link AccessibilityTreeNode}
  */
-function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, guide?: Guide): string {
-    return _nodeToDesc(node, olliVisSpec, guide).replace(/\s+/g, ' ').trim();
+function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facetValue?: string, filterValue?: FilterValue, guide?: Guide, index?: number, length?: number): string {
+    return _nodeToDesc(node, olliVisSpec, facetValue, filterValue, guide, index, length).replace(/\s+/g, ' ').trim();
 
-    function _nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, guide?: Guide): string {
-        const chartType = (olliVisSpec: OlliVisSpec, node: AccessibilityTreeNode) => {
+    function _nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facetValue?: string, filterValue?: FilterValue, guide?: Guide, index?: number, length?: number): string {
+        const chartType = (olliVisSpec: OlliVisSpec) => {
             if (olliVisSpec.type === 'chart') {
                 return _chartType(olliVisSpec);
             }
-            if (olliVisSpec.type === 'facetedChart' && node.filterValues.facet) {
-                const chart = olliVisSpec.charts.get(node.filterValues.facet);
+            if (olliVisSpec.type === 'facetedChart' && facetValue) {
+                const chart = olliVisSpec.charts.get(facetValue);
                 if (chart) {
                     return _chartType(chart);
                 }
@@ -270,7 +288,6 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, guide
         }
         const chartTitle = (chart: OlliVisSpec) => chart.title ? `titled "${chart.title}"` : '';
         const listAxes = (chart: Chart) => chart.axes.length === 1 ? `with axis "${chart.axes[0].title ?? chart.axes[0].field}"` : `with axes ${chart.axes.map(axis => `"${axis.title ?? axis.field}"`).join(' and ')}`;
-        const multiViewIndex = (node: AccessibilityTreeNode) => node.parent?.type === 'multiView' ? `${node.parent.children.indexOf(node) + 1} of ${node.parent.children.length}.` : '';
         const guideTitle = (guide: Guide) => `titled "${guide.title ?? guide.field}"`;
         const axisScaleType = (axis: Axis) => `for a ${axis.scaleType ?? axis.type} scale`;
         const legendChannel = (legend: Legend) => legend.channel ? `for ${legend.channel}` : '';
@@ -282,9 +299,9 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, guide
                 `with ${pluralize(guide.values.length, 'value')} starting with "${guide.values[0]}" and ending with "${guide.values[guide.values.length - 1]}"`
             ) :
             `with values from "${guide.values[0]}" to "${guide.values[guide.values.length - 1]}"`;
-        const facetValue = (node: AccessibilityTreeNode) => `"${node.filterValues.facet}".` ?? '';
-        const filteredValues = (guideFilterValues: string | [number, number] | undefined) => {
-            if (guideFilterValues === undefined) return '';
+        const facetValueStr = (facetValue?: string) => facetValue ? `"${facetValue}".` : '';
+        const filteredValues = (guideFilterValues?: EncodingFilterValue) => {
+            if (!guideFilterValues) return '';
             else if (Array.isArray(guideFilterValues)) {
                 return `Range ${guideFilterValues.join(' to ')}.`
             }
@@ -292,14 +309,17 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, guide
                 return `"${guideFilterValues}".`;
             }
         }
-        const filteredValuesGrid = (gridFilterValues: [string | [number, number], string | [number, number]] | undefined) => {
-            if (gridFilterValues === undefined) return '';
+        const filteredValuesGrid = (gridFilterValues?: GridFilterValue) => {
+            if (!gridFilterValues) return '';
             return `in ${filteredValues(gridFilterValues[0])} and ${gridFilterValues[1]}`;
         }
-        const datumIndex = (node: AccessibilityTreeNode) => node.parent ? `${node.parent.children.indexOf(node) + 1} of ${node.parent.children.length}.` : '';
-        const datum = (datum: any) => Object.entries(datum).map(([k, v]) => {
-            return `"${k}": "${v}"`;
-        }).join(', ');
+        const indexStr = (index?: number, length?: number) => index !== undefined && length !== undefined ? `${index + 1} of ${length}.` : '';
+        const datum = (datum: any, olliVisSpec: OlliVisSpec) => {
+            const fieldsUsed = getFieldsUsedForChart(olliVisSpec);
+            fieldsUsed.map(field => {
+                return `"${field}": "${datum[field]}"`;
+            }).join(', ');
+        }
 
         const chart = olliVisSpec as Chart;
         const axis = guide as Axis;
@@ -309,40 +329,25 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, guide
             case 'multiView':
                 return `A faceted chart ${chartTitle(olliVisSpec)} with ${node.children.length} views.`;
             case 'chart':
-                return `${multiViewIndex(node)} A ${chartType(chart, node)} ${chartTitle(chart)} ${listAxes(chart)}.`;
+                return `${indexStr(index, length)} A ${chartType(chart)} ${chartTitle(chart)} ${listAxes(chart)}.`;
             case 'xAxis':
             case 'yAxis':
-                return `${axis.axisType.toUpperCase()}-axis ${guideTitle(axis)} ${axisScaleType(axis)} ${guideValues(axis)}. ${facetValue(node)}`;
+                return `${axis.axisType.toUpperCase()}-axis ${guideTitle(axis)} ${axisScaleType(axis)} ${guideValues(axis)}. ${facetValueStr(facetValue)}`;
             case 'legend':
-                return `Legend ${guideTitle(legend)} ${legendChannel(legend)} ${guideValues(axis)}. ${facetValue(node)}`;
+                return `Legend ${guideTitle(legend)} ${legendChannel(legend)} ${guideValues(axis)}. ${facetValueStr(facetValue)}`;
             case 'grid':
-                return `Grid view of ${chartType(chart, node)}. ${facetValue(node)}`
+                return `Grid view of ${chartType(chart)}. ${facetValueStr(facetValue)}`
             case 'filteredData':
                 if (node.parent?.type === 'grid') {
-                    return `${pluralize(node.children.length, 'value')} ${filteredValuesGrid(node.filterValues.grid)}. ${facetValue(node)}`;
+                    return `${pluralize(node.children.length, 'value')} ${filteredValuesGrid(filterValue as GridFilterValue)}. ${facetValueStr(facetValue)}`;
                 }
                 else {
-                    return `${filteredValues(node.filterValues.guide)} ${pluralize(node.children.length, 'value')}. ${facetValue(node)}`;
+                    return `${filteredValues(filterValue as EncodingFilterValue)} ${pluralize(node.children.length, 'value')}. ${facetValueStr(facetValue)}`;
                 }
-                break;
             case 'data':
-                return `${datumIndex(node)} ${datum(node.selected[0])}`;
+                return `${indexStr(index, length)} ${datum(node.selected[0], olliVisSpec)}`;
             default:
                 throw `Node type ${node.type} not handled in nodeToDesc`;
         }
-        // if (node.type === "multiView" || node.type === "chart") {
-        //     return node.description
-        // } else if (node.type === "xAxis" || node.type === "yAxis") {
-        //     return node.description
-        // } else if (node.type === `legend`) {
-        //     return node.description
-        // } else if (node.type === "filteredData") {
-        //     return `Range ${node.description} ${node.selected.length} ${node.selected.length === 1 ? 'value' : 'values'} in the interval`
-        // } else if (node.type === `grid`) {
-        //     return node.description
-        // } else if (node.type === 'data') {
-        //     return node.fieldsUsed.reduce((desc: string, currentKey: string) => `${desc} ${currentKey}: ${node.selected[0][currentKey]}`, "");
-        // }
-        return node.type;
     }
 }
