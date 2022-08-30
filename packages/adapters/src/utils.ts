@@ -1,5 +1,6 @@
-import { Scene, Spec, parse, View, SceneItem, SceneContext, Scale } from "vega";
+import { Scene, Spec, parse, View, SceneItem, SceneContext } from "vega";
 import { isNumeric as vlIsNumeric } from "vega-lite";
+import { OlliDataset } from "./Types";
 
 export async function getVegaScene(spec: Spec): Promise<SceneGroup> {
     const runtime = parse(spec);
@@ -67,16 +68,18 @@ function verifyNode(scenegraphNode: any, cancelRoles: string[]): boolean {
     }
 }
 
-export function getData(scene: SceneGroup): any[] {
+export function getData(scene: SceneGroup): OlliDataset {
     try {
-        // let data: Map<string, any[]> = new Map()
-        // const datasets = spec.data?.map((set: any) => set.name)!
-        // datasets.map((key: string) => data.set(key, scene.context.data[key].values.value));
-        // return data
-        return (scene as any).context.data['source_0'].values.value
-        // TODO hardcoded dataset name
+        const datasets = (scene as any).context.data;
+        const names = Object.keys(datasets).filter(name => {
+            return name.match(/(source)|(data)_\d/);
+        });
+        const name = names.reverse()[0]; // TODO do we know this is the right one?
+        const dataset = datasets[name].values.value;
+
+        return dataset;
     } catch (error) {
-        throw new Error(`No data defined in the Vega Spec \n ${error}`)
+        throw new Error(`No data found in the Vega scenegraph \n ${error}`)
     }
 }
 
@@ -98,6 +101,18 @@ export const guideTypeFromScale = (scaleType: string): 'discrete' | 'continuous'
         case 'quantize':
         case 'threshold':
         case 'bin-ordinal':
+        default:
+            return 'discrete';
+    }
+  }
+
+  export const guideTypeFromVLEncoding = (encodingType: string): 'discrete' | 'continuous' => {
+    switch (encodingType) {
+        case 'quantitative':
+        case 'temporal':
+            return 'continuous';
+        case 'ordinal':
+        case 'nominal':
         default:
             return 'discrete';
     }

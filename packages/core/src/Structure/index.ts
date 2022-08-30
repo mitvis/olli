@@ -1,7 +1,7 @@
-import { Guide, Chart, OlliVisSpec, OlliMark, FacetedChart, chart, Axis, Legend } from "olli-adapters/src/Types";
+import { Guide, Chart, OlliVisSpec, OlliMark, FacetedChart, chart, Axis, Legend, OlliDatum, OlliDataset, OlliValue } from "olli-adapters/src/Types";
 import { AccessibilityTree, AccessibilityTreeNode, NodeType } from "./Types";
 
-type EncodingFilterValue = string | [number, number];
+type EncodingFilterValue = string | [number | Date, number | Date];
 type GridFilterValue = [EncodingFilterValue, EncodingFilterValue];
 type FilterValue = EncodingFilterValue | GridFilterValue;
 
@@ -38,8 +38,17 @@ function getFieldsUsedForChart(olliVisSpec: OlliVisSpec): string[] {
     }
 }
 
-const filterInterval = (selection: any[], field: string, lowerBound: number, upperBound: number): any[] => {
-    return selection.filter((val: any) => {
+const filterInterval = (selection: OlliDataset, field: string, lowerBound: number | Date, upperBound: number | Date): OlliDataset => {
+    return selection.filter((datum: any) => {
+        let value = datum[field];
+        console.log(value, lowerBound, upperBound);
+        if (value instanceof Date) {
+            const lowerBoundStr = String(lowerBound);
+            const upperBoundStr = String(upperBound);
+            if (lowerBoundStr.length === 4 && upperBoundStr.length === 4) {
+                value = value.getFullYear();
+            }
+        }
         // TODO: commented out date handling and value not found thingy
         // if ((lowerCaseDesc.includes("date") || lowerCaseDesc.includes("temporal")) && upperBound.toString().length === 4) {
         //     const d = new Date(val[field])
@@ -48,18 +57,32 @@ const filterInterval = (selection: any[], field: string, lowerBound: number, upp
         //     let updatedField = Object.keys(val).find((k: string) => k.includes(field) || field.includes(k))
         //     if (updatedField) return val[updatedField] >= lowerBound && val[updatedField] < upperBound;
         // }
-        return val[field] >= lowerBound && val[field] < upperBound;
+        // if (datum[field] instanceof Date && value >= lowerBound && value < upperBound) {
+        //     console.log(value);
+        // }
+        return value >= lowerBound && value < upperBound;
     })
 }
 
-function axisValuesToIntervals(values: string[] | number[]): [number, number][] {
+function axisValuesToIntervals(values: string[] | number[]): ([number, number] | [Date, Date])[] {
 
-    const ensureAxisValuesNumeric = (values: any[]): number[] => {
+    const ensureAxisValuesNumeric = (values: any[]): {values: number[], isDate?: boolean} => {
         const isStringArr = values.every(v => typeof v === 'string' || v instanceof String);
         if (isStringArr) {
-            return values.map(s => Number(s.replaceAll(',', '')));
+            return {
+                values: values.map(s => Number(s.replaceAll(',', '')))
+            };
         }
-        return values;
+        const isDateArr = values.every(v => v instanceof Date);
+        if (isDateArr) {
+            return {
+                values: values.map(d => d.getTime()),
+                isDate: true
+            };
+        }
+        return {
+            values
+        };
     }
 
     const getEncodingValueIncrements = (incrementArray: [number, number][], currentValue: number, index: number, array: number[]): [number, number][] => {
@@ -72,13 +95,7 @@ function axisValuesToIntervals(values: string[] | number[]): [number, number][] 
             bounds = [(currentValue - incrementDifference), currentValue];
         } else if (index === array.length - 1) {
             const incrementDifference: number = currentValue - (array[index - 1] as number)
-            let finalIncrement;
-            // TODO i commented out date handling. it will require changes to typings
-            // if (currentValue instanceof Date) {
-                // finalIncrement = currentValue.getTime() + incrementDifference;
-            // } else {
-                finalIncrement = currentValue + incrementDifference;
-            // }
+            const finalIncrement = currentValue + incrementDifference;
             incrementArray.push([array[reducedIndex] as number, currentValue])
             bounds = [currentValue, finalIncrement];
 
@@ -89,8 +106,12 @@ function axisValuesToIntervals(values: string[] | number[]): [number, number][] 
         return incrementArray
     }
 
-    values = ensureAxisValuesNumeric(values);
-    return values.reduce(getEncodingValueIncrements, []);
+    const res = ensureAxisValuesNumeric(values);
+    const increments = res.values.reduce(getEncodingValueIncrements, []);
+    if (res.isDate) {
+        return increments.map(value => [new Date(value[0]), new Date(value[1])])
+    }
+    return increments;
 }
 
 /**
@@ -120,7 +141,7 @@ function olliVisSpecToNode(type: NodeType, selected: any[], parent: Accessibilit
             node.children = [...facetedChart.charts.entries()].map(([facetValue, chart]: [string, Chart], index, array) => {
                 return olliVisSpecToNode(
                     "chart",
-                    selected.filter((datum: any) => datum[facetedChart.facetedField] === facetValue),
+                    selected.filter((datum: any) => String(datum[facetedChart.facetedField]) === facetValue),
                     node,
                     chart,
                     facetValue,
@@ -174,7 +195,7 @@ function olliVisSpecToNode(type: NodeType, selected: any[], parent: Accessibilit
                     node.children = axis.values.map(value => {
                         return olliVisSpecToNode(
                             'filteredData',
-                            selected.filter(d => d[axis.field] === value),
+                            selected.filter(d => String(d[axis.field]) === String(value)),
                             node,
                             chart,
                             facetValue,
@@ -204,7 +225,7 @@ function olliVisSpecToNode(type: NodeType, selected: any[], parent: Accessibilit
                     node.children = legend.values.map(value => {
                         return olliVisSpecToNode(
                             'filteredData',
-                            selected.filter(d => d[legend.field] === value),
+                            selected.filter(d => String(d[legend.field]) === String(value)),
                             node,
                             chart,
                             facetValue,
@@ -273,6 +294,15 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
     return _nodeToDesc(node, olliVisSpec, facetValue, filterValue, guide, index, length).replace(/\s+/g, ' ').trim();
 
     function _nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facetValue?: string, filterValue?: FilterValue, guide?: Guide, index?: number, length?: number): string {
+        const fmtValue = (value: OlliValue) => {
+            if (value instanceof Date) {
+                return value.toLocaleString("en-US", { year: 'numeric', month: 'short', day: 'numeric' });
+            }
+            else if (typeof value !== 'string' && (!isNaN(value) && value % 1 != 0)) {
+                return Number(value).toFixed(2);
+            }
+            return value;
+        }
         const chartType = (olliVisSpec: OlliVisSpec) => {
             if (olliVisSpec.type === 'chart') {
                 return _chartType(olliVisSpec);
@@ -298,18 +328,18 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
         const guideValues = (guide: Guide) => guide.type === 'discrete' ?
             (
                 guide.values.length === 2 ?
-                `with 2 values: "${guide.values[0]}" and "${guide.values[1]}"` :
+                `with 2 values: "${fmtValue(guide.values[0])}" and "${fmtValue(guide.values[1])}"` :
                 `with ${pluralize(guide.values.length, 'value')} starting with "${guide.values[0]}" and ending with "${guide.values[guide.values.length - 1]}"`
             ) :
-            `with values from "${guide.values[0]}" to "${guide.values[guide.values.length - 1]}"`;
+            `with values from "${fmtValue(guide.values[0])}" to "${fmtValue(guide.values[guide.values.length - 1])}"`;
         const facetValueStr = (facetValue?: string) => facetValue ? `"${facetValue}".` : '';
         const filteredValues = (guideFilterValues?: EncodingFilterValue) => {
             if (!guideFilterValues) return '';
             else if (Array.isArray(guideFilterValues)) {
-                return `Range ${guideFilterValues.join(' to ')}.`
+                return `Range ${guideFilterValues.map(v => fmtValue(v)).join(' to ')}.`
             }
             else {
-                return `"${guideFilterValues}".`;
+                return `"${fmtValue(guideFilterValues)}".`;
             }
         }
         const filteredValuesGrid = (gridFilterValues?: GridFilterValue) => {
@@ -317,7 +347,7 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
             return `in ${filteredValues(gridFilterValues[0])} and ${gridFilterValues[1]}`;
         }
         const indexStr = (index?: number, length?: number) => index !== undefined && length !== undefined ? `${index + 1} of ${length}.` : '';
-        const datum = (datum: any, olliVisSpec: OlliVisSpec, guide?: Guide) => {
+        const datum = (datum: OlliDatum, olliVisSpec: OlliVisSpec, guide?: Guide) => {
             let fieldsUsed = getFieldsUsedForChart(olliVisSpec);
             // put the filter values last, since user already knows the value
             if (guide) {
@@ -327,7 +357,8 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
                 fieldsUsed = fieldsUsed.filter(f => f !== olliVisSpec.facetedField).concat([olliVisSpec.facetedField]);
             }
             fieldsUsed.map(field => {
-                return `"${field}": "${datum[field]}"`;
+                const value = fmtValue(datum[field]);
+                return `"${field}": "${value}"`;
             }).join(', ');
         }
 

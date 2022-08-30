@@ -1,3 +1,4 @@
+import { OlliDatum } from "olli-adapters/src/Types";
 import { AccessibilityTreeNode } from "../../Structure/Types";
 
 /**
@@ -16,11 +17,11 @@ export function renderTable(tree: AccessibilityTreeNode, fieldsUsed: string[]): 
     })
 
     tableBody.appendChild(tableHeaders)
-    tree.selected.forEach((data: any) => {
+    tree.selected.forEach((data: OlliDatum) => {
         const dataRow = document.createElement("tr")
         fieldsUsed.forEach((field: string) => {
             const tableData = document.createElement("td")
-            tableData.innerText = data[field];
+            tableData.innerText = String(data[field]);
             dataRow.appendChild(tableData);
         })
 

@@ -1,5 +1,5 @@
 import { Spec, ScaleDataRef, Scale, ScaleData, Scene, SceneItem, isString } from "vega";
-import { Guide, OlliVisSpec, VisAdapter, chart, Chart, Axis, Legend, facetedChart, FacetedChart, OlliMark } from "./Types";
+import { Guide, OlliVisSpec, VisAdapter, chart, Chart, Axis, Legend, facetedChart, FacetedChart, OlliMark, OlliDataset } from "./Types";
 import { filterUniqueNodes, findScenegraphNodes, getData, getVegaScene, guideTypeFromScale, isNumeric, SceneGroup } from "./utils";
 
 /**
@@ -18,7 +18,7 @@ export const VegaAdapter: VisAdapter<Spec> = async (vSpec: Spec): Promise<OlliVi
     }
 }
 
-function parseFacets(spec: Spec, scene: SceneGroup, data: any[]): FacetedChart {
+function parseFacets(spec: Spec, scene: SceneGroup, data: OlliDataset): FacetedChart {
     const axes = filterUniqueNodes(findScenegraphNodes(scene, "axis").map((axisNode: any) => parseAxisInformation(spec, axisNode)));
     const legends = filterUniqueNodes(findScenegraphNodes(scene, "legend").map((legendNode: any) => parseLegendInformation(spec, legendNode, data)));
     const chartItems = scene.items.filter((el: any) => el.role === "scope")[0].items;
@@ -56,7 +56,7 @@ function parseFacets(spec: Spec, scene: SceneGroup, data: any[]): FacetedChart {
     return multiViewChart;
 }
 
-function parseSingleChart(spec: Spec, scene: Scene | SceneItem, data: any[]): Chart {
+function parseSingleChart(spec: Spec, scene: Scene | SceneItem, data: OlliDataset): Chart {
     const axes = findScenegraphNodes(scene, "axis").map((axisNode: any) => parseAxisInformation(spec, axisNode));
     const legends = findScenegraphNodes(scene, "legend").map((legendNode: any) => parseLegendInformation(spec, legendNode, data))
     const chartTitle: string | undefined = findScenegraphNodes(scene, "title").length > 0 ?
@@ -136,7 +136,7 @@ function parseAxisInformation(spec: Spec, axis: any): Axis {
 /**
  * @returns a key-value pairing of the legend name and the {@link Guide} of the corresponding axis
  */
-function parseLegendInformation(spec: Spec, legendNode: any, data: any[]): Legend {
+function parseLegendInformation(spec: Spec, legendNode: any, data: OlliDataset): Legend {
     const scaleName: string = legendNode.items[0].datum.scales[Object.keys(legendNode.items[0].datum.scales)[0]];
     const scaleSpec = spec.scales?.find((specScale: any) => specScale.name === scaleName);
     const labels: any[] = legendNode.items[0].items.find((n: any) => n.role === "legend-entry").items[0].items[0].items;

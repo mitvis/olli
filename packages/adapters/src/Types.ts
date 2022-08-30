@@ -1,19 +1,25 @@
-import { LegendType } from "vega";
-
 /**
  * Detailing the different marks that can exist in a chart
  */
 export type OlliMark = "point" | "bar" | "line" | undefined;
 
+export type OlliValue = string | number | Date;
+
+export interface OlliDatum {
+    [key: string]: OlliValue;
+}
+
+export type OlliDataset = OlliDatum[];
+
 /**
  * A simple union type that when implemented a concrete adapter class can be used with any visualization library to
  * later be used to create an explorable Accessibility Tree.
  */
- type BaseOlliVisSpec = {
+type BaseOlliVisSpec = {
     type: "chart" | "facetedChart",
-    data: any[],
+    data: OlliDataset,
     title? : string
- }
+}
 
 
 /**

@@ -6,9 +6,10 @@ import {
     Axis,
     Legend,
     facetedChart,
-    chart
+    chart,
+    OlliDataset
 } from "./Types";
-import { filterUniqueNodes, findScenegraphNodes, getData, getVegaScene, guideTypeFromScale, isNumeric, SceneGroup } from "./utils";
+import { filterUniqueNodes, findScenegraphNodes, getData, getVegaScene, guideTypeFromScale, guideTypeFromVLEncoding, isNumeric, SceneGroup } from "./utils";
 
 /**
  * Adapter to deconstruct Vega-Lite visualizations into an {@link OlliVisSpec}
@@ -32,9 +33,9 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
  * @param spec The Vega-Lite Spec that rendered the visualization
  * @returns An {@link OlliVisSpec} of the deconstructed Vega-Lite visualization
  */
-function parseMultiView(spec: any, scene: SceneGroup, data: any[]): OlliVisSpec {
+function parseMultiView(spec: any, scene: SceneGroup, data: OlliDataset): OlliVisSpec {
     const axes = filterUniqueNodes(findScenegraphNodes(scene, "axis").map((axis: any) => parseAxis(axis, spec, data)));
-    const legends = filterUniqueNodes(findScenegraphNodes(scene, "legend").map((legend: any) => parseLegend(legend, spec, data)));
+    const legends = filterUniqueNodes(findScenegraphNodes(scene, "legend").map((legend: any) => parseLegend(legend, spec)));
     let facetedField = spec.encoding.facet !== undefined ? spec.encoding.facet.field : spec.encoding['color'].field
     let nestedHeirarchies: Map<any, Chart> = new Map(scene.items.filter((el: any) => el.role === "scope")[0].items
         .map((chart: any) => {
@@ -59,7 +60,7 @@ function parseMultiView(spec: any, scene: SceneGroup, data: any[]): OlliVisSpec 
  * @param spec The Vega-Lite Spec that rendered the visualization
  * @returns An {@link OlliVisSpec} of the deconstructed Vega-Lite visualization
  */
-function parseChart(spec: any, scene: SceneGroup, data: any[]): Chart {
+function parseChart(spec: any, scene: SceneGroup, data: OlliDataset): Chart {
     let axes: Axis[] = findScenegraphNodes(scene, "axis").map((axis: any) => parseAxis(axis, spec, data))
     let legends: Legend[] = findScenegraphNodes(scene, "legend").map((legend: any) => parseLegend(legend, spec))
     let mark: any = spec.mark // TODO vega-lite mark type exceeds olli mark type, should do some validation
@@ -69,7 +70,6 @@ function parseChart(spec: any, scene: SceneGroup, data: any[]): Chart {
         data,
         mark
     })
-    console.log(node);
     return node
 }
 
@@ -80,7 +80,7 @@ function parseChart(spec: any, scene: SceneGroup, data: any[]): Chart {
  * @param spec The Vega-Lite Spec that rendered the visualization
  * @returns A {@link Axis} from the converted axisScenegraphNode
  */
-function parseAxis(axisScenegraphNode: any, spec: any, data: any[]): Axis {
+function parseAxis(axisScenegraphNode: any, spec: any, data: OlliDataset): Axis {
     const axisView = axisScenegraphNode.items[0]
     const orient = axisView.orient
     const encodingKey = orient === 'bottom' ? 'x' : 'y';
@@ -95,7 +95,7 @@ function parseAxis(axisScenegraphNode: any, spec: any, data: any[]): Axis {
         field = encoding.field
     }
 
-    const type = (encoding.type === 'quantitative' || encoding.aggregate) ? 'continuous' : 'discrete';
+    const type = encoding.type ? guideTypeFromVLEncoding(encoding.type) : (encoding.aggregate ? 'continuous' : 'discrete');
 
     return {
         type,
@@ -115,15 +115,13 @@ function parseAxis(axisScenegraphNode: any, spec: any, data: any[]): Axis {
  * @returns A {@link legend} from the converted legendScenegraphNode
  */
 function parseLegend(legendScenegraphNode: any, spec: any): Legend {
-    const scaleName = legendScenegraphNode.items[0].datum.scales[Object.keys(legendScenegraphNode.items[0].datum.scales)[0]];
     const labels: any[] = legendScenegraphNode.items[0].items.find((n: any) => n.role === "legend-entry").items[0].items[0].items;
 
     const values = labels.map((n: any) => n.items.find((el: any) => el.role === "legend-label").items[0].datum.value);
-    console.log(values);
 
     const encType = spec.encoding['color'].type;
 
-    const type = encType ? (encType === 'quantitative' ? 'continuous' : 'discrete') :
+    const type = encType ? guideTypeFromVLEncoding(encType) :
         (values.every((t: any) => isNumeric(String(t))) ? 'continuous' : 'discrete');
 
     // TODO legend channel currently hardcoded to color
