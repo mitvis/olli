@@ -1,4 +1,4 @@
-import { OlliDatum } from "olli-adapters/src/Types";
+import { OlliDatum } from "../../Types";
 import { AccessibilityTreeNode } from "../../Structure/Types";
 
 /**

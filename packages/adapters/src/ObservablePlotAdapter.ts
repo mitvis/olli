@@ -1,4 +1,4 @@
-import { VisAdapter, OlliVisSpec, FacetedChart, Chart, Axis, Legend, Guide, OlliMark } from "./Types";
+import { VisAdapter, OlliVisSpec, FacetedChart, Chart, Axis, Legend, OlliMark } from "olli";
 import { guideTypeFromScale, isNumeric } from "./utils";
 // Observable-Plot has no type declaration file :/
 const Plot = require("@observablehq/plot")

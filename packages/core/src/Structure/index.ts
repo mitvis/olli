@@ -1,4 +1,4 @@
-import { Guide, Chart, OlliVisSpec, OlliMark, FacetedChart, chart, Axis, Legend, OlliDatum, OlliDataset, OlliValue } from "olli-adapters/src/Types";
+import { Guide, Chart, OlliVisSpec, FacetedChart, Axis, Legend, OlliDatum, OlliDataset, OlliValue } from "../Types";
 import { AccessibilityTree, AccessibilityTreeNode, NodeType } from "./Types";
 
 type EncodingFilterValue = string | [number | Date, number | Date];

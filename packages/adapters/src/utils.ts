@@ -1,6 +1,6 @@
 import { Scene, Spec, parse, View, SceneItem, SceneContext } from "vega";
 import { isNumeric as vlIsNumeric } from "vega-lite";
-import { OlliDataset } from "./Types";
+import { OlliDataset } from "olli";
 
 export async function getVegaScene(spec: Spec): Promise<SceneGroup> {
     const runtime = parse(spec);

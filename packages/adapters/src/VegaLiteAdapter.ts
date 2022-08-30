@@ -8,7 +8,7 @@ import {
     facetedChart,
     chart,
     OlliDataset
-} from "./Types";
+} from "olli";
 import { filterUniqueNodes, findScenegraphNodes, getData, getVegaScene, guideTypeFromScale, guideTypeFromVLEncoding, isNumeric, SceneGroup } from "./utils";
 
 /**

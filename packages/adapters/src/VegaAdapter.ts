@@ -1,5 +1,5 @@
 import { Spec, ScaleDataRef, Scale, ScaleData, Scene, SceneItem, isString } from "vega";
-import { Guide, OlliVisSpec, VisAdapter, chart, Chart, Axis, Legend, facetedChart, FacetedChart, OlliMark, OlliDataset } from "./Types";
+import { OlliVisSpec, VisAdapter, chart, Chart, Axis, Legend, facetedChart, FacetedChart, OlliMark, OlliDataset } from "olli";
 import { filterUniqueNodes, findScenegraphNodes, getData, getVegaScene, guideTypeFromScale, isNumeric, SceneGroup } from "./utils";
 
 /**

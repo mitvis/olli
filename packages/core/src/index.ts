@@ -1,9 +1,11 @@
-import { OlliVisSpec } from "olli-adapters/src/Types"
+import { OlliVisSpec } from "./Types"
 import { renderTable } from "./Render/Table"
 import { renderTree } from "./Render/TreeView"
 import { TreeLinks } from "./Render/TreeView/TreeLink"
 import { olliVisSpecToTree } from "./Structure"
 import { AccessibilityTree } from "./Structure/Types"
+
+export * from './Types';
 
 /**
  * The configuration object outlining how an accessible visualization should be rendered based on a {@link OlliVisSpec}.
