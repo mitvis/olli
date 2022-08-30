@@ -161,7 +161,7 @@ function olliVisSpecToNode(type: NodeType, selected: any[], parent: Accessibilit
                         undefined,
                         legend);
                 }),
-                ...(chart.mark === 'point' && filteredAxes.length === 2 ? [
+                ...(chart.mark === 'point' && filteredAxes.length === 2 && filteredAxes.every(axis => axis.type === 'continuous') ? [
                     olliVisSpecToNode('grid', selected, node, chart, facetValue)
                 ] : [])
             ]
