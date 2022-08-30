@@ -132,8 +132,7 @@ function parseAxis(plot: any, svg: Element): Axis {
 
     let guide: Axis = {
         type,
-        values: type === 'discrete' ? ticks : ticks.map(t => parseFloat(t)),
-        title: `${svg?.getAttribute('aria-label')} titled ${field}`,
+        values: type === 'discrete' ? ticks : ticks.map(t => Number(t)),
         field: field,
         axisType: axisType
     }
@@ -153,7 +152,7 @@ function parseAxis(plot: any, svg: Element): Axis {
  */
 function parseLegend(plot: any, svg: Element): Legend { //TODO: Does not support 'ramp' legend types when the legend is rendered as an SVG
     const plotMark = plot.marks.filter((mark: any) => mark.ariaLabel !== 'rule')[0];
-    const channel = plotMark.channels.find((c: any) => c.scale === 'color');
+    const channel = plotMark.channels.find((c: any) => c.scale === 'color'); // TODO channel hardcoded to color
     const values: string[] = Object.keys(svg.children).map((k: string) => {
         let c = svg.children[parseInt(k)];
         if (c.nodeName !== 'STYLE') {
@@ -169,11 +168,10 @@ function parseLegend(plot: any, svg: Element): Legend { //TODO: Does not support
 
     let guide: Legend = {
         type,
-        values: type === 'discrete' ? values : values.map(v => parseFloat(v.replace(/,/g, ''))),
+        values: type === 'discrete' ? values : values.map(v => Number(v.replace(/,/g, ''))),
         field: field,
-        title: field,
-        legendType: type === 'discrete' ? 'symbol' : 'gradient',
-        scaleType
+        channel: 'color', // TODO
+        legendType: type === 'discrete' ? 'symbol' : 'gradient'
     }
 
     return guide

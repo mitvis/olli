@@ -11,7 +11,8 @@ export type OlliMark = "point" | "bar" | "line" | undefined;
  */
  type BaseOlliVisSpec = {
     type: "chart" | "facetedChart",
-    data: any[]
+    data: any[],
+    title? : string
  }
 
 
@@ -22,8 +23,7 @@ export type OlliMark = "point" | "bar" | "line" | undefined;
     type: "chart",
     axes: Axis[] ,
     legends: Legend[],
-    mark: OlliMark,
-    title? : string
+    mark: OlliMark
 }
 
 /**
@@ -58,21 +58,22 @@ export type Guide = {
     values: string[] | number[],
     field: string,
     title?: string,
-    scaleType?: string,
 }
 
 /**
  * Extending the {@link Guide} interface for visualization axes
  */
 export interface Axis extends Guide {
-    axisType: 'x' | 'y'
+    axisType: 'x' | 'y',
+    scaleType?: string // e.g. linear, logarithmic, band
 }
 
 /**
  * Extending the {@link Guide} interface for visualization legends
  */
 export interface Legend extends Guide {
-    legendType: LegendType
+    legendType: LegendType,
+    channel?: string // e.g. color, opacity
 }
 
 /**

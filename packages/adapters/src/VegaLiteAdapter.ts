@@ -122,12 +122,13 @@ function parseLegend(legendScenegraphNode: any, spec: any): Legend {
         values.every((t: any) => isNumeric(t)) ? 'continuous' : 'discrete'
     );
 
+    // TODO legend channel currently hardcoded to color
     return {
         type,
         values,
         title: spec.encoding['color'].title ? spec.encoding['color'].title : spec.encoding['color'].field,
         field: spec.encoding['color'].field,
-        scaleType: scaleSpec?.type,
+        channel: 'color',
         legendType: spec.encoding['color'].type
     }
 }

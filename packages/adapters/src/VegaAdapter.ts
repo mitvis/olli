@@ -1,4 +1,4 @@
-import { Spec, ScaleDataRef, Scale, ScaleData, Scene, SceneItem } from "vega";
+import { Spec, ScaleDataRef, Scale, ScaleData, Scene, SceneItem, isString } from "vega";
 import { Guide, OlliVisSpec, VisAdapter, chart, Chart, Axis, Legend, facetedChart, FacetedChart, OlliMark } from "./Types";
 import { findScenegraphNodes, getData, getVegaScene, guideTypeFromScale, isNumeric, SceneGroup } from "./utils";
 
@@ -104,7 +104,7 @@ function vegaMarkToOlliMark(mark?: string): OlliMark {
  */
 function parseAxisInformation(spec: Spec, axis: any): Axis {
     const axisView = axis.items[0]
-    const ticks = axisView.items.find((n: any) => n.role === 'axis-tick').items.map((n: any) => n.datum.value);
+    const ticks: any[] = axisView.items.find((n: any) => n.role === 'axis-tick').items.map((n: any) => n.datum.value);
     const title: string = axisView.items.find((n: any) => n.role === "axis-title")?.items?.[0]?.text;
     const scaleName: string = axisView.datum.scale;
     const scaleSpec = spec.scales?.find((specScale: Scale) => specScale.name === scaleName)!;
@@ -131,7 +131,7 @@ function parseAxisInformation(spec: Spec, axis: any): Axis {
     //
 
     const type = scaleSpec?.type ? guideTypeFromScale(scaleSpec.type) : (
-        ticks.every((t: any) => isNumeric(t)) ? 'continuous' : 'discrete'
+        ticks.every((t: string | number) => !isString(t) || (isString(t) && isNumeric(t))) ? 'continuous' : 'discrete'
     );
 
     const axisType = axisView.orient === "bottom" || axisView.orient === "top" ? "x" : "y";
@@ -168,7 +168,7 @@ function parseLegendInformation(spec: Spec, legendNode: any, data: any[]): Legen
     const values = labels.map((n: any) => n.items.find((el: any) => el.role === "legend-label").items[0].datum.value);
 
     const type = scaleSpec?.type ? guideTypeFromScale(scaleSpec.type) : (
-        values.every((t: any) => isNumeric(t)) ? 'continuous' : 'discrete'
+        values.every((t: string | number) => !isString(t) || (isString(t) && isNumeric(t))) ? 'continuous' : 'discrete'
     );
 
     return {
@@ -176,7 +176,6 @@ function parseLegendInformation(spec: Spec, legendNode: any, data: any[]): Legen
         values,
         title: title,
         field: (field as string),
-        scaleType: spec.scales?.find((specScale: any) => specScale.name === scaleName)?.type,
         legendType: "symbol" // TODO hardcoded legend type
     }
 

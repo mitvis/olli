@@ -23,6 +23,13 @@ export type AccessibilityTreeNode = {
     type: NodeType,
     parent: AccessibilityTreeNode | null,
     selected: any[],
+    filterValues: {
+      // TODO we could replace this with the vega predicate format, which would be cool because you could generate the selection from that
+      // (not necessarily more useful now, but more generalizable because we could explore different ways to generate arbitrary preds in the future, not just by tree/encoding traversal)
+      facet?: string,
+      guide?: string | [number, number],
+      grid?: [string | [number, number], string | [number, number]]
+    },
     description: string,
     children: AccessibilityTreeNode[],
 
