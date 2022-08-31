@@ -4,9 +4,6 @@ import * as Plot from "https://cdn.skypack.dev/@observablehq/plot@0.5";
 
 d3.json("https://raw.githubusercontent.com/vega/vega-datasets/next/data/penguins.json").then((data) => {
     let spec = {
-        // color: {
-        //   legend: true,
-        // },
         grid: true,
         color: {
             type: "ordinal",
