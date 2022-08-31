@@ -321,15 +321,15 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
         const filteredValues = (guideFilterValues?: EncodingFilterValue) => {
             if (!guideFilterValues) return '';
             else if (Array.isArray(guideFilterValues)) {
-                return `Range ${guideFilterValues.map(v => fmtValue(v)).join(' to ')}.`
+                return `${guideFilterValues.map(v => fmtValue(v)).join(' to ')}`
             }
             else {
-                return `"${fmtValue(guideFilterValues)}".`;
+                return `"${fmtValue(guideFilterValues)}"`;
             }
         }
         const filteredValuesGrid = (gridFilterValues?: GridFilterValue) => {
             if (!gridFilterValues) return '';
-            return `in ${filteredValues(gridFilterValues[0])} and ${gridFilterValues[1]}`;
+            return `in ${filteredValues(gridFilterValues[0])} and ${filteredValues(gridFilterValues[1])}`;
         }
         const indexStr = (index?: number, length?: number) => index !== undefined && length !== undefined ? `${index + 1} of ${length}.` : '';
         const datum = (datum: OlliDatum, node: AccessibilityTreeNode) => {
@@ -338,6 +338,7 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
                 return `"${field}": "${value}"`;
             }).join(', ');
         }
+        const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
         const chart = olliVisSpec as Chart;
         const axis = guide as Axis;
@@ -360,7 +361,7 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
                     return `${pluralize(node.children.length, 'value')} ${filteredValuesGrid(filterValue as GridFilterValue)}. ${facetValueStr(facetValue)}`;
                 }
                 else {
-                    return `${filteredValues(filterValue as EncodingFilterValue)} ${pluralize(node.children.length, 'value')}. ${facetValueStr(facetValue)}`;
+                    return `${capitalize(filteredValues(filterValue as EncodingFilterValue))}. ${pluralize(node.children.length, 'value')}. ${facetValueStr(facetValue)}`;
                 }
             case 'data':
                 // note: the datum description is not used by the table renderer
