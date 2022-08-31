@@ -25,8 +25,7 @@ export type AccessibilityTreeNode = {
     selected: any[],
     description: string,
     tableKeys?: string[],
-    children: AccessibilityTreeNode[],
-
+    children: AccessibilityTreeNode[]
 }
 
 export type AccessibilityTree = {

@@ -1,7 +1,7 @@
 import { OlliVisSpec } from "./Types"
 import { renderTable } from "./Render/Table"
+import { Tree } from "./Render/TreeView/Tree"
 import { renderTree } from "./Render/TreeView"
-import { TreeLinks } from "./Render/TreeView/TreeLink"
 import { olliVisSpecToTree } from "./Structure"
 import { AccessibilityTree } from "./Structure/Types"
 
@@ -36,9 +36,9 @@ export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTML
             break;
         case ('tree'):
         default:
-            const ul = renderTree(tree, (Math.random() + 1).toString(36).substring(7));
+            const ul = renderTree(tree);
             htmlRendering.appendChild(ul);
-            new TreeLinks(ul).init();
+            new Tree(ul).init();
             break;
     }
 
