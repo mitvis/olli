@@ -302,6 +302,14 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
 
     function _nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facetValue?: string, filterValue?: FilterValue, guide?: Guide, index?: number, length?: number): string {
         const chartType = (chart: Chart) => {
+            if (chart.mark === 'point') {
+                if (chart.axes.every(axis => axis.type === 'continuous')) {
+                    return 'scatterplot';
+                }
+                else {
+                    return 'dot plot';
+                }
+            }
             return chart.mark ? `${chart.mark} chart` : '';
         }
         const chartTitle = (chart: OlliVisSpec) => (chart.title || facetValue) ? `titled "${chart.title || facetValue}"` : '';
