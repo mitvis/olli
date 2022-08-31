@@ -1,4 +1,5 @@
-import { Guide, Chart, OlliVisSpec, FacetedChart, Axis, Legend, OlliDatum, OlliDataset, OlliValue } from "../Types";
+import { Guide, Chart, OlliVisSpec, FacetedChart, Axis, Legend, OlliDatum, OlliDataset } from "../Types";
+import { fmtValue } from "../utils";
 import { AccessibilityTree, AccessibilityTreeNode, NodeType } from "./Types";
 
 type EncodingFilterValue = string | [number | Date, number | Date];
@@ -11,16 +12,17 @@ type FilterValue = EncodingFilterValue | GridFilterValue;
  * @returns The transormed {@link AccessibilityTreeNode}
  */
 export function olliVisSpecToTree(olliVisSpec: OlliVisSpec): AccessibilityTree {
+    const fieldsUsed = getFieldsUsedForChart(olliVisSpec);
     switch (olliVisSpec.type) {
         case "facetedChart":
             return {
-                root: olliVisSpecToNode("multiView", olliVisSpec.data, null, olliVisSpec),
-                fieldsUsed: getFieldsUsedForChart(olliVisSpec)
+                root: olliVisSpecToNode("multiView", olliVisSpec.data, null, olliVisSpec, fieldsUsed),
+                fieldsUsed
             }
         case "chart":
             return {
-                root: olliVisSpecToNode("chart", olliVisSpec.data, null, olliVisSpec),
-                fieldsUsed: getFieldsUsedForChart(olliVisSpec)
+                root: olliVisSpecToNode("chart", olliVisSpec.data, null, olliVisSpec, fieldsUsed),
+                fieldsUsed
             }
         default:
             throw `olliVisSpec.type ${(olliVisSpec as any).type} not handled in olliVisSpecToTree`;
@@ -30,9 +32,9 @@ export function olliVisSpecToTree(olliVisSpec: OlliVisSpec): AccessibilityTree {
 function getFieldsUsedForChart(olliVisSpec: OlliVisSpec): string[] {
     switch (olliVisSpec.type) {
         case "facetedChart":
-            return [olliVisSpec.facetedField, ...[...olliVisSpec.charts.values()].flatMap((chart: Chart) => getFieldsUsedForChart(chart))];
+            return [...new Set([olliVisSpec.facetedField, ...[...olliVisSpec.charts.values()].flatMap((chart: Chart) => getFieldsUsedForChart(chart))])];
         case "chart":
-            return (olliVisSpec.axes as Guide[]).concat(olliVisSpec.legends).reduce((fields: string[], guide: Guide) => fields.concat(guide.field), []);
+            return [...new Set((olliVisSpec.axes as Guide[]).concat(olliVisSpec.legends).reduce((fields: string[], guide: Guide) => fields.concat(guide.field), []))];
         default:
             throw `olliVisSpec.type ${(olliVisSpec as any).type} not handled in getFieldsUsedForChart`;
     }
@@ -41,7 +43,6 @@ function getFieldsUsedForChart(olliVisSpec: OlliVisSpec): string[] {
 const filterInterval = (selection: OlliDataset, field: string, lowerBound: number | Date, upperBound: number | Date): OlliDataset => {
     return selection.filter((datum: any) => {
         let value = datum[field];
-        console.log(value, lowerBound, upperBound);
         if (value instanceof Date) {
             const lowerBoundStr = String(lowerBound);
             const upperBoundStr = String(upperBound);
@@ -49,17 +50,6 @@ const filterInterval = (selection: OlliDataset, field: string, lowerBound: numbe
                 value = value.getFullYear();
             }
         }
-        // TODO: commented out date handling and value not found thingy
-        // if ((lowerCaseDesc.includes("date") || lowerCaseDesc.includes("temporal")) && upperBound.toString().length === 4) {
-        //     const d = new Date(val[field])
-        //     return d.getFullYear() >= lowerBound && d.getFullYear() < upperBound;
-        // } else if (val[field] === undefined) {
-        //     let updatedField = Object.keys(val).find((k: string) => k.includes(field) || field.includes(k))
-        //     if (updatedField) return val[updatedField] >= lowerBound && val[updatedField] < upperBound;
-        // }
-        // if (datum[field] instanceof Date && value >= lowerBound && value < upperBound) {
-        //     console.log(value);
-        // }
         return value >= lowerBound && value < upperBound;
     })
 }
@@ -123,7 +113,7 @@ function axisValuesToIntervals(values: string[] | number[]): ([number, number] |
  * @param childrenInformation changing variable to assist with generating more nodes of the tree
  * @returns The {@link AccessibilityTreeNode} from the provided parameters
  */
-function olliVisSpecToNode(type: NodeType, selected: any[], parent: AccessibilityTreeNode | null, olliVisSpec: OlliVisSpec, facetValue?: string, filterValue?: FilterValue, guide?: Guide, index?: number, length?: number): AccessibilityTreeNode {
+function olliVisSpecToNode(type: NodeType, selected: any[], parent: AccessibilityTreeNode | null, olliVisSpec: OlliVisSpec, fieldsUsed: string[], facetValue?: string, filterValue?: FilterValue, guide?: Guide, index?: number, length?: number): AccessibilityTreeNode {
     let node: AccessibilityTreeNode = {
         type: type,
         parent: parent,
@@ -144,6 +134,7 @@ function olliVisSpecToNode(type: NodeType, selected: any[], parent: Accessibilit
                     selected.filter((datum: any) => String(datum[facetedChart.facetedField]) === facetValue),
                     node,
                     chart,
+                    fieldsUsed,
                     facetValue,
                     undefined,
                     undefined,
@@ -168,6 +159,7 @@ function olliVisSpecToNode(type: NodeType, selected: any[], parent: Accessibilit
                         selected,
                         node,
                         chart,
+                        fieldsUsed,
                         facetValue,
                         undefined,
                         axis);
@@ -178,12 +170,13 @@ function olliVisSpecToNode(type: NodeType, selected: any[], parent: Accessibilit
                         selected,
                         node,
                         chart,
+                        fieldsUsed,
                         facetValue,
                         undefined,
                         legend);
                 }),
                 ...(chart.mark === 'point' && filteredAxes.length === 2 && filteredAxes.every(axis => axis.type === 'continuous') ? [
-                    olliVisSpecToNode('grid', selected, node, chart, facetValue)
+                    olliVisSpecToNode('grid', selected, node, chart, fieldsUsed, facetValue)
                 ] : [])
             ]
             break;
@@ -198,6 +191,7 @@ function olliVisSpecToNode(type: NodeType, selected: any[], parent: Accessibilit
                             selected.filter(d => String(d[axis.field]) === String(value)),
                             node,
                             chart,
+                            fieldsUsed,
                             facetValue,
                             String(value),
                             axis);
@@ -211,6 +205,7 @@ function olliVisSpecToNode(type: NodeType, selected: any[], parent: Accessibilit
                             filterInterval(selected, axis.field, a, b),
                             node,
                             chart,
+                            fieldsUsed,
                             facetValue,
                             [a, b],
                             axis);
@@ -228,6 +223,7 @@ function olliVisSpecToNode(type: NodeType, selected: any[], parent: Accessibilit
                             selected.filter(d => String(d[legend.field]) === String(value)),
                             node,
                             chart,
+                            fieldsUsed,
                             facetValue,
                             String(value),
                             legend);
@@ -254,6 +250,7 @@ function olliVisSpecToNode(type: NodeType, selected: any[], parent: Accessibilit
                         y2),
                     node,
                     chart,
+                    fieldsUsed,
                     facetValue,
                     [[x1, x2], [y1, y2]]);
             });
@@ -265,6 +262,7 @@ function olliVisSpecToNode(type: NodeType, selected: any[], parent: Accessibilit
                     [datum],
                     node,
                     chart,
+                    fieldsUsed,
                     facetValue,
                     undefined,
                     guide,
@@ -274,13 +272,22 @@ function olliVisSpecToNode(type: NodeType, selected: any[], parent: Accessibilit
             })
             break;
         case "data":
-            // pass; no children to generate
+            // set the ordering of the fields for rendering to a table
+            // put the filter values last, since user already knows the value
+            node.tableKeys = fieldsUsed;
+            if (guide) {
+                node.tableKeys = node.tableKeys.filter(f => f !== guide.field).concat([guide.field]);
+            }
+            if (facetValue) {
+                const facetedField = fieldsUsed[0];
+                node.tableKeys = node.tableKeys.filter(f => f !== facetedField).concat([facetedField]);
+            }
             break;
         default:
             throw `Node type ${type} not handled in olliVisSpecToNode`;
     }
 
-    node.description = nodeToDesc(node, olliVisSpec, facetValue,filterValue, guide, index, length);
+    node.description = nodeToDesc(node, olliVisSpec, facetValue, filterValue, guide, index, length);
 
     return node;
 }
@@ -294,30 +301,8 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
     return _nodeToDesc(node, olliVisSpec, facetValue, filterValue, guide, index, length).replace(/\s+/g, ' ').trim();
 
     function _nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facetValue?: string, filterValue?: FilterValue, guide?: Guide, index?: number, length?: number): string {
-        const fmtValue = (value: OlliValue) => {
-            if (value instanceof Date) {
-                return value.toLocaleString("en-US", { year: 'numeric', month: 'short', day: 'numeric' });
-            }
-            else if (typeof value !== 'string' && (!isNaN(value) && value % 1 != 0)) {
-                return Number(value).toFixed(2);
-            }
-            return value;
-        }
-        const chartType = (olliVisSpec: OlliVisSpec) => {
-            if (olliVisSpec.type === 'chart') {
-                return _chartType(olliVisSpec);
-            }
-            if (olliVisSpec.type === 'facetedChart' && facetValue) {
-                const chart = olliVisSpec.charts.get(facetValue);
-                if (chart) {
-                    return _chartType(chart);
-                }
-            }
-            return '';
-
-            function _chartType(chart: Chart) {
-                return chart.mark ? `${chart.mark} chart` : '';
-            }
+        const chartType = (chart: Chart) => {
+            return chart.mark ? `${chart.mark} chart` : '';
         }
         const chartTitle = (chart: OlliVisSpec) => (chart.title || facetValue) ? `titled "${chart.title || facetValue}"` : '';
         const listAxes = (chart: Chart) => chart.axes.length === 1 ? `with axis "${chart.axes[0].title || chart.axes[0].field}"` : `with axes ${chart.axes.map(axis => `"${axis.title || axis.field}"`).join(' and ')}`;
@@ -347,16 +332,8 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
             return `in ${filteredValues(gridFilterValues[0])} and ${gridFilterValues[1]}`;
         }
         const indexStr = (index?: number, length?: number) => index !== undefined && length !== undefined ? `${index + 1} of ${length}.` : '';
-        const datum = (datum: OlliDatum, olliVisSpec: OlliVisSpec, guide?: Guide) => {
-            let fieldsUsed = getFieldsUsedForChart(olliVisSpec);
-            // put the filter values last, since user already knows the value
-            if (guide) {
-                fieldsUsed = fieldsUsed.filter(f => f !== guide.field).concat([guide.field]);
-            }
-            if (olliVisSpec.type === 'facetedChart') {
-                fieldsUsed = fieldsUsed.filter(f => f !== olliVisSpec.facetedField).concat([olliVisSpec.facetedField]);
-            }
-            fieldsUsed.map(field => {
+        const datum = (datum: OlliDatum, node: AccessibilityTreeNode) => {
+            return node.tableKeys?.map(field => {
                 const value = fmtValue(datum[field]);
                 return `"${field}": "${value}"`;
             }).join(', ');
@@ -387,7 +364,7 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
                 }
             case 'data':
                 // note: the datum description is not used by the table renderer
-                return `${indexStr(index, length)} ${datum(node.selected[0], olliVisSpec, guide)}`;
+                return `${indexStr(index, length)} ${datum(node.selected[0], node)}`;
             default:
                 throw `Node type ${node.type} not handled in nodeToDesc`;
         }

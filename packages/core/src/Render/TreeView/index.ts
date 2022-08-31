@@ -1,12 +1,13 @@
 import { AccessibilityTreeNode } from "../../Structure/Types";
+import { fmtValue } from "../../utils";
 import "./TreeStyle.css";
 
 /**
  *
- * @param tree A {@link AccessibilityTreeNode} to generate a navigable tree view from
+ * @param node A {@link AccessibilityTreeNode} to generate a navigable tree view from
  * @returns An {@link HTMLElement} ARIA TreeView of the navigable tree view for a visualization
  */
- export function renderTree(tree: AccessibilityTreeNode, fieldsUsed: string[]): HTMLElement {
+ export function renderTree(node: AccessibilityTreeNode): HTMLElement {
     const nodeToAppend: HTMLElement = document.createElement("li")
     nodeToAppend.setAttribute("role", "treeitem");
     nodeToAppend.setAttribute("aria-expanded", "false");
@@ -14,16 +15,16 @@ import "./TreeStyle.css";
     const nestedChildElements: HTMLElement = document.createElement("ul")
 
     const nodeDescription: HTMLElement = document.createElement("span");
-    nodeDescription.appendChild(document.createTextNode(tree.description));
+    nodeDescription.appendChild(document.createTextNode(node.description));
 
-    const treeChildren: AccessibilityTreeNode[] = tree.children;
+    const treeChildren: AccessibilityTreeNode[] = node.children;
     const dataChildren: AccessibilityTreeNode[] = treeChildren.filter((child: AccessibilityTreeNode) => child.type === "data")
     if (dataChildren.length > 0) {
         const table: HTMLElement = document.createElement("table");
 
         const tableBody = document.createElement("tbody");
         const rowHeaders = document.createElement("tr");
-        fieldsUsed.forEach((key: string) => {
+        dataChildren[0].tableKeys?.forEach((key: string) => {
             const header = document.createElement("th")
             header.setAttribute("class", "tableInformation");
             header.innerText = key
@@ -31,17 +32,13 @@ import "./TreeStyle.css";
         })
         tableBody.appendChild(rowHeaders)
 
-        dataChildren.forEach((dataPoint: AccessibilityTreeNode) => {
+        dataChildren.forEach((node: AccessibilityTreeNode) => {
             const dataRow = document.createElement("tr")
-            fieldsUsed.forEach((key: string) => {
+            node.tableKeys?.forEach((key: string) => {
                 const headerData = document.createElement("td")
                 headerData.setAttribute("class", "tableInformation");
-                const value = dataPoint.selected[0][key];
-                if (!isNaN(value) && value % 1 != 0) {
-                    headerData.innerText = Number(value).toFixed(2);
-                } else {
-                    headerData.innerText = dataPoint.selected[0][key]
-                }
+                const value = fmtValue(node.selected[0][key]);
+                headerData.innerText = value;
                 dataRow.appendChild(headerData);
             })
             tableBody.appendChild(dataRow)
@@ -56,7 +53,7 @@ import "./TreeStyle.css";
 
     if (treeChildren.length > 0) {
         treeChildren.filter((child: AccessibilityTreeNode) => child.type !== `data`).forEach((child: AccessibilityTreeNode) => {
-            nestedChildElements.appendChild(renderTree(child, fieldsUsed));
+            nestedChildElements.appendChild(renderTree(child));
         })
         nodeToAppend.appendChild(nestedChildElements);
     }

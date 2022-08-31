@@ -36,7 +36,7 @@ export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTML
             break;
         case ('tree'):
         default:
-            const ul = renderTree(tree.root, tree.fieldsUsed);
+            const ul = renderTree(tree.root);
             htmlRendering.appendChild(ul);
             new TreeLinks(ul).init();
             break;
