@@ -1,7 +1,7 @@
 /**
  * Detailing the different marks that can exist in a chart
  */
- export type OlliMark = "point" | "bar" | "line" | undefined;
+ export type OlliMark = "point" | "bar" | "line";
 
  export type OlliValue = string | number | Date;
 
@@ -29,7 +29,7 @@
      type: "chart",
      axes: Axis[] ,
      legends: Legend[],
-     mark: OlliMark
+     mark?: OlliMark
  }
 
  /**

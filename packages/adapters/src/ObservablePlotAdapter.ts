@@ -95,7 +95,7 @@ function plotToChart(plot: any, svg: Element): Chart {
     const chart: Chart = {
         axes: axes,
         type: "chart",
-        mark: identifyMark(plotMark.ariaLabel),
+        mark: plotMarkToOlliMark(plotMark.ariaLabel),
         legends: legends,
         data: plotMark.data
     }
@@ -214,7 +214,7 @@ function isMultiSeries(plot: any): boolean {
     return lineMarks && lineMarks.channels.some((c: any) => c.name === "stroke");
 }
 
-function identifyMark(m: string): OlliMark {
+function plotMarkToOlliMark(m: string): OlliMark | undefined {
     switch (m) {
         case ('dot'):
             return "point";

@@ -63,7 +63,7 @@ function parseSingleChart(spec: Spec, scene: Scene | SceneItem, data: OlliDatase
         findScenegraphNodes(scene, "title")[0].items[0].items[0].items[0].text
         : undefined;
 
-    let mark: OlliMark = vegaMarkToOlliMark(spec.marks?.map(mark => mark.type)[0]); // TODO write a better way to get the mark type
+    const mark = vegaMarkToOlliMark(spec.marks?.map(mark => mark.type)[0]); // TODO write a better way to get the mark type
 
     let chartNode = chart({
         data,
@@ -77,7 +77,7 @@ function parseSingleChart(spec: Spec, scene: Scene | SceneItem, data: OlliDatase
     return chartNode;
 }
 
-function vegaMarkToOlliMark(mark?: string): OlliMark {
+function vegaMarkToOlliMark(mark?: string): OlliMark | undefined {
     switch (mark) {
         case 'symbol': return 'point';
         case 'line': return 'line';
