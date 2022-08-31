@@ -32,11 +32,11 @@ export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTML
 
     switch (config.renderType) {
         case ("table"):
-            htmlRendering.appendChild(renderTable(tree.root, tree.fieldsUsed));
+            htmlRendering.appendChild(renderTable(tree.root.selected, tree.fieldsUsed));
             break;
         case ('tree'):
         default:
-            const ul = renderTree(tree.root);
+            const ul = renderTree(tree, (Math.random() + 1).toString(36).substring(7));
             htmlRendering.appendChild(ul);
             new TreeLinks(ul).init();
             break;

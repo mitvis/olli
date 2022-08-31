@@ -1,4 +1,4 @@
-import { OlliDatum } from "../../Types";
+import { OlliDataset, OlliDatum } from "../../Types";
 import { AccessibilityTreeNode } from "../../Structure/Types";
 
 /**
@@ -6,7 +6,7 @@ import { AccessibilityTreeNode } from "../../Structure/Types";
  * @param tree The {@link AccessibilityTreeNode} to generate a table from
  * @returns An {@link HTMLElement} table of the data used in a visualization
  */
-export function renderTable(tree: AccessibilityTreeNode, fieldsUsed: string[]): HTMLElement {
+export function renderTable(data: OlliDataset, fieldsUsed: string[]): HTMLElement {
     const table = document.createElement("table");
     const tableBody = document.createElement("tbody");
     const tableHeaders = document.createElement("tr");
@@ -17,7 +17,7 @@ export function renderTable(tree: AccessibilityTreeNode, fieldsUsed: string[]): 
     })
 
     tableBody.appendChild(tableHeaders)
-    tree.selected.forEach((data: OlliDatum) => {
+    data.forEach((data: OlliDatum) => {
         const dataRow = document.createElement("tr")
         fieldsUsed.forEach((field: string) => {
             const tableData = document.createElement("td")
