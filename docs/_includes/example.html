@@ -9,6 +9,9 @@
 <div>
     <!-- <h4>Overview:</h4> -->
     {% include exampleDescription.html %}
+
+    {% include exampleControls.html %}
+
     <h4><label for="adapter">Select an adapter:</label></h4>
 
     <script>
@@ -31,7 +34,7 @@
 
     {% for adapter in include.content.adapters %}
     <div id="Block-Example-{{adapter.name}}" class="Block-Example">
-        <div class="Example-Block">
+        <div>
             <h4>{{adapter.name}} Visualization:</h4>
             <div id="Visualization-{{ adapter.name }}"></div>
             <h4>Olli tree view:</h4>
@@ -47,13 +50,6 @@
         const initAdapter = localStorage.getItem('selectedAdapter') ?? 'Vega-Lite';
         document.getElementById(`Block-Example-${initAdapter}`).classList.add('Select-Vis-Enabled');
         document.querySelector(`#${initAdapter}`).setAttribute('selected', 'selected')
-
-        document.addEventListener('keypress', (keyStroke) => {
-            if (keyStroke.key.toLowerCase() === 't') {
-                const selectedAdapter = localStorage.getItem('selectedAdapter') ?? 'Vega-Lite';
-                document.getElementById(`AccessibilityTree-${selectedAdapter}`).firstChild.firstChild.focus()
-            }
-        })
 
         import prettier from "https://unpkg.com/prettier@2.7.1/esm/standalone.mjs";
         import parserBabel from "https://unpkg.com/prettier@2.7.1/esm/parser-babel.mjs";

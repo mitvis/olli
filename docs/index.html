@@ -7,24 +7,20 @@ title: "Home"
 
 <div>
     <p>
-        Olli is a library that creates a standard and scalable
-        infrastructure for accessible web-based visualizations by embedding a navigable tree that users can explore for
-        a
-        richer screen reader experience. Adapters specific to different visualization libaries break down a chart where
-        an accessible rendering is then created using existing ARIA TreeView technology.
+        Olli is an open-source library for converting data visualizations into accessible text structures for screen reader users.
+        Starting with an existing visualization specification created with a supported toolkit, Olli produces a keyboard-navigable tree view with descriptions at varying levels of detail.
+        Users can explore these structures both to get an initial overview, and to dive into the data in more detail.
     </p>
     <p>
+        Olli comes with built-in support for visualizations created in <a href="https://vega.github.io/vega/">Vega</a>, <a href="https://vega.github.io/vega-lite/">Vega-Lite</a>, and <a href="https://observablehq.com/@observablehq/plot">Observable Plot</a>.
         Using an adapter design pattern, Olli can be extended to support any JavaScript visualization library by
         implementing a function that adapts existing chart instances into a standard <code>OlliVisSpec</code> interface.
-        This
-        interface details its structural, hierarchical, and visual components, that are then rendered as a tree view in
-        HTML compatible with the <em>Accessible Rich Internet Applications (ARIA) standard</em>.
+        With the adapter pattern, developers can extend support to new toolkits while re-using the Olli renderer, which implements best practices according to the <em>Accessible Rich Internet Applications (ARIA) standard</em>.
     </p>
     <p>
         Check out the <a href="{{site.baseurl}}/examples">example gallery</a> to see how Olli can be used with
-        different charts from various visualization libraries, <a href="https://github.com/mitvis/olli"
-            target="_blank">browse the documentation on Github</a> to see how you can make your visualizations more
-        accessible, or <a href="{{site.baseurl}}/quickstart#writingAdapters">create your own
-            adapter</a> to expand accessible visualizations!
+        different charts from various visualization libraries, use the <a href="http://localhost:4000/olli/quickstart">quickstart</a> to start making your own accessible visualizations,
+        or contribute to the open-source project on <a href="https://github.com/mitvis/olli"
+            target="_blank">Github</a>!
     </p>
 </div>

@@ -2,40 +2,27 @@
 layout: default
 title: "Tutorial"
 ---
-<script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
-<script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
-<script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
-<script src="https://d3js.org/d3.v7.min.js"></script>
-<script type="text/javascript" src="./olli/adapters.js"></script>
-<script type="text/javascript" src="./olli/olli.js"></script>
+
+{% include imports.html %}
+
 <div>
     <h3>Overview</h3>
-    <p>The default rendering using <em>Olli</em> is an <em>Accessible Rich Internet Applications (ARIA)</em>
-        Tree View based on the <a href="https://w3c.github.io/aria-practices/examples/treeview/treeview-navigation.html"
-            target="_blank">W3C Navigation TreeView Example</a>. Olli represents accessible visualizations as a tree
-        structure containing descriptions at varying levels starting with a broad description of the chart and gradually
-        becoming more specific. The top of the tree contains a high-level overview of the visualization followed by
-        nodes representing guides (axes, legends, and nested charts).
-        Each guide node has children of the different intervals of data, and finally the end of the tree contains the
-        individual data points from the selected interval. The tree provides agency to blind and low-vision users
-        allowing them explore a data visualization on their own. Instead of being restricted to alternative text or
-        individual data points of a chart, they can get specific information about its shape and structure.
+    <p>By default, <em>Olli</em> renders an accessible visualization as a tree view based on the <a href="https://w3c.github.io/aria-practices/examples/treeview/treeview-navigation.html"
+            target="_blank">W3C Navigation TreeView Example</a>.
     </p>
-    <h3>Controls</h3>
     <p>
-        The accessible rendering can be selected by clicking on the root tree node with your mouse, additionally
-        pressing the <code><strong>t</strong></code> key will also focus on the navigable structure. Once focused on a
-        node, arrow keys
-        can then be used to traverse the tree structurally (i.e., <strong><em>up and down</em></strong> to move between levels, <strong><em>left
-            and right</em></strong> to move between siblings). As the AccessibilityTreeNode is traversed, tree nodes that have
-        children are rendered as a nested unordered list with a group role and aria-expanded attribute. Otherwise, a
-        node is rendered as a list item with a treeitem ARIA role. The addition of the ARIA roles and extra attributes
-        allow the screen reader to provide a more specific description of the node's position of the treeBelow is an
-        example of a simple scatterplot with the tree view structure to test the navigation:
+        Each element of the tree view contains a textual description, with high level descriptions at the top of the tree and detailed data values at the bottom.
+        The top of each chart contains a description of the chart type and data fields.
+        The next level contains descriptions of the chart encodings (e.g. axes, legends).
+        After that, the data is broken down by category for discrete encodings, and interval for continuous encodings.
+        Finally, the bottom of the chart contains a data table with data filtered according to the user's position in the tree.
     </p>
-    <h4>Visualization:</h4>
+
+    {% include exampleControls.html %}
+
+    <h4>Vega-Lite Visualization:</h4>
     <div id="Visualization"></div>
-    <h4>Tree View:</h4>
+    <h4>Olli output:</h4>
     <div id="AccessibilityTree"></div>
     <script>
         let spec = {
@@ -74,12 +61,6 @@ title: "Tutorial"
 
         OlliAdapters.VegaLiteAdapter(spec).then(olliVisSpec => {
             document.getElementById("AccessibilityTree").append(olli(olliVisSpec))
-        })
-
-        document.addEventListener('keypress', (keyStroke) => {
-            if (keyStroke.key.toLowerCase() === 't') {
-                document.getElementById(`AccessibilityTree`).firstChild.firstChild.focus()
-            }
         })
     </script>
 </div>
