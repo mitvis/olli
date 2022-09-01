@@ -1,74 +1,126 @@
-import { AccessibilityTreeNode } from "../../Structure/Types";
+// Adapted from: https://w3c.github.io/aria-practices/examples/treeview/treeview-1/treeview-1b.html
+
+import { AccessibilityTree, AccessibilityTreeNode } from "../../Structure/Types";
+import { fmtValue } from "../../utils";
 import "./TreeStyle.css";
 
 /**
  *
- * @param tree A {@link AccessibilityTreeNode} to generate a navigable tree view from
+ * @param node A {@link AccessibilityTreeNode} to generate a navigable tree view from
  * @returns An {@link HTMLElement} ARIA TreeView of the navigable tree view for a visualization
  */
- export function renderTree(tree: AccessibilityTreeNode): HTMLElement {
-    const nodeToAppend: HTMLElement = document.createElement("li")
-    nodeToAppend.setAttribute("role", "treeitem");
-    nodeToAppend.setAttribute("aria-expanded", "false");
+ export function renderTree(tree: AccessibilityTree): HTMLElement {
+  const namespace = (Math.random() + 1).toString(36).substring(7);
 
-    const nestedChildElements: HTMLElement = document.createElement("ul")
+  const node = tree.root;
 
-    const nodeDescription: HTMLElement = document.createElement("span");
-    nodeDescription.appendChild(document.createTextNode(tree.description));
+  const root = document.createElement('ul');
+  const labelId = `${namespace}-${node.type}-label`;
 
-    const treeChildren: AccessibilityTreeNode[] = tree.children;
-    const dataChildren: AccessibilityTreeNode[] = treeChildren.filter((child: AccessibilityTreeNode) => child.type === "data")
-    if (dataChildren.length > 0) {
-        const table: HTMLElement = document.createElement("table");
+  root.setAttribute('role', 'tree');
+  root.setAttribute('aria-labelledby', labelId);
 
-        const tableBody = document.createElement("tbody");
-        const rowHeaders = document.createElement("tr");
-        tree.fieldsUsed.forEach((key: string) => {
-            const header = document.createElement("th")
-            header.setAttribute("class", "tableInformation");
-            header.innerText = key
-            rowHeaders.appendChild(header);
-        })
-        tableBody.appendChild(rowHeaders)
+  // const childContainer = document.createElement('ul');
+  // childContainer.setAttribute('role', 'group');
 
-        dataChildren.forEach((dataPoint: AccessibilityTreeNode) => {
-            const dataRow = document.createElement("tr")
-            tree.fieldsUsed.forEach((key: string) => {
-                const headerData = document.createElement("td")
-                headerData.setAttribute("class", "tableInformation");
-                const value = dataPoint.selected[0][key];
-                if (!isNaN(value) && value % 1 != 0) {
-                    headerData.innerText = Number(value).toFixed(2);
-                } else {
-                    headerData.innerText = dataPoint.selected[0][key]
-                }
-                dataRow.appendChild(headerData);
-            })
-            tableBody.appendChild(dataRow)
-        })
+  // childContainer.appendChild(_renderTree(node, namespace, 1, 1, 1));
 
-        table.appendChild(tableBody);
+  // root.appendChild(childContainer);
 
-        nestedChildElements.appendChild(table);
+  // childContainer.querySelector('span')?.setAttribute('id', labelId);
+
+  root.appendChild(_renderTree(node, namespace, 1, 1, 1));
+  root.querySelector('span')?.setAttribute('id', labelId);
+
+  return root;
+
+  function _renderTree(node: AccessibilityTreeNode, namespace: string, level: number, posinset: number, setsize: number): HTMLElement {
+    const item = document.createElement('li');
+    item.setAttribute('role', 'treeitem');
+    item.setAttribute('aria-level', String(level));
+    item.setAttribute('aria-setsize', String(setsize));
+    item.setAttribute('aria-posinset', String(posinset));
+    item.setAttribute('aria-expanded', 'false');
+    item.setAttribute('data-nodetype', node.type);
+    if (node.gridIndex) {
+      item.setAttribute('data-i', String(node.gridIndex.i));
+      item.setAttribute('data-j', String(node.gridIndex.j));
     }
 
-    nodeToAppend.appendChild(nodeDescription);
+    const label = document.createElement('span');
+    label.textContent = node.description;
+    item.appendChild(label);
 
-    if (treeChildren.length > 0) {
-        treeChildren.filter((child: AccessibilityTreeNode) => child.type !== `data`).forEach((child: AccessibilityTreeNode) => {
-            nestedChildElements.appendChild(renderTree(child));
+    if (node.children.length) {
+
+      const dataChildren = node.children.filter(n => n.type === 'data');
+      const treeChildren = node.children.filter(n => n.type !== 'data');
+
+      const childContainer = document.createElement('ul');
+      childContainer.setAttribute('role', 'group');
+
+      if (dataChildren.length) {
+        childContainer.appendChild(createDataTable(dataChildren, level + 1));
+      }
+      else {
+        treeChildren.forEach((n, index, array) => {
+          childContainer.appendChild(_renderTree(n, namespace, level + 1, index + 1, array.length));
         })
-        nodeToAppend.appendChild(nestedChildElements);
+      }
+      item.appendChild(childContainer);
+
     }
 
-    const treeDom = document.createElement("ul");
-    treeDom.appendChild(nodeToAppend);
-    return treeDom;
+    return item;
+  }
+
+  function createDataTable(dataNodes: AccessibilityTreeNode[], level: number) {
+    const table = document.createElement("table");
+    table.setAttribute('aria-label', `Table with ${dataNodes.length} rows`);
+    table.setAttribute('aria-level', String(level));
+    table.setAttribute('aria-posinset', '1');
+    table.setAttribute('aria-setsize', '1');
+
+    const thead = document.createElement("thead");
+    const theadtr = document.createElement("tr");
+
+    dataNodes[0].tableKeys?.forEach((key: string) => {
+      const th = document.createElement("th");
+      th.setAttribute('scope', 'col');
+      th.innerText = key
+      theadtr.appendChild(th);
+    });
+
+    thead.appendChild(theadtr);
+    table.appendChild(thead);
+
+    //
+
+    const tableBody = document.createElement("tbody");
+
+    dataNodes.forEach((node) => {
+      const dataRow = document.createElement("tr")
+      node.tableKeys?.forEach((key: string) => {
+        const td = document.createElement("td")
+        const value = fmtValue(node.selected[0][key]);
+        td.innerText = value;
+        dataRow.appendChild(td);
+      })
+      tableBody.appendChild(dataRow);
+    });
+
+    table.appendChild(tableBody);
+
+    const item = document.createElement('li');
+    item.setAttribute('role', 'treeitem');
+    item.setAttribute('aria-level', String(level));
+    item.setAttribute('aria-setsize', '1');
+    item.setAttribute('aria-posinset', '1');
+    item.setAttribute('aria-expanded', 'false');
+
+    item.appendChild(table);
+
+    return item;
+  }
+
 }
-
-// function appendStyle() {
-//     const style = document.createElement('style')
-//     style.innerHTML = treeStyle;
-//     document.head.appendChild(style)
-
-// }

@@ -1,6 +1,12 @@
-import { VisAdapter, OlliVisSpec, FacetedChart, Chart, Axis, Legend, Guide, Mark, ObservablePlotSpec } from "./Types";
+import { VisAdapter, OlliVisSpec, FacetedChart, Chart, Axis, Legend, OlliMark } from "olli";
+import { guideTypeFromScale, isNumeric } from "./utils";
 // Observable-Plot has no type declaration file :/
 const Plot = require("@observablehq/plot")
+
+/**
+ * Observable-Plot does not have any exported types
+ */
+type ObservablePlotSpec = any;
 
 /**
  * * Adapter to deconstruct ObservablePlot visualizations into an {@link OlliVisSpec}
@@ -19,29 +25,27 @@ export const ObservablePlotAdapter: VisAdapter<ObservablePlotSpec> = async (plot
 /**
  * Specifies that the provided visualization information relates to a faceted chart
  * @param plot The ObservablePlot spec to render the visualization
- * @param svg the rendered SVGElement of the visualization 
+ * @param svg the rendered SVGElement of the visualization
  * @returns the generated {@link FacetedChart}
  */
 function plotToFacetedChart(plot: any, svg: Element): FacetedChart {
     const chartSVG = svg.tagName !== 'svg' ? Object.values(svg.children).find((n) => n.tagName === 'svg')! : svg;
-    const axes: Axis[] = ['x-axis', 'y-axis'].reduce((parsedAxes: Axis[], s: string) => {
-        let axisSVG = findHtmlElement(chartSVG, s);
-        if (axisSVG) {
-            parsedAxes.push(parseAxis(plot, axisSVG))
-        }
-        return parsedAxes
-    }, [])
+    // const axes: Axis[] = ['x-axis', 'y-axis'].reduce((parsedAxes: Axis[], s: string) => {
+    //     let axisSVG = findHtmlElement(chartSVG, s);
+    //     if (axisSVG) {
+    //         parsedAxes.push(parseAxis(plot, axisSVG))
+    //     }
+    //     return parsedAxes
+    // }, [])
     let legends: Legend[] = []
     if (plot.color && plot.color.legend) legends.push(parseLegend(plot, svg.children[0]))
     const plotMark = plot.marks.filter((mark: any) => mark.ariaLabel !== 'rule')[0]
-    let fields = (axes as any[]).concat(legends).reduce((fieldArr: string[], guide: Guide) => fieldArr.concat(guide.field), []);
     let charts: Map<any, Chart> = new Map();
     let facetField = plot.facet ?
         plot.facet.y ?
             plot.facet.y :
             plot.facet.x :
         plot.marks.find((mark: any) => mark.ariaLabel === 'line').channels.find((c: any) => c.name === "stroke").value;
-    fields.push(facetField)
     if (hasFacets(plot)) {
         charts = new Map(Object.values(chartSVG.children)
             .filter((n) => n.getAttribute('aria-label') === 'facet')
@@ -62,8 +66,6 @@ function plotToFacetedChart(plot: any, svg: Element): FacetedChart {
         type: "facetedChart",
         charts: charts,
         data: plotMark.data,
-        dataFieldsUsed: fields,
-        description: `Faceted chart`,
         facetedField: facetField,
     };
 
@@ -73,7 +75,7 @@ function plotToFacetedChart(plot: any, svg: Element): FacetedChart {
 /**
  * Specifies that the provided visualization information relates to a single chart
  * @param plot The ObservablePlot spec to render the visualization
- * @param svg the rendered Element of the visualization 
+ * @param svg the rendered Element of the visualization
  * @param data A filtered data set used in the chart
  * @returns the generated {@link Chart}
  */
@@ -89,21 +91,13 @@ function plotToChart(plot: any, svg: Element): Chart {
     let legends: Legend[] = []
     if (plot.color && plot.color.legend) legends.push(parseLegend(plot, svg.children[0]))
     const plotMark = plot.marks.filter((mark: any) => mark.ariaLabel !== 'rule')[0]
-    let fields: string[] = (axes as any[]).concat(legends).reduce((fieldArr: string[], guide: Guide) => fieldArr.concat(guide.field), []) //TODO: Same code as vega-lite adapter, create utility functions that can be reused accross adapters
 
-    let chart: Chart = {
+    const chart: Chart = {
         axes: axes,
         type: "chart",
+        mark: plotMarkToOlliMark(plotMark.ariaLabel),
         legends: legends,
-        data: plotMark.data,
-        dataFieldsUsed: fields,
-        description: `A chart with ${plotMark.ariaLabel} marks`,
-        gridNodes: []
-    }
-
-    if (identifyMark(plotMark.ariaLabel) !== "[Undefined]") {
-        chart.markUsed = identifyMark(plotMark.ariaLabel);
-        modifyVisFromMark(chart, chart.markUsed)
+        data: plotMark.data
     }
 
     return chart
@@ -112,16 +106,15 @@ function plotToChart(plot: any, svg: Element): Chart {
 /**
  * Creates an {@link Axis} from the provided spec and svg
  * @param plot The ObservablePlot spec to render the visualization
- * @param svg the SVG element of an axis 
+ * @param svg the SVG element of an axis
  * @returns A {@link Axis} of the visualization
  */
 function parseAxis(plot: any, svg: Element): Axis {
     const axisType = svg?.getAttribute('aria-label') === 'y-axis' ? 'y' : 'x'
-    const orient = axisType === 'y' ? 'left' : 'bottom';
     const plotMark = plot.marks.filter((mark: any) => mark.ariaLabel !== 'rule')[0]
     const channel = plotMark.channels.find((c: any) => c.scale === axisType)
     const field: string = typeof channel.value === 'object' ? channel.value.label : channel.value
-    const ticks: string[] | number[] = Object.keys(svg.children).reduce((tArr: number[] | string[], k: string) => {
+    const ticks: string[] = Object.keys(svg.children).map((k: string) => {
         const cObj: Element = svg.children[parseInt(k)]
         let tickValue: string = '';
         if (cObj.classList[0] === 'tick') {
@@ -132,24 +125,16 @@ function parseAxis(plot: any, svg: Element): Axis {
             })
         }
 
-        if (tickValue !== '') {
-            if (isNaN(parseInt(tickValue))) {
-                //@ts-ignore
-                tArr.push(tickValue)
-            } else {
-                //@ts-ignore
-                tArr.push(parseInt(tickValue.replace(/,/g, '')));
-            }
-        }
-        return tArr
-    }, [])
+        return tickValue;
+    }).filter(t => t.length);
+
+    const type = ticks.every(t => isNumeric(t)) ? 'continuous' : 'discrete';
 
     let guide: Axis = {
-        values: [...ticks] as string[] | number[],
-        title: `${svg?.getAttribute('aria-label')} titled ${field}`,
-        data: plotMark.data,
+        type,
+        values: type === 'discrete' ? ticks : ticks.map(t => Number(t.replace(/,/g, ''))),
         field: field,
-        orient: orient
+        axisType: axisType
     }
 
     if (channel.type) {
@@ -162,41 +147,31 @@ function parseAxis(plot: any, svg: Element): Axis {
 /**
  * Creates an {@link Legend} from the provided spec and svg
  * @param plot The ObservablePlot spec to render the visualization
- * @param svg the SVG element of an legend 
+ * @param svg the SVG element of an legend
  * @returns A {@link Legend} of the visualization
  */
 function parseLegend(plot: any, svg: Element): Legend { //TODO: Does not support 'ramp' legend types when the legend is rendered as an SVG
     const plotMark = plot.marks.filter((mark: any) => mark.ariaLabel !== 'rule')[0];
-    const channel = plotMark.channels.find((c: any) => c.scale === 'color');
-    const values: string[] | number[] = Object.keys(svg.children).reduce((a: string[] | number[], k: string) => {
+    const channel = plotMark.channels.find((c: any) => c.scale === 'color'); // TODO channel hardcoded to color
+    const values: string[] = Object.keys(svg.children).map((k: string) => {
         let c = svg.children[parseInt(k)];
         if (c.nodeName !== 'STYLE') {
-            if (isNaN(parseInt(c.textContent!))) {
-                //@ts-ignore -> array "a" is considered to have type "never[]" unsure how to fix, so used ts-ignore
-                a.push(c.textContent);
-            } else {
-                //@ts-ignore
-                a.push(parseInt(c.textContent!.replace(/,/g, '')));
-            }
+            return c.textContent!;
         }
-
-        return a
-    }, [])
+        return '';
+    }).filter(x => x.length);
     const field: string = typeof channel.value === 'object' ? channel.value.label : channel.value
+    const scaleType = plot?.color?.type;
+
+    const type = scaleType ? guideTypeFromScale(scaleType) :
+        (values.every(v => isNumeric(v)) ? 'continuous' : 'discrete');
 
     let guide: Legend = {
-        values: values,
-        data: plotMark.data,
+        type,
+        values: type === 'discrete' ? values : values.map(v => Number(v.replace(/,/g, ''))),
         field: field,
-        title: field,
-        type: 'ordinal',
+        channel: 'color', // TODO
     }
-
-    if (identifyMark(plotMark.ariaLabel) !== "[Undefined]") {
-        guide.markUsed = identifyMark(plotMark.ariaLabel);
-    }
-
-    if (plot.color.type) guide.type = plot.color.type
 
     return guide
 }
@@ -239,37 +214,15 @@ function isMultiSeries(plot: any): boolean {
     return lineMarks && lineMarks.channels.some((c: any) => c.name === "stroke");
 }
 
-function identifyMark(m: string): Mark {
+function plotMarkToOlliMark(m: string): OlliMark | undefined {
     switch (m) {
         case ('dot'):
             return "point";
         case ('bar'):
-            return "rect";
+            return "bar";
         case ('line'):
             return "line";
         default:
-            return "[Undefined]"
-    }
-}
-
-/**
- *
- * @param vis The {@link Chart} to update
- * @param mark The {@link Mark} used in the provided {@Link ChartInformation}
- * @param spec The Vega-Lite specification of the provided visualization
- */
-function modifyVisFromMark(vis: Chart, mark: Mark): void {
-    switch (mark) {
-        case 'rect':
-            vis.axes = vis.axes.filter((visAxis: Guide) => visAxis.scaleType === "band")
-            break;
-        case 'geoshape':
-            break;
-        case 'point':
-            if (vis.title) {
-                vis.title = `Scatter plot with title ${vis.title} `;
-            }
-            if (vis.axes.every((a: Axis) => typeof a.values[0] === "number")) vis.gridNodes = [...vis.axes];
-            break;
+            return undefined
     }
 }
