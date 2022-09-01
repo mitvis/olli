@@ -36,18 +36,15 @@ export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTML
         default:
             const ul = renderTree(tree);
             htmlRendering.appendChild(ul);
-            new Tree(ul).init();
+            const t = new Tree(ul);
+            t.init();
+            document.addEventListener('keypress', (e) => {
+                if (e.key === 't') {
+                    t.setFocusToItem(t.rootTreeItem);
+                }
+            })
             break;
     }
-
-    document.addEventListener('keypress', (keyStroke) => {
-        if (keyStroke.key.toLowerCase() === 't') {
-            const treeview = document.getElementById('treeView');
-            if (treeview !== null) {
-                (treeview as any).firstChild!.focus()
-            }
-        }
-    })
 
     return htmlRendering;
 }
