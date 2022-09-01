@@ -78,8 +78,8 @@ export class TreeItem {
         let elem = node.firstElementChild;
 
         while (elem) {
-            if (elem.tagName.toLowerCase() == 'ul') {
-                elem.setAttribute('role', 'group');
+            // if (['ul', 'table', 'th', 'td'].includes(elem.tagName.toLowerCase())) {
+            if (['ul'].includes(elem.tagName.toLowerCase())) {
                 this.isExpandable = true;
                 break;
             }
@@ -115,10 +115,6 @@ export class TreeItem {
     init() {
         this.domNode.tabIndex = -1;
 
-        if (!this.domNode.getAttribute('role')) {
-            this.domNode.setAttribute('role', 'treeitem');
-        }
-
         this.domNode.addEventListener('keydown', this.handleKeydown.bind(this));
         this.domNode.addEventListener('click', this.handleClick.bind(this));
         this.domNode.addEventListener('focus', this.handleFocus.bind(this));
@@ -143,6 +139,8 @@ export class TreeItem {
         if (event.altKey || event.ctrlKey || event.metaKey) {
             return;
         }
+
+        // TODO this was lateral nav
 
         // if (event.shiftKey) {
         //     let root = this.getRootNode();
@@ -202,9 +200,11 @@ export class TreeItem {
                 flag = true;
                 break;
             case 'ArrowDown':
-                if (this.children.length > 0 && this.isExpandable) {
-                    this.tree.expandTreeItem(this);
-                    this.tree.setFocusToNextLayer(this);
+                if (this.children.length > 0) {
+                    if (this.isExpandable) {
+                        this.tree.expandTreeItem(this);
+                        this.tree.setFocusToNextLayer(this);
+                    }
                 }
                 flag = true;
                 break;

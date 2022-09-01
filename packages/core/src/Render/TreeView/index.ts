@@ -52,22 +52,22 @@ import "./TreeStyle.css";
     item.appendChild(label);
 
     if (node.children.length) {
+
       const dataChildren = node.children.filter(n => n.type === 'data');
       const treeChildren = node.children.filter(n => n.type !== 'data');
 
+      const childContainer = document.createElement('ul');
+      childContainer.setAttribute('role', 'group');
+
       if (dataChildren.length) {
-        // item.appendChild(createDataTable(dataChildren, level + 1));
+        childContainer.appendChild(createDataTable(dataChildren, level + 1));
       }
       else {
-        const childContainer = document.createElement('ul');
-        childContainer.setAttribute('role', 'group');
-
         treeChildren.forEach((n, index, array) => {
           childContainer.appendChild(_renderTree(n, namespace, level + 1, index + 1, array.length));
         })
-
-        item.appendChild(childContainer);
       }
+      item.appendChild(childContainer);
 
     }
 
@@ -76,6 +76,10 @@ import "./TreeStyle.css";
 
   function createDataTable(dataNodes: AccessibilityTreeNode[], level: number) {
     const table = document.createElement("table");
+    table.setAttribute('aria-label', `Table with ${dataNodes.length} rows`);
+    table.setAttribute('aria-level', String(level));
+    table.setAttribute('aria-posinset', '1');
+    table.setAttribute('aria-setsize', '1');
 
     const thead = document.createElement("thead");
     const theadtr = document.createElement("tr");
@@ -107,19 +111,16 @@ import "./TreeStyle.css";
 
     table.appendChild(tableBody);
 
-    return table;
+    const item = document.createElement('li');
+    item.setAttribute('role', 'treeitem');
+    item.setAttribute('aria-level', String(level));
+    item.setAttribute('aria-setsize', '1');
+    item.setAttribute('aria-posinset', '1');
+    item.setAttribute('aria-expanded', 'false');
 
-    // const item = document.createElement('li');
+    item.appendChild(table);
 
-    // item.setAttribute('role', 'treeitem');
-    // item.setAttribute('aria-level', String(level));
-    // item.setAttribute('aria-setsize', "1");
-    // item.setAttribute('aria-posinset', "1");
-    // item.setAttribute('aria-expanded', 'false');
-
-    // item.appendChild(table);
-
-    // return item;
+    return item;
   }
 
 }

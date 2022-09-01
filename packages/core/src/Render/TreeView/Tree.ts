@@ -41,10 +41,12 @@ export class Tree {
             let ti = group
 
             while (elem) {
-                if (elem.tagName.toLowerCase() === 'li') {
+                if (['li', 'tr', 'th', 'td'].includes(elem.tagName.toLowerCase())) {
                     ti = new TreeItem(elem, tree, group);
                     ti.init();
-                    if (group) group.children.push(ti);
+                    if (group) {
+                        group.children.push(ti);
+                    }
                     tree.treeItems.push(ti);
                 }
 
@@ -56,15 +58,12 @@ export class Tree {
             }
         }
 
-        // initialize pop up menus
-        if (!this.domNode.getAttribute('role')) {
-            this.domNode.setAttribute('role', 'tree');
-        }
-
         findTreeitems(this.domNode, this, undefined);
 
         this.updateVisibleTreeItems();
         this.rootTreeItem.domNode.tabIndex = 0;
+
+        console.log(this);
     }
 
     setFocusToItem(treeitem: TreeItem) {
