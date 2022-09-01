@@ -62,8 +62,6 @@ export class Tree {
 
         this.updateVisibleTreeItems();
         this.rootTreeItem.domNode.tabIndex = 0;
-
-        console.log(this);
     }
 
     setFocusToItem(treeitem: TreeItem) {
