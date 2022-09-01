@@ -113,11 +113,12 @@ function axisValuesToIntervals(values: string[] | number[]): ([number, number] |
  * @param childrenInformation changing variable to assist with generating more nodes of the tree
  * @returns The {@link AccessibilityTreeNode} from the provided parameters
  */
-function olliVisSpecToNode(type: NodeType, selected: any[], parent: AccessibilityTreeNode | null, olliVisSpec: OlliVisSpec, fieldsUsed: string[], facetValue?: string, filterValue?: FilterValue, guide?: Guide, index?: number, length?: number): AccessibilityTreeNode {
+function olliVisSpecToNode(type: NodeType, selected: any[], parent: AccessibilityTreeNode | null, olliVisSpec: OlliVisSpec, fieldsUsed: string[], facetValue?: string, filterValue?: FilterValue, guide?: Guide, index?: number, length?: number, gridIndex?: {i: number, j: number}): AccessibilityTreeNode {
     let node: AccessibilityTreeNode = {
         type: type,
         parent: parent,
         selected: selected,
+        gridIndex,
         //
         description: type,
         children: [],
@@ -240,7 +241,7 @@ function olliVisSpecToNode(type: NodeType, selected: any[], parent: Accessibilit
             const xIntervals = axisValuesToIntervals(xAxis.values);
             const yIntervals = axisValuesToIntervals(yAxis.values);
             const cartesian = (...a: any[][]) => a.reduce((a: any[], b: any[]) => a.flatMap((d: any) => b.map((e: any) => [d, e].flat())));
-            node.children = cartesian(xIntervals, yIntervals).map(([x1, x2, y1, y2]) => {
+            node.children = cartesian(xIntervals, yIntervals).map(([x1, x2, y1, y2], index) => {
                 return olliVisSpecToNode(
                     'filteredData',
                     filterInterval(
@@ -252,7 +253,8 @@ function olliVisSpecToNode(type: NodeType, selected: any[], parent: Accessibilit
                     chart,
                     fieldsUsed,
                     facetValue,
-                    [[x1, x2], [y1, y2]]);
+                    [[x1, x2], [y1, y2]],
+                    undefined, undefined, undefined, {i: Math.floor(index / yIntervals.length), j: index % yIntervals.length});
             });
             break;
         case "filteredData":

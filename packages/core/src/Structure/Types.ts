@@ -24,8 +24,12 @@ export type AccessibilityTreeNode = {
     parent: AccessibilityTreeNode | null,
     selected: any[],
     description: string,
-    tableKeys?: string[],
     children: AccessibilityTreeNode[]
+    tableKeys?: string[],
+    gridIndex?: {
+      i: number,
+      j: number
+    }
 }
 
 export type AccessibilityTree = {

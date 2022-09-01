@@ -42,6 +42,10 @@ import "./TreeStyle.css";
     item.setAttribute('aria-posinset', String(posinset));
     item.setAttribute('aria-expanded', 'false');
     item.setAttribute('data-nodetype', node.type);
+    if (node.gridIndex) {
+      item.setAttribute('data-i', String(node.gridIndex.i));
+      item.setAttribute('data-j', String(node.gridIndex.j));
+    }
 
     const label = document.createElement('span');
     label.textContent = node.description;

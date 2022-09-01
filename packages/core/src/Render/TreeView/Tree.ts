@@ -129,6 +129,62 @@ export class Tree {
         }
     }
 
+    setFocusGridLeft(currentItem: TreeItem) {
+        const i = currentItem.domNode.getAttribute('data-i');
+        const j = currentItem.domNode.getAttribute('data-j');
+        if (i && j) {
+            const next = this.treeItems.find(item => {
+                return item.domNode.getAttribute('data-i') === String(Number(i) - 1) &&
+                    item.domNode.getAttribute('data-j') === String(j);
+            });
+            if (next) {
+                this.setFocusToItem(next);
+            }
+        }
+    }
+
+    setFocusGridRight(currentItem: TreeItem) {
+        const i = currentItem.domNode.getAttribute('data-i');
+        const j = currentItem.domNode.getAttribute('data-j');
+        if (i && j) {
+            const next = this.treeItems.find(item => {
+                return item.domNode.getAttribute('data-i') === String(Number(i) + 1) &&
+                    item.domNode.getAttribute('data-j') === String(j);
+            });
+            if (next) {
+                this.setFocusToItem(next);
+            }
+        }
+    }
+
+    setFocusGridUp(currentItem: TreeItem) {
+        const i = currentItem.domNode.getAttribute('data-i');
+        const j = currentItem.domNode.getAttribute('data-j');
+        if (i && j) {
+            const next = this.treeItems.find(item => {
+                return item.domNode.getAttribute('data-i') === String(i) &&
+                    item.domNode.getAttribute('data-j') === String(Number(j) + 1);
+            });
+            if (next) {
+                this.setFocusToItem(next);
+            }
+        }
+    }
+
+    setFocusGridDown(currentItem: TreeItem) {
+        const i = currentItem.domNode.getAttribute('data-i');
+        const j = currentItem.domNode.getAttribute('data-j');
+        if (i && j) {
+            const next = this.treeItems.find(item => {
+                return item.domNode.getAttribute('data-i') === String(i) &&
+                    item.domNode.getAttribute('data-j') === String(Number(j) - 1);
+            });
+            if (next) {
+                this.setFocusToItem(next);
+            }
+        }
+    }
+
     expandTreeItem(currentItem: TreeItem) {
         if (currentItem.isExpandable) {
             if (currentItem.parent) {

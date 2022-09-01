@@ -251,6 +251,18 @@ export class TreeItem {
             case 'l':
                 this.tree.focusOnNodeType("legend", this);
                 break;
+            case 'w':
+                this.tree.setFocusGridUp(this);
+                break;
+            case 'a':
+                this.tree.setFocusGridLeft(this);
+                break;
+            case 's':
+                this.tree.setFocusGridDown(this);
+                break;
+            case 'd':
+                this.tree.setFocusGridRight(this);
+                break;
         }
 
         if (flag) {
@@ -297,65 +309,3 @@ export class TreeItem {
         event.currentTarget.classList.remove('hover');
     }
 }
-
-// export class GridTreeItemLink extends TreeItem {
-//     private gridIndex: number;
-//     private gridWidth: number;
-//     public rowPosition: number;
-
-//     constructor(node: any, treeObj: any, group: any, level: number) {
-//         super(node, treeObj, group, level);
-//         const getNodeFromString = (partialLabelString: string) => {
-//             return this.parent.parent.children.reduce((returnVal, currentNode) => {
-//                 if (currentNode.label.includes(partialLabelString)) {
-//                     return currentNode
-//                 } else {
-//                     return returnVal;
-//                 }
-//             });
-//         }
-
-//         this.gridIndex = this.parent.children.length;
-//         // TODO
-//         this.gridWidth = this.parent.parent.label.includes('facet') ? getNodeFromString("Y-Axis").children.length : getNodeFromString("X-Axis").children.length;
-
-//         const getRowPosition = (): number => {
-//             if (this.gridIndex !== 0) {
-//                 let prevPosition: number = (this.parent.children[this.gridIndex - 1] as GridTreeItemLink).rowPosition;
-//                 return prevPosition === this.gridWidth ? 1 : prevPosition + 1
-//             } else {
-//                 return 1;
-//             }
-//         }
-
-//         this.rowPosition = getRowPosition();
-//     }
-
-//     handleKeydown(event: any): void {
-//         super.handleKeydown(event);
-
-//         let currentChildIndex: number = this.parent.children.indexOf(this);
-//         switch (event.keyCode) {
-//             case this.keyCode.W:
-//                 if (currentChildIndex + this.gridWidth < this.parent.children.length) {
-//                     this.tree.setFocusToItem(this.parent.children[currentChildIndex + this.gridWidth])
-//                 }
-//                 break;
-//             case this.keyCode.S:
-//                 if (currentChildIndex - this.gridWidth >= 0) {
-//                     this.tree.setFocusToItem(this.parent.children[currentChildIndex - this.gridWidth])
-//                 }
-//                 break;
-//             case this.keyCode.A:
-//                 if (this.rowPosition > 1) {
-//                     this.tree.setFocusToItem(this.parent.children[currentChildIndex - 1])
-//                 }
-//                 break;
-//             case this.keyCode.D:
-//                 if (this.rowPosition < this.gridWidth) {
-//                     this.tree.setFocusToItem(this.parent.children[currentChildIndex + 1])
-//                 }
-//                 break;
-//         }
-//     }
-// }
