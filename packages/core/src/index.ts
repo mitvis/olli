@@ -11,8 +11,7 @@ export * from './Types';
  * The configuration object outlining how an accessible visualization should be rendered based on a {@link OlliVisSpec}.
  */
 type OlliConfigOptions = {
-    renderType?: 'tree' | 'table',
-    ariaLabel?: string // TODO
+    renderType?: 'tree' | 'table'
 }
 
 /**
@@ -26,8 +25,7 @@ export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTML
     htmlRendering.classList.add('olli-vis');
 
     config = {
-        renderType: config?.renderType ?? 'tree',
-        ariaLabel: config?.ariaLabel ?? undefined
+        renderType: config?.renderType || 'tree'
     }
 
     switch (config.renderType) {
@@ -40,10 +38,6 @@ export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTML
             htmlRendering.appendChild(ul);
             new Tree(ul).init();
             break;
-    }
-
-    if (config.ariaLabel) {
-        htmlRendering.setAttribute("aria-label", config.ariaLabel);
     }
 
     document.addEventListener('keypress', (keyStroke) => {
