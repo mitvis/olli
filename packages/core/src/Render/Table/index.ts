@@ -1,5 +1,5 @@
 import { OlliDataset, OlliDatum } from "../../Types";
-import { AccessibilityTreeNode } from "../../Structure/Types";
+import { fmtValue } from "../../utils";
 
 /**
  *
@@ -8,23 +8,28 @@ import { AccessibilityTreeNode } from "../../Structure/Types";
  */
 export function renderTable(data: OlliDataset, fieldsUsed: string[]): HTMLElement {
     const table = document.createElement("table");
-    const tableBody = document.createElement("tbody");
-    const tableHeaders = document.createElement("tr");
-    fieldsUsed.forEach((field: string) => {
-        const header = document.createElement("th");
-        header.innerText = field;
-        tableHeaders.appendChild(header);
-    })
+    const thead = document.createElement("thead");
+    const theadtr = document.createElement("tr");
 
-    tableBody.appendChild(tableHeaders)
+    fieldsUsed.forEach((field: string) => {
+        const th = document.createElement("th");
+        th.setAttribute('scope', 'col');
+        th.innerText = field;
+        theadtr.appendChild(th);
+    });
+
+    thead.appendChild(theadtr);
+    table.appendChild(thead);
+
+    const tableBody = document.createElement("tbody");
+
     data.forEach((data: OlliDatum) => {
         const dataRow = document.createElement("tr")
         fieldsUsed.forEach((field: string) => {
-            const tableData = document.createElement("td")
-            tableData.innerText = String(data[field]);
-            dataRow.appendChild(tableData);
+            const td = document.createElement("td")
+            td.innerText = fmtValue(data[field]);
+            dataRow.appendChild(td);
         })
-
         tableBody.appendChild(dataRow);
     })
     table.appendChild(tableBody)
