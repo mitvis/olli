@@ -83,6 +83,7 @@ import "./TreeStyle.css";
 
     const thead = document.createElement("thead");
     const theadtr = document.createElement("tr");
+    theadtr.setAttribute('aria-label', `${dataNodes[0].tableKeys?.join(', ')}`);
 
     dataNodes[0].tableKeys?.forEach((key: string) => {
       const th = document.createElement("th");
@@ -100,6 +101,7 @@ import "./TreeStyle.css";
 
     dataNodes.forEach((node) => {
       const dataRow = document.createElement("tr")
+      dataRow.setAttribute('aria-label', `${node.tableKeys?.map(key => `${key}: ${node.selected[0][key]}`).join(', ')}`);
       node.tableKeys?.forEach((key: string) => {
         const td = document.createElement("td")
         const value = fmtValue(node.selected[0][key]);
