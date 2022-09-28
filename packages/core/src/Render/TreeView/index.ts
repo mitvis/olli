@@ -111,16 +111,17 @@ import "./TreeStyle.css";
 
     table.appendChild(tableBody);
 
-    const item = document.createElement('li');
-    item.setAttribute('role', 'treeitem');
-    item.setAttribute('aria-level', String(level));
-    item.setAttribute('aria-setsize', '1');
-    item.setAttribute('aria-posinset', '1');
-    item.setAttribute('aria-expanded', 'false');
+    // const item = document.createElement('li');
+    // item.setAttribute('role', 'treeitem');
+    // item.setAttribute('aria-level', String(level));
+    // item.setAttribute('aria-setsize', '1');
+    // item.setAttribute('aria-posinset', '1');
+    // item.setAttribute('aria-expanded', 'false');
 
-    item.appendChild(table);
+    // item.appendChild(table);
 
-    return item;
+    // return item;
+    return table;
   }
 
 }
