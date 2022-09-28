@@ -41,7 +41,7 @@ export class Tree {
             let ti = group
 
             while (elem) {
-                if (['li'].includes(elem.tagName.toLowerCase())) {
+                if (['li', 'thead', 'tbody'].includes(elem.tagName.toLowerCase())) {
                     ti = new TreeItem(elem, tree, group);
                     ti.init();
                     if (group) {

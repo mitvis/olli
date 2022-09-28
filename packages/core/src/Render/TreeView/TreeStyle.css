@@ -36,17 +36,17 @@
 
 /* disable default keyboard focus styling for treeitems
    Keyboard focus is styled with the following CSS */
-.olli-vis [role="treeitem"]:focus {
+.olli-vis :focus {
   outline: 0;
 }
 
-.olli-vis [role="treeitem"].focus,
-.olli-vis [role="treeitem"] span.focus {
+.olli-vis .focus,
+.olli-vis  span.focus {
   border-color: black;
   background-color: #eee;
 }
 
-.olli-vis [role="treeitem"].hover,
-.olli-vis [role="treeitem"] span:hover {
+.olli-vis .hover,
+.olli-vis  span:hover {
   background-color: #ddd;
 }
