@@ -41,7 +41,8 @@
 }
 
 .olli-vis .focus,
-.olli-vis  span.focus {
+.olli-vis  span.focus,
+.olli-vis  [aria-selected="true"] {
   border-color: black;
   background-color: #eee;
 }

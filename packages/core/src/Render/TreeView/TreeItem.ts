@@ -80,8 +80,7 @@ export class TreeItem {
         while (elem) {
             // if (['ul', 'table', 'th', 'td'].includes(elem.tagName.toLowerCase())) {
 
-            if (['ul', 'table', 'thead', 'tbody'].includes(elem.tagName.toLowerCase())) {
-
+            if (['ul', 'table', 'thead', 'tbody', 'tr', 'td', 'th'].includes(elem.tagName.toLowerCase())) {
             // if (['ul', 'table'].includes(elem.tagName.toLowerCase())) {
                 this.isExpandable = true;
                 break;

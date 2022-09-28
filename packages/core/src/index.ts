@@ -37,6 +37,7 @@ export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTML
             const ul = renderTree(tree);
             htmlRendering.appendChild(ul);
             const t = new Tree(ul);
+            console.log(t);
             t.init();
             document.addEventListener('keypress', (e) => {
                 if (e.key === 't') {
