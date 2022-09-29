@@ -5,40 +5,40 @@ title: "Quickstart"
 
 <div>
   <div>
-    <h2>Using Olli:</h2>
+    <h2>Adding Olli to Your Project</h2>
     <h3>HTML <code>&lt;script&gt;</code> Tags</h3>
-    <p>The most basic way to use Olli is to add it to any basic HTML page.</p>
-    <p><a href="https://codepen.io/matt-blanco/pen/abYQOEM" target="_blank">Fully functional HTML example with CodePen</a></p>
-    <p>1. Add the script tag inside the document <code>&lt;head&gt;</code>:</p>
+    <p>The most basic way to use Olli is to add it to any HTML page.</p>
+    <p><a href="https://codepen.io/jonathanzong/pen/WNJzjQp" target="_blank">Full HTML example with CodePen</a></p>
+    <p>1. Add script tags inside the document <code>&lt;head&gt;</code></p>
     <div class="Code-Block">
       <code class="language-xml">
-        &lt;html&gt;
+        &lt;head&gt;
+          <!-- vega / vega-lite -->
+          &lt;script src="https://cdn.jsdelivr.net/npm/vega@5"&gt;&lt;/script&gt;
+          &lt;script src="https://cdn.jsdelivr.net/npm/vega-lite@5"&gt;&lt;/script&gt;
 
+          <!-- olli -->
+          &lt;script src="https://cdn.jsdelivr.net/npm/olli@1"&gt;&lt;/script&gt;
+          &lt;script src="https://cdn.jsdelivr.net/npm/olli-adapters@1"&gt;&lt;/script&gt;
 
-          &lt;head&gt;
-            &lt;script src="https://cdn.jsdelivr.net/npm/vega@5"&gt;&lt;/script&gt;
-            &lt;script src="https://cdn.jsdelivr.net/npm/vega-lite@5"&gt;&lt;/script&gt;
-            &lt;script src="https://cdn.jsdelivr.net/npm/vega-embed@6"&gt;&lt;/script&gt;
-
-            &lt;script src="https://cdn.jsdelivr.net/npm/olli@1"&gt;&lt;/script&gt;
-            &lt;script src="https://cdn.jsdelivr.net/npm/olli-adapters@1"&gt;&lt;/script&gt;
-
-          &lt;/head&gt;
-
-          &lt;body&gt;
-            &lt;div id="visualization"&gt;&lt;/div&gt;
-            &lt;div id="accessibleVisTree"&gt;&lt;/div&gt;
-          &lt;/body&gt;
-
-        &lt;/html&gt;
+        &lt;/head&gt;
       </code>
     </div>
-    <p>2. Call Olli from a &lt;script&gt; tag:</p>
+    <p>2. Add container <code>div</code>s in the document <code>&lt;body&gt;</code></p>
     <div class="Code-Block">
       <code class="language-xml">
-
+        &lt;body&gt;
+          &lt;div id="vega-container"&gt;&lt;/div&gt;
+          &lt;div id="olli-container"&gt;&lt;/div&gt;
+        &lt;/body&gt;
+      </code>
+    </div>
+    <p>3. In a &lt;script&gt; tag, render the visualization and call Olli</p>
+    <div class="Code-Block">
+      <code class="language-xml">
         &lt;script&gt;
-          let spec = {
+          // vega-lite spec of an example bar chart
+          const vlSpec = {
             "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
             "description": "A simple bar chart with embedded data.",
             "data": {
@@ -55,61 +55,103 @@ title: "Quickstart"
             }
           }
 
-          let vegaSpec = vegaLite.compile(spec).spec
+          // code to render the vega-lite chart
+          const vegaSpec = vegaLite.compile(vlSpec).spec;
           const runtime = vega.parse(vegaSpec);
-          const vegaRender = document.getElementById('visualization');
-          let view = new vega.View(runtime)
+          const vegaContainer = document.getElementById('vega-container');
+          const view = new vega.View(runtime)
             .logLevel(vega.Warn)
-            .initialize(vegaRender)
+            .initialize(vegaContainer)
             .renderer('svg')
             .hover()
             .run();
 
-          OlliAdapters.VegaLiteAdapter(vegaLiteSpec).then(olliVisSpec => {
-            document.getElementById("accessibleVisTree").append(olli(olliVisSpec))
+          // code to render the olli treeview
+          OlliAdapters.VegaLiteAdapter(vlSpec).then(olliVisSpec => {
+            const olliRender = olli(olliVisSpec);
+            document.getElementById("olli-container").append(olliRender);
           })
         &lt;/script&gt;
-
       </code>
     </div>
-    <p><strong>NOTE:</strong> If using Vega or ObservablePlot the adapters are
-      <strong><code>OlliAdapters.VegaAdapter</code></strong> and
-      <strong><code>OlliAdapters.ObservableAdapter</code></strong> respectively.
-    </p>
+
   </div>
   <div>
-    <h3>NodeJS Applications</h3>
-    <p>Olli can also be easily added to normal JavaScript applications.</p>
-    <p><a href="https://codepen.io/matt-blanco/pen/zYWMGyX" target="_blank">Fully functional example with CodePen</a></p>
+    <h3>Using NPM</h3>
+    <p>Olli can also be easily included in JavaScript applications using <a href="https://www.npmjs.com/">NPM</a>, a popular package manager.</p>
+    <!-- <p><a href="https://codepen.io/matt-blanco/pen/zYWMGyX" target="_blank">Fully functional example with CodePen</a></p> -->
     <div>
-      <p>1. Install the preset:</p>
+      <p>1. Install the preset</p>
       <div class="Code-Block">
         <code class="language-bash">
           npm install olli olli-adapters
         </code>
       </div>
-      <p>2. Import <code>olli</code> and the adapter you want into the file you'll Olli in:</p>
+      <p>2. Import olli and the adapter for your visualization library</p>
       <div class="Code-Block">
         <code class="language-javascript">
+          // olli imports
           import { olli } from 'olli'
-          import { VegaLiteAdapter } from 'olli-adapters' // Or import VegaAdapter or ObservableAdapter
+          import { VegaLiteAdapter } from 'olli-adapters' // Or VegaAdapter, or ObservableAdapter
+
+          // vega-lite imports
+          import * as vega from "vega";
+          import * as vegaLite from "vega-lite";
         </code>
       </div>
-      <p>3. Call <code>olli</code> and set-up your configuration object:</p>
+      <p>3. Add container <code>div</code>s for the visualization and Olli output</p>
+      <div class="Code-Block">
+        <code class="language-xml">
+          &lt;div id="vega-container"&gt;&lt;/div&gt;
+          &lt;div id="olli-container"&gt;&lt;/div&gt;
+        </code>
+      </div>
+      <p>4. Render the visualization</p>
       <div class="Code-Block">
         <code class="language-javascript">
+          // vega-lite spec of an example bar chart
+          const vlSpec = {
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+            "description": "A simple bar chart with embedded data.",
+            "data": {
+              "values": [
+                { "a": "A", "b": 28 }, { "a": "B", "b": 55 }, { "a": "C", "b": 43 },
+                { "a": "D", "b": 91 }, { "a": "E", "b": 81 }, { "a": "F", "b": 53 },
+                { "a": "G", "b": 19 }, { "a": "H", "b": 87 }
+              ]
+            },
+            "mark": "bar",
+            "encoding": {
+              "x": { "field": "a", "type": "nominal", "axis": { "labelAngle": 0 } },
+              "y": { "field": "b", "type": "quantitative" }
+            }
+          }
 
-          VegaLiteAdapter(vegaLiteSpec).then(olliVisSpec => {
-            document.getElementById("accessibleVisTree").append(olli(olliVisSpec))
-          })
-
+          // code to render the vega-lite chart
+          const vegaSpec = vegaLite.compile(vlSpec).spec;
+          const runtime = vega.parse(vegaSpec);
+          const vegaContainer = document.getElementById('vega-container');
+          const view = new vega.View(runtime)
+            .logLevel(vega.Warn)
+            .initialize(vegaContainer)
+            .renderer('svg')
+            .hover()
+            .run();
         </code>
       </div>
-      <p><strong>NOTE:</strong> Within any JavaScript file, an adapter can be called using an <code>async/await</code>
-        function instead of within a promise reaction.
+      <p>5. Call olli and render the output treeview</p>
+      <div class="Code-Block">
+        <code class="language-javascript">
+          // code to render the olli treeview
+          VegaLiteAdapter(vlSpec).then(olliVisSpec => {
+            const olliRender = olli(olliVisSpec);
+            document.getElementById("olli-container").append(olliRender);
+          })
+        </code>
+      </div>
     </div>
   </div>
-  <div>
+  <!-- <div>
     <h3>React</h3>
     <p>Olli can even be used with React, but due to how React handles the state of the DOM, <code>olli</code> has to be
       called
@@ -142,8 +184,13 @@ title: "Quickstart"
 
       </code>
     </div>
-  </div>
-  <div>
+  </div> -->
+  <h2>Contributing to Olli</h2>
+  <p>
+    While Olli ships with support for Vega, Vega-Lite, and Observable Plot, it is designed to be extended with new adapters. If you would like Olli to support visualizations created in another toolkit, please see the <a href="https://github.com/mitvis/olli">Github repo</a> for more information on how to contribute to the Olli open source project.
+  </p>
+
+  <!-- <div>
     <h2 id="writingAdapters">Writing Your Own Adapter:</h2>
     <p>
       It's likely that Olli may not support your visualization just yet. Luckily following a simply interface you can
@@ -220,7 +267,7 @@ title: "Quickstart"
       can look at the <a href="https://github.com/mitvis/olli/blob/main/packages/adapters/src/VegaLiteAdapter.ts"
         target="_blank">Vega-Lite adapter</a>.
     </p>
-  </div>
+  </div> -->
 </div>
 
 <script type="module">
