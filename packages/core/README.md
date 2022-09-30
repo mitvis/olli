@@ -1,11 +1,11 @@
-# Directory Structure
+# olli
 
-The codebase is broken into three subdirectories, one for each part of Olli, converting a visualization into the `OlliVisSpec`, Creating a `AccessibilityTreeNode` based off of the transformed visualization, and finally rendering the constructed tree.
+This is Olli's core package. It is published on `npm` as `olli`.
 
-## Tree
+## Structure
 
-This is where the `AccessibilityTreeNode` is created based on a provided `OlliVisSpec`
+The `src/Structure` folder constructs a tree structure from a given `OlliVisSpec`. This code also assigns descriptions to each node in the tree.
 
 ## Render
 
-All of the different rendering types from the TreeView to a simple data table reside here. Each rendering type generates the HTML elements that will be appeneded on the specified DOM element.
+The `src/Render` folder includes screen-reader-friendly renderers for a tree view and a table.
