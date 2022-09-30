@@ -46,13 +46,12 @@ The `src/Render` folder includes screen-reader-friendly renderers for a tree vie
 
 Olli renders an accessible structure by traversing the tree and out-
 putting HTML elements and necessary ARIA attributes. To imple-
-ment an accessible HTML tree view, we adapted an [example](https://w3c.github.io/aria-
-practices/examples/treeview/treeview-navigation.html) from
+ment an accessible HTML tree view, we adapted an [example](https://w3c.github.io/aria-practices/examples/treeview/treeview-navigation.html) from
 the W3C’s WAI-ARIA Authoring Examples documentation. As
 the AccessibilityTreeNode is traversed, tree nodes that have
 children are rendered as a nested unordered list with a group role
 and aria-expanded attribute. Otherwise, a node is rendered as a
-list item with a treeitem ARIA role. The addition of the ARIA
+list item with a `treeitem` ARIA role. The addition of the ARIA
 roles and extra attributes allow the screen reader to provide a more
 specific description of the node’s position of the tree.
 
