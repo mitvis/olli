@@ -6,7 +6,7 @@ For more information about Olli, see the main project repo at https://github.com
 
 This is Olli's adapters package, published on `npm` as `olli-adapters`.
 
-# Adapters
+## Adapters
 
 Because visualization toolkits are designed with different trade-offs
 in mind, their APIs can vary widely. In order to support adding
@@ -30,7 +30,7 @@ details of the accessible visualization. This lowers the barrier for
 visualization authors who lack specialized accessibility expertise to
 offer accessible visualization experiences.
 
-##  OlliVisSpec
+###  OlliVisSpec
 
 An adapter takes in a visualization toolkit’s output (e.g. an SVG, or
 a scenegraph instance) and its original specification, and returns that
