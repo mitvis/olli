@@ -1,29 +1,51 @@
-# Deconstructing Visualizations
+# olli
 
-The adapter pattern is at the core in the design of Olli, being used to deconstruct visualizations
-into an `OlliVisSpec`. Since every visualization grammar contains its own
-complexities, in order to make a wider set of visualizations accessible, adapters are used to create
-a common type that can then be rendered into different accessible formats. Generating a
-screen-reader accessible structure for multiple visualization libraries is streamlined as the
-rendering no longer has to work with the concrete implementation of external libraries. The type
-system is comprised of a primary `OlliVisSpec` describing the structure of a chart with
-`Guide`s. The types bring out the perceived or hierarchical elements of a chart that are rarely
-explicitly outlined in a specification.
+Olli is an open-source library for converting data visualizations into accessible text structures for screen reader users. Starting with an existing visualization specification created with a supported toolkit, Olli produces a keyboard-navigable tree view with descriptions at varying levels of detail. Users can explore these structures both to get an initial overview, and to dive into the data in more detail.
 
-## `OlliVisSpec`
+For more information about Olli, see the main project repo at https://github.com/mitvis/olli.
 
-The `OlliVisSpec` is the output of the adapters deconstructing a visualization from its original
-specification into a more generalized format. A visualization will either be a composite view of
-nested charts or simply be a single chart depending on the hierarchy of information. Each object
-also contains a high-level description of the visualization and the data that being visualized.
-Within a lone chart, the `OlliVisSpec` also outlines the structured elements of the chart
-including axes and legend, but also visual information such as the mark being used and the title of
-the chart, if any.
+This is Olli's adapters package, published on `npm` as `olli-adapters`.
 
-Specific type information may be found in `Types.ts`.
+# Adapters
 
-### `Guide`s
+Because visualization toolkits are designed with different trade-offs
+in mind, their APIs can vary widely. In order to support adding
+accessibility to the widest possible range of visualizations, Olli
+uses an adapter design pattern to convert visualization specifica-
+tions from various toolkits into a common interface that can then
+be rendered as accessible HTML. Olli accomplishes this by wrap-
+ping an instance of another visualization toolkit within an adapter
+function, which returns an `OlliVisSpec` object that corresponds to
+the visualization. Olli then constructs a hierarchical data structure
+containing descriptions for elements of the visualization, which is
+then rendered as an accessible tree view. Because the accessible
+structure is constructed from the standard `OlliVisSpec` interface,
+this process is agnostic to the details of the toolkit with which the
+original visualization was implemented.
 
-`Guide`s contain information on the structured elements of charts. The axes and legends of a visualization share many common attributes throughout visualization grammars, and Olli reflects those similarities.
+To extend Olli’s coverage to support adding screen reader accessi-
+bility to a new toolkit, developers can simply implement an adapter
+function for that toolkit, without needing to re-implement the UX
+details of the accessible visualization. This lowers the barrier for
+visualization authors who lack specialized accessibility expertise to
+offer accessible visualization experiences.
 
-The `Guide` type may also be found in `Types.ts`.
+##  OlliVisSpec
+
+An adapter takes in a visualization toolkit’s output (e.g. an SVG, or
+a scenegraph instance) and its original specification, and returns that
+visualization as an object implementing the `OlliVisSpec` interface.
+An OlliVisSpec object either describes a single visualization,
+or contains a list of objects that each describe a single view of
+a multi-view chart. Each object has information about a chart’s
+visual elements, including its mark type and its guides (i.e. axes and
+legends). It also has a list of names of data fields participating in
+visual encodings, and other metadata such as the title.
+Each view’s Guide objects contain a title, the name of the field
+mapped to the axis/legend, and other metadata (e.g. the axis ori-
+entation or legend type). They also include information needed to
+divide axes and legends down into smaller sections (i.e., interval
+extents for continuous guides and categories for discrete guides),
+and a reference to the underlying data.
+
+The `OlliVisSpec` type is defined here: https://github.com/mitvis/olli/blob/main/packages/core/src/Types.ts
