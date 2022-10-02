@@ -10,7 +10,8 @@ For a [user tutorial](https://mitvis.github.io/olli/tutorial), [quickstart guide
 
 - Fork and clone the `mitvis/olli` repository.
 - In the `olli` directory, run `npm install` to install dependencies for all packages. We use [npm workspaces](https://docs.npmjs.com/cli/v8/using-npm/workspaces) to manage the two packages in this repo.
-- Run `npm run start` to start the webpack bundler in development mode with live reloading. Run `npm run build` to run webpack for production. (Note: `olli` must be built before `olli-adapters` the first time you run the build scripts.)
+- In the `core` or `adapters` package directories, run `npm run start` to start the webpack bundler in development mode with live reloading. Run `npm run build` to run webpack for production. (Note: `olli` must be built before `olli-adapters` the first time you run the build scripts.)
+- To run scripts for both packages at the same time, run commands from the `olli` directory using the `-ws` flag, e.g. `npm run build -ws`.
 
 ## Current Visualization Library Support
 
