@@ -15,6 +15,8 @@ For a user tutorial, quickstart guide, and examples, see the [Olli website](http
 - [Making data visualization more accessible for blind and low-vision individuals | MIT News](https://news.mit.edu/2022/data-visualization-accessible-blind-0602)
 - [Rich Screen Reader Experiences for Accessible Data Visualization | MIT Visualization Group](http://vis.csail.mit.edu/pubs/rich-screen-reader-vis-experiences/)
 
-## About
+## Contributions, Development, and Support
+
+Interested in contributing to Olli? Please see our contribution and development guidlines, and our [code of conduct](https://vega.github.io/vega/about/code-of-conduct/).
 
 Olli was originally created by [Matt Blanco](https://mattblanco.me/) and the library is maintained by the [MIT Visualization Group](http://vis.csail.mit.edu/).
