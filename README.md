@@ -12,7 +12,8 @@ For a user tutorial, quickstart guide, and examples, see the [Olli website](http
 
 ## Related Links
 
-- [Rich Screen Reader Experiences for Accessible Data Visualization](http://vis.csail.mit.edu/pubs/rich-screen-reader-vis-experiences/)
+- [Making data visualization more accessible for blind and low-vision individuals | MIT News](https://news.mit.edu/2022/data-visualization-accessible-blind-0602)
+- [Rich Screen Reader Experiences for Accessible Data Visualization | MIT Visualization Group](http://vis.csail.mit.edu/pubs/rich-screen-reader-vis-experiences/)
 
 ## About
 
