@@ -4,7 +4,7 @@ Olli is an open-source library for converting data visualizations into accessibl
 
 ## Using Olli
 
-For a user tutorial, quickstart guide, and examples, see the [Olli website](https://mitvis.github.io/olli/).
+For a [user tutorial](https://mitvis.github.io/olli/tutorial), [quickstart guide](https://mitvis.github.io/olli/quickstart), and [examples](https://mitvis.github.io/olli/examples), see the [Olli website](https://mitvis.github.io/olli/).
 
 ## Development instructions
 
