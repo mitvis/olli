@@ -23,6 +23,6 @@ For a user tutorial, quickstart guide, and examples, see the [Olli website](http
 
 ## Contributions, Development, and Support
 
-Interested in contributing to Olli? Please see our contribution and development guidlines, and our [code of conduct](https://vega.github.io/vega/about/code-of-conduct/).
+Interested in contributing to Olli? Please see our [contribution and development guidelines](https://github.com/mitvis/olli/blob/main/CONTRIBUTING.md), and our [code of conduct](https://vega.github.io/vega/about/code-of-conduct/).
 
 Olli was originally created by [Matt Blanco](https://mattblanco.me/) and the library is maintained by the [MIT Visualization Group](http://vis.csail.mit.edu/).
