@@ -26,7 +26,7 @@ For a [user tutorial](https://mitvis.github.io/olli/tutorial), [quickstart guide
 
 ## Reporting an Issue
 
-If you encounter issues when using Olli, please [file an issue on GitHub](https://github.com/mitvis/olli/issues). Please include enough information to reproduce the issue. For example, if the issue is a bug with a chart that Olli should support with one of its adapters, please include the spec and dataset for the chart.
+If you encounter issues when using Olli, please [file an issue on GitHub](https://github.com/mitvis/olli/issues). Please include enough information to reproduce the issue. For example, if the issue is a bug with a chart that Olli should support with one of its adapters, please include the spec and dataset for the chart. For accessibility issues, please share what browser and screen reader you are using.
 
 ## Contributions, Development, and Support
 
