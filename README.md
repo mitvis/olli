@@ -24,6 +24,10 @@ For a [user tutorial](https://mitvis.github.io/olli/tutorial), [quickstart guide
 - [Making data visualization more accessible for blind and low-vision individuals | MIT News](https://news.mit.edu/2022/data-visualization-accessible-blind-0602)
 - [Rich Screen Reader Experiences for Accessible Data Visualization | MIT Visualization Group](http://vis.csail.mit.edu/pubs/rich-screen-reader-vis-experiences/)
 
+## Reporting an Issue
+
+If you encounter issues when using Olli, please [file an issue on GitHub](https://github.com/mitvis/olli/issues). Please include enough information to reproduce the issue. For example, if the issue is a bug with a chart that Olli should support with one of its adapters, please include the spec and dataset for the chart.
+
 ## Contributions, Development, and Support
 
 Interested in contributing to Olli? Please see our [contribution and development guidelines](https://github.com/mitvis/olli/blob/main/CONTRIBUTING.md), and our [code of conduct](https://vega.github.io/vega/about/code-of-conduct/).
