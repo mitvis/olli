@@ -45,7 +45,7 @@ function plotToFacetedChart(plot: any, svg: Element): FacetedChart {
         plot.facet.y ?
             plot.facet.y :
             plot.facet.x :
-        plot.marks.find((mark: any) => mark.ariaLabel === 'line').channels.find((c: any) => c.name === "stroke").value;
+        flatChannels(plot.marks.find((mark: any) => mark.ariaLabel === 'line').channels).find((c: any) => c.name === "stroke").value;
     if (hasFacets(plot)) {
         charts = new Map(Object.values(chartSVG.children)
             .filter((n) => n.getAttribute('aria-label') === 'facet')
@@ -112,7 +112,7 @@ function plotToChart(plot: any, svg: Element): Chart {
 function parseAxis(plot: any, svg: Element): Axis {
     const axisType = svg?.getAttribute('aria-label') === 'y-axis' ? 'y' : 'x'
     const plotMark = plot.marks.filter((mark: any) => mark.ariaLabel !== 'rule')[0]
-    const channel = plotMark.channels.find((c: any) => c.scale === axisType)
+    const channel = flatChannels(plotMark.channels).find((c: any) => c.scale === axisType)
     const field: string = typeof channel.value === 'object' ? channel.value.label : channel.value
     const ticks: string[] = Object.keys(svg.children).map((k: string) => {
         const cObj: Element = svg.children[parseInt(k)]
@@ -152,7 +152,7 @@ function parseAxis(plot: any, svg: Element): Axis {
  */
 function parseLegend(plot: any, svg: Element): Legend { //TODO: Does not support 'ramp' legend types when the legend is rendered as an SVG
     const plotMark = plot.marks.filter((mark: any) => mark.ariaLabel !== 'rule')[0];
-    const channel = plotMark.channels.find((c: any) => c.scale === 'color'); // TODO channel hardcoded to color
+    const channel = flatChannels(plotMark.channels).find((c: any) => c.scale === 'color'); // TODO channel hardcoded to color
     const values: string[] = Object.keys(svg.children).map((k: string) => {
         let c = svg.children[parseInt(k)];
         if (c.nodeName !== 'STYLE') {
@@ -225,4 +225,8 @@ function plotMarkToOlliMark(m: string): OlliMark | undefined {
         default:
             return undefined
     }
+}
+
+function flatChannels(channels: any) {
+    return channels.find ? channels : Object.entries(channels).map(([name, chan]) => ({...chan as {}, name}))
 }
