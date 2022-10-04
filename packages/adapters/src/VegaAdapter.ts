@@ -1,4 +1,4 @@
-import { Spec, ScaleDataRef, Scale, ScaleData, Scene, SceneItem, isString } from "vega";
+import { Spec, ScaleDataRef, Scale, ScaleData, Scene, SceneItem, isString, SignalRef, ScaleMultiFieldsRef } from "vega";
 import { OlliVisSpec, VisAdapter, chart, Chart, Axis, Legend, facetedChart, FacetedChart, OlliMark, OlliDataset } from "olli";
 import { filterUniqueNodes, findScenegraphNodes, getData, getVegaScene, guideTypeFromScale, isNumeric, SceneGroup } from "./utils";
 
@@ -97,7 +97,7 @@ function parseAxisInformation(spec: Spec, axis: any): Axis {
     const scaleSpec = spec.scales?.find((specScale: Scale) => specScale.name === scaleName)!;
 
     // TODO make finding the field more robust to different kinds of scale domain specs
-    let scaleDomain: any = scaleSpec?.domain!
+    let scaleDomain: any = scaleSpec?.domain as ScaleData
 
     if (!scaleDomain) {
         spec.marks?.forEach((m: any) => {
@@ -109,11 +109,22 @@ function parseAxisInformation(spec: Spec, axis: any): Axis {
         })
     }
 
-    let fields: string;
-    if (scaleDomain.field !== undefined) {
-        fields = scaleDomain.field
+    let field: string;
+    if (scaleDomain?.field && !scaleDomain?.field?.signal) {
+        field = (scaleDomain as ScaleDataRef).field as string;
+    } else if (scaleDomain.data && scaleDomain.fields) {
+        if (scaleDomain.fields.length === 2 && (scaleDomain.fields[0] as string).endsWith('_start') && (scaleDomain.fields[1] as string).endsWith('_end')) {
+            // stack transform for stacked bars
+            const str = (scaleDomain as ScaleMultiFieldsRef).fields[0] as string;
+            field = str.substring(0, str.indexOf('_start'));
+        }
+        else {
+            // TODO think this case through
+            field = scaleDomain.fields[0];
+        }
     } else {
-        fields = scaleDomain.fields[1] // TODO hardcoded
+        // TODO
+        field = scaleDomain.fields[0].field;
     }
     //
 
@@ -127,7 +138,7 @@ function parseAxisInformation(spec: Spec, axis: any): Axis {
         type,
         values: ticks,
         title: title,
-        field: fields,
+        field: field,
         scaleType: scaleSpec?.type,
         axisType: axisType
     }
