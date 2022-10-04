@@ -151,6 +151,44 @@ title: "Quickstart"
       </div>
     </div>
   </div>
+
+  <div>
+    <h3>In an Observable Notebook</h3>
+    <p>
+      Olli can be embedded in an Observable Notebook.
+    </p>
+    <p>
+      Please refer to this <a href="https://observablehq.com/@fil/hello-olli">example notebook</a> contributed by Philippe Rivière.
+    </p>
+    <p>1. Imports</p>
+    <div class="Code-Block">
+      <code class="language-javascript">
+        Olli = require("olli@1", "olli-adapters@1")
+        Plot = require("@observablehq/plot@0.6")
+      </code>
+    </div>
+    <p>2. Spec</p>
+    <div class="Code-Block">
+      <code class="language-javascript">
+        spec = ({
+          marginLeft: 120,
+          marginRight: 90,
+          grid: true,
+          color: { type: "ordinal", scheme: "category10", legend: true },
+          x: { nice: true, grid: true },
+          y: { grid: true },
+          facet: { data, y: "site", marginRight: 90 },
+          marks: [Plot.dot(data, { x: "yield", y: "variety", fill: "year" })]
+        })
+      </code>
+    </div>
+    <p>3. Render</p>
+    <div class="Code-Block">
+      <code class="language-javascript">
+        Olli.ObservablePlotAdapter(spec).then(Olli.olli)
+      </code>
+    </div>
+  </div>
   <!-- <div>
     <h3>React</h3>
     <p>Olli can even be used with React, but due to how React handles the state of the DOM, <code>olli</code> has to be
