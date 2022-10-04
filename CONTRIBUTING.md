@@ -20,6 +20,8 @@ For an overview of all packages, see the [`/packages` folder](/packages).
 
 Olli's adapter pattern allows developers to extend Olli support to additional visualization toolkits while re-using our accessible renderer.
 
+Please refer to `VegaLiteAdapter` in [`adapters/src/VegaLiteAdapter.ts`](https://github.com/mitvis/olli/blob/main/packages/adapters/src/VegaLiteAdapter.ts) for a reference implementation.
+
 The `VisAdapter` type is defined in [`core/src/Types.ts`](https://github.com/mitvis/olli/blob/main/packages/core/src/Types.ts).
 
 ```typescript
