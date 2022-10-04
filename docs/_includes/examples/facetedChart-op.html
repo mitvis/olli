@@ -1,9 +1,11 @@
 <script type="module">
 import * as d3 from "https://cdn.skypack.dev/d3-fetch@3";
-import * as Plot from "https://cdn.skypack.dev/@observablehq/plot@0.5";
+import * as Plot from "https://cdn.skypack.dev/@observablehq/plot@0.6";
 
 d3.json("https://raw.githubusercontent.com/vega/vega-datasets/next/data/barley.json").then(data => {
     let spec = {
+        marginLeft: 120,
+        marginRight: 90,
         grid: true,
         color: {
             type: "ordinal",
@@ -11,7 +13,7 @@ d3.json("https://raw.githubusercontent.com/vega/vega-datasets/next/data/barley.j
             legend: true
         },
         x: {
-            domain: [0, 70],
+            nice: true,
             grid: true
         },
         y: {
@@ -20,6 +22,7 @@ d3.json("https://raw.githubusercontent.com/vega/vega-datasets/next/data/barley.j
         facet: {
             data: data,
             y: 'site',
+            marginRight: 90
         },
         marks: [
             Plot.dot(data, { x: "yield", y: "variety", fill: "year" })
