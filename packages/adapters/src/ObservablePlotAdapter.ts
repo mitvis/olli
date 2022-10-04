@@ -211,7 +211,7 @@ function hasFacets(plot: any): boolean {
  */
 function isMultiSeries(plot: any): boolean {
     const lineMarks = plot.marks.find((mark: any) => mark.ariaLabel === 'line');
-    return lineMarks && lineMarks.channels.some((c: any) => c.name === "stroke");
+    return lineMarks && flatChannels(lineMarks.channels).some((c: any) => c.name === "stroke");
 }
 
 function plotMarkToOlliMark(m: string): OlliMark | undefined {
