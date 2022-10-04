@@ -12,8 +12,7 @@
  export type OlliDataset = OlliDatum[];
 
  /**
-  * A simple union type that when implemented a concrete adapter class can be used with any visualization library to
-  * later be used to create an explorable Accessibility Tree.
+  * Base information that is common to all OlliVisSpecs
   */
  type BaseOlliVisSpec = {
      type: "chart" | "facetedChart",
@@ -21,9 +20,8 @@
      title? : string
  }
 
-
  /**
-  * Outlines the grammar of graphics information that has to be parsed from a visualization.
+  * The grammar of graphics information that has to be parsed from a single view visualization.
   */
   export interface Chart extends BaseOlliVisSpec {
      type: "chart",
@@ -37,8 +35,7 @@
   */
  export interface FacetedChart extends BaseOlliVisSpec {
      type: "facetedChart",
-     // maps faceted value to chart
-     charts: Map<string, Chart>,
+     charts: Map<string, Chart>, // maps facet value to chart
      facetedField: string,
  }
 
@@ -54,10 +51,10 @@ export const facetedChart = (fields: Omit<FacetedChart, 'type'>): FacetedChart =
 
  /**
  * The {@link Guide} is an the information needed for generating various nodes on the Accessibility Tree where
- *   values: is the array of values on the data source (ex: tick values for an Axis)
- *   title: string title describing this information
- *   data: an array of data from the visualization to eventually be filtered using the range
- *   field: the object field that will be used to compare data values to range values
+ *   type: discrete (e.g. for nominal, ordinal data) or continuous (e.g. for quantitative, temporal data)
+ *   values: array of values (ex: tick values for a continuous axis, category names for a discrete axis)
+ *   field: name of the field encoded by the axis
+ *   title: human-readable axis title
  */
 export type Guide = {
   type: 'discrete' | 'continuous',
