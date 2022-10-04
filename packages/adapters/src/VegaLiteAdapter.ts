@@ -87,12 +87,13 @@ function parseAxis(axisScenegraphNode: any, spec: any, data: OlliDataset): Axis 
     const encoding = spec.encoding[encodingKey];
     const ticks = axisView.items.find((n: any) => n.role === 'axis-tick').items.map((n: any) => n.datum.value);
     const axisType = axisView.orient === "bottom" || axisView.orient === "top" ? "x" : "y";
-    let field;
+    let field: string;
 
     if (encoding.aggregate) {
-        field = Object.keys(data[0]).filter((key: string) => key.includes(encoding.field))
+        // field = Object.keys(data[0]).find((key: string) => key.includes(encoding.field))
+        field = `${encoding.aggregate}_${encoding.field}`;
     } else {
-        field = encoding.field
+        field = encoding.field;
     }
 
     const type = encoding.type ? guideTypeFromVLEncoding(encoding.type) : (encoding.aggregate ? 'continuous' : 'discrete');
