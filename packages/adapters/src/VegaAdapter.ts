@@ -8,13 +8,14 @@ import { filterUniqueNodes, findScenegraphNodes, getData, getVegaScene, guideTyp
 * @returns the {@link OlliVisSpec}, the non-concrete visualization information that can be later used to
 * generate the Accessibility Tree Encoding
 */
-export const VegaAdapter: VisAdapter<Spec> = async (vSpec: Spec): Promise<OlliVisSpec> => {
-    const scene = await getVegaScene(vSpec);
+export const VegaAdapter: VisAdapter<Spec> = async (spec: Spec): Promise<OlliVisSpec> => {
+    const scene: SceneGroup = await getVegaScene(spec);
     const data = getData(scene);
+    const description = spec.description; // possible text description included with spec
     if (scene.items.some((el: any) => el.role === "scope")) {
-        return parseFacets(vSpec, scene, data);
+        return {description, ...parseFacets(spec, scene, data)};
     } else {
-        return parseSingleChart(vSpec, scene, data);
+        return {description, ...parseSingleChart(spec, scene, data)};
     }
 }
 

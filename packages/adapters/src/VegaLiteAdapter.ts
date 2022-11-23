@@ -19,12 +19,13 @@ import { filterUniqueNodes, findScenegraphNodes, getData, getVegaScene, guideTyp
 export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSpec): Promise<OlliVisSpec> => {
     const scene: SceneGroup = await getVegaScene(compile(spec).spec);
     const data = getData(scene);
+    const description = spec.description; // possible text description included with spec
     if (scene.items.some((node: any) => node.role === 'scope')) {
         // looking for role === 'scope' means we're using parseMultiView to handle
         // both faceted charts and multi-series lines
-        return parseMultiView(spec, scene, data)
+        return {description, ...parseMultiView(spec, scene, data)}
     } else {
-        return parseChart(spec, scene, data)
+        return {description, ...parseChart(spec, scene, data)}
     }
 }
 
