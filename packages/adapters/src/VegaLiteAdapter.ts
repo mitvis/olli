@@ -65,6 +65,10 @@ function parseChart(spec: any, scene: SceneGroup, data: OlliDataset): Chart {
     let axes: Axis[] = findScenegraphNodes(scene, "axis").map((axis: any) => parseAxis(axis, spec, data))
     let legends: Legend[] = findScenegraphNodes(scene, "legend").map((legend: any) => parseLegend(legend, spec))
     let mark: any = spec.mark // TODO vega-lite mark type exceeds olli mark type, should do some validation
+    if (mark && mark.type) {
+        // e.g. "mark": {"type": "line", "point": true}
+        mark = mark.type
+    }
     let node = chart({
         axes: axes.filter((axis: Axis) => axis.field !== undefined),
         legends: legends,
