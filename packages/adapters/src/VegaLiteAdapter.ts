@@ -9,7 +9,7 @@ import {
     chart,
     OlliDataset
 } from "olli";
-import { filterUniqueNodes, findScenegraphNodes, getData, getVegaScene, guideTypeFromScale, guideTypeFromVLEncoding, isNumeric, SceneGroup } from "./utils";
+import { filterUniqueObjects, findScenegraphNodes, getData, getVegaScene, guideTypeFromScale, guideTypeFromVLEncoding, isNumeric, SceneGroup } from "./utils";
 
 /**
  * Adapter to deconstruct Vega-Lite visualizations into an {@link OlliVisSpec}
@@ -35,8 +35,8 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
  * @returns An {@link OlliVisSpec} of the deconstructed Vega-Lite visualization
  */
 function parseMultiView(spec: any, scene: SceneGroup, data: OlliDataset): OlliVisSpec {
-    const axes = filterUniqueNodes(findScenegraphNodes(scene, "axis").map((axis: any) => parseAxis(axis, spec, data)));
-    const legends = filterUniqueNodes(findScenegraphNodes(scene, "legend").map((legend: any) => parseLegend(legend, spec)));
+    const axes = filterUniqueObjects<Axis>(findScenegraphNodes(scene, "axis").map((axis: any) => parseAxis(axis, spec, data)));
+    const legends = filterUniqueObjects<Legend>(findScenegraphNodes(scene, "legend").map((legend: any) => parseLegend(legend, spec)));
     let facetedField = spec.encoding.facet !== undefined ? spec.encoding.facet.field : spec.encoding['color'].field
     let nestedHeirarchies: Map<any, Chart> = new Map(scene.items.filter((el: any) => el.role === "scope")[0].items
         .map((chart: any) => {
@@ -97,14 +97,22 @@ function parseAxis(axisScenegraphNode: any, spec: any, data: OlliDataset): Axis 
         field = encoding.field;
     }
 
-    const type = encoding.type ? guideTypeFromVLEncoding(encoding.type) : (encoding.aggregate ? 'continuous' : 'discrete');
+    const scaleType = encoding.type;
+    const type = scaleType ? guideTypeFromVLEncoding(scaleType) : (encoding.aggregate ? 'continuous' : 'discrete');
+
+    // convert temporal values into date objects
+    if (scaleType === 'temporal') {
+        data.forEach(datum => {
+            datum[field] = new Date(datum[field]);
+        });
+    }
 
     return {
         type,
         values: ticks,
         title: encoding.title || undefined,
         field: field,
-        scaleType: encoding.type,
+        scaleType,
         axisType: axisType
     }
 }
