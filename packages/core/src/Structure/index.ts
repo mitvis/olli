@@ -7,9 +7,9 @@ type GridFilterValue = [EncodingFilterValue, EncodingFilterValue];
 type FilterValue = EncodingFilterValue | GridFilterValue;
 
 /**
- * Constructs an {@link AccessibilityTreeNode} based off of a generalized visualization
- * @param olliVisSpec the {@link Chart} or {@link CompositeChart} to transform into a tree
- * @returns The transormed {@link AccessibilityTreeNode}
+ * Constructs an {@link AccessibilityTree} from a visualization spec
+ * @param olliVisSpec the {@link OlliVisSpec} to transform into a tree
+ * @returns An {@link AccessibilityTree} for that spec
  */
 export function olliVisSpecToTree(olliVisSpec: OlliVisSpec): AccessibilityTree {
     const fieldsUsed = getFieldsUsedForChart(olliVisSpec);
@@ -105,15 +105,24 @@ function axisValuesToIntervals(values: string[] | number[]): ([number, number] |
 }
 
 /**
- * Creates a {@link AccessibilityTreeNode} of the given parameters
- * @param desc The string that will be used when rendering this node
- * @param parent The parent {@link AccessibilityTreeNode} of the node to be generated
- * @param selected Selection of data from this node and its children
- * @param type Meta-data to know what kind of element this node is from a visualization
- * @param childrenInformation changing variable to assist with generating more nodes of the tree
+ * Creates a {@link AccessibilityTreeNode} of the given parameters.
+ * This function recursively constructs a tree and returns the root node of the tree.
+ *
+ * @param type The {@link NodeType} to construct
+ * @param selected filtered list of data rows selected by the node
+ * @param parent The parent {@link AccessibilityTreeNode} of the node
+ * @param olliVisSpec The spec for the visualization
+ * @param fieldsUsed The data fields that are used by encodings in the olliVisSpec
+ * @param facetValue? If the spec is a faceted chart, the data value to facet on
+ * @param filterValue? if the current node being constructed is a filteredData node, the FilterValue to filter on
+ * @param guide? if the current node is associated with a guide, the guide spec
+ * @param index? the index of the current node in its sibling list
+ * @param length? the length of the list containing the current node and its siblings
+ * @param gridIndex? if the current node being constructed is a grid node, the row/col coordinates of the node
+ *
  * @returns The {@link AccessibilityTreeNode} from the provided parameters
  */
-function olliVisSpecToNode(type: NodeType, selected: any[], parent: AccessibilityTreeNode | null, olliVisSpec: OlliVisSpec, fieldsUsed: string[], facetValue?: string, filterValue?: FilterValue, guide?: Guide, index?: number, length?: number, gridIndex?: {i: number, j: number}): AccessibilityTreeNode {
+function olliVisSpecToNode(type: NodeType, selected: OlliDatum[], parent: AccessibilityTreeNode | null, olliVisSpec: OlliVisSpec, fieldsUsed: string[], facetValue?: string, filterValue?: FilterValue, guide?: Guide, index?: number, length?: number, gridIndex?: {i: number, j: number}): AccessibilityTreeNode {
     let node: AccessibilityTreeNode = {
         type: type,
         parent: parent,
