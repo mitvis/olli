@@ -5,6 +5,11 @@ import { OlliDatum } from "../Types";
  */
 export type NodeType = "chart" | "xAxis" | "yAxis" | "data" | "filteredData" | "legend" | "grid" | "multiView";
 
+
+export type EncodingFilterValue = string | [number | Date, number | Date];
+export type GridFilterValue = [EncodingFilterValue, EncodingFilterValue];
+export type FilterValue = EncodingFilterValue | GridFilterValue;
+
 /**
  * A {@link AccessibilityTreeNode} represents an location in an accessible structure.
  * type: The {@link NodeType} of this element
@@ -22,10 +27,11 @@ export type AccessibilityTreeNode = {
     description: string,
     children: AccessibilityTreeNode[]
     tableKeys?: string[],
+    filterValue?: FilterValue,
     gridIndex?: {
       i: number,
       j: number
-    }
+    },
 }
 
 /**

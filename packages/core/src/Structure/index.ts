@@ -1,10 +1,6 @@
 import { Guide, Chart, OlliVisSpec, FacetedChart, Axis, Legend, OlliDatum, OlliDataset } from "../Types";
 import { fmtValue } from "../utils";
-import { AccessibilityTree, AccessibilityTreeNode, NodeType } from "./Types";
-
-type EncodingFilterValue = string | [number | Date, number | Date];
-type GridFilterValue = [EncodingFilterValue, EncodingFilterValue];
-type FilterValue = EncodingFilterValue | GridFilterValue;
+import { AccessibilityTree, AccessibilityTreeNode, NodeType, FilterValue, EncodingFilterValue, GridFilterValue } from "./Types";
 
 /**
  * Constructs an {@link AccessibilityTree} from a visualization spec
@@ -124,9 +120,10 @@ function axisValuesToIntervals(values: string[] | number[]): ([number, number] |
  */
 function olliVisSpecToNode(type: NodeType, selected: OlliDatum[], parent: AccessibilityTreeNode | null, olliVisSpec: OlliVisSpec, fieldsUsed: string[], facetValue?: string, filterValue?: FilterValue, guide?: Guide, index?: number, length?: number, gridIndex?: {i: number, j: number}): AccessibilityTreeNode {
     let node: AccessibilityTreeNode = {
-        type: type,
-        parent: parent,
-        selected: selected,
+        type,
+        parent,
+        selected,
+        filterValue,
         gridIndex,
         //
         description: type,
@@ -298,7 +295,7 @@ function olliVisSpecToNode(type: NodeType, selected: OlliDatum[], parent: Access
             throw `Node type ${type} not handled in olliVisSpecToNode`;
     }
 
-    node.description = nodeToDesc(node, olliVisSpec, facetValue, filterValue, guide, index, length);
+    node.description = nodeToDesc(node, olliVisSpec, facetValue, guide, index, length);
 
     return node;
 }
@@ -308,10 +305,10 @@ function olliVisSpecToNode(type: NodeType, selected: OlliDatum[], parent: Access
  * @param node The node whose description is being created
  * @returns A description based on the provided {@link AccessibilityTreeNode}
  */
-function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facetValue?: string, filterValue?: FilterValue, guide?: Guide, index?: number, length?: number): string {
-    return _nodeToDesc(node, olliVisSpec, facetValue, filterValue, guide, index, length).replace(/\s+/g, ' ').trim();
+function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facetValue?: string, guide?: Guide, index?: number, length?: number): string {
+    return _nodeToDesc(node, olliVisSpec, facetValue, guide, index, length).replace(/\s+/g, ' ').trim();
 
-    function _nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facetValue?: string, filterValue?: FilterValue, guide?: Guide, index?: number, length?: number): string {
+    function _nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facetValue?: string, guide?: Guide, index?: number, length?: number): string {
         const chartType = (chart: Chart) => {
             if (chart.mark === 'point') {
                 if (chart.axes.every(axis => axis.type === 'continuous')) {
@@ -387,10 +384,10 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
                 return `Grid view of ${chartType(chart)}. ${facetValueStr(facetValue)}`
             case 'filteredData':
                 if (node.parent?.type === 'grid') {
-                    return `${pluralize(node.children.length, 'value')} ${filteredValuesGrid(filterValue as GridFilterValue)}. ${facetValueStr(facetValue)}`;
+                    return `${pluralize(node.children.length, 'value')} ${filteredValuesGrid(node.filterValue as GridFilterValue)}. ${facetValueStr(facetValue)}`;
                 }
                 else {
-                    return `${capitalize(filteredValues(filterValue as EncodingFilterValue))}. ${pluralize(node.children.length, 'value')}. ${facetValueStr(facetValue)}`;
+                    return `${capitalize(filteredValues(node.filterValue as EncodingFilterValue))}. ${pluralize(node.children.length, 'value')}. ${facetValueStr(facetValue)}`;
                 }
             case 'data':
                 // note: the datum description is not used by the table renderer
