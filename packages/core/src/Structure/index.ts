@@ -321,7 +321,7 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
             return chart.mark ? `${chart.mark} chart` : '';
         }
         const chartTitle = (chart: OlliVisSpec) => (chart.title || facetValue) ? `titled "${chart.title || facetValue}"` : '';
-        const description = (chart: OlliVisSpec) => {
+        const authorDescription = (chart: OlliVisSpec) => {
             if (chart.description) {
                 let str = chart.description.trim();
                 if (!/.*[.?!]/g.test(str)) {
@@ -372,9 +372,9 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
 
         switch (node.type) {
             case 'multiView':
-                return `${description(olliVisSpec)}A faceted chart ${chartTitle(olliVisSpec)} with ${node.children.length} views.`;
+                return `${authorDescription(olliVisSpec)}A faceted chart ${chartTitle(olliVisSpec)} with ${node.children.length} views.`;
             case 'chart':
-                return `${description(olliVisSpec)}${indexStr(index, length)} A ${chartType(chart)} ${chartTitle(chart)} ${listAxes(chart)}.`;
+                return `${authorDescription(olliVisSpec)}${indexStr(index, length)} A ${chartType(chart)} ${chartTitle(chart)} ${listAxes(chart)}.`;
             case 'xAxis':
             case 'yAxis':
                 return `${axis.axisType.toUpperCase()}-axis ${guideTitle(axis)} ${axisScaleType(axis)} ${guideValues(axis)}. ${facetValueStr(facetValue)}`;
