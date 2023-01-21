@@ -48,7 +48,7 @@ import "./TreeStyle.css";
     }
 
     const label = document.createElement('span');
-    label.textContent = node.description;
+    label.textContent = formatDescTokens(getSettingsFor(node.description));
     item.appendChild(label);
 
     if (node.children.length) {
@@ -124,6 +124,19 @@ import "./TreeStyle.css";
 
     // return item;
     return table;
+  }
+
+  // TODO: probably export this from the new settings folder when it's created
+  function getSettingsFor(description: Map<string, string>) {
+    return Array.from(description.values());
+  }
+
+  function formatDescTokens(description: string[]) {
+    return description.map(capitalizeFirst).join('. ') + '.';
+
+    function capitalizeFirst(s: string) {
+      return s.slice(0, 1).toUpperCase() + s.slice(1)
+    }
   }
 
 }

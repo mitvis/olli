@@ -24,7 +24,7 @@ export type AccessibilityTreeNode = {
     type: NodeType,
     parent: AccessibilityTreeNode | null,
     selected: OlliDatum[],
-    description: string,
+    description: Map<string, string>,
     children: AccessibilityTreeNode[]
     tableKeys?: string[],
     filterValue?: FilterValue,

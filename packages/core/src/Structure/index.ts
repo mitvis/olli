@@ -126,7 +126,7 @@ function olliVisSpecToNode(type: NodeType, selected: OlliDatum[], parent: Access
         filterValue,
         gridIndex,
         //
-        description: type,
+        description: new Map<string, string>(),
         children: [],
     }
 
@@ -305,10 +305,10 @@ function olliVisSpecToNode(type: NodeType, selected: OlliDatum[], parent: Access
  * @param node The node whose description is being created
  * @returns A description based on the provided {@link AccessibilityTreeNode}
  */
-function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facetValue?: string, guide?: Guide, index?: number, length?: number): string {
-    return _nodeToDesc(node, olliVisSpec, facetValue, guide, index, length).replace(/\s+/g, ' ').trim();
+function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facetValue?: string, guide?: Guide, idx?: number, length?: number): Map<string, string> {
+    return _nodeToDesc(node, olliVisSpec, facetValue, guide, idx, length);
 
-    function _nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facetValue?: string, guide?: Guide, index?: number, length?: number): string {
+    function _nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facetValue?: string, guide?: Guide, idx?: number, length?: number): Map<string, string> {
         const chartType = (chart: Chart) => {
             if (chart.mark === 'point') {
                 if (chart.axes.every(axis => axis.type === 'continuous')) {
@@ -343,7 +343,7 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
                 `with ${pluralize(guide.values.length, 'value')} starting with "${guide.values[0]}" and ending with "${guide.values[guide.values.length - 1]}"`
             ) :
             `with values from "${fmtValue(guide.values[0])}" to "${fmtValue(guide.values[guide.values.length - 1])}"`;
-        const facetValueStr = (facetValue?: string) => facetValue ? `"${facetValue}".` : '';
+        const facetValueStr = (facetValue?: string) => facetValue ? `"${facetValue}"` : '';
         const filteredValues = (guideFilterValues?: EncodingFilterValue) => {
             if (!guideFilterValues) return '';
             else if (Array.isArray(guideFilterValues)) {
@@ -357,7 +357,7 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
             if (!gridFilterValues) return '';
             return `in ${filteredValues(gridFilterValues[0])} and ${filteredValues(gridFilterValues[1])}`;
         }
-        const indexStr = (index?: number, length?: number) => index !== undefined && length !== undefined ? `${index + 1} of ${length}.` : '';
+        const indexStr = (index?: number, length?: number) => index !== undefined && length !== undefined ? `${index + 1} of ${length}` : '';
         const datum = (datum: OlliDatum, node: AccessibilityTreeNode) => {
             return node.tableKeys?.map(field => {
                 const value = fmtValue(datum[field]);
@@ -370,30 +370,196 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
         const axis = guide as Axis;
         const legend = guide as Legend;
 
-        switch (node.type) {
-            case 'multiView':
-                return `${authorDescription(olliVisSpec)}A faceted chart ${chartTitle(olliVisSpec)} with ${node.children.length} views.`;
-            case 'chart':
-                return `${authorDescription(olliVisSpec)}${indexStr(index, length)} A ${chartType(chart)} ${chartTitle(chart)} ${listAxes(chart)}.`;
-            case 'xAxis':
-            case 'yAxis':
-                return `${axis.axisType.toUpperCase()}-axis ${guideTitle(axis)} ${axisScaleType(axis)} ${guideValues(axis)}. ${facetValueStr(facetValue)}`;
-            case 'legend':
-                return `Legend ${guideTitle(legend)} ${legendChannel(legend)} ${guideValues(axis)}. ${facetValueStr(facetValue)}`;
-            case 'grid':
-                return `Grid view of ${chartType(chart)}. ${facetValueStr(facetValue)}`
-            case 'filteredData':
-                if (node.parent?.type === 'grid') {
-                    return `${pluralize(node.children.length, 'value')} ${filteredValuesGrid(node.filterValue as GridFilterValue)}. ${facetValueStr(facetValue)}`;
-                }
-                else {
-                    return `${capitalize(filteredValues(node.filterValue as EncodingFilterValue))}. ${pluralize(node.children.length, 'value')}. ${facetValueStr(facetValue)}`;
-                }
-            case 'data':
-                // note: the datum description is not used by the table renderer
-                return `${indexStr(index, length)} ${datum(node.selected[0], node)}`;
-            default:
-                throw `Node type ${node.type} not handled in nodeToDesc`;
+        const nodeTypeToHierarchyLevel = new Map<string, string>([
+            ['multiView', 'root'],
+            ['chart', 'facet'],
+            ['xAxis', 'axis'],
+            ['yAxis', 'axis'],
+            ['legend', 'axis'],
+            ['grid', 'axis'],
+            ['filteredData', 'section'],
+            ['data', 'datapoint']
+        ]);
+    
+        const hierarchyLevelToTokens = new Map<string, string[]>([
+            ['root', ['name']],
+            ['facet', ['index', 'type', 'name', 'children']],
+            ['axis', ['name', 'type', 'data', 'size', 'parent', 'aggregate']],
+            ['section', ['data', 'index', 'size', 'parent']],
+            ['datapoint', ['data', 'parent']]
+        ])
+
+        function name(node: AccessibilityTreeNode) {
+            switch (node.type) {
+                case 'multiView':
+                    return `a faceted chart ${chartTitle(olliVisSpec)} with ${node.children.length} views`;
+                case 'chart':
+                    return chartTitle(chart);  
+                case 'xAxis':
+                case 'yAxis':
+                    return `${axis.axisType}-axis ${guideTitle(axis)}`; 
+                case 'legend':
+                    return `legend ${guideTitle(legend)}`;
+                case 'grid':
+                    return `grid view of ${chartType(chart)}`;
+                default:
+                    throw `Node type ${node.type} does not have this token.`
+            } 
         }
+
+        function index(node: AccessibilityTreeNode) {
+            switch (node.type) {
+                case 'chart':
+                    return indexStr(idx, length);
+                case 'filteredData':
+                    return ''; // TODO not sure if this exists but I think it should
+                default:
+                    throw `Node type ${node.type} does not have this token.`   ;
+            }
+        }
+
+        function type(node: AccessibilityTreeNode) {
+            switch (node.type) {
+                case 'chart':
+                    return chartType(chart);
+                case 'xAxis':
+                case 'yAxis':
+                    return axisScaleType(axis);
+                case 'legend':
+                    return legendChannel(legend);
+                case 'grid':
+                    return ''; // Axes generally have types, but not grid axes - TODO?
+                default:
+                    throw `Node type ${node.type} does not have this token.` 
+            }
+        }
+
+        function children(node: AccessibilityTreeNode) {
+            switch (node.type) {
+                case 'chart':
+                    return listAxes(chart);
+                default:
+                    throw `Node type ${node.type} does not have this token.` 
+            }
+        }
+
+        function data(node: AccessibilityTreeNode) {
+            switch (node.type) {
+                case 'xAxis':
+                case 'yAxis':
+                case 'legend':
+                    return guideValues(axis);
+                case 'grid':
+                    return ''; // Axes generally have data, but not grid axes - TODO?
+                case 'filteredData':
+                    if (node.parent?.type === 'grid') {
+                        return filteredValuesGrid(node.filterValue as GridFilterValue);
+                    }
+                    else {
+                        return filteredValues(node.filterValue as EncodingFilterValue);
+                    }
+                case 'data':
+                    return `${indexStr(idx, length)} ${datum(node.selected[0], node)}`;
+                default:
+                    throw `Node type ${node.type} does not have this token.` 
+            }
+        }
+
+        function size(node: AccessibilityTreeNode) {
+            switch (node.type) {
+                case 'xAxis':
+                case 'yAxis':
+                case 'legend':
+                case 'grid':
+                    return ''; // TODO this does not exist yet but I think it should
+                case 'filteredData':
+                    return pluralize(node.children.length, 'value')
+                default:
+                    throw `Node type ${node.type} does not have this token.` 
+            }
+        }
+
+        function parent(node: AccessibilityTreeNode) {
+            switch (node.type) {
+                case 'xAxis':
+                case 'yAxis':
+                case 'legend':
+                case 'grid':
+                case 'filteredData':
+                case 'data':
+                    return facetValueStr(facetValue)
+                default:
+                    throw `Node type ${node.type} does not have this token.` 
+            }
+        }
+
+        function aggregate(node: AccessibilityTreeNode) {
+            switch (node.type) {
+                case 'xAxis':
+                case 'yAxis':
+                case 'legend':
+                case 'grid':
+                    return ''; // TODO
+                default:
+                    throw `Node type ${node.type} does not have this token.` 
+            }
+        }
+
+        const tokenFunctions = new Map<string, Function>([
+            ['name', name],
+            ['index', index],
+            ['type', type],
+            ['children', children],
+            ['data', data],
+            ['size', size],
+            ['children', children],
+            ['parent', parent],
+            ['aggregate', aggregate]
+        ])
+
+        if (node.type === undefined) {
+            throw `Node type ${node.type} not handled in nodeToDesc`;
+        } else {
+            const description = new Map<string, string>();
+            const hierarchyLevel = nodeTypeToHierarchyLevel.get(node.type);
+            if (hierarchyLevel !== undefined) {
+                const tokens = hierarchyLevelToTokens.get(hierarchyLevel);
+                if (tokens !== undefined) { // wow i hate this
+                    for (const token of tokens) {
+                        const tokenFunc = tokenFunctions.get(token);
+                        if (tokenFunc !== undefined) {
+                            description.set(token, tokenFunc(node));
+                        }
+                    }
+                }
+            }
+            return description;
+        }
+
+        // switch (node.type) {
+        //     case 'multiView':
+        //         return `${authorDescription(olliVisSpec)}A faceted chart ${chartTitle(olliVisSpec)} with ${node.children.length} views.`;
+        //     case 'chart':
+        //         return `${authorDescription(olliVisSpec)}${indexStr(idx, length)} A ${chartType(chart)} ${chartTitle(chart)} ${listAxes(chart)}.`;
+        //     case 'xAxis':
+        //     case 'yAxis':
+        //         return `${axis.axisType.toUpperCase()}-axis ${guideTitle(axis)} ${axisScaleType(axis)} ${guideValues(axis)}. ${facetValueStr(facetValue)}`;
+        //     case 'legend':
+        //         return `Legend ${guideTitle(legend)} ${legendChannel(legend)} ${guideValues(axis)}. ${facetValueStr(facetValue)}`;
+        //     case 'grid':
+        //         return `Grid view of ${chartType(chart)}. ${facetValueStr(facetValue)}`
+        //     case 'filteredData':
+        //         if (node.parent?.type === 'grid') {
+        //             return `${pluralize(node.children.length, 'value')} ${filteredValuesGrid(node.filterValue as GridFilterValue)}. ${facetValueStr(facetValue)}`;
+        //         }
+        //         else {
+        //             return `${capitalize(filteredValues(node.filterValue as EncodingFilterValue))}. ${pluralize(node.children.length, 'value')}. ${facetValueStr(facetValue)}`;
+        //         }
+        //     case 'data':
+        //         // note: the datum description is not used by the table renderer
+        //         return `${indexStr(idx, length)} ${datum(node.selected[0], node)}`;
+        //     default:
+        //         throw `Node type ${node.type} not handled in nodeToDesc`;
+        // }
     }
 }
