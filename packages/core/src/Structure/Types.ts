@@ -4,7 +4,7 @@ import { OlliDatum } from "../Types";
  * Meta-data information to what kind of node is currently visited
  */
 export type NodeType = "chart" | "xAxis" | "yAxis" | "data" | "filteredData" | "legend" | "grid" | "multiView";
-
+export type TokenType = "name" | "index" | "type" | "children" | "data" | "size" | "parent" | "aggregate"
 
 export type EncodingFilterValue = string | [number | Date, number | Date];
 export type GridFilterValue = [EncodingFilterValue, EncodingFilterValue];
@@ -24,7 +24,7 @@ export type AccessibilityTreeNode = {
     type: NodeType,
     parent: AccessibilityTreeNode | null,
     selected: OlliDatum[],
-    description: Map<string, string>,
+    description: Map<TokenType, string>,
     children: AccessibilityTreeNode[]
     tableKeys?: string[],
     filterValue?: FilterValue,

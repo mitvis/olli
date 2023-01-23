@@ -1,6 +1,6 @@
 import { Guide, Chart, OlliVisSpec, FacetedChart, Axis, Legend, OlliDatum, OlliDataset } from "../Types";
 import { fmtValue } from "../utils";
-import { AccessibilityTree, AccessibilityTreeNode, NodeType, FilterValue, EncodingFilterValue, GridFilterValue } from "./Types";
+import { AccessibilityTree, AccessibilityTreeNode, NodeType, TokenType, FilterValue, EncodingFilterValue, GridFilterValue } from "./Types";
 
 /**
  * Constructs an {@link AccessibilityTree} from a visualization spec
@@ -126,7 +126,7 @@ function olliVisSpecToNode(type: NodeType, selected: OlliDatum[], parent: Access
         filterValue,
         gridIndex,
         //
-        description: new Map<string, string>(),
+        description: new Map<TokenType, string>(),
         children: [],
     }
 
@@ -305,10 +305,10 @@ function olliVisSpecToNode(type: NodeType, selected: OlliDatum[], parent: Access
  * @param node The node whose description is being created
  * @returns A description based on the provided {@link AccessibilityTreeNode}
  */
-function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facetValue?: string, guide?: Guide, idx?: number, length?: number): Map<string, string> {
+function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facetValue?: string, guide?: Guide, idx?: number, length?: number): Map<TokenType, string> {
     return _nodeToDesc(node, olliVisSpec, facetValue, guide, idx, length);
 
-    function _nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facetValue?: string, guide?: Guide, idx?: number, length?: number): Map<string, string> {
+    function _nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facetValue?: string, guide?: Guide, idx?: number, length?: number): Map<TokenType, string> {
         const chartType = (chart: Chart) => {
             if (chart.mark === 'point') {
                 if (chart.axes.every(axis => axis.type === 'continuous')) {
@@ -370,24 +370,24 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
         const axis = guide as Axis;
         const legend = guide as Legend;
 
-        const nodeTypeToHierarchyLevel = new Map<string, string>([
-            ['multiView', 'root'],
-            ['chart', 'facet'],
-            ['xAxis', 'axis'],
-            ['yAxis', 'axis'],
-            ['legend', 'axis'],
-            ['grid', 'axis'],
-            ['filteredData', 'section'],
-            ['data', 'datapoint']
-        ]);
+        const nodeTypeToHierarchyLevel = {
+            'multiView': 'root',
+            'chart': 'facet',
+            'xAxis': 'axis',
+            'yAxis': 'axis',
+            'legend': 'axis',
+            'grid': 'axis',
+            'filteredData': 'section',
+            'data': 'datapoint',
+        };
     
-        const hierarchyLevelToTokens = new Map<string, string[]>([
-            ['root', ['name']],
-            ['facet', ['index', 'type', 'name', 'children']],
-            ['axis', ['name', 'type', 'data', 'size', 'parent', 'aggregate']],
-            ['section', ['data', 'index', 'size', 'parent']],
-            ['datapoint', ['data', 'parent']]
-        ])
+        const hierarchyLevelToTokens = {
+            'root': ['name'],
+            'facet': ['index', 'type', 'name', 'children'],
+            'axis': ['name', 'type', 'data', 'size', 'parent', 'aggregate'],
+            'section': ['data', 'index', 'size', 'parent'],
+            'datapoint': ['data', 'parent'],
+        };
 
         function name(node: AccessibilityTreeNode) {
             switch (node.type) {
@@ -505,61 +505,28 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
             }
         }
 
-        const tokenFunctions = new Map<string, Function>([
-            ['name', name],
-            ['index', index],
-            ['type', type],
-            ['children', children],
-            ['data', data],
-            ['size', size],
-            ['children', children],
-            ['parent', parent],
-            ['aggregate', aggregate]
-        ])
-
-        if (node.type === undefined) {
-            throw `Node type ${node.type} not handled in nodeToDesc`;
-        } else {
-            const description = new Map<string, string>();
-            const hierarchyLevel = nodeTypeToHierarchyLevel.get(node.type);
-            if (hierarchyLevel !== undefined) {
-                const tokens = hierarchyLevelToTokens.get(hierarchyLevel);
-                if (tokens !== undefined) { // wow i hate this
-                    for (const token of tokens) {
-                        const tokenFunc = tokenFunctions.get(token);
-                        if (tokenFunc !== undefined) {
-                            description.set(token, tokenFunc(node));
-                        }
-                    }
-                }
-            }
-            return description;
+        const tokenFunctions = {
+            'name': name,
+            'index': index,
+            'type': type,
+            'children': children,
+            'data': data,
+            'size': size,
+            'parent': parent,
+            'aggregate': aggregate
         }
 
-        // switch (node.type) {
-        //     case 'multiView':
-        //         return `${authorDescription(olliVisSpec)}A faceted chart ${chartTitle(olliVisSpec)} with ${node.children.length} views.`;
-        //     case 'chart':
-        //         return `${authorDescription(olliVisSpec)}${indexStr(idx, length)} A ${chartType(chart)} ${chartTitle(chart)} ${listAxes(chart)}.`;
-        //     case 'xAxis':
-        //     case 'yAxis':
-        //         return `${axis.axisType.toUpperCase()}-axis ${guideTitle(axis)} ${axisScaleType(axis)} ${guideValues(axis)}. ${facetValueStr(facetValue)}`;
-        //     case 'legend':
-        //         return `Legend ${guideTitle(legend)} ${legendChannel(legend)} ${guideValues(axis)}. ${facetValueStr(facetValue)}`;
-        //     case 'grid':
-        //         return `Grid view of ${chartType(chart)}. ${facetValueStr(facetValue)}`
-        //     case 'filteredData':
-        //         if (node.parent?.type === 'grid') {
-        //             return `${pluralize(node.children.length, 'value')} ${filteredValuesGrid(node.filterValue as GridFilterValue)}. ${facetValueStr(facetValue)}`;
-        //         }
-        //         else {
-        //             return `${capitalize(filteredValues(node.filterValue as EncodingFilterValue))}. ${pluralize(node.children.length, 'value')}. ${facetValueStr(facetValue)}`;
-        //         }
-        //     case 'data':
-        //         // note: the datum description is not used by the table renderer
-        //         return `${indexStr(idx, length)} ${datum(node.selected[0], node)}`;
-        //     default:
-        //         throw `Node type ${node.type} not handled in nodeToDesc`;
-        // }
+        const description = new Map<TokenType, string>();
+        try {
+            const hierarchyLevel = nodeTypeToHierarchyLevel[node.type];
+            const tokens = hierarchyLevelToTokens[hierarchyLevel as keyof typeof hierarchyLevelToTokens];
+            for (const token of tokens) {
+                const tokenFunc = tokenFunctions[token as keyof typeof tokenFunctions];
+                description.set(token as TokenType, tokenFunc(node));
+            }
+        } catch (e) {
+            throw `Node type ${node.type} not handled in nodeToDesc`;
+        }
+        return description;
     }
 }
