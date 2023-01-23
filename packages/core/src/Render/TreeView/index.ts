@@ -1,6 +1,7 @@
 // Adapted from: https://w3c.github.io/aria-practices/examples/treeview/treeview-1/treeview-1b.html
 
 import { AccessibilityTree, AccessibilityTreeNode } from "../../Structure/Types";
+import { getDescriptionWithSettings } from "../../Settings"
 import { fmtValue } from "../../utils";
 import "./TreeStyle.css";
 
@@ -20,6 +21,7 @@ import "./TreeStyle.css";
   root.setAttribute('role', 'tree');
   root.setAttribute('aria-labelledby', labelId);
 
+  root.setAttribute('id', '0') // TODO need to implement id scheme generally
   // const childContainer = document.createElement('ul');
   // childContainer.setAttribute('role', 'group');
 
@@ -48,7 +50,7 @@ import "./TreeStyle.css";
     }
 
     const label = document.createElement('span');
-    label.textContent = formatDescTokens(getSettingsFor(node.description));
+    label.textContent = formatDescTokens(getDescriptionWithSettings(node));
     item.appendChild(label);
 
     if (node.children.length) {
@@ -124,11 +126,6 @@ import "./TreeStyle.css";
 
     // return item;
     return table;
-  }
-
-  // TODO: probably export this from the new settings folder when it's created
-  function getSettingsFor(description: Map<string, string>) {
-    return Array.from(description.values());
   }
 
   function formatDescTokens(description: string[]) {

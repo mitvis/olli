@@ -4,6 +4,7 @@ import { Tree } from "./Render/TreeView/Tree"
 import { renderTree } from "./Render/TreeView"
 import { olliVisSpecToTree } from "./Structure"
 import { AccessibilityTree } from "./Structure/Types"
+import { renderMenu } from "./Settings"
 
 export * from './Types';
 
@@ -34,6 +35,9 @@ export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTML
             break;
         case ('tree'):
         default:
+            const menu = renderMenu(tree);
+            htmlRendering.appendChild(menu);
+
             const ul = renderTree(tree);
             htmlRendering.appendChild(ul);
             const t = new Tree(ul);

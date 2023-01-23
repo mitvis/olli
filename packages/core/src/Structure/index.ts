@@ -1,6 +1,6 @@
 import { Guide, Chart, OlliVisSpec, FacetedChart, Axis, Legend, OlliDatum, OlliDataset } from "../Types";
 import { fmtValue } from "../utils";
-import { AccessibilityTree, AccessibilityTreeNode, NodeType, TokenType, FilterValue, EncodingFilterValue, GridFilterValue } from "./Types";
+import { AccessibilityTree, AccessibilityTreeNode, NodeType, TokenType, nodeTypeToHierarchyLevel, hierarchyLevelToTokens, FilterValue, EncodingFilterValue, GridFilterValue } from "./Types";
 
 /**
  * Constructs an {@link AccessibilityTree} from a visualization spec
@@ -369,25 +369,6 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
         const chart = olliVisSpec as Chart;
         const axis = guide as Axis;
         const legend = guide as Legend;
-
-        const nodeTypeToHierarchyLevel = {
-            'multiView': 'root',
-            'chart': 'facet',
-            'xAxis': 'axis',
-            'yAxis': 'axis',
-            'legend': 'axis',
-            'grid': 'axis',
-            'filteredData': 'section',
-            'data': 'datapoint',
-        };
-    
-        const hierarchyLevelToTokens = {
-            'root': ['name'],
-            'facet': ['index', 'type', 'name', 'children'],
-            'axis': ['name', 'type', 'data', 'size', 'parent', 'aggregate'],
-            'section': ['data', 'index', 'size', 'parent'],
-            'datapoint': ['data', 'parent'],
-        };
 
         function name(node: AccessibilityTreeNode) {
             switch (node.type) {
