@@ -5,8 +5,9 @@ import { OlliDatum } from "../Types";
  */
 export type NodeType = "chart" | "xAxis" | "yAxis" | "data" | "filteredData" | "legend" | "grid" | "multiView";
 export type TokenType = "name" | "index" | "type" | "children" | "data" | "size" | "parent" | "aggregate";
+export type HierarchyLevel = "root" | "facet" | "axis" | "section" | "datapoint";
 
-export const nodeTypeToHierarchyLevel = {
+export const nodeTypeToHierarchyLevel: {[k in NodeType]: HierarchyLevel} = {
   'multiView': 'root',
   'chart': 'facet',
   'xAxis': 'axis',
@@ -17,7 +18,7 @@ export const nodeTypeToHierarchyLevel = {
   'data': 'datapoint',
 };
 
-export const hierarchyLevelToTokens = {
+export const hierarchyLevelToTokens: {[k in HierarchyLevel]: TokenType[]} = {
   'root': ['name'],
   'facet': ['index', 'type', 'name', 'children'],
   'axis': ['name', 'type', 'data', 'size', 'parent', 'aggregate'],

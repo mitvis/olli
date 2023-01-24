@@ -1,49 +1,7 @@
-import { AccessibilityTree, AccessibilityTreeNode, nodeTypeToHierarchyLevel, hierarchyLevelToTokens } from "../Structure/Types";
+import { AccessibilityTree, AccessibilityTreeNode, TokenType, nodeTypeToHierarchyLevel, hierarchyLevelToTokens } from "../Structure/Types";
 import { renderTree } from "../Render/TreeView"
 import { Tree } from "../Render/TreeView/Tree"
-
-const tokenDescs = {
-  'index': 'Index ("1 of 5")',
-  'type': 'Item type ("line", "temporal")',
-  'size': 'Size ("10 values")',
-  'relative': 'Quartile',
-  'data': 'Data values',
-  'aggregate': 'Min, max, and average',
-  'parent': 'View name',
-  'name': 'Item name',
-  'children': 'Child names',
-}
-
-const settingsData = {
-  'facet': {
-    'immutable': false,
-    'options': {
-      'high': ['index', 'type', 'name', 'children'],
-      'low': ['type', 'name', 'children'],
-    }
-  },
-  'axis': {
-    'immutable': false,
-    'options': {
-      'high': ['name', 'type', 'data', 'size', 'parent', 'aggregate'],
-      'low': ['name', 'type', 'data'],
-    }
-  },
-  'section': {
-    'immutable': false,
-    'options': {
-      'high': ['data', 'index', 'size', 'parent'],
-      'low': ['data', 'size'],
-    }
-  },
-  'datapoint': {
-    'immutable': false,
-    'options': {
-      'high': ['data', 'parent'],
-      'low': ['data']
-    }
-  }
-}
+import { tokenDescs, settingsData } from "./data"
 
 /**
  * Constructs the settings menu from the settings objects above
@@ -87,31 +45,39 @@ export function renderMenu(tree: AccessibilityTree): HTMLElement {
 }
 
 /**
- * Given a node with all possible description tokens, return those which the settings
- * define as currently visible
+ * Given a node with all possible description tokens, return a formatted string
+ * including only those tokens which the settings define as currently visible
  * 
  * @param node A {@link AccessibilityTreeNode} with a description map
- * @returns An array of description token strings 
+ * @returns A formatted string description for the node
  */
-export function getDescriptionWithSettings(node: AccessibilityTreeNode): string[] {
+export function getDescriptionWithSettings(node: AccessibilityTreeNode): string {
   const checkbox = document.getElementById('settings-checkbox') as HTMLInputElement;
   const setting = checkbox ? (checkbox.checked ? 'low' : 'high') : 'high';
 
   const hierarchyLevel = nodeTypeToHierarchyLevel[node.type];
-  let include: string[];
-  if (!(hierarchyLevel in settingsData)) {
+  let include: TokenType[];
+  if (hierarchyLevel === 'root') {
     // Cannot be changed by user; use default settings
-    include = hierarchyLevelToTokens[hierarchyLevel as keyof typeof hierarchyLevelToTokens]
+    include = hierarchyLevelToTokens[hierarchyLevel]
   } else {
-    include = settingsData[hierarchyLevel as keyof typeof settingsData]['options'][setting];
+    include = settingsData[hierarchyLevel][setting];
   }
 
   const description = [];
   for (const [token, desc] of node.description.entries()) {
-    if (include.includes(token as string)) {
+    if (include.includes(token)) {
       description.push(desc);
     }
   }
+
+  function formatDescTokens(description: string[]) {
+    return description.map(capitalizeFirst).join('. ') + '.';
+
+    function capitalizeFirst(s: string) {
+      return s.slice(0, 1).toUpperCase() + s.slice(1)
+    }
+  }
   
-  return description;
+  return formatDescTokens(description);
 }

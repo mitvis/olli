@@ -499,11 +499,9 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
 
         const description = new Map<TokenType, string>();
         try {
-            const hierarchyLevel = nodeTypeToHierarchyLevel[node.type];
-            const tokens = hierarchyLevelToTokens[hierarchyLevel as keyof typeof hierarchyLevelToTokens];
+            const tokens = hierarchyLevelToTokens[nodeTypeToHierarchyLevel[node.type]];
             for (const token of tokens) {
-                const tokenFunc = tokenFunctions[token as keyof typeof tokenFunctions];
-                description.set(token as TokenType, tokenFunc(node));
+                description.set(token, tokenFunctions[token](node));
             }
         } catch (e) {
             throw `Node type ${node.type} not handled in nodeToDesc`;
