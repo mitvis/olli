@@ -21,7 +21,7 @@ import "./TreeStyle.css";
   root.setAttribute('role', 'tree');
   root.setAttribute('aria-labelledby', labelId);
 
-  root.setAttribute('id', '0') // TODO need to implement id scheme generally
+  // root.setAttribute('id', '0') // TODO need to implement id scheme generally - oh maybe id should go later
   // const childContainer = document.createElement('ul');
   // childContainer.setAttribute('role', 'group');
 
@@ -31,19 +31,21 @@ import "./TreeStyle.css";
 
   // childContainer.querySelector('span')?.setAttribute('id', labelId);
 
-  root.appendChild(_renderTree(node, namespace, 1, 1, 1));
+  root.appendChild(_renderTree(node, namespace, 1, 1, 1, "root"));
   root.querySelector('span')?.setAttribute('id', labelId);
 
   return root;
 
-  function _renderTree(node: AccessibilityTreeNode, namespace: string, level: number, posinset: number, setsize: number): HTMLElement {
+  function _renderTree(node: AccessibilityTreeNode, namespace: string, level: number, posinset: number, setsize: number, idPrefix: string): HTMLElement {
     const item = document.createElement('li');
+    const id = idPrefix + '-' + posinset
     item.setAttribute('role', 'treeitem');
     item.setAttribute('aria-level', String(level));
     item.setAttribute('aria-setsize', String(setsize));
     item.setAttribute('aria-posinset', String(posinset));
     item.setAttribute('aria-expanded', 'false');
     item.setAttribute('data-nodetype', node.type);
+    item.setAttribute('id', id); // TODO not fully clear who should have this id: `item` node, `label` span, etc
     if (node.gridIndex) {
       item.setAttribute('data-i', String(node.gridIndex.i));
       item.setAttribute('data-j', String(node.gridIndex.j));
@@ -66,7 +68,7 @@ import "./TreeStyle.css";
       }
       else {
         treeChildren.forEach((n, index, array) => {
-          childContainer.appendChild(_renderTree(n, namespace, level + 1, index + 1, array.length));
+          childContainer.appendChild(_renderTree(n, namespace, level + 1, index + 1, array.length, id));
         })
       }
       item.appendChild(childContainer);

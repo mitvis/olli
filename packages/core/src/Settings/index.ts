@@ -26,11 +26,7 @@ export function renderMenu(tree: AccessibilityTree): HTMLElement {
     const newUl = renderTree(tree);
     const t = new Tree(newUl);
     t.init();
-    document.addEventListener('keypress', (e) => {
-        if (e.key === 't') {
-            t.setFocusToItem(t.rootTreeItem);
-        }
-    })
+
     document.getElementById("0")?.replaceWith(newUl);
     // TODO this resets focus, probably should do something about that
   });

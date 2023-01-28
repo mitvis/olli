@@ -5,6 +5,7 @@ import { renderTree } from "./Render/TreeView"
 import { olliVisSpecToTree } from "./Structure"
 import { AccessibilityTree } from "./Structure/Types"
 import { renderMenu } from "./Settings"
+import { addMenuCommands, addTreeCommands } from "./Settings/commands"
 
 export * from './Types';
 
@@ -47,6 +48,9 @@ export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTML
                     t.setFocusToItem(t.rootTreeItem);
                 }
             })
+
+            addMenuCommands(menu);
+            addTreeCommands(ul);
             break;
     }
 
