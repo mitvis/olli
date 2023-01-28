@@ -20,6 +20,7 @@ import "./TreeStyle.css";
 
   root.setAttribute('role', 'tree');
   root.setAttribute('aria-labelledby', labelId);
+  root.setAttribute('id', 'tree-root');
 
   // root.setAttribute('id', '0') // TODO need to implement id scheme generally - oh maybe id should go later
   // const childContainer = document.createElement('ul');
