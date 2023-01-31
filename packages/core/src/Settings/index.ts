@@ -2,6 +2,7 @@ import { AccessibilityTree, AccessibilityTreeNode, TokenType, HierarchyLevel, no
 import { renderTree } from "../Render/TreeView"
 import { Tree } from "../Render/TreeView/Tree"
 import { tokenDescs, settingsData } from "./data"
+import { addMenuCommands, addTreeCommands } from "./commands"
 
 /**
  * Constructs the settings menu from the settings objects above
@@ -74,7 +75,7 @@ function makeIndivVerbosityMenu(hierarchyLevel: Exclude<HierarchyLevel, 'root'>,
   return container;
 }
 
-function updateVerbosityDescription(dropdown: HTMLSelectElement, tree: AccessibilityTree) {
+export function updateVerbosityDescription(dropdown: HTMLSelectElement, tree: AccessibilityTree) {
   const hierarchyLevel = dropdown.id.split('-')[0] as Exclude<HierarchyLevel, 'root'>;
   const customMenu = document.getElementById(`${hierarchyLevel}-custom`)!;
   const descriptionText = dropdown.nextElementSibling! as HTMLElement;
@@ -98,6 +99,10 @@ function updateVerbosityDescription(dropdown: HTMLSelectElement, tree: Accessibi
     const newUl = renderTree(tree);
     const t = new Tree(newUl);
     t.init();
+    newUl.classList.add('olli-vis');
+    // TODO this is somewhat gross
+    addTreeCommands(newUl, tree);
+    addMenuCommands(document.getElementById('settings')!, t)
     // TODO - fix focus
     document.getElementById('tree-root')!.replaceWith(newUl);
   }

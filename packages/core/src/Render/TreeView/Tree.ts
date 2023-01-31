@@ -24,6 +24,7 @@ export class Tree {
     domNode: any;
     treeItems: TreeItem[];
     rootTreeItem!: TreeItem;
+    lastFocusedItem!: TreeItem;
 
     constructor(node: HTMLElement) {
 
@@ -62,6 +63,7 @@ export class Tree {
 
         this.updateVisibleTreeItems();
         this.rootTreeItem.domNode.tabIndex = 0;
+        this.lastFocusedItem = this.rootTreeItem;
     }
 
     setFocusToItem(treeitem: TreeItem) {
@@ -72,6 +74,7 @@ export class Tree {
               ti.domNode.tabIndex = 0;
               ti.domNode.focus();
               ti.domNode.setAttribute('aria-selected', 'true');
+              this.lastFocusedItem = ti;
             } else {
               ti.domNode.tabIndex = -1;
               ti.domNode.setAttribute('aria-selected', 'false');

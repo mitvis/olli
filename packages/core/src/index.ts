@@ -24,7 +24,7 @@ export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTML
     const tree: AccessibilityTree = olliVisSpecToTree(olliVisSpec);
 
     const htmlRendering: HTMLElement = document.createElement("div");
-    htmlRendering.classList.add('olli-vis');
+    // htmlRendering.classList.add('olli-vis');
 
     config = {
         renderType: config?.renderType || 'tree'
@@ -40,6 +40,7 @@ export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTML
             htmlRendering.appendChild(menu);
 
             const ul = renderTree(tree);
+            ul.classList.add('olli-vis');
             htmlRendering.appendChild(ul);
             const t = new Tree(ul);
             t.init();
@@ -49,8 +50,8 @@ export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTML
                 }
             })
 
-            addMenuCommands(menu);
-            addTreeCommands(ul);
+            addMenuCommands(menu, t);
+            addTreeCommands(ul, tree);
             break;
     }
 

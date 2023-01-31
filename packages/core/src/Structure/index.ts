@@ -384,7 +384,7 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
                 case 'grid':
                     return `grid view of ${chartType(chart)}`;
                 default:
-                    throw `Node type ${node.type} does not have this token.`
+                    throw `Node type ${node.type} does not have this token.`;
             } 
         }
 
@@ -393,9 +393,9 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
                 case 'chart':
                     return indexStr(idx, length);
                 case 'filteredData':
-                    return ''; // TODO not sure if this exists but I think it should
+                    return indexStr(idx, length);
                 default:
-                    throw `Node type ${node.type} does not have this token.`   ;
+                    throw `Node type ${node.type} does not have this token.`;
             }
         }
 
@@ -411,7 +411,7 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
                 case 'grid':
                     return ''; // Axes generally have types, but not grid axes - TODO?
                 default:
-                    throw `Node type ${node.type} does not have this token.` 
+                    throw `Node type ${node.type} does not have this token.`;
             }
         }
 
@@ -420,7 +420,7 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
                 case 'chart':
                     return listAxes(chart);
                 default:
-                    throw `Node type ${node.type} does not have this token.` 
+                    throw `Node type ${node.type} does not have this token.`;
             }
         }
 
@@ -442,7 +442,7 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
                 case 'data':
                     return `${indexStr(idx, length)} ${datum(node.selected[0], node)}`;
                 default:
-                    throw `Node type ${node.type} does not have this token.` 
+                    throw `Node type ${node.type} does not have this token.`;
             }
         }
 
@@ -452,11 +452,10 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
                 case 'yAxis':
                 case 'legend':
                 case 'grid':
-                    return ''; // TODO this does not exist yet but I think it should
                 case 'filteredData':
-                    return pluralize(node.children.length, 'value')
+                    return pluralize(node.children.length, 'value');
                 default:
-                    throw `Node type ${node.type} does not have this token.` 
+                    throw `Node type ${node.type} does not have this token.`;
             }
         }
 
@@ -468,9 +467,9 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
                 case 'grid':
                 case 'filteredData':
                 case 'data':
-                    return facetValueStr(facetValue)
+                    return facetValueStr(facetValue);
                 default:
-                    throw `Node type ${node.type} does not have this token.` 
+                    throw `Node type ${node.type} does not have this token.`;
             }
         }
 
@@ -482,7 +481,7 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
                 case 'grid':
                     return ''; // TODO
                 default:
-                    throw `Node type ${node.type} does not have this token.` 
+                    throw `Node type ${node.type} does not have this token.`;
             }
         }
 

@@ -39,14 +39,14 @@ import "./TreeStyle.css";
 
   function _renderTree(node: AccessibilityTreeNode, namespace: string, level: number, posinset: number, setsize: number, idPrefix: string): HTMLElement {
     const item = document.createElement('li');
-    const id = idPrefix + '-' + posinset
+    const id = idPrefix + '-' + (posinset - 1)
     item.setAttribute('role', 'treeitem');
     item.setAttribute('aria-level', String(level));
     item.setAttribute('aria-setsize', String(setsize));
     item.setAttribute('aria-posinset', String(posinset));
     item.setAttribute('aria-expanded', 'false');
     item.setAttribute('data-nodetype', node.type);
-    item.setAttribute('id', id); // TODO not fully clear who should have this id: `item` node, `label` span, etc
+    item.setAttribute('id', id);
     if (node.gridIndex) {
       item.setAttribute('data-i', String(node.gridIndex.i));
       item.setAttribute('data-j', String(node.gridIndex.j));
