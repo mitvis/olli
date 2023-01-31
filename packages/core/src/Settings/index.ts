@@ -9,6 +9,7 @@ import { tokenDescs, settingsData } from "./data"
  * @returns An {@link HTMLElement} with the settings menu
  */
 export function renderMenu(tree: AccessibilityTree): HTMLElement {
+  // Make the menu container
   const root = document.createElement("fieldset");
   root.setAttribute("id", "settings");
   root.setAttribute("tabindex", "0");
@@ -18,20 +19,13 @@ export function renderMenu(tree: AccessibilityTree): HTMLElement {
   legend.innerText = "Settings Menu";
   root.appendChild(legend);
 
+  // Make individual menus for each hierarchy level
+  Object.keys(settingsData).forEach(hierarchyLevel => {
+    // Verbosity options (high, low, custom)
+    root.appendChild(makeIndivVerbosityMenu(hierarchyLevel as Exclude<HierarchyLevel, 'root'>, tree));
 
-  // checkbox.addEventListener('change', (event) => {
-  //   const newUl = renderTree(tree);
-  //   const t = new Tree(newUl);
-  //   t.init();
-
-  //   document.getElementById("0")?.replaceWith(newUl);
-  //   // TODO this resets focus, probably should do something about that
-  // });
-
-  Object.keys(settingsData).forEach(control => {
-    root.appendChild(makeIndivVerbosityMenu(control as Exclude<HierarchyLevel, 'root'>, tree));
-
-    const cMenu = makeIndivCustomMenu(control as Exclude<HierarchyLevel, 'root'>, tree);
+    // Menu to add custom preset - hidden until 'custom' option is selected
+    const cMenu = makeIndivCustomMenu(hierarchyLevel as Exclude<HierarchyLevel, 'root'>, tree);
     cMenu.setAttribute('style', 'display: none');
     cMenu.setAttribute('aria-hidden', 'true');
     root.appendChild(cMenu);
@@ -41,15 +35,25 @@ export function renderMenu(tree: AccessibilityTree): HTMLElement {
   return root;
 }
 
-function makeIndivVerbosityMenu(control: Exclude<HierarchyLevel, 'root'>, tree: AccessibilityTree) {
-  const options: {[k: string]: TokenType[]} = settingsData[control];
+function makeIndivVerbosityMenu(hierarchyLevel: Exclude<HierarchyLevel, 'root'>, tree: AccessibilityTree) {
+  const options: {[k: string]: TokenType[]} = settingsData[hierarchyLevel];
 
+  // Make the dropdown container
   const dropdown = document.createElement('select');
-  dropdown.id = `${control}-verbosity`
+  dropdown.id = `${hierarchyLevel}-verbosity`
   dropdown.addEventListener('change', (event) => {
     updateVerbosityDescription(dropdown, tree);
   });
 
+  const label = document.createElement('label');
+  label.setAttribute('for', `${hierarchyLevel}-verbosity`);
+  label.innerText = capitalizeFirst(`${hierarchyLevel} verbosity:`);
+
+  const info = document.createElement('span');
+  info.setAttribute('tabindex', '0')
+  info.innerText = `Description: ${options[Object.keys(options)[0]].join(', ')}`;
+
+  // Add all preset options, plus 'custom' to make a new preset
   for (let option of Object.keys(options)) {
     let opt = document.createElement('option');
     opt.innerText = option;
@@ -61,16 +65,8 @@ function makeIndivVerbosityMenu(control: Exclude<HierarchyLevel, 'root'>, tree: 
   custom.value = 'custom';
   dropdown.appendChild(custom);
 
-  const label = document.createElement('label');
-  label.setAttribute('for', `${control}-verbosity`);
-  label.innerText = capitalizeFirst(`${control} verbosity:`);
-
-  const info = document.createElement('span');
-  info.setAttribute('tabindex', '0')
-  info.innerText = `Description: ${options[Object.keys(options)[0]].join(', ')}`;
-
   const container = document.createElement('div');
-  container.id = `${control}-verbosity-container`;
+  container.id = `${hierarchyLevel}-verbosity-container`;
   container.appendChild(label);
   container.appendChild(dropdown);
   container.append(info);
@@ -79,13 +75,9 @@ function makeIndivVerbosityMenu(control: Exclude<HierarchyLevel, 'root'>, tree: 
 }
 
 function updateVerbosityDescription(dropdown: HTMLSelectElement, tree: AccessibilityTree) {
-  const control = dropdown.id.split('-')[0] as Exclude<HierarchyLevel, 'root'>;
-  const customMenu = document.getElementById(`${control}-custom`);
-  const descriptionText = dropdown.nextElementSibling as HTMLElement;
-
-  if (customMenu === null || descriptionText === null) {
-    return; // TODO
-  }
+  const hierarchyLevel = dropdown.id.split('-')[0] as Exclude<HierarchyLevel, 'root'>;
+  const customMenu = document.getElementById(`${hierarchyLevel}-custom`)!;
+  const descriptionText = dropdown.nextElementSibling! as HTMLElement;
 
   if (dropdown.value === 'custom') {
     // Open the customization menu
@@ -97,33 +89,46 @@ function updateVerbosityDescription(dropdown: HTMLSelectElement, tree: Accessibi
     customMenu.setAttribute('style', 'display: none');
     customMenu.setAttribute('aria-hidden', 'true');
 
-    // Update the current description based on the new setting
+    // Updates based on the new setting:
+    // description tokens listed in the menu
     descriptionText.innerText =
-      `Description: ${settingsData[control][dropdown.value].join(', ')}`;
+      `Description: ${settingsData[hierarchyLevel][dropdown.value].join(', ')}`;
     
-    // TODO this is a hack and also screws with focus
+    // node description in the tree
     const newUl = renderTree(tree);
     const t = new Tree(newUl);
     t.init();
+    // TODO - fix focus
     document.getElementById('tree-root')!.replaceWith(newUl);
   }
 }
 
-function makeIndivCustomMenu(control: Exclude<HierarchyLevel, 'root'>, tree: AccessibilityTree) {
-  const tokens = hierarchyLevelToTokens[control];
+function makeIndivCustomMenu(hierarchyLevel: Exclude<HierarchyLevel, 'root'>, tree: AccessibilityTree) {
+  const tokens = hierarchyLevelToTokens[hierarchyLevel];
+
+  // Create overall container, plus one just for checkboxes
   const container = document.createElement('div');
-  container.id = `${control}-custom`;
+  container.id = `${hierarchyLevel}-custom`;
 
   const checkboxContainer = document.createElement('div');
-  checkboxContainer.id = `${control}-custom-options`;
+  checkboxContainer.id = `${hierarchyLevel}-custom-options`;
 
+  const nameInput = document.createElement('input');
+  nameInput.type = 'text';
+  nameInput.id = `${hierarchyLevel}-custom-name`;
+
+  const nameLabel = document.createElement('label');
+  nameLabel.setAttribute('for', `${hierarchyLevel}-custom-name`);
+  nameLabel.innerText = 'Custom preset name';
+
+  // Create individual checkboxes
   for (let token of tokens) {
     const input = document.createElement('input');
     input.type = 'checkbox';
-    input.id = `${control}-${token}`;
+    input.id = `${hierarchyLevel}-${token}`;
 
     const label = document.createElement('label');
-    label.setAttribute('for', `${control}-${token}`);
+    label.setAttribute('for', `${hierarchyLevel}-${token}`);
     label.innerText = tokenDescs[token];
 
     const div = document.createElement('div');
@@ -132,18 +137,10 @@ function makeIndivCustomMenu(control: Exclude<HierarchyLevel, 'root'>, tree: Acc
     checkboxContainer.append(div);
   }
 
-  const nameInput = document.createElement('input');
-  nameInput.type = 'text';
-  nameInput.id = `${control}-custom-name`;
-
-  const nameLabel = document.createElement('label');
-  nameLabel.setAttribute('for', `${control}-custom-name`);
-  nameLabel.innerText = 'Custom preset name';
-
   const saveButton = document.createElement('button');
   saveButton.innerText = 'Save';
   saveButton.addEventListener('click', (event) => {
-    savePreset(control, tree);
+    savePreset(hierarchyLevel, tree);
   });
 
   container.append(checkboxContainer);
@@ -153,38 +150,40 @@ function makeIndivCustomMenu(control: Exclude<HierarchyLevel, 'root'>, tree: Acc
   return container;
 }
 
-function savePreset(control: Exclude<HierarchyLevel, 'root'>, tree: AccessibilityTree) {
-  const customMenu = document.getElementById(`${control}-custom`);
-  if (customMenu === null) {
-    return; // TODO
-  }
+function savePreset(hierarchyLevel: Exclude<HierarchyLevel, 'root'>, tree: AccessibilityTree) {
+  const customMenu = document.getElementById(`${hierarchyLevel}-custom`)!;
+
+  // Close the custom menu since user is done with it
   customMenu.setAttribute('style', 'display: none');
   customMenu.setAttribute('aria-hidden', 'true');
   
-  const presetName = (document.getElementById(`${control}-custom-name`)! as HTMLInputElement).value;
-  settingsData[control][presetName] = getCurrentlyChecked(control);
-  updateVerbosityDropdown(control); // TODO
+  // Store the new preset in settingsData
+  const presetName = (document.getElementById(`${hierarchyLevel}-custom-name`)! as HTMLInputElement).value;
+  settingsData[hierarchyLevel][presetName] = getCurrentlyChecked(hierarchyLevel);
+  updateVerbosityDropdown(hierarchyLevel);
 
-  const dropdown = document.getElementById(`${control}-verbosity`)! as HTMLSelectElement;
+  // Set the dropdown to this preset and update the description accordingly 
+  // (acting as though user had selected their new preset from the dropdown menu)
+  const dropdown = document.getElementById(`${hierarchyLevel}-verbosity`)! as HTMLSelectElement;
   dropdown.value = presetName;
   updateVerbosityDescription(dropdown, tree);
   dropdown.focus();
   dropdown.setAttribute('aria-active', 'true');
 
-  function getCurrentlyChecked(control: string) {
+  function getCurrentlyChecked(hierarchyLevel: string) {
     const tokens: TokenType[] = []
-    for (let tokenOption of document.getElementById(`${control}-custom-options`)!.children) {
+    for (let tokenOption of document.getElementById(`${hierarchyLevel}-custom-options`)!.children) {
       const checkbox = tokenOption!.firstElementChild! as HTMLInputElement;
-      if (checkbox.checked) {  // checkbox
+      if (checkbox.checked) {
         tokens.push(checkbox.id.split('-')[1] as TokenType);
       }
     }
     return tokens;
   }
 
-  function updateVerbosityDropdown(control: string) {
-    const oldMenu = document.getElementById(`${control}-verbosity-container`);
-    oldMenu!.replaceWith(makeIndivVerbosityMenu(control as Exclude<HierarchyLevel, 'root'>, tree));
+  function updateVerbosityDropdown(hierarchyLevel: string) {
+    const oldMenu = document.getElementById(`${hierarchyLevel}-verbosity-container`);
+    oldMenu!.replaceWith(makeIndivVerbosityMenu(hierarchyLevel as Exclude<HierarchyLevel, 'root'>, tree));
   }
 }
 
