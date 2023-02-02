@@ -1,5 +1,5 @@
 import { AccessibilityTree, AccessibilityTreeNode, TokenType, HierarchyLevel, nodeTypeToHierarchyLevel, hierarchyLevelToTokens } from "../Structure/Types";
-import { renderTree } from "../Render/TreeView"
+import { renderTree, rerenderTreeDescription } from "../Render/TreeView"
 import { Tree } from "../Render/TreeView/Tree"
 import { tokenDescs, settingsData } from "./data"
 import { addMenuCommands, addTreeCommands } from "./commands"
@@ -94,17 +94,8 @@ export function updateVerbosityDescription(dropdown: HTMLSelectElement, tree: Ac
     // description tokens listed in the menu
     descriptionText.innerText =
       `Description: ${settingsData[hierarchyLevel][dropdown.value].join(', ')}`;
-    
     // node description in the tree
-    const newUl = renderTree(tree);
-    const t = new Tree(newUl);
-    t.init();
-    newUl.classList.add('olli-vis');
-    // TODO this is somewhat gross
-    addTreeCommands(newUl, tree);
-    addMenuCommands(document.getElementById('settings')!, t)
-    // TODO - fix focus
-    document.getElementById('tree-root')!.replaceWith(newUl);
+    rerenderTreeDescription(tree, document.getElementById('tree-root')!);
   }
 }
 
@@ -222,7 +213,7 @@ export function getDescriptionWithSettings(node: AccessibilityTreeNode): string 
   }
 
   function formatDescTokens(description: string[]) {
-    return description.map(capitalizeFirst).join('. ') + '.';
+    return description.filter(x => x.length > 0).map(capitalizeFirst).join('. ') + '.';
   }
   
   return formatDescTokens(description);

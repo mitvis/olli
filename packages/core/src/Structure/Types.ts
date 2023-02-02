@@ -4,8 +4,12 @@ import { OlliDatum } from "../Types";
  * Meta-data information to what kind of node is currently visited
  */
 export type NodeType = "chart" | "xAxis" | "yAxis" | "data" | "filteredData" | "legend" | "grid" | "multiView";
-export type TokenType = "name" | "index" | "type" | "children" | "data" | "size" | "parent" | "aggregate";
-export type HierarchyLevel = "root" | "facet" | "axis" | "section" | "datapoint";
+
+export const tokenType = ["name", "index", "type", "children", "data", "size", "parent", "aggregate"] as const;
+export type TokenType = typeof tokenType[number];
+
+export const hierarchyLevel = ['root', 'facet', 'axis', 'section', 'datapoint'] as const;
+export type HierarchyLevel = typeof hierarchyLevel[number];
 
 export const nodeTypeToHierarchyLevel: {[k in NodeType]: HierarchyLevel} = {
   'multiView': 'root',

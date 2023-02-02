@@ -1,5 +1,6 @@
-import { AccessibilityTree, AccessibilityTreeNode, TokenType, HierarchyLevel } from "../Structure/Types";
+import { AccessibilityTree, AccessibilityTreeNode, tokenType, TokenType, hierarchyLevel, HierarchyLevel } from "../Structure/Types";
 import { Tree } from "../Render/TreeView/Tree";
+import { htmlNodeToTree } from "../Render/TreeView";
 import { updateVerbosityDescription } from "./index";
 
 export function addMenuCommands(menu: HTMLElement, t: Tree) {
@@ -36,13 +37,13 @@ export function addTreeCommands(treeElt: HTMLElement, tree: AccessibilityTree) {
     keylog += event.key;
 
     // Check for commands to change a hierarchy level's verbosity setting
-    // for (const hierarchyLevel of HierarchyLevel) {
-    for (const hierarchyLevel of ['facet', 'axis', 'section', 'datapoint']) {
-      const low = hierarchyLevel.slice(0, 1) + 'low';
-      const high = hierarchyLevel.slice(0, 1) + 'high';
+    hierarchyLevel.forEach((hLevel: HierarchyLevel) => {
+    // for (const hierarchyLevel of ['facet', 'axis', 'section', 'datapoint']) {
+      const low = hLevel.slice(0, 1) + 'low';
+      const high = hLevel.slice(0, 1) + 'high';
       if (keylog.slice(keylog.length - low.length) === low) {
         console.log('l')
-        const dropdown = document.getElementById(hierarchyLevel + '-verbosity') as HTMLSelectElement;
+        const dropdown = document.getElementById(hLevel + '-verbosity') as HTMLSelectElement;
         dropdown.value = 'low';
         updateVerbosityDescription(dropdown, tree)
         // TODO may need to set focus
@@ -50,22 +51,23 @@ export function addTreeCommands(treeElt: HTMLElement, tree: AccessibilityTree) {
         return;
       } else if (keylog.slice(keylog.length - high.length) === high) {
         console.log('h')
-        const dropdown = document.getElementById(hierarchyLevel + '-verbosity') as HTMLSelectElement;
+        const dropdown = document.getElementById(hLevel + '-verbosity') as HTMLSelectElement;
         dropdown.value = 'high';
         updateVerbosityDescription(dropdown, tree)
         // TODO may need to set focus
         keylog = '';
         return;
       }
-    }
+    });
 
     // Check for commands to generate an individual description token
-    for (const token of ["name", "index", "type", "children", "data", "size", "parent", "aggregate"]) {
+    tokenType.forEach((token: TokenType) => {
       if (keylog.slice(keylog.length - token.length) === token) {
         console.log('t')
         const currentNode = document.activeElement! as HTMLElement;
         console.log('curnode is', currentNode);
         const treeNode: AccessibilityTreeNode = htmlNodeToTree(currentNode, tree);
+        console.log('curnode desc, token', treeNode.description, token)
         if (treeNode.description.has(token as TokenType)) {
           // TODO how to speak??
           console.log("I would have spoken", treeNode.description.get(token as TokenType))
@@ -73,15 +75,6 @@ export function addTreeCommands(treeElt: HTMLElement, tree: AccessibilityTree) {
         keylog = '';
         return;
       }
-    }
-
-    function htmlNodeToTree(node: HTMLElement, tree: AccessibilityTree) {
-      let cur = tree.root;
-      const path = node.id.split('-').slice(2).map(x => Number(x));
-      for (const idx of path) {
-        cur = cur.children[idx];
-      }
-      return cur;
-    }
+    });
   })
 }

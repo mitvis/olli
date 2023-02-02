@@ -366,6 +366,28 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
         }
         const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
+        const averageValue = (node: AccessibilityTreeNode, axis: Axis) => {
+            if (axis.scaleType !== 'quantitative') return '';
+            return `the average value is ${
+                Math.round(node.selected.reduce((a, b) => a + Number(b[axis.field]), 0)
+                    /node.selected.length)}`;
+        }
+
+        const maximumValue = (node: AccessibilityTreeNode, axis: Axis) => {
+            if (axis.scaleType !== 'quantitative') return '';
+            return `the maximum value is ${
+                    node.selected.reduce((a, b) => Math.max(a,  Number(b[axis.field])), 0)
+                }`;
+        }
+
+        const minimumValue = (node: AccessibilityTreeNode, axis: Axis) => {
+            if (axis.scaleType !== 'quantitative') return '';
+            // TODO non-existent datapoints seem to be 0??
+            return `the minimum value is ${
+                    node.selected.reduce((a, b) => Math.min(a,  Number(b[axis.field])), 0)
+                }`;
+        }
+
         const chart = olliVisSpec as Chart;
         const axis = guide as Axis;
         const legend = guide as Legend;
@@ -393,7 +415,9 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
                 case 'chart':
                     return indexStr(idx, length);
                 case 'filteredData':
-                    return indexStr(idx, length);
+                    // TODO idx and len are undefined right now, need to pass them down in spectonode above
+                    // return indexStr(idx, length);
+                    return '';
                 default:
                     throw `Node type ${node.type} does not have this token.`;
             }
@@ -477,9 +501,10 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
             switch (node.type) {
                 case 'xAxis':
                 case 'yAxis':
+                    return `${averageValue(node, axis)}, ${maximumValue(node, axis)}, and ${minimumValue(node, axis)}`; // TODO
                 case 'legend':
                 case 'grid':
-                    return ''; // TODO
+                    return ''; // TODO this causes errors
                 default:
                     throw `Node type ${node.type} does not have this token.`;
             }
