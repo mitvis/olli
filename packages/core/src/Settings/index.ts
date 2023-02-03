@@ -1,7 +1,7 @@
 import { AccessibilityTree, AccessibilityTreeNode, TokenType, HierarchyLevel, nodeTypeToHierarchyLevel, hierarchyLevelToTokens } from "../Structure/Types";
 import { renderTree, rerenderTreeDescription } from "../Render/TreeView"
 import { Tree } from "../Render/TreeView/Tree"
-import { tokenDescs, settingsData } from "./data"
+import { tokenDescs, defaultSettingsData } from "./data"
 import { addMenuCommands, addTreeCommands } from "./commands"
 
 /**
@@ -10,6 +10,16 @@ import { addMenuCommands, addTreeCommands } from "./commands"
  * @returns An {@link HTMLElement} with the settings menu
  */
 export function renderMenu(tree: AccessibilityTree): HTMLElement {
+  // Get saved menu settings if they exist, otherwise save the default settings
+  const storedData = localStorage.getItem('settingsData');
+  let settingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: string]: TokenType[]}};
+  if (storedData) {
+    settingsData = JSON.parse(storedData);
+  } else {
+    settingsData = defaultSettingsData;
+    localStorage.setItem('settingsData', JSON.stringify(defaultSettingsData));
+  }
+
   // Make the menu container
   const root = document.createElement("fieldset");
   root.setAttribute("id", "settings");
@@ -37,6 +47,7 @@ export function renderMenu(tree: AccessibilityTree): HTMLElement {
 }
 
 function makeIndivVerbosityMenu(hierarchyLevel: Exclude<HierarchyLevel, 'root'>, tree: AccessibilityTree) {
+  const settingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: string]: TokenType[]}} = JSON.parse(localStorage.getItem('settingsData')!);
   const options: {[k: string]: TokenType[]} = settingsData[hierarchyLevel];
 
   // Make the dropdown container
@@ -76,6 +87,7 @@ function makeIndivVerbosityMenu(hierarchyLevel: Exclude<HierarchyLevel, 'root'>,
 }
 
 export function updateVerbosityDescription(dropdown: HTMLSelectElement, tree: AccessibilityTree) {
+  const settingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: string]: TokenType[]}} = JSON.parse(localStorage.getItem('settingsData')!);
   const hierarchyLevel = dropdown.id.split('-')[0] as Exclude<HierarchyLevel, 'root'>;
   const customMenu = document.getElementById(`${hierarchyLevel}-custom`)!;
   const descriptionText = dropdown.nextElementSibling! as HTMLElement;
@@ -154,9 +166,11 @@ function savePreset(hierarchyLevel: Exclude<HierarchyLevel, 'root'>, tree: Acces
   customMenu.setAttribute('aria-hidden', 'true');
   
   // Store the new preset in settingsData
+  const settingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: string]: TokenType[]}} = JSON.parse(localStorage.getItem('settingsData')!);
   const presetName = (document.getElementById(`${hierarchyLevel}-custom-name`)! as HTMLInputElement).value;
   settingsData[hierarchyLevel][presetName] = getCurrentlyChecked(hierarchyLevel);
   updateVerbosityDropdown(hierarchyLevel);
+  localStorage.setItem('settingsData', JSON.stringify(settingsData));
 
   // Set the dropdown to this preset and update the description accordingly 
   // (acting as though user had selected their new preset from the dropdown menu)
@@ -178,6 +192,7 @@ function savePreset(hierarchyLevel: Exclude<HierarchyLevel, 'root'>, tree: Acces
   }
 
   function updateVerbosityDropdown(hierarchyLevel: string) {
+    const settingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: string]: TokenType[]}} = JSON.parse(localStorage.getItem('settingsData')!);
     const oldMenu = document.getElementById(`${hierarchyLevel}-verbosity-container`);
     oldMenu!.replaceWith(makeIndivVerbosityMenu(hierarchyLevel as Exclude<HierarchyLevel, 'root'>, tree));
   }
@@ -193,6 +208,8 @@ function savePreset(hierarchyLevel: Exclude<HierarchyLevel, 'root'>, tree: Acces
 export function getDescriptionWithSettings(node: AccessibilityTreeNode): string {
   const hierarchyLevel = nodeTypeToHierarchyLevel[node.type];
   let include: TokenType[];
+  const settingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: string]: TokenType[]}} = JSON.parse(localStorage.getItem('settingsData')!);
+
   if (hierarchyLevel === 'root') {
     // Cannot be changed by user; use default settings
     include = hierarchyLevelToTokens[hierarchyLevel];

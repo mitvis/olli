@@ -82,7 +82,7 @@ import "./TreeStyle.css";
 /**
  *
  * @param tree The {@link AccessibilityTreeNode} whose description is being re-rendered
- * @param ul The {@link HTMLElement} corresponding to the tree
+ * @param ul The {@link HTMLElement} corresponding to the tree root
  */
 export function rerenderTreeDescription(tree: AccessibilityTree, ul: HTMLElement){
   // Tree structure is ul -> li[] | table, li -> [span, ul] | span

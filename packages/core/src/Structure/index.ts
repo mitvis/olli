@@ -501,7 +501,7 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
             switch (node.type) {
                 case 'xAxis':
                 case 'yAxis':
-                    return `${averageValue(node, axis)}, ${maximumValue(node, axis)}, and ${minimumValue(node, axis)}`; // TODO
+                    return `${averageValue(node, axis)}, ${maximumValue(node, axis)}, and ${minimumValue(node, axis)}`; // TODO add case for 0
                 case 'legend':
                 case 'grid':
                     return ''; // TODO this causes errors

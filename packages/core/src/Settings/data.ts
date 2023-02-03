@@ -12,7 +12,7 @@ export const tokenDescs = {
   'children': 'Child names',
 }
 
-export let settingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: string]: TokenType[]}} = {
+export let defaultSettingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: string]: TokenType[]}} = {
   'facet': {
     'high': ['index', 'type', 'name', 'children'],
     'low': ['type', 'name', 'children'],
