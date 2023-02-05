@@ -40,18 +40,20 @@ export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTML
             htmlRendering.appendChild(menu);
 
             const ul = renderTree(tree);
-            ul.classList.add('olli-vis');
-            htmlRendering.appendChild(ul);
+            const container = document.createElement('div');
+            container.classList.add('olli-vis'); // TODO sort out exactly what's happening here
+            container.appendChild(ul)
+            htmlRendering.appendChild(container);
             const t = new Tree(ul);
             t.init();
             document.addEventListener('keypress', (e) => {
-                if (e.key === 't') {
+                if (e.key === 't' && !t.currentlyTypingToken()) {
                     t.setFocusToItem(t.rootTreeItem);
                 }
             })
 
             addMenuCommands(menu, t);
-            addTreeCommands(ul, tree);
+            addTreeCommands(ul, tree, t);
             break;
     }
 

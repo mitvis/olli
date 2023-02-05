@@ -192,7 +192,7 @@ function olliVisSpecToNode(type: NodeType, selected: OlliDatum[], parent: Access
             const axis = guide as Axis;
             switch (axis.type) {
                 case "discrete":
-                    node.children = axis.values.map(value => {
+                    node.children = axis.values.map((value, idx)=> {
                         return olliVisSpecToNode(
                             'filteredData',
                             selected.filter(d => String(d[axis.field]) === String(value)),
@@ -201,12 +201,14 @@ function olliVisSpecToNode(type: NodeType, selected: OlliDatum[], parent: Access
                             fieldsUsed,
                             facetValue,
                             String(value),
-                            axis);
+                            axis,
+                            idx,
+                            axis.values.length);
                     });
                     break;
                 case "continuous":
                     const intervals = axisValuesToIntervals(axis.values);
-                    node.children = intervals.map(([a, b]) => {
+                    node.children = intervals.map(([a, b], idx) => {
                         return olliVisSpecToNode(
                             'filteredData',
                             filterInterval(selected, axis.field, a, b),
@@ -215,7 +217,9 @@ function olliVisSpecToNode(type: NodeType, selected: OlliDatum[], parent: Access
                             fieldsUsed,
                             facetValue,
                             [a, b],
-                            axis);
+                            axis,
+                            idx,
+                            intervals.length);
                     });
                     break;
             }
@@ -224,7 +228,7 @@ function olliVisSpecToNode(type: NodeType, selected: OlliDatum[], parent: Access
             const legend = guide as Legend;
             switch (legend.type) {
                 case "discrete":
-                    node.children = legend.values.map(value => {
+                    node.children = legend.values.map((value, idx) => {
                         return olliVisSpecToNode(
                             'filteredData',
                             selected.filter(d => String(d[legend.field]) === String(value)),
@@ -233,7 +237,9 @@ function olliVisSpecToNode(type: NodeType, selected: OlliDatum[], parent: Access
                             fieldsUsed,
                             facetValue,
                             String(value),
-                            legend);
+                            legend,
+                            idx,
+                            legend.values.length);
                     });
                     break;
                 case "continuous":
@@ -359,7 +365,9 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
         }
         const indexStr = (index?: number, length?: number) => index !== undefined && length !== undefined ? `${index + 1} of ${length}` : '';
         const datum = (datum: OlliDatum, node: AccessibilityTreeNode) => {
-            return node.tableKeys?.map(field => {
+            return node.tableKeys?.map(field => { 
+                // maybe just literally filter out symbol here, so it can be returned in parent function like it should be?
+                // would then need some new way to concat data and parent in settings format but that's ok probably
                 const value = fmtValue(datum[field]);
                 return `"${field}": "${value}"`;
             }).join(', ');
@@ -376,15 +384,16 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
         const maximumValue = (node: AccessibilityTreeNode, axis: Axis) => {
             if (axis.scaleType !== 'quantitative') return '';
             return `the maximum value is ${
-                    node.selected.reduce((a, b) => Math.max(a,  Number(b[axis.field])), 0)
+                    node.selected.reduce((a, b) => Math.max(a,  Number(b[axis.field])), 
+                                        Number(node.selected[0][axis.field]))
                 }`;
         }
 
         const minimumValue = (node: AccessibilityTreeNode, axis: Axis) => {
             if (axis.scaleType !== 'quantitative') return '';
-            // TODO non-existent datapoints seem to be 0??
             return `the minimum value is ${
-                    node.selected.reduce((a, b) => Math.min(a,  Number(b[axis.field])), 0)
+                    node.selected.reduce((a, b) => Math.min(a,  Number(b[axis.field])), 
+                                        Number(node.selected[0][axis.field]))
                 }`;
         }
 
@@ -416,8 +425,8 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
                     return indexStr(idx, length);
                 case 'filteredData':
                     // TODO idx and len are undefined right now, need to pass them down in spectonode above
-                    // return indexStr(idx, length);
-                    return '';
+                    return indexStr(idx, length);
+                    // return '';
                 default:
                     throw `Node type ${node.type} does not have this token.`;
             }
@@ -464,7 +473,7 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
                         return filteredValues(node.filterValue as EncodingFilterValue);
                     }
                 case 'data':
-                    return `${indexStr(idx, length)} ${datum(node.selected[0], node)}`;
+                    return datum(node.selected[0], node)!;
                 default:
                     throw `Node type ${node.type} does not have this token.`;
             }
@@ -501,7 +510,8 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
             switch (node.type) {
                 case 'xAxis':
                 case 'yAxis':
-                    return `${averageValue(node, axis)}, ${maximumValue(node, axis)}, and ${minimumValue(node, axis)}`; // TODO add case for 0
+                    if (axis.scaleType !== 'quantitative') return '';
+                    return `${averageValue(node, axis)}, ${maximumValue(node, axis)}, and ${minimumValue(node, axis)}`;
                 case 'legend':
                 case 'grid':
                     return ''; // TODO this causes errors

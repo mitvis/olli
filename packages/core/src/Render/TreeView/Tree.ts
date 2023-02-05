@@ -1,4 +1,4 @@
-import { NodeType } from "../../Structure/Types";
+import { NodeType, tokenType } from "../../Structure/Types";
 import { TreeItem } from "./TreeItem";
 /*
  *   This content is licensed according to the W3C Software License at
@@ -25,12 +25,15 @@ export class Tree {
     treeItems: TreeItem[];
     rootTreeItem!: TreeItem;
     lastFocusedItem!: TreeItem;
+    keylog: string;
 
     constructor(node: HTMLElement) {
 
         this.domNode = node;
 
         this.treeItems = [];
+
+        this.keylog = '';
 
     }
 
@@ -278,5 +281,20 @@ export class Tree {
             this.setFocusToItem(targetItem);
         }
 
+    }
+
+    currentlyTypingToken = () => {
+        return (tokenType.find(token => startEndOverlap(this.keylog, "." + token) > 0))
+
+       function startEndOverlap(endOverlaps: string, startOverlaps: string): number {
+            let overlapLen = Math.min(startOverlaps.length, endOverlaps.length);
+            while (overlapLen > 0) {
+              if (startOverlaps.slice(0, overlapLen) === endOverlaps.slice(-overlapLen)) {
+                break;
+              }
+              overlapLen -= 1;
+            }
+            return overlapLen;
+        }
     }
 }

@@ -12,8 +12,7 @@ export function addMenuCommands(menu: HTMLElement, t: Tree) {
   })
 }
 
-export function addTreeCommands(treeElt: HTMLElement, tree: AccessibilityTree) {
-  let keylog = '';
+export function addTreeCommands(treeElt: HTMLElement, tree: AccessibilityTree, t: Tree) {
   let lastTimePressed = new Date().valueOf();
 
   treeElt.addEventListener('keydown', (event) => {
@@ -24,47 +23,42 @@ export function addTreeCommands(treeElt: HTMLElement, tree: AccessibilityTree) {
       menu.focus();
       menu.setAttribute('aria-selected', 'true');
 
-      keylog = '';
+      t.keylog = '';
     }
 
-    // If the first time key pressed in 5 seconds, empty previous keylog
+    // If the first time key pressed in 2 seconds, empty previous keylog
     // TODO try out some timings
-    if ((timePressed - lastTimePressed) > 5*1000) {
-      keylog = '';
+    if ((timePressed - lastTimePressed) > 2*1000) {
+      t.keylog = '';
     }
     lastTimePressed = timePressed;
 
-    keylog += event.key;
+    t.keylog += event.key;
 
     // Check for commands to change a hierarchy level's verbosity setting
     hierarchyLevel.forEach((hLevel: HierarchyLevel) => {
     // for (const hierarchyLevel of ['facet', 'axis', 'section', 'datapoint']) {
       const low = hLevel.slice(0, 1) + 'low';
       const high = hLevel.slice(0, 1) + 'high';
-      if (keylog.slice(keylog.length - low.length) === low) {
+      if (t.keylog.slice(t.keylog.length - low.length) === low) {
         const dropdown = document.getElementById(hLevel + '-verbosity') as HTMLSelectElement;
         dropdown.value = 'low';
         updateVerbosityDescription(dropdown, tree)
-        keylog = '';
+        t.keylog = '';
         return;
-      } else if (keylog.slice(keylog.length - high.length) === high) {
+      } else if (t.keylog.slice(t.keylog.length - high.length) === high) {
         const dropdown = document.getElementById(hLevel + '-verbosity') as HTMLSelectElement;
         dropdown.value = 'high';
         updateVerbosityDescription(dropdown, tree)
-        keylog = '';
+        t.keylog = '';
         return;
       }
     });
 
     // Check for commands to generate an individual description token
-    // if we've started typing a token command, then don't let other keydown events interrupt it
-    if (tokenType.find(token => startEndOverlap(keylog, token) > 0)) {
-      console.log('stopping propagation')
-      event.stopImmediatePropagation();
-    }
-
     tokenType.forEach((token: TokenType) => {
-      if (keylog.slice(keylog.length - token.length) === token) {
+      const command = "." + token;
+      if (t.keylog.slice(t.keylog.length - command.length) === command) {
         const currentNode = document.activeElement! as HTMLElement;
         console.log('curnode is', currentNode);
         const treeNode: AccessibilityTreeNode = htmlNodeToTree(currentNode, tree);
@@ -73,22 +67,10 @@ export function addTreeCommands(treeElt: HTMLElement, tree: AccessibilityTree) {
           srSpeakingHack(treeNode.description.get(token as TokenType)!);
           console.log("speaking:", treeNode.description.get(token as TokenType))
         }
-        keylog = '';
+        t.keylog = '';
         return;
       }
     });
-
-    function startEndOverlap(endOverlaps: string, startOverlaps: string): number {
-      console.log("checking overlaps for", endOverlaps, startOverlaps);
-      let overlapLen = Math.min(startOverlaps.length, endOverlaps.length);
-      while (overlapLen > 0) {
-        if (startOverlaps.slice(0, overlapLen) === endOverlaps.slice(-overlapLen)) {
-          break;
-        }
-        overlapLen -= 1;
-      }
-      return overlapLen;
-    }
 
     function srSpeakingHack(text: string) {
       const elt = document.createElement('div');
