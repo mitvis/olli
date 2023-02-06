@@ -144,7 +144,9 @@ function parseLegend(legendScenegraphNode: any, spec: any): Legend {
 
     const values = labels.map((n: any) => n.items.find((el: any) => el.role === "legend-label").items[0].datum.value);
 
-    const encType = spec.encoding['color'].type;
+    const encoding = spec.encoding['color']?.condition || spec.encoding['color'];
+
+    const encType = encoding.type;
 
     const type = encType ? guideTypeFromVLEncoding(encType) :
         (values.every((t: any) => isNumeric(String(t))) ? 'continuous' : 'discrete');
@@ -153,8 +155,8 @@ function parseLegend(legendScenegraphNode: any, spec: any): Legend {
     return {
         type,
         values,
-        title: spec.encoding['color'].title ? spec.encoding['color'].title : spec.encoding['color'].field,
-        field: spec.encoding['color'].field,
+        title: encoding.title ? encoding.title : encoding.field,
+        field: encoding.field,
         channel: 'color'
     }
 }
