@@ -7,7 +7,8 @@ import {
     Legend,
     facetedChart,
     chart,
-    OlliDataset
+    OlliDataset,
+    FacetedChart
 } from "olli";
 import { filterUniqueObjects, findScenegraphNodes, getData, getVegaScene, guideTypeFromScale, guideTypeFromVLEncoding, isNumeric, SceneGroup } from "./utils";
 
@@ -34,7 +35,7 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
  * @param spec The Vega-Lite Spec that rendered the visualization
  * @returns An {@link OlliVisSpec} of the deconstructed Vega-Lite visualization
  */
-function parseMultiView(spec: TopLevelSpec, scene: SceneGroup, data: OlliDataset): OlliVisSpec {
+function parseMultiView(spec: TopLevelSpec, scene: SceneGroup, data: OlliDataset): FacetedChart {
     const axes = filterUniqueObjects<Axis>(findScenegraphNodes(scene, "axis").map((axis: any) => parseAxis(axis, spec, data)));
     const legends = filterUniqueObjects<Legend>(findScenegraphNodes(scene, "legend").map((legend: any) => parseLegend(legend, spec)));
     const getFacetedField = (spec: any) => {
