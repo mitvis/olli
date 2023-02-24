@@ -126,7 +126,7 @@ function olliVisSpecToNode(type: NodeType, selected: OlliDatum[], parent: Access
         filterValue,
         gridIndex,
         //
-        description: new Map<TokenType, string>(),
+        description: new Map<TokenType, string[]>(),
         children: [],
     }
 
@@ -311,10 +311,10 @@ function olliVisSpecToNode(type: NodeType, selected: OlliDatum[], parent: Access
  * @param node The node whose description is being created
  * @returns A description based on the provided {@link AccessibilityTreeNode}
  */
-function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facetValue?: string, guide?: Guide, idx?: number, length?: number): Map<TokenType, string> {
+function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facetValue?: string, guide?: Guide, idx?: number, length?: number): Map<TokenType, string[]> {
     return _nodeToDesc(node, olliVisSpec, facetValue, guide, idx, length);
 
-    function _nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facetValue?: string, guide?: Guide, idx?: number, length?: number): Map<TokenType, string> {
+    function _nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facetValue?: string, guide?: Guide, idx?: number, length?: number): Map<TokenType, string[]> {
         const chartType = (chart: Chart) => {
             if (chart.mark === 'point') {
                 if (chart.axes.every(axis => axis.type === 'continuous')) {
@@ -531,11 +531,11 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
             'aggregate': aggregate
         }
 
-        const description = new Map<TokenType, string>();
+        const description = new Map<TokenType, string[]>();
         try {
             const tokens = hierarchyLevelToTokens[nodeTypeToHierarchyLevel[node.type]];
             for (const token of tokens) {
-                description.set(token, tokenFunctions[token](node));
+                description.set(token, [tokenFunctions[token](node), 'longer ' + tokenFunctions[token](node)]);
             }
         } catch (e) {
             throw `Node type ${node.type} not handled in nodeToDesc`;

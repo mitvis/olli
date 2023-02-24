@@ -1,47 +1,68 @@
-import { AccessibilityTree, AccessibilityTreeNode, tokenType, TokenType, hierarchyLevel, HierarchyLevel } from "../Structure/Types";
+import { AccessibilityTree, AccessibilityTreeNode, tokenType, TokenType, tokenLength, hierarchyLevel, HierarchyLevel, nodeTypeToHierarchyLevel } from "../Structure/Types";
 import { Tree } from "../Render/TreeView/Tree";
 import { htmlNodeToTree } from "../Render/TreeView";
-import { updateVerbosityDescription, getCurrentlyChecked } from "./index";
+import { updateVerbosityDescription, getCurrentCustom, prettifyTokenTuples } from "./index";
 
 export function addMenuCommands(menu: HTMLElement, t: Tree) {
   menu.addEventListener('keydown', (event) => {
-    console.log(event);
     if (event.key === 'Escape') {
-      // "Close" menu by moving focus back to the user's previous position in the tree
+      // "Close" menu by hiding it and moving focus back to the user's previous position in the tree
+      const menu = document.getElementById('settings')!;
+      menu.setAttribute('style', 'display: none');
+      menu.setAttribute('aria-hidden', 'true');
       t.setFocusToItem(t.lastFocusedItem);
     } else if (event.altKey && event.key === 'ArrowLeft') {
-      // Reorder custom preset checkboxes
-      const thisCheckbox = document.activeElement as HTMLInputElement;
+      // Reorder custom preset items
+      const thisItem = document.activeElement as HTMLSelectElement;
 
-      if (thisCheckbox && thisCheckbox.type && thisCheckbox.type === 'checkbox') {
-        const thisDiv = thisCheckbox.parentNode! as HTMLElement;
+      if (thisItem && thisItem.nodeName === "SELECT") {
+        const thisDiv = thisItem.parentNode! as HTMLElement;
         const previousDiv = thisDiv.previousElementSibling;
         if (previousDiv != null) {
           // Change menu ordering
           // Note: don't want to call insertBefore(thisDiv, previousDiv)
           // because first parameter to insertBefore loses focus
           thisDiv.insertAdjacentElement('afterend', previousDiv);
-          thisCheckbox.focus();
-          thisCheckbox.setAttribute('aria-active', 'true');
+          thisItem.focus();
+          thisItem.setAttribute('aria-active', 'true');
 
-          const hierarchyLevel = thisCheckbox.id.split('-')[0];
-          srSpeakingHack(getCurrentlyChecked(hierarchyLevel).join(', '));
+          const hierarchyLevel = thisItem.id.split('-')[0];
+          srSpeakingHack(prettifyTokenTuples(getCurrentCustom(hierarchyLevel)));
         }
       }
     } else if (event.altKey && event.key === 'ArrowRight') {
-      const thisCheckbox = document.activeElement as HTMLInputElement;
-      if (thisCheckbox && thisCheckbox.type && thisCheckbox.type === 'checkbox') {
-        const thisDiv = thisCheckbox.parentNode! as HTMLElement;
+      const thisItem = document.activeElement as HTMLSelectElement;
+      if (thisItem && thisItem.nodeName === "SELECT") {
+        const thisDiv = thisItem.parentNode! as HTMLElement;
         const nextDiv = thisDiv.nextElementSibling;
         if (nextDiv != null) {
           thisDiv.parentNode!.insertBefore(nextDiv, thisDiv);
 
-          const hierarchyLevel = thisCheckbox.id.split('-')[0];
-          srSpeakingHack(getCurrentlyChecked(hierarchyLevel).join(', '));
+          const hierarchyLevel = thisItem.id.split('-')[0];
+          srSpeakingHack(prettifyTokenTuples(getCurrentCustom(hierarchyLevel)));
         }
       }
     } 
-  })
+  });
+
+  // Keep settings menu a closed environment: send tab at the end to the beginning and vice versa
+  const first = menu.firstElementChild! as HTMLElement;
+  const last = menu.lastElementChild! as HTMLElement;
+  first.addEventListener('keydown', (event) => {
+    if (event.key === "Tab" && event.shiftKey) {
+      event.preventDefault();
+      last.focus();
+      last.setAttribute('aria-selected', 'true');
+    }
+  });
+
+  last.addEventListener('keydown', (event) => {
+    if (event.key === "Tab" && !event.shiftKey) {
+      event.preventDefault();
+      first.focus();
+      first.setAttribute('aria-selected', 'true');
+    }
+  });
 }
 
 export function addTreeCommands(treeElt: HTMLElement, tree: AccessibilityTree, t: Tree) {
@@ -50,10 +71,15 @@ export function addTreeCommands(treeElt: HTMLElement, tree: AccessibilityTree, t
   treeElt.addEventListener('keydown', (event) => {
     const timePressed = new Date().valueOf();
     if (event.ctrlKey && event.key === 'm') {
-      // "Open" menu by moving focus there
+      // "Open" menu by making it visible and moving focus there
       const menu = document.getElementById('settings')!;
-      menu.focus();
-      menu.setAttribute('aria-selected', 'true');
+      const legend = menu.firstElementChild! as HTMLElement;
+      console.log(legend);
+      menu.setAttribute('style', 'display: block');
+      menu.setAttribute('aria-hidden', 'false');
+      legend.focus();
+      legend.setAttribute('aria-selected', 'true');
+      console.log(document.activeElement);
 
       t.keylog = '';
     }
@@ -68,22 +94,20 @@ export function addTreeCommands(treeElt: HTMLElement, tree: AccessibilityTree, t
     t.keylog += event.key;
 
     // Check for commands to change a hierarchy level's verbosity setting
+    const settingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: string]: [TokenType, tokenLength][]}} = JSON.parse(localStorage.getItem('settingsData')!);
     hierarchyLevel.forEach((hLevel: HierarchyLevel) => {
-    // for (const hierarchyLevel of ['facet', 'axis', 'section', 'datapoint']) {
-      const low = hLevel.slice(0, 1) + 'low';
-      const high = hLevel.slice(0, 1) + 'high';
-      if (t.keylog.slice(t.keylog.length - low.length) === low) {
-        const dropdown = document.getElementById(hLevel + '-verbosity') as HTMLSelectElement;
-        dropdown.value = 'low';
-        updateVerbosityDescription(dropdown, tree)
-        t.keylog = '';
-        return;
-      } else if (t.keylog.slice(t.keylog.length - high.length) === high) {
-        const dropdown = document.getElementById(hLevel + '-verbosity') as HTMLSelectElement;
-        dropdown.value = 'high';
-        updateVerbosityDescription(dropdown, tree)
-        t.keylog = '';
-        return;
+      if (hLevel === 'root') { return; }
+      const dropdown = document.getElementById(hLevel + '-verbosity') as HTMLSelectElement;
+      const settingLevels = Object.keys(settingsData[hLevel as Exclude<HierarchyLevel, 'root'>]);
+
+      for (const sLevel of settingLevels) {
+        const command = hLevel.slice(0, 1) + sLevel;
+        if (t.keylog.slice(t.keylog.length - command.length) === command) {
+          dropdown.value = sLevel;
+          updateVerbosityDescription(dropdown, tree)
+          t.keylog = '';
+          return;
+        }
       }
     });
 
@@ -94,8 +118,10 @@ export function addTreeCommands(treeElt: HTMLElement, tree: AccessibilityTree, t
         const currentNode = document.activeElement! as HTMLElement;
         const treeNode: AccessibilityTreeNode = htmlNodeToTree(currentNode, tree);
         if (treeNode.description.has(token as TokenType)) {
-          srSpeakingHack(treeNode.description.get(token as TokenType)!);
-          console.log("speaking:", treeNode.description.get(token as TokenType))
+          const hLevel = nodeTypeToHierarchyLevel[treeNode.type] as Exclude<HierarchyLevel, 'root'>;
+          const verbosity = (document.getElementById(`${hLevel}-verbosity`) as HTMLSelectElement).value;
+          const length = settingsData[hLevel][verbosity].find(x => x[0] === token)![1];
+          srSpeakingHack(treeNode.description.get(token as TokenType)![length]);
         }
         t.keylog = '';
         return;
@@ -105,7 +131,8 @@ export function addTreeCommands(treeElt: HTMLElement, tree: AccessibilityTree, t
   })
 }
 
-function srSpeakingHack(text: string) {
+export function srSpeakingHack(text: string) {
+  console.log('speaking', text);
   const elt = document.createElement('div');
   elt.setAttribute('aria-live', 'assertive');
   document.body.appendChild(elt);
