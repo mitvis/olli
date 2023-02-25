@@ -46,6 +46,9 @@ import "./TreeStyle.css";
       item.setAttribute('data-i', String(node.gridIndex.i));
       item.setAttribute('data-j', String(node.gridIndex.j));
     }
+    if (node.filterValue) {
+      item.setAttribute('data-filterValue', JSON.stringify(node.filterValue));
+    }
 
     const label = document.createElement('span');
     label.textContent = node.description;
