@@ -17,6 +17,7 @@
  type BaseOlliVisSpec = {
      type: "chart" | "facetedChart",
      data: OlliDataset,
+     selection?: OlliDataset, // optional: an initial top level selection (subset of data)
      title?: string,
      description?: string // possible chart description included with the spec
  }
