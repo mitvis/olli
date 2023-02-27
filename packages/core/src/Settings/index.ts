@@ -1,4 +1,4 @@
-import { AccessibilityTree, AccessibilityTreeNode, TokenType, tokenLength, HierarchyLevel, nodeTypeToHierarchyLevel, hierarchyLevelToTokens } from "../Structure/Types";
+import { AccessibilityTree, AccessibilityTreeNode, TokenType, tokenType, tokenLength, HierarchyLevel, nodeTypeToHierarchyLevel, hierarchyLevelToTokens } from "../Structure/Types";
 import { renderTree, rerenderTreeDescription } from "../Render/TreeView"
 import { Tree } from "../Render/TreeView/Tree"
 import { tokenDescs, defaultSettingsData } from "./data"
@@ -123,7 +123,7 @@ export function updateVerbosityDescription(dropdown: HTMLSelectElement, tree: Ac
 function makeIndivCustomMenu(hierarchyLevel: Exclude<HierarchyLevel, 'root'>, tree: AccessibilityTree) {
   const tokens = hierarchyLevelToTokens[hierarchyLevel];
 
-  // Create overall container, plus one just for checkboxes
+  // Create overall container, plus one just for length dropdowns
   const container = document.createElement('div');
   container.id = `${hierarchyLevel}-custom`;
 
@@ -138,10 +138,9 @@ function makeIndivCustomMenu(hierarchyLevel: Exclude<HierarchyLevel, 'root'>, tr
   nameLabel.setAttribute('for', `${hierarchyLevel}-custom-name`);
   nameLabel.innerText = 'Custom preset name';
 
-  // Create individual checkboxes
+  // Create individual dropdowns
   for (let token of tokens) {
     const dropdown = document.createElement('select');
-    // input.type = 'checkbox';
     dropdown.id = `${hierarchyLevel}-${token}`;
 
     for (const option of ['off', 'short', 'long']) {
@@ -216,6 +215,8 @@ export function getCurrentCustom(hierarchyLevel: string) {
   return tokens;
 }
 
+export const focusTokens = Object.fromEntries(tokenType.map(token => [token, false]));
+
 /**
  * Given a node with all possible description tokens, return a formatted string
  * including only those tokens which the settings define as currently visible
@@ -242,8 +243,13 @@ export function getDescriptionWithSettings(node: AccessibilityTreeNode): string 
 
   const description = [];
   for (const [token, desc] of node.description.entries()) {
-    if (includeOrder.includes(token)) {
-      description[includeOrder.indexOf(token)] = desc[tokenLengths[token]];
+    if (includeOrder.includes(token) || focusTokens[token]) {
+      if (focusTokens[token]) { // put it up front
+        length = tokenLengths[token] ? tokenLengths[token] : 0; // default to short if no info
+        description.unshift(desc[length]);
+      } else { // use original order
+        description[includeOrder.indexOf(token)] = desc[tokenLengths[token]];
+      }
     }
   }
 
