@@ -12,12 +12,12 @@ export function olliVisSpecToTree(olliVisSpec: OlliVisSpec): AccessibilityTree {
     switch (olliVisSpec.type) {
         case "facetedChart":
             return {
-                root: olliVisSpecToNode("multiView", olliVisSpec.data, null, olliVisSpec, fieldsUsed),
+                root: olliVisSpecToNode("multiView", olliVisSpec.selection || olliVisSpec.data, null, olliVisSpec, fieldsUsed),
                 fieldsUsed
             }
         case "chart":
             return {
-                root: olliVisSpecToNode("chart", olliVisSpec.data, null, olliVisSpec, fieldsUsed),
+                root: olliVisSpecToNode("chart", olliVisSpec.selection || olliVisSpec.data, null, olliVisSpec, fieldsUsed),
                 fieldsUsed
             }
         default:

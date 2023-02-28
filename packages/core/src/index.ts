@@ -13,7 +13,8 @@ export * from './Types';
  * The configuration object outlining how an accessible visualization should be rendered based on a {@link OlliVisSpec}.
  */
 export type OlliConfigOptions = {
-    renderType?: 'tree' | 'table'
+    renderType?: 'tree' | 'table',
+    onFocus?: (elem: HTMLElement) => void
 }
 
 /**
@@ -26,7 +27,8 @@ export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTML
     const htmlRendering: HTMLElement = document.createElement("div");
 
     config = {
-        renderType: config?.renderType || 'tree'
+        renderType: config?.renderType || 'tree',
+        onFocus: config?.onFocus
     }
 
     switch (config.renderType) {
@@ -45,7 +47,7 @@ export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTML
             container.classList.add('olli-vis');
             container.appendChild(ul);
             htmlRendering.appendChild(container);
-            const t = new Tree(ul);
+            const t = new Tree(ul, config.onFocus);
             t.init();
             document.addEventListener('keypress', (e) => {
                 if (e.key === 't' && !t.currentlyTypingToken()) {
