@@ -18,18 +18,22 @@ export const tokenDescs = {
 export let defaultSettingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: string]: [TokenType, tokenLength][]}} = {
   'facet': {
     'high': [['index', Long], ['type', Long], ['name', Long], ['children', Long]],
-    'low': [['type', Long], ['name', Long], ['children', Long]],
+    'medium': [['type', Long], ['name', Long], ['children', Long]],
+    'low': [['type', Short], ['name', Short], ['children', Short]],
   },
   'axis': {
     'high': [['name', Long], ['type', Long], ['data', Long], ['size', Long], ['parent', Long], ['aggregate', Long]],
-    'low': [['name', Long], ['type', Long], ['data', Long]],
+    'medium': [['name', Long], ['type', Long], ['data', Long]],
+    'low': [['name', Short], ['type', Short], ['data', Short]],
   },
   'section': {
     'high': [['data', Long], ['index', Long], ['size', Long], ['parent', Long]],
-    'low': [['data', Long], ['size', Long]],
+    'medium': [['data', Long], ['size', Long]],
+    'low': [['data', Short], ['size', Short]],
   },
   'datapoint': {
     'high': [['data', Long], ['parent', Long]],
-    'low': [['data', Long]]
+    'medium': [['data', Long]],
+    'low': [['data', Short]],
   }
 }
