@@ -41,7 +41,7 @@ export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTML
             const t = new Tree(ul, config.onFocus);
             t.init();
             document.addEventListener('keypress', (e) => {
-                if (e.key === 't') {
+                if (e.ctrlKey && e.key === 't') {
                     t.setFocusToItem(t.rootTreeItem);
                 }
             })
