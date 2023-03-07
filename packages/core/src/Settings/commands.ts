@@ -88,6 +88,19 @@ export function addTreeCommands(treeElt: HTMLElement, tree: AccessibilityTree, t
       t.keylog = '';
     }
 
+    if (event.ctrlKey && event.key === 'i') {
+      // "Open" command dropdown by making it visible and moving focus there
+      const dropdown = document.getElementById('command-dropdown')!;
+      dropdown.setAttribute('style', 'display: block');
+      dropdown.setAttribute('aria-hidden', 'false');
+      setTimeout(() => {
+        dropdown.focus();
+        dropdown.setAttribute('aria-selected', 'true');
+      }, 0);
+
+      t.keylog = '';
+    }
+
     // If the first time key pressed in 2 seconds, empty previous keylog
     // TODO try out some timings
     if ((timePressed - lastTimePressed) > 2*1000) {

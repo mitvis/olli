@@ -42,6 +42,20 @@ export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTML
             menu.setAttribute('aria-hidden', 'true');
             htmlRendering.appendChild(menu);
 
+            // TODO formalize
+            const dropdown = document.createElement('select');
+            dropdown.setAttribute('id', 'command-dropdown');
+            for (const option of ['name', 'parent', 'children', 'size', 'etc']) {
+                let opt = document.createElement('option');
+                opt.innerText = option;
+                opt.value = option;
+                dropdown.appendChild(opt);
+            }
+            dropdown.setAttribute('style', 'display: none');
+            dropdown.setAttribute('aria-hidden', 'true');
+            htmlRendering.appendChild(dropdown);
+
+
             const ul = renderTree(tree);
             const container = document.createElement('div');
             container.classList.add('olli-vis');
@@ -54,6 +68,19 @@ export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTML
                     t.setFocusToItem(t.rootTreeItem);
                 }
             })
+
+            // TODO formalize
+            dropdown.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter' || event.key === 'Escape') {
+                    dropdown.setAttribute('style', 'display: none');
+                    dropdown.setAttribute('aria-hidden', 'true');
+                    t.setFocusToItem(t.lastFocusedItem);
+                }
+
+                if (event.key === "Tab") {
+                    event.preventDefault();
+                }
+            });
 
             addMenuCommands(menu, t);
             addTreeCommands(ul, tree, t);
