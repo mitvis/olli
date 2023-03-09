@@ -367,26 +367,21 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
         const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
         const averageValue = (node: AccessibilityTreeNode, axis: Axis) => {
-            if (axis.scaleType !== 'quantitative') return '';
-            return `${
-                Math.round(node.selected.reduce((a, b) => a + Number(b[axis.field]), 0)
-                    /node.selected.length)}`;
+            // if ((axis.scaleType !== 'quantitative') || !node.selected.length) return '';
+            return Math.round(node.selected.reduce((a, b) => a + Number(b[axis.field]), 0)
+                    /node.selected.length);
         }
 
         const maximumValue = (node: AccessibilityTreeNode, axis: Axis) => {
-            if (axis.scaleType !== 'quantitative') return '';
-            return `${
-                    node.selected.reduce((a, b) => Math.max(a,  Number(b[axis.field])), 
-                                        Number(node.selected[0][axis.field]))
-                }`;
+            // if ((axis.scaleType !== 'quantitative') || !node.selected.length) return '';
+            return node.selected.reduce((a, b) => Math.max(a,  Number(b[axis.field])), 
+                                        Number(node.selected[0][axis.field]));
         }
 
         const minimumValue = (node: AccessibilityTreeNode, axis: Axis) => {
-            if (axis.scaleType !== 'quantitative') return '';
-            return `${
-                    node.selected.reduce((a, b) => Math.min(a,  Number(b[axis.field])), 
-                                        Number(node.selected[0][axis.field]))
-                }`;
+            // if ((axis.scaleType !== 'quantitative') || !node.selected.length) return '';
+            return node.selected.reduce((a, b) => Math.min(a,  Number(b[axis.field])), 
+                                        Number(node.selected[0][axis.field]));
         }
 
         const chart = olliVisSpec as Chart;
@@ -517,7 +512,8 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
             switch (node.type) {
                 case 'xAxis':
                 case 'yAxis':
-                    if (axis.scaleType !== 'quantitative') return ['', ''];
+                case 'filteredData':
+                    if (!axis || !axis.scaleType || axis.scaleType !== 'quantitative' || !node.selected.length) return ['', ''];
                     const avg = averageValue(node, axis);
                     const max = maximumValue(node, axis);
                     const min = minimumValue(node, axis);
@@ -531,6 +527,72 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
             }
         }
 
+        function context(node: AccessibilityTreeNode):string[] {
+            switch (node.type) {
+                case 'filteredData':
+                    if (!axis || !axis.scaleType || axis.scaleType !== 'quantitative' || !node.parent || !node.selected.length) return ['', ''];
+                    let sections;
+                    // Note - copy of the olliVisSpecToNode logic for guide types
+                    switch (node.parent.type) {
+                    case "xAxis":
+                    case "yAxis":
+                        const axis = guide as Axis;
+                        switch (axis.type) {
+                            case "discrete":
+                                sections = axis.values.map((value, idx)=> 
+                                    node.parent!.selected.filter(d => String(d[axis.field]) === String(value))
+                                );
+                                break;
+                            case "continuous":
+                                const intervals = axisValuesToIntervals(axis.values);
+                                sections = intervals.map(([a, b], idx) => 
+                                    filterInterval(node.parent!.selected, axis.field, a, b)
+                                 );
+                                break;
+                        }
+                        break;
+                    case "legend":
+                        const legend = guide as Legend;
+                        switch (legend.type) {
+                            case "discrete":
+                                sections = legend.values.map((value, idx) => 
+                                    node.parent!.selected.filter(d => String(d[legend.field]) === String(value))
+                                );
+                                break;
+                            case "continuous":
+                               return ['', ''];
+                        }
+                        break;
+                    case "grid":
+                        return ['', ''] // weird and don't want to deal with this
+                    }
+
+                    if (!sections) {
+                        return ['', ''];
+                    }
+                    const avgs: number[] = []
+                    sections.forEach(interval => {
+                        if (interval.length == 0) {
+                            avgs.push(0);
+                            return;
+                        }
+                        const avg = Math.round(interval.reduce((a, b) => a + Number(b[axis.field]), 0)/node.selected.length);
+                        avgs.push(avg);
+                    });
+                    
+                    avgs.sort();
+                    const thisAvg = node.selected.length == 0 ? 0 : averageValue(node, axis);
+                    const pos = avgs.indexOf(thisAvg)/length!;
+                    const quart = Math.max(1, Math.ceil(pos * 4)); // pos is btwn 0 and 1, no quartile 0
+                    return [`quartile ${quart} by average`, `quartile ${quart} when compared by section average`]
+
+                case 'data':
+                    return ['scontext', 'lcontext'];
+                default:
+                    throw `Node type ${node.type} does not have the token context.`;
+            }
+        }
+
         const tokenFunctions = {
             'name': name,
             'index': index,
@@ -539,19 +601,18 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
             'data': data,
             'size': size,
             'parent': parent,
-            'aggregate': aggregate
+            'aggregate': aggregate,
+            'context': context
         }
 
         const description = new Map<TokenType, string[]>();
         try {
             const tokens = hierarchyLevelToTokens[nodeTypeToHierarchyLevel[node.type]];
             for (const token of tokens) {
-                // TODO lol
                 description.set(token, tokenFunctions[token](node));
             }
         } catch (e) {
-            console.log(e)
-            throw `Node type ${node.type} not handled in nodeToDesc`;
+            throw `Node type ${node.type} not handled in nodeToDesc, threw: ${e}`;
         }
         return description;
     }

@@ -4,8 +4,8 @@ import { Tree } from "./Render/TreeView/Tree"
 import { renderTree } from "./Render/TreeView"
 import { olliVisSpecToTree } from "./Structure"
 import { AccessibilityTree } from "./Structure/Types"
-import { renderMenu } from "./Settings"
-import { addMenuCommands, addTreeCommands } from "./Settings/commands"
+import { renderMenu, renderCommandsMenu } from "./Settings"
+import { addMenuCommands, addTreeCommands, addCommandsMenuCommands } from "./Settings/commands"
 
 export * from './Types';
 
@@ -43,17 +43,10 @@ export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTML
             htmlRendering.appendChild(menu);
 
             // TODO formalize
-            const dropdown = document.createElement('select');
-            dropdown.setAttribute('id', 'command-dropdown');
-            for (const option of ['name', 'parent', 'children', 'size', 'etc']) {
-                let opt = document.createElement('option');
-                opt.innerText = option;
-                opt.value = option;
-                dropdown.appendChild(opt);
-            }
-            dropdown.setAttribute('style', 'display: none');
-            dropdown.setAttribute('aria-hidden', 'true');
-            htmlRendering.appendChild(dropdown);
+            const commandsMenu = renderCommandsMenu();
+            commandsMenu.setAttribute('style', 'display: none');
+            commandsMenu.setAttribute('aria-hidden', 'true');
+            htmlRendering.appendChild(commandsMenu);
 
 
             const ul = renderTree(tree);
@@ -69,21 +62,9 @@ export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTML
                 }
             })
 
-            // TODO formalize
-            dropdown.addEventListener('keydown', (event) => {
-                if (event.key === 'Enter' || event.key === 'Escape') {
-                    dropdown.setAttribute('style', 'display: none');
-                    dropdown.setAttribute('aria-hidden', 'true');
-                    t.setFocusToItem(t.lastFocusedItem);
-                }
-
-                if (event.key === "Tab") {
-                    event.preventDefault();
-                }
-            });
-
             addMenuCommands(menu, t);
             addTreeCommands(ul, tree, t);
+            addCommandsMenuCommands(commandsMenu, tree, t);
             break;
     }
 

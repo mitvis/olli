@@ -25,7 +25,6 @@ export class Tree {
     treeItems: TreeItem[];
     rootTreeItem!: TreeItem;
     lastFocusedItem!: TreeItem;
-    keylog: string;
     onFocus?: (el: HTMLElement) => void;
 
     constructor(node: HTMLElement, onFocus?: (el: HTMLElement) => void) {
@@ -34,8 +33,6 @@ export class Tree {
 
         this.treeItems = [];
 
-        this.keylog = '';
-        
         this.onFocus = onFocus;
 
     }
@@ -291,7 +288,10 @@ export class Tree {
 
     currentlyTypingToken = () => {
         // don't activate any other commands if writing a preset name
-        if (document.activeElement && document.activeElement.id.endsWith('custom-name')) {return true;}
+        if (document.activeElement && (document.activeElement.id.endsWith('custom-name') || 
+            (document.activeElement.id === 'command-dropdown'))) {
+            return true;
+        }
 
        function startEndOverlap(endOverlaps: string, startOverlaps: string): number {
             let overlapLen = Math.min(startOverlaps.length, endOverlaps.length);

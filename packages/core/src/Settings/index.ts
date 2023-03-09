@@ -1,4 +1,4 @@
-import { AccessibilityTree, AccessibilityTreeNode, TokenType, tokenType, tokenLength, HierarchyLevel, nodeTypeToHierarchyLevel, hierarchyLevelToTokens } from "../Structure/Types";
+import { AccessibilityTree, AccessibilityTreeNode, TokenType, tokenType, tokenLength, HierarchyLevel, hierarchyLevel, nodeTypeToHierarchyLevel, hierarchyLevelToTokens } from "../Structure/Types";
 import { renderTree, rerenderTreeDescription } from "../Render/TreeView"
 import { Tree } from "../Render/TreeView/Tree"
 import { tokenDescs, defaultSettingsData } from "./data"
@@ -48,6 +48,39 @@ export function renderMenu(tree: AccessibilityTree): HTMLElement {
   root.appendChild(text);
 
   return root;
+}
+
+export function renderCommandsMenu() {
+  const dropdown = document.createElement('select');
+  dropdown.setAttribute('id', 'command-dropdown');
+
+  function createOption(text: string, value: string, container: HTMLElement) {
+    let option = document.createElement('option');
+    option.innerText = text;
+    option.value = value;
+    container.appendChild(option);
+  }
+
+  // Speak token
+  for (const token of tokenType) {
+    createOption(token, token, dropdown);
+  }
+
+  // 'Focus' token by bringing up to front
+  for (const token of tokenType) {
+    createOption('focus ' + token, 'focus-' + token, dropdown);
+  }
+  createOption('clear', 'clear', dropdown);
+
+  // Change one hierarchy level's verbosity
+  for (const hLevel of hierarchyLevel) {
+    if (hLevel === 'root') continue;
+    const settingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: string]: [TokenType, tokenLength][]}} = JSON.parse(localStorage.getItem('settingsData')!);
+    for (const level of Object.keys(settingsData[(hLevel as Exclude<HierarchyLevel, 'root'>)])) {
+     createOption(hLevel.slice(0,1) + level, hLevel + '-' + level, dropdown);
+    }
+  }
+  return dropdown;
 }
 
 function makeIndivVerbosityMenu(hierarchyLevel: Exclude<HierarchyLevel, 'root'>, tree: AccessibilityTree) {
@@ -200,6 +233,8 @@ function savePreset(hierarchyLevel: Exclude<HierarchyLevel, 'root'>, tree: Acces
     const oldMenu = document.getElementById(`${hierarchyLevel}-verbosity-container`);
     oldMenu!.replaceWith(makeIndivVerbosityMenu(hierarchyLevel as Exclude<HierarchyLevel, 'root'>, tree));
   }
+
+  // TODO add a command to the commands dropdown
 }
 
 export function getCurrentCustom(hierarchyLevel: string) {
@@ -258,6 +293,53 @@ export function getDescriptionWithSettings(node: AccessibilityTreeNode): string 
   }
   
   return formatDescTokens(description);
+}
+
+/**
+ * Given a set of nodes with all possible description tokens, return a list of tokens
+ * for each node that can be represented in a table, including only those tokens which
+ * the settings define as currently visible
+ * 
+ * @param nodes A list of {@link AccessibilityTreeNode}s with a description map
+ * @returns A list of description tokens for the nodes
+ */
+export function getDescriptionsForTables(nodes: AccessibilityTreeNode[]): string[][] {
+  // Make the assumption that all nodes have the same settings as the first one (just diff content)
+  const node = nodes[0]
+
+  const hierarchyLevel = nodeTypeToHierarchyLevel[node.type];
+  let includeOrder: TokenType[];
+  let tokenLengths: {[k in string]: tokenLength} = {}; // TODO string is actually TokenType but gave up on typing
+  const settingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: string]: [TokenType, tokenLength][]}} = JSON.parse(localStorage.getItem('settingsData')!);
+
+  if (hierarchyLevel === 'root') {
+    // Cannot be changed by user; use default settings
+    includeOrder = hierarchyLevelToTokens[hierarchyLevel];
+    tokenLengths = Object.fromEntries(includeOrder.map(token => [token as TokenType, tokenLength.Long]));
+  } else {
+    const dropdown = document.getElementById(`${hierarchyLevel}-verbosity`) as HTMLSelectElement;
+    const value = dropdown ? dropdown.value : 'high'; // If not yet initialized, use default of 'high' setting
+    includeOrder = settingsData[hierarchyLevel][value].map(x => x[0]);
+    tokenLengths = Object.fromEntries(settingsData[hierarchyLevel][value]);
+  }
+
+  const descriptions: string[][] = [];
+  for (let node of nodes) {
+    const description = [];
+    for (const [token, desc] of node.description.entries()) {
+      if (includeOrder.includes(token) || focusTokens[token]) {
+        if (focusTokens[token]) { // put it up front
+          length = tokenLengths[token] ? tokenLengths[token] : 0; // default to short if no info
+          description.unshift(desc[length]);
+        } else { // use original order
+          description[includeOrder.indexOf(token)] = desc[tokenLengths[token]];
+        }
+      }
+    }
+    descriptions.push(description);
+  }
+
+  return descriptions;
 }
 
 function capitalizeFirst(s: string) {

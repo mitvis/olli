@@ -1,7 +1,7 @@
 // Adapted from: https://w3c.github.io/aria-practices/examples/treeview/treeview-1/treeview-1b.html
 
 import { AccessibilityTree, AccessibilityTreeNode } from "../../Structure/Types";
-import { getDescriptionWithSettings } from "../../Settings"
+import { getDescriptionWithSettings, getDescriptionsForTables } from "../../Settings"
 import { fmtValue } from "../../utils";
 import "./TreeStyle.css";
 
@@ -149,8 +149,9 @@ function createDataTable(dataNodes: AccessibilityTreeNode[], level: number) {
   //
 
   const tableBody = document.createElement("tbody");
+  const descriptions = getDescriptionsForTables(dataNodes);
 
-  dataNodes.forEach((node) => {
+  dataNodes.forEach((node, idx) => {
     const dataRow = document.createElement("tr")
     dataRow.setAttribute('aria-label', `${node.tableKeys?.map(key => `${key}: ${fmtValue(node.selected[0][key])}`).join(', ')}`);
     node.tableKeys?.forEach((key: string) => {
@@ -159,6 +160,12 @@ function createDataTable(dataNodes: AccessibilityTreeNode[], level: number) {
       td.innerText = value;
       dataRow.appendChild(td);
     })
+    // descriptions[idx].forEach((key: string) => {
+    //   const td = document.createElement("td");
+    //   const value = fmtValue(key);
+    //   td.innerText = value;
+    //   dataRow.appendChild(td);
+    // });
     tableBody.appendChild(dataRow);
   });
 

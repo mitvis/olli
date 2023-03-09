@@ -5,7 +5,7 @@ import { OlliDatum } from "../Types";
  */
 export type NodeType = "chart" | "xAxis" | "yAxis" | "data" | "filteredData" | "legend" | "grid" | "multiView";
 
-export const tokenType = ["name", "index", "type", "children", "data", "size", "parent", "aggregate"] as const;
+export const tokenType = ["name", "index", "type", "children", "data", "size", "parent", "aggregate", "context"] as const;
 export type TokenType = typeof tokenType[number];
 
 export const hierarchyLevel = ['root', 'facet', 'axis', 'section', 'datapoint'] as const;
@@ -31,8 +31,8 @@ export const hierarchyLevelToTokens: {[k in HierarchyLevel]: TokenType[]} = {
   'root': ['name'],
   'facet': ['index', 'type', 'name', 'children'],
   'axis': ['name', 'type', 'data', 'size', 'parent', 'aggregate'],
-  'section': ['data', 'index', 'size', 'parent'],
-  'datapoint': ['data', 'parent'],
+  'section': ['data', 'index', 'size', 'parent', 'aggregate', 'context'],
+  'datapoint': ['data', 'parent', 'context'],
 };
 
 export type EncodingFilterValue = string | [number | Date, number | Date];

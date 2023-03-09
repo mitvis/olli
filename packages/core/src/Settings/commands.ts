@@ -48,32 +48,24 @@ export function addMenuCommands(menu: HTMLElement, t: Tree) {
     } 
   });
 
-  // Keep settings menu a closed environment: send tab at the end to the beginning and vice versa
+  // Keep settings menu a closed environment by blocking tab-forward at end and tab-back at beginning
   const first = menu.firstElementChild! as HTMLElement;
   const last = menu.lastElementChild! as HTMLElement;
   first.addEventListener('keydown', (event) => {
     if (event.key === "Tab" && event.shiftKey) {
       event.preventDefault();
-      // last.focus();
-      // last.setAttribute('aria-selected', 'true');
     }
   });
 
   last.addEventListener('keydown', (event) => {
     if (event.key === "Tab" && !event.shiftKey) {
       event.preventDefault();
-      // jzong suggests: don't loop, but don't let them leave - that way it feels more like a room
-      // first.focus();
-      // first.setAttribute('aria-selected', 'true');
     }
   });
 }
 
 export function addTreeCommands(treeElt: HTMLElement, tree: AccessibilityTree, t: Tree) {
-  let lastTimePressed = new Date().valueOf();
-
   treeElt.addEventListener('keydown', (event) => {
-    const timePressed = new Date().valueOf();
     if (event.ctrlKey && event.key === 'm') {
       // "Open" menu by making it visible and moving focus there
       const menu = document.getElementById('settings')!;
@@ -84,8 +76,6 @@ export function addTreeCommands(treeElt: HTMLElement, tree: AccessibilityTree, t
         legend.focus();
         legend.setAttribute('aria-selected', 'true');
       }, 0);
-
-      t.keylog = '';
     }
 
     if (event.ctrlKey && event.key === 'i') {
@@ -97,75 +87,73 @@ export function addTreeCommands(treeElt: HTMLElement, tree: AccessibilityTree, t
         dropdown.focus();
         dropdown.setAttribute('aria-selected', 'true');
       }, 0);
-
-      t.keylog = '';
     }
-
-    // If the first time key pressed in 2 seconds, empty previous keylog
-    // TODO try out some timings
-    if ((timePressed - lastTimePressed) > 2*1000) {
-      t.keylog = '';
-    }
-    lastTimePressed = timePressed;
-
-    t.keylog += event.key;
-
-    // Clear focus command (see below for focus command)
-    if (t.keylog.slice(-6) === '.clear') {
-      tokenType.forEach((token: TokenType) => {
-        focusTokens[token] = false;
-        rerenderTreeDescription(tree, document.getElementById('tree-root')!);
-      });
-    }
-
-    // Commands to change a hierarchy level's verbosity setting
-    const settingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: string]: [TokenType, tokenLength][]}} = JSON.parse(localStorage.getItem('settingsData')!);
-    hierarchyLevel.forEach((hLevel: HierarchyLevel) => {
-      if (hLevel === 'root') { return; }
-      const dropdown = document.getElementById(hLevel + '-verbosity') as HTMLSelectElement;
-      const settingLevels = Object.keys(settingsData[hLevel as Exclude<HierarchyLevel, 'root'>]);
-
-      for (const sLevel of settingLevels) {
-        const command = hLevel.slice(0, 1) + sLevel;
-        if (t.keylog.slice(-command.length) === command) {
-          dropdown.value = sLevel;
-          updateVerbosityDescription(dropdown, tree)
-          t.keylog = '';
-          return;
-        }
-      }
-    });
-
-    // Check for commands to speak an individual description token just this once,
-    // or focus it from now on
-    tokenType.forEach((token: TokenType) => {
-      const speakCommand = "." + token;
-      const focusCommand = ".focus" + token;
-
-      if (t.keylog.slice(-speakCommand.length) === speakCommand) {
-        const currentNode = document.activeElement! as HTMLElement;
-        const treeNode: AccessibilityTreeNode = htmlNodeToTree(currentNode, tree);
-        if (treeNode.description.has(token as TokenType)) {
-          const hLevel = nodeTypeToHierarchyLevel[treeNode.type] as Exclude<HierarchyLevel, 'root'>;
-          const verbosity = (document.getElementById(`${hLevel}-verbosity`) as HTMLSelectElement).value;
-          const length = settingsData[hLevel][verbosity].find(x => x[0] === token)![1];
-          srSpeakingHack(treeNode.description.get(token as TokenType)![length]);
-        }
-        t.keylog = '';
-        return;
-      }
-
-      if (t.keylog.slice(-focusCommand.length) === focusCommand) {
-        focusTokens[token] = true;
-        rerenderTreeDescription(tree, document.getElementById('tree-root')!);
-      }
-    });
-
   })
 }
 
+export function addCommandsMenuCommands(commandsMenu: HTMLSelectElement, tree: AccessibilityTree, t: Tree) {
+  commandsMenu.addEventListener('keydown', (event) => {
+    const settingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: string]: [TokenType, tokenLength][]}} = JSON.parse(localStorage.getItem('settingsData')!);
+
+    if (event.key === 'Enter') {
+      const command = commandsMenu.selectedOptions[0].value;
+
+      for (const token of tokenType) {
+        if (command === token) {
+          // Read out the token for the current node in the tree
+          const currentNode = t.lastFocusedItem.domNode;
+          const treeNode: AccessibilityTreeNode = htmlNodeToTree(currentNode, tree);
+          if (treeNode.description.has(command as TokenType)) {
+            const hLevel = nodeTypeToHierarchyLevel[treeNode.type] as Exclude<HierarchyLevel, 'root'>;
+            const verbosity = (document.getElementById(`${hLevel}-verbosity`) as HTMLSelectElement).value;
+            const length = settingsData[hLevel][verbosity].find(x => x[0] === command)![1];
+            srSpeakingHack(treeNode.description.get(command as TokenType)![length]);
+          }
+        } else if (command === 'focus-' + token) {
+          // 'Focus' the token by bringing it to the front
+          focusTokens[token] = true;
+          rerenderTreeDescription(tree, document.getElementById('tree-root')!);
+        }
+      }
+      if (command === 'clear') { // Clear all focus
+        tokenType.forEach((token: TokenType) => {
+          focusTokens[token] = false;
+        });
+        rerenderTreeDescription(tree, document.getElementById('tree-root')!);
+      }
+
+      // Change one hierarchy level's verbosity
+      hierarchyLevel.forEach((hLevel: HierarchyLevel) => {
+        if (hLevel === 'root') { return; }
+        const dropdown = document.getElementById(hLevel + '-verbosity') as HTMLSelectElement;
+        const settingLevels = Object.keys(settingsData[hLevel as Exclude<HierarchyLevel, 'root'>]);
+
+        for (const sLevel of settingLevels) {
+          if (command === hLevel + '-' + sLevel) {
+            dropdown.value = sLevel;
+            updateVerbosityDescription(dropdown, tree)
+            return;
+          }
+        }
+      });
+    }
+
+    // Close menu and return to previous position in tree
+    if (event.key === 'Enter' || event.key === 'Escape') {
+      commandsMenu.setAttribute('style', 'display: none');
+      commandsMenu.setAttribute('aria-hidden', 'true');
+        t.setFocusToItem(t.lastFocusedItem);
+    }
+
+    // Closed environment, can't tab out
+    if (event.key === "Tab") {
+        event.preventDefault();
+    }
+});
+}
+
 export function srSpeakingHack(text: string) {
-  console.log('speaking', text);
+  console.log('speaking:', text);
   const elt = document.createElement('div');
   elt.setAttribute('aria-live', 'assertive');
   document.body.appendChild(elt);

@@ -13,6 +13,7 @@ export const tokenDescs = {
   'parent': 'View name',
   'name': 'Item name',
   'children': 'Child names',
+  'context': 'Context around the data'
 }
 
 export let defaultSettingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: string]: [TokenType, tokenLength][]}} = {
@@ -27,12 +28,12 @@ export let defaultSettingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: s
     'low': [['name', Short], ['type', Short], ['data', Short]],
   },
   'section': {
-    'high': [['data', Long], ['index', Long], ['size', Long], ['parent', Long]],
+    'high': [['data', Long], ['index', Long], ['size', Long], ['parent', Long], ['aggregate', Long], ['context', Long]],
     'medium': [['data', Long], ['size', Long]],
     'low': [['data', Short], ['size', Short]],
   },
   'datapoint': {
-    'high': [['data', Long], ['parent', Long]],
+    'high': [['data', Long], ['parent', Long], ['context', Long]],
     'medium': [['data', Long]],
     'low': [['data', Short]],
   }
