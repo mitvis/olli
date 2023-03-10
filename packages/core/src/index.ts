@@ -4,6 +4,7 @@ import { Tree } from "./Render/TreeView/Tree"
 import { renderTree } from "./Render/TreeView"
 import { olliVisSpecToTree } from "./Structure"
 import { AccessibilityTree } from "./Structure/Types"
+import { updateGlobalStateOnRender } from "./utils"
 
 export * from './Types';
 
@@ -40,11 +41,7 @@ export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTML
             htmlRendering.appendChild(ul);
             const t = new Tree(ul, config.onFocus);
             t.init();
-            document.addEventListener('keypress', (e) => {
-                if (e.ctrlKey && e.key === 't') {
-                    t.setFocusToItem(t.rootTreeItem);
-                }
-            })
+            updateGlobalStateOnRender(t);
             break;
     }
 
