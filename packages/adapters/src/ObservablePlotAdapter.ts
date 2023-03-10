@@ -152,8 +152,10 @@ function parseAxis(plot: any, svg: Element): Axis {
  * @returns A {@link Legend} of the visualization
  */
 function parseLegend(plot: any, svg: Element): Legend { //TODO: Does not support 'ramp' legend types when the legend is rendered as an SVG
+    const legendChannels = ['fill']; // TODO hardcoded list of channels
     const plotMark = plot.marks.filter((mark: any) => mark.ariaLabel !== 'rule')[0];
-    const channel = flatChannels(plotMark.channels).find((c: any) => c.scale === 'color'); // TODO channel hardcoded to color
+    const channel = flatChannels(plotMark.channels).find((c: any) => legendChannels.includes(c.name));
+    const field: string = typeof channel.value === 'object' ? channel.value.label : channel.value;
     const values: string[] = Object.keys(svg.children).map((k: string) => {
         let c = svg.children[parseInt(k)];
         if (c.nodeName !== 'STYLE') {
@@ -161,7 +163,6 @@ function parseLegend(plot: any, svg: Element): Legend { //TODO: Does not support
         }
         return '';
     }).filter(x => x.length);
-    const field: string = typeof channel.value === 'object' ? channel.value.label : channel.value
     const scaleType = plot?.color?.type;
 
     const type = scaleType ? guideTypeFromScale(scaleType) :
@@ -171,7 +172,7 @@ function parseLegend(plot: any, svg: Element): Legend { //TODO: Does not support
         type,
         values: type === 'discrete' ? values : values.map(v => Number(v.replace(/,/g, ''))),
         field: field,
-        channel: 'color', // TODO
+        channel: channel.name
     }
 
     return guide
