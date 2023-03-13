@@ -1,18 +1,32 @@
 <div>
   <h5>Olli controls</h5>
   <p>
-      Press <code><strong>t</strong></code> to jump to the Olli structure.
+    Press t to jump to the Olli structure.
   </p>
   <p>
-      When Olli has focus, the following keyboard commands are available:
+    When Olli has focus, the following keyboard commands are available:
   </p>
   <ul>
-      <li>Up / Down arrow — move up or down a level in the tree view</li>
-      <li>Left / Right arrow — move to previous or next item in a level</li>
-      <li>Home / End — move to first or last item in a level</li>
-      <li>x — jump to x-axis of current chart</li>
-      <li>y — jump to y-axis of current chart</li>
-      <li>l — jump to legend of current chart</li>
-      <li>W / A / S / D — when inside the grid of a scatterplot, move around the grid spatially</li>
+    <li>Up / Down arrow — move up or down a level in the tree view</li>
+    <li>Left / Right arrow — move to previous or next item in a level</li>
+    <li>Home / End — move to first or last item in a level</li>
+    <li>x — jump to x-axis of current chart</li>
+    <li>y — jump to y-axis of current chart</li>
+    <li>l — jump to legend of current chart</li>
+    <li>t — jump to top level of current tree</li>
+    <!-- <li>W / A / S / D — when inside the grid of a scatterplot, move around the grid spatially</li> -->
+  </ul>
+  <p>
+    When there is more than one Olli instance on the page:
+  </p>
+  <ul>
+    <li>t — jump to the last visited instance (or the first one on the page if none have been visited)</li>
+  </ul>
+  <p>
+    When focused on the top level of the current Olli tree:
+  </p>
+  <ul>
+    <li>t — jump to the next Olli tree on the page</li>
+    <li>shift + t — jump to the previous Olli tree</li>
   </ul>
 </div>
