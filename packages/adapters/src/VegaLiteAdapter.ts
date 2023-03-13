@@ -99,10 +99,10 @@ function parseChart(spec: any, scene: SceneGroup, data: OlliDataset): Chart {
 function parseAxis(axisScenegraphNode: any, spec: any, data: OlliDataset): Axis {
     const axisView = axisScenegraphNode.items[0]
     const orient = axisView.orient
-    const encodingKey = orient === 'bottom' ? 'x' : 'y';
-    const encoding = spec.encoding[encodingKey];
+    const axisType = orient === "bottom" || orient === "top" ? "x" : "y";
+    const encoding = spec.encoding[axisType];
     const ticks = axisView.items.find((n: any) => n.role === 'axis-tick').items.map((n: any) => n.datum.value);
-    const axisType = axisView.orient === "bottom" || axisView.orient === "top" ? "x" : "y";
+
     let field: string;
 
     if (encoding.aggregate) {
