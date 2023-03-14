@@ -1,7 +1,7 @@
 import { AccessibilityTree, AccessibilityTreeNode, tokenType, TokenType, tokenLength, hierarchyLevel, HierarchyLevel, nodeTypeToHierarchyLevel } from "../Structure/Types";
 import { Tree } from "../Render/TreeView/Tree";
 import { htmlNodeToTree, rerenderTreeDescription } from "../Render/TreeView";
-import { updateVerbosityDescription, getCurrentCustom, prettifyTokenTuples, focusTokens } from "./index";
+import { getDescriptionWithSettings, updateVerbosityDescription, getCurrentCustom, prettifyTokenTuples, focusTokens } from "./index";
 
 export function addMenuCommands(menu: HTMLElement, t: Tree) {
   menu.addEventListener('keydown', (event) => {
@@ -136,6 +136,18 @@ export function addCommandsMenuCommands(commandsMenu: HTMLSelectElement, tree: A
           }
         }
       });
+
+      // TODO
+      for (let length of Object.values(tokenLength)) {
+        if (typeof length !== 'string') continue;
+        const num = Number(Object.values(tokenLength).find(v => typeof v === 'number' && tokenLength[v] === length));
+        const enumLength = tokenLength[num];
+        if (command === length) {
+          const currentNode = t.lastFocusedItem.domNode;
+          const treeNode: AccessibilityTreeNode = htmlNodeToTree(currentNode, tree);
+          srSpeakingHack(getDescriptionWithSettings(treeNode, enumLength));
+        }
+      }
     }
 
     // Close menu and return to previous position in tree

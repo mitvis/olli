@@ -1,7 +1,7 @@
 // Adapted from: https://w3c.github.io/aria-practices/examples/treeview/treeview-1/treeview-1b.html
 
-import { AccessibilityTree, AccessibilityTreeNode } from "../../Structure/Types";
-import { getDescriptionWithSettings, getDescriptionsForTables } from "../../Settings"
+import { AccessibilityTree, AccessibilityTreeNode, tokenLength } from "../../Structure/Types";
+import { getDescriptionWithSettings, getSettingsInfoForTable } from "../../Settings"
 import { fmtValue } from "../../utils";
 import "./TreeStyle.css";
 
@@ -132,11 +132,39 @@ function createDataTable(dataNodes: AccessibilityTreeNode[], level: number) {
   table.setAttribute('aria-posinset', '1');
   table.setAttribute('aria-setsize', '1');
 
+  const tableBody = document.createElement("tbody");
+  const settingsInfo = getSettingsInfoForTable();
+  const facet = settingsInfo[0];
+  const quartile = settingsInfo[1];
+
+  const tableKeysMap: string[] = [];
+  const tableKeys = dataNodes[0].tableKeys!.filter((key: string, idx: number) => {
+    const mapping = dataNodes[0].tableKeysMap![idx];
+    if (mapping === 'default') {
+      tableKeysMap.push('default');
+      return true;
+    } else if (mapping === 'facet') {
+      if (facet !== undefined) {
+        tableKeysMap.push('facet');
+        return true;
+      }
+      return false;
+    } else if (mapping === 'quartile') {
+      if (quartile !== undefined) {
+        tableKeysMap.push('quartile');
+        return true;
+      }
+      return false;
+    }
+
+    return true; // should not occur
+  })
+
   const thead = document.createElement("thead");
   const theadtr = document.createElement("tr");
-  theadtr.setAttribute('aria-label', `${dataNodes[0].tableKeys?.join(', ')}`);
+  theadtr.setAttribute('aria-label', `${tableKeys?.join(', ')}`);
 
-  dataNodes[0].tableKeys?.forEach((key: string) => {
+  tableKeys?.forEach((key: string) => {
     const th = document.createElement("th");
     th.setAttribute('scope', 'col');
     th.innerText = key
@@ -148,24 +176,23 @@ function createDataTable(dataNodes: AccessibilityTreeNode[], level: number) {
 
   //
 
-  const tableBody = document.createElement("tbody");
-  const descriptions = getDescriptionsForTables(dataNodes);
-
   dataNodes.forEach((node, idx) => {
     const dataRow = document.createElement("tr")
     dataRow.setAttribute('aria-label', `${node.tableKeys?.map(key => `${key}: ${fmtValue(node.selected[0][key])}`).join(', ')}`);
-    node.tableKeys?.forEach((key: string) => {
+    tableKeys?.forEach((key: string, idx: number) => {
+      let value;
+
+      if (tableKeysMap![idx] === 'quartile') {
+        if (quartile === undefined) return;
+        value = node.description.get('quantile')![quartile];
+      } else {
+        value = fmtValue(node.selected[0][key]);
+      }
+
       const td = document.createElement("td")
-      const value = fmtValue(node.selected[0][key]);
       td.innerText = value;
       dataRow.appendChild(td);
     })
-    // descriptions[idx].forEach((key: string) => {
-    //   const td = document.createElement("td");
-    //   const value = fmtValue(key);
-    //   td.innerText = value;
-    //   dataRow.appendChild(td);
-    // });
     tableBody.appendChild(dataRow);
   });
 

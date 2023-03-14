@@ -72,6 +72,12 @@ export function renderCommandsMenu() {
   }
   createOption('clear', 'clear', dropdown);
 
+  // Read current node with different length settings
+  for (const length of Object.values(tokenLength)) {
+    if (typeof length !== 'string') continue; // values lists both string and numbers
+    createOption(length, length, dropdown);
+  }
+
   // Change one hierarchy level's verbosity
   for (const hLevel of hierarchyLevel) {
     if (hLevel === 'root') continue;
@@ -80,6 +86,7 @@ export function renderCommandsMenu() {
      createOption(hLevel.slice(0,1) + level, hLevel + '-' + level, dropdown);
     }
   }
+
   return dropdown;
 }
 
@@ -234,7 +241,12 @@ function savePreset(hierarchyLevel: Exclude<HierarchyLevel, 'root'>, tree: Acces
     oldMenu!.replaceWith(makeIndivVerbosityMenu(hierarchyLevel as Exclude<HierarchyLevel, 'root'>, tree));
   }
 
-  // TODO add a command to the commands dropdown
+  // add to the command prompt
+  const commands = document.getElementById('command-dropdown')!;
+  let option = document.createElement('option');
+  option.innerText = presetName;
+  option.value = presetName;
+  commands.appendChild(option);
 }
 
 export function getCurrentCustom(hierarchyLevel: string) {
@@ -259,7 +271,7 @@ export const focusTokens = Object.fromEntries(tokenType.map(token => [token, fal
  * @param node A {@link AccessibilityTreeNode} with a description map
  * @returns A formatted string description for the node
  */
-export function getDescriptionWithSettings(node: AccessibilityTreeNode): string {
+export function getDescriptionWithSettings(node: AccessibilityTreeNode, lengthFlag: string|undefined = undefined): string {
   const hierarchyLevel = nodeTypeToHierarchyLevel[node.type];
   let includeOrder: TokenType[];
   let tokenLengths: {[k in string]: tokenLength} = {}; // TODO string is actually TokenType but gave up on typing
@@ -279,11 +291,18 @@ export function getDescriptionWithSettings(node: AccessibilityTreeNode): string 
   const description = [];
   for (const [token, desc] of node.description.entries()) {
     if (includeOrder.includes(token) || focusTokens[token]) {
+      let length = 0; // default to short if no info
+      if (lengthFlag) {
+        // lengthFlag is a string from tokenLength enum; convert to its corresponding number
+        length = Number(Object.values(tokenLength).find(v => typeof v === 'number' && tokenLength[v] === lengthFlag))
+      } else if (tokenLengths[token]) {
+        length = tokenLengths[token];
+      }
+
       if (focusTokens[token]) { // put it up front
-        length = tokenLengths[token] ? tokenLengths[token] : 0; // default to short if no info
         description.unshift(desc[length]);
       } else { // use original order
-        description[includeOrder.indexOf(token)] = desc[tokenLengths[token]];
+        description[includeOrder.indexOf(token)] = desc[length];
       }
     }
   }
@@ -303,7 +322,7 @@ export function getDescriptionWithSettings(node: AccessibilityTreeNode): string 
  * @param nodes A list of {@link AccessibilityTreeNode}s with a description map
  * @returns A list of description tokens for the nodes
  */
-export function getDescriptionsForTables(nodes: AccessibilityTreeNode[]): string[][] {
+export function getDescriptionsForTablesLong(nodes: AccessibilityTreeNode[]): string[][] {
   // Make the assumption that all nodes have the same settings as the first one (just diff content)
   const node = nodes[0]
 
@@ -340,6 +359,22 @@ export function getDescriptionsForTables(nodes: AccessibilityTreeNode[]): string
   }
 
   return descriptions;
+}
+
+export function getSettingsInfoForTable() {
+  const settingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: string]: [TokenType, tokenLength][]}} = JSON.parse(localStorage.getItem('settingsData')!);
+  const dropdown = document.getElementById(`datapoint-verbosity`) as HTMLSelectElement;
+  const value = dropdown ? dropdown.value : 'high'; // If not yet initialized, use default of 'high' setting
+
+  // Facet
+  const facetSetting = settingsData['datapoint'][value].find(x => x[0] == "facet");
+
+  // Quartile
+  const quantileSetting = settingsData['datapoint'][value].find(x => x[0] == "quantile");
+
+  return [facetSetting === undefined ? undefined : facetSetting[1],
+    quantileSetting === undefined ? undefined : quantileSetting[1]]
+  
 }
 
 function capitalizeFirst(s: string) {

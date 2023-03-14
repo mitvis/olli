@@ -4,16 +4,15 @@ const Short = tokenLength.Short
 const Long = tokenLength.Long
 
 export const tokenDescs = {
-  'index': 'Index ("1 of 5")',
-  'type': 'Item type ("line", "temporal")',
-  'size': 'Size ("10 values")',
-  'relative': 'Quartile',
-  'data': 'Data values',
-  'aggregate': 'Min, max, and average',
-  'parent': 'View name',
-  'name': 'Item name',
-  'children': 'Child names',
-  'context': 'Context around the data'
+  'index': 'Index in set (e.g. "1 of 5")',
+  'type': 'Type of element (e.g. "temporal scale", "line chart")',
+  'size': 'Size of children (e.g. "10 values")',
+  'data': 'Data value or range (e.g. "0 to 800", "price: 50")',
+  'aggregate': 'Aggregate statistics including minimum, maximum, and average (e.g. "average: 50")',
+  'facet': 'Facet name (e.g. "profit" and "expenditures")',
+  'name': 'Name (e.g. "x-axis titled price")',
+  'children': 'Children’s names (e.g. at the root, "axes titled date and price") ',
+  'quantile': 'Quantile of current data (e.g. "quartile: 1")'
 }
 
 export let defaultSettingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: string]: [TokenType, tokenLength][]}} = {
@@ -23,17 +22,17 @@ export let defaultSettingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: s
     'low': [['type', Short], ['name', Short], ['children', Short]],
   },
   'axis': {
-    'high': [['name', Long], ['type', Long], ['data', Long], ['size', Long], ['parent', Long], ['aggregate', Long]],
+    'high': [['name', Long], ['type', Long], ['data', Long], ['size', Long], ['facet', Long], ['aggregate', Long]],
     'medium': [['name', Long], ['type', Long], ['data', Long]],
     'low': [['name', Short], ['type', Short], ['data', Short]],
   },
   'section': {
-    'high': [['data', Long], ['index', Long], ['size', Long], ['parent', Long], ['aggregate', Long], ['context', Long]],
+    'high': [['data', Long], ['index', Long], ['size', Long], ['facet', Long], ['aggregate', Long], ['quantile', Long]],
     'medium': [['data', Long], ['size', Long]],
     'low': [['data', Short], ['size', Short]],
   },
   'datapoint': {
-    'high': [['data', Long], ['parent', Long], ['context', Long]],
+    'high': [['data', Long], ['facet', Long], ['quantile', Long]],
     'medium': [['data', Long]],
     'low': [['data', Short]],
   }

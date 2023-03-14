@@ -5,7 +5,7 @@ import { OlliDatum } from "../Types";
  */
 export type NodeType = "chart" | "xAxis" | "yAxis" | "data" | "filteredData" | "legend" | "grid" | "multiView";
 
-export const tokenType = ["name", "index", "type", "children", "data", "size", "parent", "aggregate", "context"] as const;
+export const tokenType = ["name", "index", "type", "children", "data", "size", "facet", "aggregate", "quantile"] as const;
 export type TokenType = typeof tokenType[number];
 
 export const hierarchyLevel = ['root', 'facet', 'axis', 'section', 'datapoint'] as const;
@@ -30,9 +30,9 @@ export const nodeTypeToHierarchyLevel: {[k in NodeType]: HierarchyLevel} = {
 export const hierarchyLevelToTokens: {[k in HierarchyLevel]: TokenType[]} = {
   'root': ['name'],
   'facet': ['index', 'type', 'name', 'children'],
-  'axis': ['name', 'type', 'data', 'size', 'parent', 'aggregate'],
-  'section': ['data', 'index', 'size', 'parent', 'aggregate', 'context'],
-  'datapoint': ['data', 'parent', 'context'],
+  'axis': ['name', 'type', 'data', 'size', 'facet', 'aggregate'],
+  'section': ['data', 'index', 'size', 'facet', 'aggregate', 'quantile'],
+  'datapoint': ['data', 'facet', 'quantile'],
 };
 
 export type EncodingFilterValue = string | [number | Date, number | Date];
@@ -47,6 +47,7 @@ export type FilterValue = EncodingFilterValue | GridFilterValue;
  * description: The text description of this node that is rendered to the user
  * children: The list of child {@link AccessibilityTreeNode}s of this element
  * tableKeys: a list of fields that should be included as columns in any tabular representation of this node
+ * tableKeysMap: a list of strings corresponding to the tableKeysMap that identifies which fields need special treatment
  * gridIndex: if this node represents a cell in a grid view, the row/column coordinates of the cell *
  */
 export type AccessibilityTreeNode = {
@@ -56,6 +57,7 @@ export type AccessibilityTreeNode = {
     description: Map<TokenType, string[]>,
     children: AccessibilityTreeNode[]
     tableKeys?: string[],
+    tableKeysMap?: string[]
     filterValue?: FilterValue,
     gridIndex?: {
       i: number,
