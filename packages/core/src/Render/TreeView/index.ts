@@ -150,7 +150,7 @@ function createDataTable(dataNodes: AccessibilityTreeNode[], level: number) {
       }
       return false;
     } else if (mapping === 'quartile') {
-      if (quartile !== undefined) {
+      if (quartile !== undefined && dataNodes[0].description.get('quantile')![0]) {
         tableKeysMap.push('quartile');
         return true;
       }

@@ -331,6 +331,16 @@ function findNumericField(node: AccessibilityTreeNode, axis: Axis): string | und
     return field;
 }
 
+function findFirstDataChild(node: AccessibilityTreeNode): AccessibilityTreeNode | undefined {
+    if (node.type === 'data') return node;
+    if (!node.children) return undefined;
+    for (const child of node.children) {
+        if (child.type === 'data') return child;
+        const recurse = findFirstDataChild(child);
+        if (recurse) return recurse;
+    }
+}
+
 /**
  *
  * @param node The node whose description is being created
@@ -391,19 +401,19 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
         }
         const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
-        const averageValue = (node: AccessibilityTreeNode, axis: Axis) => {
-            return Math.round(node.selected.reduce((a, b) => a + Number(b[axis.field]), 0)
-                    /node.selected.length);
+        const averageValue = (data: OlliDatum[], field: string) => {
+            return Math.round(data.reduce((a, b) => a + Number(b[field]), 0)
+                    /data.length);
         }
 
-        const maximumValue = (node: AccessibilityTreeNode, axis: Axis) => {
-            return node.selected.reduce((a, b) => Math.max(a,  Number(b[axis.field])), 
-                                        Number(node.selected[0][axis.field]));
+        const maximumValue = (data: OlliDatum[], field: string) => {
+            return data.reduce((a, b) => Math.max(a,  Number(b[field])), 
+                                        Number(data[0][field]));
         }
 
-        const minimumValue = (node: AccessibilityTreeNode, axis: Axis) => {
-            return node.selected.reduce((a, b) => Math.min(a,  Number(b[axis.field])), 
-                                        Number(node.selected[0][axis.field]));
+        const minimumValue = (data: OlliDatum[], field: string) => {
+            return data.reduce((a, b) => Math.min(a,  Number(b[field])), 
+                                        Number(data[0][field]));
         }
 
         const chart = olliVisSpec as Chart;
@@ -533,14 +543,19 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
         function aggregate(node: AccessibilityTreeNode):string[] {
             switch (node.type) {
                 case 'xAxis':
-                case 'yAxis':
+                case 'yAxis': 
                 case 'filteredData':
-                    if (!axis || !axis.scaleType || axis.scaleType !== 'quantitative' || !node.selected.length) return ['', ''];
-                    const avg = averageValue(node, axis); // TODO rewrite function to take a field
-                    const max = maximumValue(node, axis);
-                    const min = minimumValue(node, axis);
+                    const sampleChild = findFirstDataChild(node);
+                    if (!sampleChild || !axis  || !node.selected.length) return ['', ''];
+                    let maybeField = findNumericField(sampleChild, axis);
+                    if (maybeField === undefined) return ['', ''];
+                    let field: string = String(maybeField);
+
+                    const avg = averageValue(node.selected, field);
+                    const max = maximumValue(node.selected, field);
+                    const min = minimumValue(node.selected, field);
                     return [`average ${avg}, maximum ${max}, minimum ${min}`, 
-                    `the average is ${avg}, the maximum is ${max}, and the minimum is ${min}`];
+                    `the average for the "${field}" field is ${avg}, the maximum is ${max}, and the minimum is ${min}`];
                 case 'legend':
                 case 'grid':
                     return ['', '']; // grid is weird
@@ -552,10 +567,9 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
         function quantile(node: AccessibilityTreeNode):string[] {
             switch (node.type) {
                 case 'filteredData':
-                    if (!axis || !node.parent || !node.selected.length) return ['', ''];
-                    
                     // figure out what field we're calculating the quantile over
-                    let sampleChild = node.children[0];
+                    let sampleChild = findFirstDataChild(node);
+                    if (!sampleChild || !axis || !node.parent || !node.selected.length) return ['', ''];
                     let maybeField = findNumericField(sampleChild, axis);
                     if (maybeField === undefined) return ['', ''];
                     let field: string = String(maybeField)
@@ -608,19 +622,17 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
                             avgs.push(0);
                             return;
                         }
-                        const avg = Math.round(interval.reduce((a, b) => a + Number(b[field]), 0)/interval.length);
+                        const avg = averageValue(interval, field);
                         avgs.push(avg);
                     });
                     
                     avgs.sort(function(a, b) {
                         return a - b;
                       });
-                    const thisAvg = node.selected.length == 0 ? 0 : 
-                        Math.round(node.selected.reduce((a, b) => a + Number(b[field]), 0)
-                        /node.selected.length);
+                    const thisAvg = node.selected.length == 0 ? 0 : averageValue(node.selected, field)
                     const sectionsPos = avgs.indexOf(thisAvg)/avgs.length;
                     const sectionsQuart = Math.max(1, Math.ceil(sectionsPos * 4)); // pos is btwn 0 and 1, no quartile 0
-                    return [`quartile ${sectionsQuart} by average`, `quartile ${sectionsQuart} when compared by section average over the ${field} field`]
+                    return [`quartile ${sectionsQuart} by average`, `quartile ${sectionsQuart} when compared by section average over the "${field}" field`]
 
                 case 'data':
                     // figure out what field we're calculating the quantile over
