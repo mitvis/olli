@@ -29,6 +29,13 @@ export function renderMenu(tree: AccessibilityTree): HTMLElement {
   legend.innerText = "Settings Menu";
   root.appendChild(legend);
 
+  const close = document.createElement("button");
+  close.addEventListener("click", (event) => {
+    root.dispatchEvent(new KeyboardEvent('keydown', {'key': 'Escape'}));
+  });
+  close.innerText = "Close";
+  root.appendChild(close);
+
   // Make individual menus for each hierarchy level
   Object.keys(settingsData).forEach(hierarchyLevel => {
     // Verbosity options (high, low, custom)
