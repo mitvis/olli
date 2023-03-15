@@ -6,6 +6,7 @@ import { olliVisSpecToTree } from "./Structure"
 import { AccessibilityTree } from "./Structure/Types"
 import { renderMenu, renderCommandsMenu } from "./Settings"
 import { addMenuCommands, addTreeCommands, addCommandsMenuCommands } from "./Settings/commands"
+import { updateGlobalStateOnRender } from "./utils"
 
 export * from './Types';
 
@@ -65,6 +66,7 @@ export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTML
             addMenuCommands(menu, t);
             addTreeCommands(ul, tree, t);
             addCommandsMenuCommands(commandsMenu, tree, t);
+            updateGlobalStateOnRender(t);
             break;
     }
 

@@ -1,4 +1,5 @@
 import { NodeType, tokenType } from "../../Structure/Types";
+import { setOlliGlobalState } from "../../utils";
 import { TreeItem } from "./TreeItem";
 /*
  *   This content is licensed according to the W3C Software License at
@@ -81,11 +82,12 @@ export class Tree {
               if (this.onFocus) {
                 this.onFocus(ti.domNode);
               }
+              setOlliGlobalState({lastVisitedTree: this});
             } else {
               ti.domNode.tabIndex = -1;
               ti.domNode.setAttribute('aria-selected', 'false');
             }
-          }
+        }
     }
 
     setFocusToNextItem(currentItem: TreeItem) {
