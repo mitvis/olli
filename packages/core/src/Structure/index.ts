@@ -388,7 +388,7 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
         }
         const filteredValuesGrid = (gridFilterValues?: GridFilterValue) => {
             if (!gridFilterValues) return '';
-            return `in ${filteredValues(gridFilterValues[0])} and ${filteredValues(gridFilterValues[1])}`;
+            return `${filteredValues(gridFilterValues[0])} and ${filteredValues(gridFilterValues[1])}`;
         }
         const indexStr = (index?: number, length?: number) => index !== undefined && length !== undefined ? `${index + 1} of ${length}` : '';
         const datum = (datum: OlliDatum, node: AccessibilityTreeNode) => {
@@ -498,12 +498,14 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
                     [`from ${start} to ${end}`, `with values from "${start}" to "${end}"`]
                 case 'grid':
                     return ['', '']; // grid is weird
-                case 'filteredData': // TODO make the short version, this one confused me
+                case 'filteredData':
                     if (node.parent?.type === 'grid') {
-                        return Array(2).fill(filteredValuesGrid(node.filterValue as GridFilterValue));
+                        const range = filteredValuesGrid(node.filterValue as GridFilterValue);
+                        return [range, `Values from ${range}`]
                     }
                     else {
-                        return Array(2).fill(filteredValues(node.filterValue as EncodingFilterValue));
+                        const range = filteredValues(node.filterValue as EncodingFilterValue);
+                        return [range, `Values from ${range}`]
                     }
                 case 'data':
                     return Array(2).fill(datum(node.selected[0], node)!);

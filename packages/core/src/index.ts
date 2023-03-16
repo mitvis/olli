@@ -43,12 +43,10 @@ export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTML
             menu.setAttribute('aria-hidden', 'true');
             htmlRendering.appendChild(menu);
 
-            // TODO formalize
             const commandsMenu = renderCommandsMenu();
             commandsMenu.setAttribute('style', 'display: none');
             commandsMenu.setAttribute('aria-hidden', 'true');
             htmlRendering.appendChild(commandsMenu);
-
 
             const ul = renderTree(tree);
             const container = document.createElement('div');

@@ -140,7 +140,6 @@ export function addCommandsMenuCommands(commandsMenu: HTMLElement, tree: Accessi
         }
       });
 
-      // TODO
       for (let length of Object.values(tokenLength)) {
         if (typeof length !== 'string') continue;
         const num = Number(Object.values(tokenLength).find(v => typeof v === 'number' && tokenLength[v] === length));
