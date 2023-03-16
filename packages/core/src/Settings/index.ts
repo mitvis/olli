@@ -164,7 +164,7 @@ export function updateVerbosityDescription(dropdown: HTMLSelectElement, tree: Ac
     // Open the customization menu
     customMenu.setAttribute('style', 'display: block');
     customMenu.setAttribute('aria-hidden', 'false');
-    descriptionText.innerText = "Create a custom preset using the preset menu (next element)."
+    descriptionText.innerText = "Create a custom preset using the preset menu. Set verbosity for each element; use alt/option-left and alt/option-right to reorder elements."
   } else {
     // Close custom menu (if it was open)
     customMenu.setAttribute('style', 'display: none');
