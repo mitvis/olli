@@ -94,7 +94,16 @@ export function renderCommandsMenu() {
     }
   }
 
-  return dropdown;
+  const label = document.createElement('label');
+  label.setAttribute('for', 'command-dropdown');
+  label.innerText = 'Choose command';
+
+  const container = document.createElement('div');
+  container.setAttribute('id', 'command-dropdown-container')
+  container.appendChild(label);
+  container.appendChild(dropdown);
+
+  return container;
 }
 
 function makeIndivVerbosityMenu(hierarchyLevel: Exclude<HierarchyLevel, 'root'>, tree: AccessibilityTree) {
@@ -131,6 +140,8 @@ function makeIndivVerbosityMenu(hierarchyLevel: Exclude<HierarchyLevel, 'root'>,
   dropdown.addEventListener('change', (event) => {
     if (dropdown.value !== 'custom') {
       srSpeakingHack(`${dropdown.id.split("-")[0]} verbosity set to ${dropdown.value}`);
+    } else {
+      srSpeakingHack('Custom menu open')
     }
   })
 
@@ -264,7 +275,7 @@ export function getCurrentCustom(hierarchyLevel: string) {
       tokens.push([dropdown.id.split('-')[1] as TokenType, tokenLength.Long]);
     } else if (dropdown.value === 'short') {
       tokens.push([dropdown.id.split('-')[1] as TokenType, tokenLength.Short]);
-    }
+    } // otherwise it's 'off', so don't push
   }
   return tokens;
 }

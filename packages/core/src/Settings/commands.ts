@@ -80,23 +80,23 @@ export function addTreeCommands(treeElt: HTMLElement, tree: AccessibilityTree, t
 
     if (event.ctrlKey && event.key === 'i') {
       // "Open" command dropdown by making it visible and moving focus there
-      const dropdown = document.getElementById('command-dropdown')!;
+      const dropdown = document.getElementById('command-dropdown-container')!;
       dropdown.setAttribute('style', 'display: block');
       dropdown.setAttribute('aria-hidden', 'false');
       setTimeout(() => {
-        dropdown.focus();
+        (dropdown.firstElementChild! as HTMLElement).focus();
         dropdown.setAttribute('aria-selected', 'true');
       }, 0);
     }
   })
 }
 
-export function addCommandsMenuCommands(commandsMenu: HTMLSelectElement, tree: AccessibilityTree, t: Tree) {
+export function addCommandsMenuCommands(commandsMenu: HTMLElement, tree: AccessibilityTree, t: Tree) {
   commandsMenu.addEventListener('keydown', (event) => {
     const settingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: string]: [TokenType, tokenLength][]}} = JSON.parse(localStorage.getItem('settingsData')!);
 
     if (event.key === 'Enter') {
-      const command = commandsMenu.selectedOptions[0].value;
+      const command = (commandsMenu.children[1] as HTMLSelectElement).selectedOptions[0].value;
 
       for (const token of tokenType) {
         if (command === token) {
@@ -108,6 +108,8 @@ export function addCommandsMenuCommands(commandsMenu: HTMLSelectElement, tree: A
             const verbosity = (document.getElementById(`${hLevel}-verbosity`) as HTMLSelectElement).value;
             const length = settingsData[hLevel][verbosity].find(x => x[0] === command)![1];
             srSpeakingHack(treeNode.description.get(command as TokenType)![length]);
+          } else {
+            srSpeakingHack(`No ${token} available`);
           }
         } else if (command === 'focus-' + token) {
           // 'Focus' the token by bringing it to the front
@@ -131,7 +133,8 @@ export function addCommandsMenuCommands(commandsMenu: HTMLSelectElement, tree: A
         for (const sLevel of settingLevels) {
           if (command === hLevel + '-' + sLevel) {
             dropdown.value = sLevel;
-            updateVerbosityDescription(dropdown, tree)
+            updateVerbosityDescription(dropdown, tree);
+            srSpeakingHack(`${dropdown.id.split("-")[0]} verbosity set to ${dropdown.value}`);
             return;
           }
         }

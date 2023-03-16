@@ -3,16 +3,18 @@ import { TokenType, HierarchyLevel, tokenLength} from "../Structure/Types";
 const Short = tokenLength.Short
 const Long = tokenLength.Long
 
+// Note: when putting a number before quotation mark, add a space or else VoiceOver will read 
+// the quotation mark as inches
 export const tokenDescs = {
-  'index': 'Index in set (e.g. "1 of 5")',
+  'index': 'Index in set (e.g. "1 of 5 ")',
   'type': 'Type of element (e.g. "temporal scale", "line chart")',
   'size': 'Size of children (e.g. "10 values")',
-  'data': 'Data value or range (e.g. "0 to 800", "price: 50")',
-  'aggregate': 'Aggregate statistics including minimum, maximum, and average (e.g. "average: 50")',
+  'data': 'Data value or range (e.g. "0 to 800 ", "price: 50 ")',
+  'aggregate': 'Aggregate statistics including minimum, maximum, and average (e.g. "average: 50 ")',
   'facet': 'Facet name (e.g. "profit" and "expenditures")',
   'name': 'Name (e.g. "x-axis titled price")',
   'children': 'Children’s names (e.g. at the root, "axes titled date and price") ',
-  'quantile': 'Quantile of current data (e.g. "quartile: 1")'
+  'quantile': 'Quantile of current data (e.g. "quartile: 1 ")'
 }
 
 export let defaultSettingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: string]: [TokenType, tokenLength][]}} = {
