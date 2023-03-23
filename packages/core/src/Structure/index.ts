@@ -291,7 +291,7 @@ function olliVisSpecToNode(type: NodeType, selected: OlliDatum[], parent: Access
             // set the ordering of the fields for rendering to a table
             // put the filter values last, since user already knows the value
             node.tableKeys = fieldsUsed;
-            node.tableKeysMap = node.tableKeys.map(x => "default");
+            node.tableKeysMap = node.tableKeys.map(x => "data");
             if (guide) {
                 node.tableKeys = node.tableKeys.filter(f => f !== guide.field).concat([guide.field]);
             }
@@ -301,7 +301,7 @@ function olliVisSpecToNode(type: NodeType, selected: OlliDatum[], parent: Access
                 node.tableKeysMap[node.tableKeys.length - 1] = "facet";
             }
             node.tableKeys.push("quartile");
-            node.tableKeysMap.push("quartile");
+            node.tableKeysMap.push("quantile");
 
             break;
         default:
@@ -402,18 +402,18 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
         const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
         const averageValue = (data: OlliDatum[], field: string) => {
-            return Math.round(data.reduce((a, b) => a + Number(b[field]), 0)
+            return fmtValue(data.reduce((a, b) => a + Number(b[field]), 0)
                     /data.length);
         }
 
         const maximumValue = (data: OlliDatum[], field: string) => {
-            return data.reduce((a, b) => Math.max(a,  Number(b[field])), 
-                                        Number(data[0][field]));
+            return fmtValue(data.reduce((a, b) => Math.max(a,  Number(b[field])), 
+                                        Number(data[0][field])));
         }
 
         const minimumValue = (data: OlliDatum[], field: string) => {
-            return data.reduce((a, b) => Math.min(a,  Number(b[field])), 
-                                        Number(data[0][field]));
+            return fmtValue(data.reduce((a, b) => Math.min(a,  Number(b[field])), 
+                                        Number(data[0][field])));
         }
 
         const chart = olliVisSpec as Chart;
@@ -625,14 +625,14 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
                             return;
                         }
                         const avg = averageValue(interval, field);
-                        avgs.push(avg);
+                        avgs.push(Number(avg));
                     });
                     
                     avgs.sort(function(a, b) {
                         return a - b;
                       });
                     const thisAvg = node.selected.length == 0 ? 0 : averageValue(node.selected, field)
-                    const sectionsPos = avgs.indexOf(thisAvg)/avgs.length;
+                    const sectionsPos = avgs.indexOf(Number(thisAvg))/avgs.length;
                     const sectionsQuart = Math.max(1, Math.ceil(sectionsPos * 4)); // pos is btwn 0 and 1, no quartile 0
                     return [`quartile ${sectionsQuart} by average`, `quartile ${sectionsQuart} when compared by section average over the "${field}" field`]
 

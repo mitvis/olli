@@ -336,16 +336,15 @@ export function getSettingsInfoForTable() {
   const settingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: string]: [TokenType, tokenLength][]}} = JSON.parse(localStorage.getItem('settingsData')!);
   const dropdown = document.getElementById(`datapoint-verbosity`) as HTMLSelectElement;
   const value = dropdown ? dropdown.value : 'high'; // If not yet initialized, use default of 'high' setting
+  const includeOrder = settingsData['datapoint'][value].map(x => x[0]);
 
-  // Facet
-  const facetSetting = settingsData['datapoint'][value].find(x => x[0] == "facet");
+  const allTokens = settingsData['datapoint']['high'].map(x => x[0]);
 
-  // Quartile
-  const quantileSetting = settingsData['datapoint'][value].find(x => x[0] == "quantile");
-
-  return [facetSetting === undefined ? undefined : facetSetting[1],
-    quantileSetting === undefined ? undefined : quantileSetting[1]]
-  
+  const settingOrders: {[k: string]: number} = {}
+  for (let token of allTokens) {
+    settingOrders[token] = includeOrder.indexOf(token);
+  }
+  return settingOrders;
 }
 
 function capitalizeFirst(s: string) {

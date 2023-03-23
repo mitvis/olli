@@ -126,6 +126,40 @@ export function htmlNodeToTree(node: HTMLElement, tree: AccessibilityTree): Acce
 }
 
 function createDataTable(dataNodes: AccessibilityTreeNode[], level: number) {
+  // Figure out which keys to include
+  const ordering = getSettingsInfoForTable();
+  const tableKeys: string[] = [];
+  const tableKeysMap: string[] = [];
+
+  dataNodes[0].tableKeys!.forEach((name: string, idx: number) => {
+      const key = dataNodes[0].tableKeysMap![idx];
+      const include = ordering[key];
+      if (include < 0) return;
+      // extra check for quantile since sometimes settings turn it on, but it is not generated (e.g. wrong axis)
+      if (key == 'quantile' && !(dataNodes[0].description.get('quantile')![0])) return; 
+
+      tableKeys.push(name);
+      tableKeysMap.push(key);
+  })
+
+  // Reorder keys according to their indices (values of `ordering`)
+  const orderedTableKeys: string[] = []
+  const orderedTableKeysMap: string[] = []
+  
+  for (let [token, _] of Object.entries(ordering).sort((a, b) => a[1] - b[1])) {
+    const origIdx = tableKeysMap.indexOf(token);
+    if (origIdx < 0) continue;
+
+    orderedTableKeysMap.push(token);
+    orderedTableKeys.push(tableKeys[origIdx]);
+    if (token === 'data') { // appears twice in a row
+      orderedTableKeysMap.push(token);
+      orderedTableKeys.push(tableKeys[origIdx + 1]);
+    }
+  }
+
+  // Create HTML table
+  // Container + header
   const table = document.createElement("table");
   table.setAttribute('aria-label', `Table with ${dataNodes.length} rows`);
   table.setAttribute('aria-level', String(level));
@@ -133,58 +167,29 @@ function createDataTable(dataNodes: AccessibilityTreeNode[], level: number) {
   table.setAttribute('aria-setsize', '1');
 
   const tableBody = document.createElement("tbody");
-  const settingsInfo = getSettingsInfoForTable();
-  const facet = settingsInfo[0];
-  const quartile = settingsInfo[1];
-
-  const tableKeysMap: string[] = [];
-  const tableKeys = dataNodes[0].tableKeys!.filter((key: string, idx: number) => {
-    const mapping = dataNodes[0].tableKeysMap![idx];
-    if (mapping === 'default') {
-      tableKeysMap.push('default');
-      return true;
-    } else if (mapping === 'facet') {
-      if (facet !== undefined) {
-        tableKeysMap.push('facet');
-        return true;
-      }
-      return false;
-    } else if (mapping === 'quartile') {
-      if (quartile !== undefined && dataNodes[0].description.get('quantile')![0]) {
-        tableKeysMap.push('quartile');
-        return true;
-      }
-      return false;
-    }
-
-    return true; // should not occur
-  })
-
   const thead = document.createElement("thead");
   const theadtr = document.createElement("tr");
-  theadtr.setAttribute('aria-label', `${tableKeys?.join(', ')}`);
+  theadtr.setAttribute('aria-label', `${orderedTableKeys?.join(', ')}`);
 
-  tableKeys?.forEach((key: string) => {
+  orderedTableKeys?.forEach((key: string) => {
     const th = document.createElement("th");
     th.setAttribute('scope', 'col');
-    th.innerText = key
+    th.innerText = key;
     theadtr.appendChild(th);
   });
 
   thead.appendChild(theadtr);
   table.appendChild(thead);
 
-  //
-
-  dataNodes.forEach((node, idx) => {
+  // Individual rows
+  dataNodes.forEach((node, _) => {
     const dataRow = document.createElement("tr")
     dataRow.setAttribute('aria-label', `${node.tableKeys?.map(key => `${key}: ${fmtValue(node.selected[0][key])}`).join(', ')}`);
-    tableKeys?.forEach((key: string, idx: number) => {
+    orderedTableKeys?.forEach((key: string, idx: number) => {
       let value;
 
-      if (tableKeysMap![idx] === 'quartile') {
-        if (quartile === undefined) return;
-        value = node.description.get('quantile')![quartile];
+      if (orderedTableKeysMap[idx] === 'quantile') {
+        value = node.description.get('quantile')![0];
       } else {
         value = fmtValue(node.selected[0][key]);
       }
@@ -197,16 +202,5 @@ function createDataTable(dataNodes: AccessibilityTreeNode[], level: number) {
   });
 
   table.appendChild(tableBody);
-
-  // const item = document.createElement('li');
-  // item.setAttribute('role', 'treeitem');
-  // item.setAttribute('aria-level', String(level));
-  // item.setAttribute('aria-setsize', '1');
-  // item.setAttribute('aria-posinset', '1');
-  // item.setAttribute('aria-expanded', 'false');
-
-  // item.appendChild(table);
-
-  // return item;
   return table;
 }
