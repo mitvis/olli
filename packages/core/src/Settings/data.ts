@@ -30,7 +30,7 @@ export let defaultSettingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: s
   },
   'section': {
     'high': [['data', Long], ['index', Long], ['size', Long], ['facet', Long], ['aggregate', Long], ['quantile', Long]],
-    'medium': [['data', Long], ['size', Long]],
+    'medium': [['data', Long], ['size', Long], ['aggregate', Short], ['quantile', Short]],
     'low': [['data', Short], ['size', Short]],
   },
   'datapoint': {
