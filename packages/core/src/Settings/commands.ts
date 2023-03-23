@@ -91,12 +91,12 @@ export function addTreeCommands(treeElt: HTMLElement, tree: AccessibilityTree, t
   })
 }
 
-export function addCommandsMenuCommands(commandsMenu: HTMLElement, tree: AccessibilityTree, t: Tree) {
-  commandsMenu.addEventListener('keydown', (event) => {
+export function addCommandsBoxCommands(commandsBox: HTMLElement, tree: AccessibilityTree, t: Tree) {
+  commandsBox.addEventListener('keydown', (event) => {
     const settingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: string]: [TokenType, tokenLength][]}} = JSON.parse(localStorage.getItem('settingsData')!);
 
     if (event.key === 'Enter') {
-      const command = (commandsMenu.children[1] as HTMLSelectElement).selectedOptions[0].value;
+      const command = (commandsBox.children[1] as HTMLSelectElement).selectedOptions[0].value;
 
       for (const token of tokenType) {
         if (command === token) {
@@ -154,8 +154,8 @@ export function addCommandsMenuCommands(commandsMenu: HTMLElement, tree: Accessi
 
     // Close menu and return to previous position in tree
     if (event.key === 'Enter' || event.key === 'Escape') {
-      commandsMenu.setAttribute('style', 'display: none');
-      commandsMenu.setAttribute('aria-hidden', 'true');
+      commandsBox.setAttribute('style', 'display: none');
+      commandsBox.setAttribute('aria-hidden', 'true');
         t.setFocusToItem(t.lastFocusedItem);
     }
 

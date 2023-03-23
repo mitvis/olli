@@ -4,8 +4,8 @@ import { Tree } from "./Render/TreeView/Tree"
 import { renderTree } from "./Render/TreeView"
 import { olliVisSpecToTree } from "./Structure"
 import { AccessibilityTree } from "./Structure/Types"
-import { renderMenu, renderCommandsMenu } from "./Settings"
-import { addMenuCommands, addTreeCommands, addCommandsMenuCommands } from "./Settings/commands"
+import { renderMenu, renderCommandsBox } from "./Settings"
+import { addMenuCommands, addTreeCommands, addCommandsBoxCommands } from "./Settings/commands"
 import { updateGlobalStateOnRender } from "./utils"
 
 export * from './Types';
@@ -43,7 +43,7 @@ export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTML
             menu.setAttribute('aria-hidden', 'true');
             htmlRendering.appendChild(menu);
 
-            const commandsMenu = renderCommandsMenu();
+            const commandsMenu = renderCommandsBox();
             commandsMenu.setAttribute('style', 'display: none');
             commandsMenu.setAttribute('aria-hidden', 'true');
             htmlRendering.appendChild(commandsMenu);
@@ -63,7 +63,7 @@ export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTML
 
             addMenuCommands(menu, t);
             addTreeCommands(ul, tree, t);
-            addCommandsMenuCommands(commandsMenu, tree, t);
+            addCommandsBoxCommands(commandsMenu, tree, t);
             updateGlobalStateOnRender(t);
             break;
     }

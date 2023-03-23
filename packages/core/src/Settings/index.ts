@@ -57,7 +57,7 @@ export function renderMenu(tree: AccessibilityTree): HTMLElement {
   return root;
 }
 
-export function renderCommandsMenu() {
+export function renderCommandsBox() {
   const dropdown = document.createElement('select');
   dropdown.setAttribute('id', 'command-dropdown');
 
