@@ -97,7 +97,7 @@
     ]
   },
   {
-    "title": "Multi-Series Line Chart",
+    "title": "Multi-Series Line Chart - Stocks",
     "img": "/img/multiSeriesLineChart.JPG",
     "data": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/stocks.csv",
     "url": "/gallery/multiSeriesLine.html",
@@ -153,6 +153,18 @@
       {
         "name": "ObservablePlot",
         "code": "/examples/facetedChart-op.html"
+      }
+    ]
+  },
+  {
+    "title": "Multi-Series Line Chart - Temperature",
+    "img": "/img/multiSeriesLineChart.JPG",
+    "data": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/stocks.csv",
+    "url": "/gallery/multiSeriesLine.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/temperature-vl.html"
       }
     ]
   }
