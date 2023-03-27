@@ -90,7 +90,7 @@ export function renderCommandsBox() {
     if (hLevel === 'root') continue;
     const settingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: string]: [TokenType, tokenLength][]}} = JSON.parse(localStorage.getItem('settingsData')!);
     for (const level of Object.keys(settingsData[(hLevel as Exclude<HierarchyLevel, 'root'>)])) {
-     createOption(hLevel.slice(0,1) + level, hLevel + '-' + level, dropdown);
+     createOption(hLevel + ' ' + level, hLevel + '-' + level, dropdown);
     }
   }
 

@@ -92,11 +92,17 @@ export function addTreeCommands(treeElt: HTMLElement, tree: AccessibilityTree, t
 }
 
 export function addCommandsBoxCommands(commandsBox: HTMLElement, tree: AccessibilityTree, t: Tree) {
+  const dropdown = commandsBox.children[1] as HTMLSelectElement;
+  
+  commandsBox.addEventListener("change", () => {
+    srSpeakingHack(dropdown.selectedOptions[0].text);
+  });
+
   commandsBox.addEventListener('keydown', (event) => {
     const settingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: string]: [TokenType, tokenLength][]}} = JSON.parse(localStorage.getItem('settingsData')!);
 
     if (event.key === 'Enter') {
-      const command = (commandsBox.children[1] as HTMLSelectElement).selectedOptions[0].value;
+      const command = dropdown.selectedOptions[0].value;
 
       for (const token of tokenType) {
         if (command === token) {
