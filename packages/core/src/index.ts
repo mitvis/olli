@@ -38,16 +38,6 @@ export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTML
             break;
         case ('tree'):
         default:
-            const menu = renderMenu(tree);
-            menu.setAttribute('style', 'display: none');
-            menu.setAttribute('aria-hidden', 'true');
-            htmlRendering.appendChild(menu);
-
-            const commandsMenu = renderCommandsBox();
-            commandsMenu.setAttribute('style', 'display: none');
-            commandsMenu.setAttribute('aria-hidden', 'true');
-            htmlRendering.appendChild(commandsMenu);
-
             const ul = renderTree(tree);
             const container = document.createElement('div');
             container.classList.add('olli-vis');
@@ -61,6 +51,16 @@ export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTML
                     t.setFocusToItem(t.rootTreeItem);
                 }
             })
+
+            const menu = renderMenu(tree);
+            menu.setAttribute('style', 'display: none');
+            menu.setAttribute('aria-hidden', 'true');
+            container.appendChild(menu);
+
+            const commandsMenu = renderCommandsBox();
+            commandsMenu.setAttribute('style', 'display: none');
+            commandsMenu.setAttribute('aria-hidden', 'true');
+            container.appendChild(commandsMenu);
 
             addMenuCommands(menu, t);
             addTreeCommands(ul, tree, t);
