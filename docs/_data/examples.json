@@ -100,19 +100,24 @@
     "title": "Multi-Series Line Chart - Stocks",
     "img": "/img/multiSeriesLineChart.JPG",
     "data": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/stocks.csv",
+    "url": "/gallery/stocks.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/multiSeriesChart-vl.html"
+      }
+    ],
+    "customize": true
+  },
+  {
+    "title": "Multi-Series Line Chart - Stocks",
+    "img": "/img/multiSeriesLineChart.JPG",
+    "data": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/stocks.csv",
     "url": "/gallery/multiSeriesLine.html",
     "adapters": [
       {
         "name": "Vega-Lite",
         "code": "/examples/multiSeriesChart-vl.html"
-      },
-      {
-        "name": "Vega",
-        "code": "/examples/multiSeriesChart-v.html"
-      },
-      {
-        "name": "ObservablePlot",
-        "code": "/examples/multiSeriesChart-op.html"
       }
     ]
   },
