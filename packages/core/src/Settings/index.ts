@@ -103,9 +103,6 @@ function makeIndivVerbosityMenu(hierarchyLevel: Exclude<HierarchyLevel, 'root'>,
   // Make the dropdown container
   const dropdown = document.createElement('select');
   dropdown.id = `${hierarchyLevel}-verbosity`
-  dropdown.addEventListener('change', (event) => {
-    updateVerbosityDescription(dropdown, tree);
-  });
 
   const label = document.createElement('label');
   label.setAttribute('for', `${hierarchyLevel}-verbosity`);
@@ -125,11 +122,7 @@ function makeIndivVerbosityMenu(hierarchyLevel: Exclude<HierarchyLevel, 'root'>,
   dropdown.appendChild(custom);
 
   dropdown.addEventListener('change', (event) => {
-    if (dropdown.value !== 'custom') {
-      srSpeakingHack(`${dropdown.id.split("-")[0]} verbosity set to ${dropdown.value}`);
-    } else {
-      srSpeakingHack('Custom menu open')
-    }
+    updateVerbosityDescription(dropdown, tree);
   })
 
   const container = document.createElement('div');
@@ -151,6 +144,7 @@ export function updateVerbosityDescription(dropdown: HTMLSelectElement, tree: Ac
     customMenu.setAttribute('style', 'display: block');
     customMenu.setAttribute('aria-hidden', 'false');
     label.innerText = "Create a custom preset using the preset menu. Set verbosity for each element; use alt+left and alt+right to reorder elements."
+    srSpeakingHack('Custom menu open')
   } else {
     // Close custom menu (if it was open)
     customMenu.setAttribute('style', 'display: none');
@@ -162,6 +156,8 @@ export function updateVerbosityDescription(dropdown: HTMLSelectElement, tree: Ac
     label.innerText = capitalizeFirst(`${hierarchyLevel} verbosity. ${desc}`);
     // node description in the tree
     rerenderTreeDescription(tree, document.getElementById('tree-root')!);
+
+    srSpeakingHack(`${dropdown.id.split("-")[0]} verbosity set to ${dropdown.value}. ${desc}`);
   }
 }
 
