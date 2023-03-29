@@ -53,13 +53,13 @@ export function addMenuCommands(menu: HTMLElement, t: Tree) {
   const first = menu.firstElementChild! as HTMLElement;
   const last = menu.lastElementChild! as HTMLElement;
   first.addEventListener('keydown', (event) => {
-    if (event.key === "Tab" && event.shiftKey) {
+    if (event.key === "Tab" && event.shiftKey || event.key === 'ArrowUp') {
       event.preventDefault();
     }
   });
 
   last.addEventListener('keydown', (event) => {
-    if (event.key === "Tab" && !event.shiftKey) {
+    if (event.key === "Tab" && !event.shiftKey || event.key === 'ArrowDown') {
       event.preventDefault();
     }
   });
