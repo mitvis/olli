@@ -516,12 +516,12 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
                     const start = fmtValue(axis.values[0]);
                     const next = fmtValue(axis.values[1]);
                     const end = fmtValue(axis.values[axis.values.length - 1]);
-                    const total = pluralize(axis.values.length, 'value');
+                    // const total = pluralize(axis.values.length, 'value');
                     return (axis.type === 'discrete') ?
                     (
                         (axis.values.length === 2) ?
                         [`2 values: ${start}, ${next}`, `with 2 values: "${start}" and "${next}"`] :
-                        [`${total} from ${start} to ${end}`, `with ${total} starting with "${start}" and ending with "${end}"`]
+                        [`from ${start} to ${end}`, `values starting with "${start}" and ending with "${end}"`]
                     ) :
                     [`from ${start} to ${end}`, `with values from "${start}" to "${end}"`]
                 case 'grid':
