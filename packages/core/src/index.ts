@@ -4,7 +4,7 @@ import { Tree } from "./Render/TreeView/Tree"
 import { renderTree } from "./Render/TreeView"
 import { olliVisSpecToTree } from "./Structure"
 import { AccessibilityTree } from "./Structure/Types"
-import { renderMenu, renderCommandsBox, initializeSettings } from "./Settings"
+import { renderMenu, renderCommandsBox } from "./Settings"
 import { addMenuCommands, addTreeCommands, addCommandsBoxCommands } from "./Settings/commands"
 import { updateGlobalStateOnRender } from "./utils"
 
@@ -38,7 +38,15 @@ export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTML
             break;
         case ('tree'):
         default:
-            initializeSettings()
+            const menu = renderMenu(tree);
+            menu.setAttribute('style', 'display: none');
+            menu.setAttribute('aria-hidden', 'true');
+            htmlRendering.appendChild(menu);
+
+            const commandsMenu = renderCommandsBox();
+            commandsMenu.setAttribute('style', 'display: none');
+            commandsMenu.setAttribute('aria-hidden', 'true');
+            htmlRendering.appendChild(commandsMenu);
 
             const ul = renderTree(tree);
             const container = document.createElement('div');
@@ -53,16 +61,6 @@ export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTML
                     t.setFocusToItem(t.rootTreeItem);
                 }
             })
-
-            const menu = renderMenu(tree);
-            menu.setAttribute('style', 'display: none');
-            menu.setAttribute('aria-hidden', 'true');
-            container.appendChild(menu);
-
-            const commandsMenu = renderCommandsBox();
-            commandsMenu.setAttribute('style', 'display: none');
-            commandsMenu.setAttribute('aria-hidden', 'true');
-            container.appendChild(commandsMenu);
 
             addMenuCommands(menu, t);
             addTreeCommands(ul, tree, t);

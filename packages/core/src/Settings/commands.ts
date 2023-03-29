@@ -9,7 +9,6 @@ export function addMenuCommands(menu: HTMLElement, t: Tree) {
     if (event.key === 'Escape') {
       // "Close" menu by hiding it and moving focus back to the user's previous position in the tree
       const menu = document.getElementById('settings')!;
-      (menu as any).close();
       menu.setAttribute('style', 'display: none');
       menu.setAttribute('aria-hidden', 'true');
       setTimeout(() => { // The zero timeout should not be necessary but it is
@@ -54,13 +53,13 @@ export function addMenuCommands(menu: HTMLElement, t: Tree) {
   const first = menu.firstElementChild! as HTMLElement;
   const last = menu.lastElementChild! as HTMLElement;
   first.addEventListener('keydown', (event) => {
-    if (event.key === "Tab" && event.shiftKey || event.key === 'ArrowUp') {
+    if (event.key === "Tab" && event.shiftKey) {
       event.preventDefault();
     }
   });
 
   last.addEventListener('keydown', (event) => {
-    if (event.key === "Tab" && !event.shiftKey || event.key === 'ArrowDown') {
+    if (event.key === "Tab" && !event.shiftKey) {
       event.preventDefault();
     }
   });
@@ -75,13 +74,9 @@ export function addTreeCommands(treeElt: HTMLElement, tree: AccessibilityTree, t
         const legend = menu.firstElementChild! as HTMLElement;
         menu.setAttribute('style', 'display: block');
         menu.setAttribute('aria-hidden', 'false');
-
-        (menu as any).showModal();
-
         setTimeout(() => {
-          // legend.focus();
-          // legend.setAttribute('aria-selected', 'true');
-          menu.focus();
+          legend.focus();
+          legend.setAttribute('aria-selected', 'true');
         }, 0);
       }
 

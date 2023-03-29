@@ -4,7 +4,12 @@ import { Tree } from "../Render/TreeView/Tree"
 import { tokenDescs, defaultSettingsData } from "./data"
 import { srSpeakingHack } from "./commands"
 
-export function initializeSettings() {
+/**
+ * Constructs the settings menu from the settings objects above
+ * @param node The {@link AccessibilityTreeNode} being displayed
+ * @returns An {@link HTMLElement} with the settings menu
+ */
+export function renderMenu(tree: AccessibilityTree): HTMLElement {
   // Get saved menu settings if they exist, otherwise save the default settings
   const storedData = localStorage.getItem('settingsData');
   let settingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: string]: [TokenType, tokenLength][]}};
@@ -14,53 +19,40 @@ export function initializeSettings() {
     settingsData = defaultSettingsData;
     localStorage.setItem('settingsData', JSON.stringify(defaultSettingsData));
   }
-}
 
-/**
- * Constructs the settings menu from the settings objects above
- * @param node The {@link AccessibilityTreeNode} being displayed
- * @returns An {@link HTMLElement} with the settings menu
- */
-export function renderMenu(tree: AccessibilityTree): HTMLElement {
   // Make the menu container
-  const root = document.createElement("dialog");
+  const root = document.createElement("fieldset");
   root.setAttribute("id", "settings");
-  root.setAttribute("aria-labelledby", "settings-label");
 
-  const legend = document.createElement("p");
-  legend.setAttribute("id", "settings-label");
-  // legend.setAttribute('tabindex', '0')
+  const legend = document.createElement("legend");
+  legend.setAttribute("tabindex", "0");
   legend.innerText = "Settings Menu";
-  legend.setAttribute("aria-label", legend.innerText);
   root.appendChild(legend);
 
-  const form = document.createElement('div');
-  form.setAttribute('role', 'document');
-
-  const settingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: string]: [TokenType, tokenLength][]}} = JSON.parse(localStorage.getItem('settingsData')!);
+  const close = document.createElement("button");
+  close.addEventListener("click", (event) => {
+    root.dispatchEvent(new KeyboardEvent('keydown', {'key': 'Escape'}));
+  });
+  close.innerText = "Close";
+  root.appendChild(close);
 
   // Make individual menus for each hierarchy level
   Object.keys(settingsData).forEach(hierarchyLevel => {
     // Verbosity options (high, low, custom)
-    form.appendChild(makeIndivVerbosityMenu(hierarchyLevel as Exclude<HierarchyLevel, 'root'>, tree));
+    root.appendChild(makeIndivVerbosityMenu(hierarchyLevel as Exclude<HierarchyLevel, 'root'>, tree));
 
     // Menu to add custom preset - hidden until 'custom' option is selected
     const cMenu = makeIndivCustomMenu(hierarchyLevel as Exclude<HierarchyLevel, 'root'>, tree);
     cMenu.setAttribute('style', 'display: none');
     cMenu.setAttribute('aria-hidden', 'true');
-    form.appendChild(cMenu);
+    root.appendChild(cMenu);
+
   });
 
-  root.appendChild(form);
-
-  const close = document.createElement("button");
-  close.addEventListener("click", (event) => {
-    root.close();
-    root.setAttribute('style', 'display: none');
-    root.setAttribute('aria-hidden', 'true');
-  });
-  close.innerText = "Close";
-  root.appendChild(close);
+  const text = document.createElement('p');
+  text.innerText = 'Press escape to close the menu. Press m to open it.';
+  text.setAttribute('tabindex', '0');
+  root.appendChild(text);
 
   return root;
 }
@@ -130,7 +122,7 @@ function makeIndivVerbosityMenu(hierarchyLevel: Exclude<HierarchyLevel, 'root'>,
   label.innerText = capitalizeFirst(`${hierarchyLevel} verbosity:`);
 
   const info = document.createElement('span');
-  // info.setAttribute('tabindex', '0');
+  info.setAttribute('tabindex', '0');
   info.innerText = 'Description: ' + prettifyTokenTuples(options[Object.keys(options)[0]]);
 
   // Add all preset options, plus 'custom' to make a new preset
