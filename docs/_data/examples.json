@@ -166,6 +166,7 @@
         "name": "Vega-Lite",
         "code": "/examples/temperature-vl.html"
       }
-    ]
+    ],
+    "customize": true
   }
 ]
