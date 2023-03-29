@@ -13,7 +13,7 @@ export function addMenuCommands(menu: HTMLElement, t: Tree) {
       setTimeout(() => { // The zero timeout should not be necessary but it is
         t.setFocusToItem(t.lastFocusedItem);
       }, 0);
-      
+
     } else if (event.altKey && event.key === 'ArrowLeft') {
       // Reorder custom preset items
       const thisItem = document.activeElement as HTMLSelectElement;
@@ -45,7 +45,7 @@ export function addMenuCommands(menu: HTMLElement, t: Tree) {
           srSpeakingHack(prettifyTokenTuples(getCurrentCustom(hierarchyLevel)));
         }
       }
-    } 
+    }
   });
 
   // Keep settings menu a closed environment by blocking tab-forward at end and tab-back at beginning
@@ -66,7 +66,7 @@ export function addMenuCommands(menu: HTMLElement, t: Tree) {
 
 export function addTreeCommands(treeElt: HTMLElement, tree: AccessibilityTree, t: Tree) {
   treeElt.addEventListener('keydown', (event) => {
-    if (event.ctrlKey && event.key === 'm') {
+    if (event.key === 'm') {
       // "Open" menu by making it visible and moving focus there
       const menu = document.getElementById('settings')!;
       const legend = menu.firstElementChild! as HTMLElement;
@@ -78,7 +78,7 @@ export function addTreeCommands(treeElt: HTMLElement, tree: AccessibilityTree, t
       }, 0);
     }
 
-    if (event.ctrlKey && event.key === 'i') {
+    if (event.key === 'i') {
       // "Open" command dropdown by making it visible and moving focus there
       const dropdown = document.getElementById('command-dropdown-container')!;
       dropdown.setAttribute('style', 'display: block');
@@ -93,7 +93,7 @@ export function addTreeCommands(treeElt: HTMLElement, tree: AccessibilityTree, t
 
 export function addCommandsBoxCommands(commandsBox: HTMLElement, tree: AccessibilityTree, t: Tree) {
   const dropdown = commandsBox.children[1] as HTMLSelectElement;
-  
+
   commandsBox.addEventListener("change", () => {
     srSpeakingHack(dropdown.selectedOptions[0].text);
   });
@@ -177,7 +177,7 @@ export function srSpeakingHack(text: string) {
   const elt = document.createElement('div');
   elt.setAttribute('aria-live', 'assertive');
   document.body.appendChild(elt);
-  
+
   window.setTimeout(function () {
     elt.innerText = text;
   }, 100);
