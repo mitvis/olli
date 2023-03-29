@@ -46,7 +46,7 @@ export function renderMenu(tree: AccessibilityTree): HTMLElement {
     cMenu.setAttribute('style', 'display: none');
     cMenu.setAttribute('aria-hidden', 'true');
     root.appendChild(cMenu);
-    
+
   });
 
   const text = document.createElement('p');
@@ -164,7 +164,7 @@ export function updateVerbosityDescription(dropdown: HTMLSelectElement, tree: Ac
     // Open the customization menu
     customMenu.setAttribute('style', 'display: block');
     customMenu.setAttribute('aria-hidden', 'false');
-    descriptionText.innerText = "Create a custom preset using the preset menu. Set verbosity for each element; use alt/option-left and alt/option-right to reorder elements."
+    descriptionText.innerText = "Create a custom preset using the preset menu. Set verbosity for each element; use alt+left and alt+right to reorder elements."
   } else {
     // Close custom menu (if it was open)
     customMenu.setAttribute('style', 'display: none');
@@ -207,7 +207,7 @@ function makeIndivCustomMenu(hierarchyLevel: Exclude<HierarchyLevel, 'root'>, tr
       opt.value = option;
       dropdown.appendChild(opt);
     }
-    
+
     const label = document.createElement('label');
     label.setAttribute('for', `${hierarchyLevel}-${token}`);
     label.innerText = tokenDescs[token];
@@ -237,15 +237,15 @@ function savePreset(hierarchyLevel: Exclude<HierarchyLevel, 'root'>, tree: Acces
   // Close the custom menu since user is done with it
   customMenu.setAttribute('style', 'display: none');
   customMenu.setAttribute('aria-hidden', 'true');
-  
+
   // Store the new preset in settingsData
   const settingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: string]: [TokenType, tokenLength][]}} = JSON.parse(localStorage.getItem('settingsData')!);
   const presetName = (document.getElementById(`${hierarchyLevel}-custom-name`)! as HTMLInputElement).value;
   settingsData[hierarchyLevel][presetName] = getCurrentCustom(hierarchyLevel);
   localStorage.setItem('settingsData', JSON.stringify(settingsData));
   updateVerbosityDropdown(hierarchyLevel);
-  
-  // Set the dropdown to this preset and update the description accordingly 
+
+  // Set the dropdown to this preset and update the description accordingly
   // (acting as though user had selected their new preset from the dropdown menu)
   const dropdown = document.getElementById(`${hierarchyLevel}-verbosity`)! as HTMLSelectElement;
   dropdown.value = presetName;
@@ -285,7 +285,7 @@ export const focusTokens = Object.fromEntries(tokenType.map(token => [token, fal
 /**
  * Given a node with all possible description tokens, return a formatted string
  * including only those tokens which the settings define as currently visible
- * 
+ *
  * @param node A {@link AccessibilityTreeNode} with a description map
  * @returns A formatted string description for the node
  */
@@ -328,7 +328,7 @@ export function getDescriptionWithSettings(node: AccessibilityTreeNode, lengthFl
   function formatDescTokens(description: string[]) {
     return description.filter(x => x.length > 0).map(capitalizeFirst).join('. ') + '.';
   }
-  
+
   return formatDescTokens(description);
 }
 
