@@ -50,7 +50,7 @@ export function renderMenu(tree: AccessibilityTree): HTMLElement {
   });
 
   const text = document.createElement('p');
-  text.innerText = 'Press escape to close the menu. Press ctrl-m to open it.';
+  text.innerText = 'Press escape to close the menu. Press m to open it.';
   text.setAttribute('tabindex', '0');
   root.appendChild(text);
 
