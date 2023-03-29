@@ -31,7 +31,7 @@ export const setOlliGlobalState = (state: Partial<OlliGlobalState>) => {
   };
 }
 
-const nodeIsTextInput = (activeElement: Element | null): boolean => {
+export const nodeIsTextInput = (activeElement: Element | null): boolean => {
   switch (activeElement?.nodeName) {
     case 'INPUT':
     case 'TEXTAREA':

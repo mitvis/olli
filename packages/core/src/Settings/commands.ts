@@ -2,6 +2,7 @@ import { AccessibilityTree, AccessibilityTreeNode, tokenType, TokenType, tokenLe
 import { Tree } from "../Render/TreeView/Tree";
 import { htmlNodeToTree, rerenderTreeDescription } from "../Render/TreeView";
 import { getDescriptionWithSettings, updateVerbosityDescription, getCurrentCustom, prettifyTokenTuples, focusTokens } from "./index";
+import { nodeIsTextInput } from "../utils";
 
 export function addMenuCommands(menu: HTMLElement, t: Tree) {
   menu.addEventListener('keydown', (event) => {
@@ -66,27 +67,29 @@ export function addMenuCommands(menu: HTMLElement, t: Tree) {
 
 export function addTreeCommands(treeElt: HTMLElement, tree: AccessibilityTree, t: Tree) {
   treeElt.addEventListener('keydown', (event) => {
-    if (event.key === 'm') {
-      // "Open" menu by making it visible and moving focus there
-      const menu = document.getElementById('settings')!;
-      const legend = menu.firstElementChild! as HTMLElement;
-      menu.setAttribute('style', 'display: block');
-      menu.setAttribute('aria-hidden', 'false');
-      setTimeout(() => {
-        legend.focus();
-        legend.setAttribute('aria-selected', 'true');
-      }, 0);
-    }
+    if (!nodeIsTextInput(document.activeElement)) {
+      if (event.key === 'm') {
+        // "Open" menu by making it visible and moving focus there
+        const menu = document.getElementById('settings')!;
+        const legend = menu.firstElementChild! as HTMLElement;
+        menu.setAttribute('style', 'display: block');
+        menu.setAttribute('aria-hidden', 'false');
+        setTimeout(() => {
+          legend.focus();
+          legend.setAttribute('aria-selected', 'true');
+        }, 0);
+      }
 
-    if (event.key === 'i') {
-      // "Open" command dropdown by making it visible and moving focus there
-      const dropdown = document.getElementById('command-dropdown-container')!;
-      dropdown.setAttribute('style', 'display: block');
-      dropdown.setAttribute('aria-hidden', 'false');
-      setTimeout(() => {
-        (dropdown.firstElementChild! as HTMLElement).focus();
-        dropdown.setAttribute('aria-selected', 'true');
-      }, 0);
+      if (event.key === 'i') {
+        // "Open" command dropdown by making it visible and moving focus there
+        const dropdown = document.getElementById('command-dropdown-container')!;
+        dropdown.setAttribute('style', 'display: block');
+        dropdown.setAttribute('aria-hidden', 'false');
+        setTimeout(() => {
+          (dropdown.firstElementChild! as HTMLElement).focus();
+          dropdown.setAttribute('aria-selected', 'true');
+        }, 0);
+      }
     }
   })
 }
