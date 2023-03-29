@@ -4,12 +4,7 @@ import { Tree } from "../Render/TreeView/Tree"
 import { tokenDescs, defaultSettingsData } from "./data"
 import { srSpeakingHack } from "./commands"
 
-/**
- * Constructs the settings menu from the settings objects above
- * @param node The {@link AccessibilityTreeNode} being displayed
- * @returns An {@link HTMLElement} with the settings menu
- */
-export function renderMenu(tree: AccessibilityTree): HTMLElement {
+export function initializeSettings() {
   // Get saved menu settings if they exist, otherwise save the default settings
   const storedData = localStorage.getItem('settingsData');
   let settingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: string]: [TokenType, tokenLength][]}};
@@ -19,7 +14,14 @@ export function renderMenu(tree: AccessibilityTree): HTMLElement {
     settingsData = defaultSettingsData;
     localStorage.setItem('settingsData', JSON.stringify(defaultSettingsData));
   }
+}
 
+/**
+ * Constructs the settings menu from the settings objects above
+ * @param node The {@link AccessibilityTreeNode} being displayed
+ * @returns An {@link HTMLElement} with the settings menu
+ */
+export function renderMenu(tree: AccessibilityTree): HTMLElement {
   // Make the menu container
   const root = document.createElement("fieldset");
   root.setAttribute("id", "settings");
@@ -35,6 +37,9 @@ export function renderMenu(tree: AccessibilityTree): HTMLElement {
   });
   close.innerText = "Close";
   root.appendChild(close);
+
+
+  const settingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: string]: [TokenType, tokenLength][]}} = JSON.parse(localStorage.getItem('settingsData')!);
 
   // Make individual menus for each hierarchy level
   Object.keys(settingsData).forEach(hierarchyLevel => {

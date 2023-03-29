@@ -4,7 +4,7 @@ import { Tree } from "./Render/TreeView/Tree"
 import { renderTree } from "./Render/TreeView"
 import { olliVisSpecToTree } from "./Structure"
 import { AccessibilityTree } from "./Structure/Types"
-import { renderMenu, renderCommandsBox } from "./Settings"
+import { renderMenu, renderCommandsBox, initializeSettings } from "./Settings"
 import { addMenuCommands, addTreeCommands, addCommandsBoxCommands } from "./Settings/commands"
 import { updateGlobalStateOnRender } from "./utils"
 
@@ -38,6 +38,8 @@ export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTML
             break;
         case ('tree'):
         default:
+            initializeSettings()
+
             const ul = renderTree(tree);
             const container = document.createElement('div');
             container.classList.add('olli-vis');
