@@ -118,7 +118,7 @@ function axisValuesToIntervals(values: string[] | number[]): ([number, number] |
  *
  * @returns The {@link AccessibilityTreeNode} from the provided parameters
  */
-function olliVisSpecToNode(type: NodeType, selected: OlliDatum[], parent: AccessibilityTreeNode | null, olliVisSpec: OlliVisSpec, fieldsUsed: string[], facetValue?: string, filterValue?: FilterValue, guide?: Guide, index?: number, length?: number, gridIndex?: {i: number, j: number}): AccessibilityTreeNode {
+function olliVisSpecToNode(type: NodeType, selected: OlliDatum[], parent: AccessibilityTreeNode | null, olliVisSpec: OlliVisSpec, fieldsUsed: string[], height: number = 0, facetValue?: string, filterValue?: FilterValue, guide?: Guide, index?: number, length?: number, gridIndex?: {i: number, j: number}): AccessibilityTreeNode {
     let node: AccessibilityTreeNode = {
         type,
         parent,
@@ -144,6 +144,7 @@ function olliVisSpecToNode(type: NodeType, selected: OlliDatum[], parent: Access
                     node,
                     chart,
                     fieldsUsed,
+                    height + 1,
                     facetValue,
                     undefined,
                     undefined,
@@ -169,6 +170,7 @@ function olliVisSpecToNode(type: NodeType, selected: OlliDatum[], parent: Access
                         node,
                         chart,
                         fieldsUsed,
+                        height + 1,
                         facetValue,
                         undefined,
                         axis);
@@ -180,12 +182,13 @@ function olliVisSpecToNode(type: NodeType, selected: OlliDatum[], parent: Access
                         node,
                         chart,
                         fieldsUsed,
+                        height + 1,
                         facetValue,
                         undefined,
                         legend);
                 }),
                 ...(chart.mark === 'point' && filteredAxes.length === 2 && filteredAxes.every(axis => axis.type === 'continuous') ? [
-                    olliVisSpecToNode('grid', selected, node, chart, fieldsUsed, facetValue)
+                    olliVisSpecToNode('grid', selected, node, chart, fieldsUsed, height + 1, facetValue)
                 ] : [])
             ]
             break;
@@ -201,6 +204,7 @@ function olliVisSpecToNode(type: NodeType, selected: OlliDatum[], parent: Access
                             node,
                             chart,
                             fieldsUsed,
+                            height + 1,
                             facetValue,
                             String(value),
                             axis,
@@ -217,6 +221,7 @@ function olliVisSpecToNode(type: NodeType, selected: OlliDatum[], parent: Access
                             node,
                             chart,
                             fieldsUsed,
+                            height + 1,
                             facetValue,
                             [a, b],
                             axis,
@@ -237,6 +242,7 @@ function olliVisSpecToNode(type: NodeType, selected: OlliDatum[], parent: Access
                             node,
                             chart,
                             fieldsUsed,
+                            height + 1,
                             facetValue,
                             String(value),
                             legend,
@@ -266,6 +272,7 @@ function olliVisSpecToNode(type: NodeType, selected: OlliDatum[], parent: Access
                     node,
                     chart,
                     fieldsUsed,
+                    height + 1,
                     facetValue,
                     [[x1, x2], [y1, y2]],
                     undefined, undefined, undefined, {i: Math.floor(index / yIntervals.length), j: index % yIntervals.length});
@@ -279,6 +286,7 @@ function olliVisSpecToNode(type: NodeType, selected: OlliDatum[], parent: Access
                     node,
                     chart,
                     fieldsUsed,
+                    height + 1,
                     facetValue,
                     undefined,
                     guide,
@@ -308,7 +316,7 @@ function olliVisSpecToNode(type: NodeType, selected: OlliDatum[], parent: Access
             throw `Node type ${type} not handled in olliVisSpecToNode`;
     }
 
-    node.description = nodeToDesc(node, olliVisSpec, facetValue, guide, index, length);
+    node.description = nodeToDesc(node, olliVisSpec, facetValue, guide, index, length, height);
 
     return node;
 }
@@ -346,10 +354,10 @@ function findFirstDataChild(node: AccessibilityTreeNode): AccessibilityTreeNode 
  * @param node The node whose description is being created
  * @returns A description based on the provided {@link AccessibilityTreeNode}
  */
-function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facetValue?: string, guide?: Guide, idx?: number, length?: number): Map<TokenType, string[]> {
-    return _nodeToDesc(node, olliVisSpec, facetValue, guide, idx, length);
+function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facetValue?: string, guide?: Guide, idx?: number, length?: number, height?: number): Map<TokenType, string[]> {
+    return _nodeToDesc(node, olliVisSpec, facetValue, guide, idx, length, height);
 
-    function _nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facetValue?: string, guide?: Guide, idx?: number, length?: number): Map<TokenType, string[]> {
+    function _nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facetValue?: string, guide?: Guide, idx?: number, length?: number, height?: number): Map<TokenType, string[]> {
         const chartType = (chart: Chart) => {
             if (chart.mark === 'point') {
                 if (chart.axes.every(axis => axis.type === 'continuous')) {
@@ -542,6 +550,10 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
             }
         }
 
+        function depth(node: AccessibilityTreeNode):string[] {
+            return [`depth ${height}`, `the tree depth is ${height}`];
+        }
+
         function aggregate(node: AccessibilityTreeNode):string[] {
             switch (node.type) {
                 case 'xAxis':
@@ -665,6 +677,7 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
             'data': data,
             'size': size,
             'facet': facet,
+            'depth': depth,
             'aggregate': aggregate,
             'quantile': quantile
         }
