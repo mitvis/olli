@@ -144,13 +144,13 @@ export function updateVerbosityDescription(dropdown: HTMLSelectElement, tree: Ac
   const settingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: string]: [TokenType, tokenLength][]}} = JSON.parse(localStorage.getItem('settingsData')!);
   const hierarchyLevel = dropdown.id.split('-')[0] as Exclude<HierarchyLevel, 'root'>;
   const customMenu = document.getElementById(`${hierarchyLevel}-custom`)!;
-  const descriptionText = dropdown.nextElementSibling! as HTMLElement;
+  const label = dropdown.previousElementSibling! as HTMLElement;
 
   if (dropdown.value === 'custom') {
     // Open the customization menu
     customMenu.setAttribute('style', 'display: block');
     customMenu.setAttribute('aria-hidden', 'false');
-    descriptionText.innerText = "Create a custom preset using the preset menu. Set verbosity for each element; use alt+left and alt+right to reorder elements."
+    label.innerText = "Create a custom preset using the preset menu. Set verbosity for each element; use alt+left and alt+right to reorder elements."
   } else {
     // Close custom menu (if it was open)
     customMenu.setAttribute('style', 'display: none');
@@ -158,7 +158,8 @@ export function updateVerbosityDescription(dropdown: HTMLSelectElement, tree: Ac
 
     // Updates based on the new setting:
     // description tokens listed in the menu
-    descriptionText.innerText = 'Description: ' + prettifyTokenTuples(settingsData[hierarchyLevel][dropdown.value]);
+    const desc = 'Description: ' + prettifyTokenTuples(settingsData[hierarchyLevel][dropdown.value]);
+    label.innerText = capitalizeFirst(`${hierarchyLevel} verbosity. ${desc}`);
     // node description in the tree
     rerenderTreeDescription(tree, document.getElementById('tree-root')!);
   }
