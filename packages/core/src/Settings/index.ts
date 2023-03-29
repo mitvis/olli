@@ -29,12 +29,13 @@ export function renderMenu(tree: AccessibilityTree): HTMLElement {
 
   const legend = document.createElement("p");
   legend.setAttribute("id", "settings-label");
-  legend.setAttribute('tabindex', '0')
+  // legend.setAttribute('tabindex', '0')
   legend.innerText = "Settings Menu";
   legend.setAttribute("aria-label", legend.innerText);
   root.appendChild(legend);
 
-  const form = document.createElement('form');
+  const form = document.createElement('div');
+  form.setAttribute('role', 'document');
 
   const settingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: string]: [TokenType, tokenLength][]}} = JSON.parse(localStorage.getItem('settingsData')!);
 
@@ -129,7 +130,7 @@ function makeIndivVerbosityMenu(hierarchyLevel: Exclude<HierarchyLevel, 'root'>,
   label.innerText = capitalizeFirst(`${hierarchyLevel} verbosity:`);
 
   const info = document.createElement('span');
-  info.setAttribute('tabindex', '0');
+  // info.setAttribute('tabindex', '0');
   info.innerText = 'Description: ' + prettifyTokenTuples(options[Object.keys(options)[0]]);
 
   // Add all preset options, plus 'custom' to make a new preset
