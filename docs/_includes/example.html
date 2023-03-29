@@ -47,7 +47,7 @@
     </div>
     {% endfor %}
     <script type="module">
-        const initAdapter = localStorage.getItem('selectedAdapter') ?? 'Vega-Lite';
+        const initAdapter = 'Vega-Lite';
         document.getElementById(`Block-Example-${initAdapter}`).classList.add('Select-Vis-Enabled');
         // document.querySelector(`#${initAdapter}`).setAttribute('selected', 'selected')
 
