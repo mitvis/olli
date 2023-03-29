@@ -92,7 +92,7 @@ export function rerenderTreeDescription(tree: AccessibilityTree, ul: HTMLElement
   // ul -> li[] | table
   // li -> [span, ul] | span
   // span, table have no children
-  
+
   if (ul.children.length) {
     for (const li of ul.children) {
       if (li.nodeName === 'TABLE') {
@@ -138,7 +138,7 @@ function createDataTable(dataNodes: AccessibilityTreeNode[], level: number) {
       const include = ordering[key];
       if (include < 0) return;
       // extra check for quantile since sometimes settings turn it on, but it is not generated (e.g. wrong axis)
-      if (key == 'quantile' && !(dataNodes[0].description.get('quantile')![0])) return; 
+      if (key == 'quantile' && !(dataNodes[0].description.get('quantile')![0])) return;
 
       tableKeys.push(name);
       tableKeysMap.push(key);
@@ -147,7 +147,7 @@ function createDataTable(dataNodes: AccessibilityTreeNode[], level: number) {
   // Reorder keys according to their indices (values of `ordering`)
   const orderedTableKeys: string[] = []
   const orderedTableKeysMap: string[] = []
-  
+
   for (let [token, _] of Object.entries(ordering).sort((a, b) => a[1] - b[1])) {
     const origIdx = tableKeysMap.indexOf(token);
     if (origIdx < 0) continue;
@@ -177,6 +177,7 @@ function createDataTable(dataNodes: AccessibilityTreeNode[], level: number) {
     const th = document.createElement("th");
     th.setAttribute('scope', 'col');
     th.innerText = key;
+    th.setAttribute('aria-label', key);
     theadtr.appendChild(th);
   });
 
@@ -186,7 +187,7 @@ function createDataTable(dataNodes: AccessibilityTreeNode[], level: number) {
   // Individual rows
   dataNodes.forEach((node, _) => {
     const dataRow = document.createElement("tr")
-    dataRow.setAttribute('aria-label', `${node.tableKeys?.map(key => `${key}: ${fmtValue(node.selected[0][key])}`).join(', ')}`);
+    dataRow.setAttribute('aria-label', `${orderedTableKeys?.map((key, idx) => `${key}: ${orderedTableKeysMap[idx] === 'quantile' ? node.description.get('quantile')![0] : fmtValue(node.selected[0][key])}`).join(', ')}`);
     orderedTableKeys?.forEach((key: string, idx: number) => {
       let value;
 
@@ -198,6 +199,7 @@ function createDataTable(dataNodes: AccessibilityTreeNode[], level: number) {
 
       const td = document.createElement("td")
       td.innerText = value;
+      td.setAttribute('aria-label', value);
       dataRow.appendChild(td);
     })
     tableBody.appendChild(dataRow);

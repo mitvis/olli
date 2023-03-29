@@ -7,8 +7,6 @@
     When Olli has focus, the following keyboard commands are available:
   </p>
   <ul>
-    <li>Ctrl-M / Escape — open or close the settings menu</li>
-    <li>Ctrl-I / Escape — open or close the command box</li>
     <li>Up / Down arrow — move up or down a level in the tree view</li>
     <li>Left / Right arrow — move to previous or next item in a level</li>
     <li>Home / End — move to first or last item in a level</li>
@@ -18,17 +16,13 @@
     <li>t — jump to top level of current tree</li>
     <!-- <li>W / A / S / D — when inside the grid of a scatterplot, move around the grid spatially</li> -->
   </ul>
-  <p>
-    When there is more than one Olli instance on the page:
-  </p>
+
+  {% if include.customize %}
+  <h5>Customization controls</h5>
+
   <ul>
-    <li>t — jump to the last visited instance (or the first one on the page if none have been visited)</li>
+    <li>m / Escape — open or close the settings menu</li>
+    <li>i / Escape — open or close the command box</li>
   </ul>
-  <p>
-    When focused on the top level of the current Olli tree:
-  </p>
-  <ul>
-    <li>t — jump to the next Olli tree on the page</li>
-    <li>shift + t — jump to the previous Olli tree</li>
-  </ul>
+  {% endif %}
 </div>

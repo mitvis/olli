@@ -24,11 +24,6 @@ export function renderMenu(tree: AccessibilityTree): HTMLElement {
   const root = document.createElement("fieldset");
   root.setAttribute("id", "settings");
 
-  const legend = document.createElement("legend");
-  legend.setAttribute("tabindex", "0");
-  legend.innerText = "Settings Menu";
-  root.appendChild(legend);
-
   const close = document.createElement("button");
   close.addEventListener("click", (event) => {
     root.dispatchEvent(new KeyboardEvent('keydown', {'key': 'Escape'}));
@@ -46,13 +41,8 @@ export function renderMenu(tree: AccessibilityTree): HTMLElement {
     cMenu.setAttribute('style', 'display: none');
     cMenu.setAttribute('aria-hidden', 'true');
     root.appendChild(cMenu);
-    
-  });
 
-  const text = document.createElement('p');
-  text.innerText = 'Press escape to close the menu. Press ctrl-m to open it.';
-  text.setAttribute('tabindex', '0');
-  root.appendChild(text);
+  });
 
   return root;
 }
@@ -113,17 +103,11 @@ function makeIndivVerbosityMenu(hierarchyLevel: Exclude<HierarchyLevel, 'root'>,
   // Make the dropdown container
   const dropdown = document.createElement('select');
   dropdown.id = `${hierarchyLevel}-verbosity`
-  dropdown.addEventListener('change', (event) => {
-    updateVerbosityDescription(dropdown, tree);
-  });
 
   const label = document.createElement('label');
   label.setAttribute('for', `${hierarchyLevel}-verbosity`);
-  label.innerText = capitalizeFirst(`${hierarchyLevel} verbosity:`);
-
-  const info = document.createElement('span');
-  info.setAttribute('tabindex', '0');
-  info.innerText = 'Description: ' + prettifyTokenTuples(options[Object.keys(options)[0]]);
+  const desc = 'Description: ' + prettifyTokenTuples(options[Object.keys(options)[0]]);
+  label.innerText = capitalizeFirst(`${hierarchyLevel} verbosity. ${desc}`);
 
   // Add all preset options, plus 'custom' to make a new preset
   for (let option of Object.keys(options)) {
@@ -138,18 +122,13 @@ function makeIndivVerbosityMenu(hierarchyLevel: Exclude<HierarchyLevel, 'root'>,
   dropdown.appendChild(custom);
 
   dropdown.addEventListener('change', (event) => {
-    if (dropdown.value !== 'custom') {
-      srSpeakingHack(`${dropdown.id.split("-")[0]} verbosity set to ${dropdown.value}`);
-    } else {
-      srSpeakingHack('Custom menu open')
-    }
+    updateVerbosityDescription(dropdown, tree);
   })
 
   const container = document.createElement('div');
   container.id = `${hierarchyLevel}-verbosity-container`;
   container.appendChild(label);
   container.appendChild(dropdown);
-  container.append(info);
 
   return container;
 }
@@ -158,13 +137,14 @@ export function updateVerbosityDescription(dropdown: HTMLSelectElement, tree: Ac
   const settingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: string]: [TokenType, tokenLength][]}} = JSON.parse(localStorage.getItem('settingsData')!);
   const hierarchyLevel = dropdown.id.split('-')[0] as Exclude<HierarchyLevel, 'root'>;
   const customMenu = document.getElementById(`${hierarchyLevel}-custom`)!;
-  const descriptionText = dropdown.nextElementSibling! as HTMLElement;
+  const label = dropdown.previousElementSibling! as HTMLElement;
 
   if (dropdown.value === 'custom') {
     // Open the customization menu
     customMenu.setAttribute('style', 'display: block');
     customMenu.setAttribute('aria-hidden', 'false');
-    descriptionText.innerText = "Create a custom preset using the preset menu. Set verbosity for each element; use alt/option-left and alt/option-right to reorder elements."
+    label.innerText = "Create a custom preset using the preset menu. Set verbosity for each element; use alt+left and alt+right to reorder elements."
+    srSpeakingHack('Custom menu open')
   } else {
     // Close custom menu (if it was open)
     customMenu.setAttribute('style', 'display: none');
@@ -172,9 +152,12 @@ export function updateVerbosityDescription(dropdown: HTMLSelectElement, tree: Ac
 
     // Updates based on the new setting:
     // description tokens listed in the menu
-    descriptionText.innerText = 'Description: ' + prettifyTokenTuples(settingsData[hierarchyLevel][dropdown.value]);
+    const desc = 'Description: ' + prettifyTokenTuples(settingsData[hierarchyLevel][dropdown.value]);
+    label.innerText = capitalizeFirst(`${hierarchyLevel} verbosity. ${desc}`);
     // node description in the tree
     rerenderTreeDescription(tree, document.getElementById('tree-root')!);
+
+    srSpeakingHack(`${dropdown.id.split("-")[0]} verbosity set to ${dropdown.value}. ${desc}`);
   }
 }
 
@@ -207,7 +190,7 @@ function makeIndivCustomMenu(hierarchyLevel: Exclude<HierarchyLevel, 'root'>, tr
       opt.value = option;
       dropdown.appendChild(opt);
     }
-    
+
     const label = document.createElement('label');
     label.setAttribute('for', `${hierarchyLevel}-${token}`);
     label.innerText = tokenDescs[token];
@@ -237,15 +220,15 @@ function savePreset(hierarchyLevel: Exclude<HierarchyLevel, 'root'>, tree: Acces
   // Close the custom menu since user is done with it
   customMenu.setAttribute('style', 'display: none');
   customMenu.setAttribute('aria-hidden', 'true');
-  
+
   // Store the new preset in settingsData
   const settingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: string]: [TokenType, tokenLength][]}} = JSON.parse(localStorage.getItem('settingsData')!);
   const presetName = (document.getElementById(`${hierarchyLevel}-custom-name`)! as HTMLInputElement).value;
   settingsData[hierarchyLevel][presetName] = getCurrentCustom(hierarchyLevel);
   localStorage.setItem('settingsData', JSON.stringify(settingsData));
   updateVerbosityDropdown(hierarchyLevel);
-  
-  // Set the dropdown to this preset and update the description accordingly 
+
+  // Set the dropdown to this preset and update the description accordingly
   // (acting as though user had selected their new preset from the dropdown menu)
   const dropdown = document.getElementById(`${hierarchyLevel}-verbosity`)! as HTMLSelectElement;
   dropdown.value = presetName;
@@ -285,7 +268,7 @@ export const focusTokens = Object.fromEntries(tokenType.map(token => [token, fal
 /**
  * Given a node with all possible description tokens, return a formatted string
  * including only those tokens which the settings define as currently visible
- * 
+ *
  * @param node A {@link AccessibilityTreeNode} with a description map
  * @returns A formatted string description for the node
  */
@@ -328,7 +311,7 @@ export function getDescriptionWithSettings(node: AccessibilityTreeNode, lengthFl
   function formatDescTokens(description: string[]) {
     return description.filter(x => x.length > 0).map(capitalizeFirst).join('. ') + '.';
   }
-  
+
   return formatDescTokens(description);
 }
 

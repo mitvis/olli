@@ -51,6 +51,7 @@ export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTML
             const ul = renderTree(tree);
             const container = document.createElement('div');
             container.classList.add('olli-vis');
+            container.setAttribute('role', 'application');
             container.appendChild(ul);
             htmlRendering.appendChild(container);
             const t = new Tree(ul, config.onFocus);
