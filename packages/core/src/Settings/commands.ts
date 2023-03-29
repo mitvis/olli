@@ -50,8 +50,8 @@ export function addMenuCommands(menu: HTMLElement, t: Tree) {
   });
 
   // Keep settings menu a closed environment by blocking tab-forward at end and tab-back at beginning
-  const first = menu.firstElementChild! as HTMLElement;
-  const last = menu.lastElementChild! as HTMLElement;
+  const first = menu.querySelector(':enabled')! as HTMLElement;
+  const last = [...menu.querySelectorAll('select:enabled')].filter(x => !(x.parentElement as any).closest('#settings > div[aria-hidden="true"]')).reverse()[0]! as HTMLElement;
   first.addEventListener('keydown', (event) => {
     if (event.key === "Tab" && event.shiftKey) {
       event.preventDefault();

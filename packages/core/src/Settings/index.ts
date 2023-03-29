@@ -24,12 +24,6 @@ export function renderMenu(tree: AccessibilityTree): HTMLElement {
   const root = document.createElement("fieldset");
   root.setAttribute("id", "settings");
 
-  const legend = document.createElement("legend");
-  legend.setAttribute("tabindex", "0");
-  legend.innerText = "Settings Menu";
-  legend.setAttribute('aria-label', legend.innerText);
-  root.appendChild(legend);
-
   const close = document.createElement("button");
   close.addEventListener("click", (event) => {
     root.dispatchEvent(new KeyboardEvent('keydown', {'key': 'Escape'}));
@@ -49,12 +43,6 @@ export function renderMenu(tree: AccessibilityTree): HTMLElement {
     root.appendChild(cMenu);
 
   });
-
-  const text = document.createElement('p');
-  text.innerText = 'Press escape to close the menu. Press m to open it.';
-  text.setAttribute('tabindex', '0');
-  text.setAttribute('aria-label', text.innerText);
-  root.appendChild(text);
 
   return root;
 }
