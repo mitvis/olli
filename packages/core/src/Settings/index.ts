@@ -25,42 +25,41 @@ export function renderMenu(tree: AccessibilityTree): HTMLElement {
   // Make the menu container
   const root = document.createElement("dialog");
   root.setAttribute("id", "settings");
-  root.setAttribute("role", "form");
+  root.setAttribute("aria-labelledby", "settings-label");
 
   const legend = document.createElement("p");
-  legend.setAttribute("tabindex", "0");
+  legend.setAttribute("id", "settings-label");
+  legend.setAttribute('tabindex', '0')
   legend.innerText = "Settings Menu";
-  legend.setAttribute('aria-label', legend.innerText)
+  legend.setAttribute("aria-label", legend.innerText);
   root.appendChild(legend);
 
-  const close = document.createElement("button");
-  close.addEventListener("click", (event) => {
-    root.close();
-  });
-  close.innerText = "Close";
-  root.appendChild(close);
-
+  const form = document.createElement('form');
 
   const settingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: string]: [TokenType, tokenLength][]}} = JSON.parse(localStorage.getItem('settingsData')!);
 
   // Make individual menus for each hierarchy level
   Object.keys(settingsData).forEach(hierarchyLevel => {
     // Verbosity options (high, low, custom)
-    root.appendChild(makeIndivVerbosityMenu(hierarchyLevel as Exclude<HierarchyLevel, 'root'>, tree));
+    form.appendChild(makeIndivVerbosityMenu(hierarchyLevel as Exclude<HierarchyLevel, 'root'>, tree));
 
     // Menu to add custom preset - hidden until 'custom' option is selected
     const cMenu = makeIndivCustomMenu(hierarchyLevel as Exclude<HierarchyLevel, 'root'>, tree);
     cMenu.setAttribute('style', 'display: none');
     cMenu.setAttribute('aria-hidden', 'true');
-    root.appendChild(cMenu);
-
+    form.appendChild(cMenu);
   });
 
-  const text = document.createElement('p');
-  text.innerText = 'Press escape to close the menu. Press m to open it.';
-  text.setAttribute('aria-label', text.innerText)
-  text.setAttribute('tabindex', '0');
-  root.appendChild(text);
+  root.appendChild(form);
+
+  const close = document.createElement("button");
+  close.addEventListener("click", (event) => {
+    root.close();
+    root.setAttribute('style', 'display: none');
+    root.setAttribute('aria-hidden', 'true');
+  });
+  close.innerText = "Close";
+  root.appendChild(close);
 
   return root;
 }
