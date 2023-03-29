@@ -75,8 +75,7 @@ export function addTreeCommands(treeElt: HTMLElement, tree: AccessibilityTree, t
         menu.setAttribute('style', 'display: block');
         menu.setAttribute('aria-hidden', 'false');
         setTimeout(() => {
-          legend.focus();
-          legend.setAttribute('aria-selected', 'true');
+          (menu.querySelector(':enabled') as any)?.focus();
         }, 0);
       }
 
