@@ -27,6 +27,7 @@ export function renderMenu(tree: AccessibilityTree): HTMLElement {
   const legend = document.createElement("legend");
   legend.setAttribute("tabindex", "0");
   legend.innerText = "Settings Menu";
+  legend.setAttribute('aria-label', legend.innerText);
   root.appendChild(legend);
 
   const close = document.createElement("button");
@@ -52,6 +53,7 @@ export function renderMenu(tree: AccessibilityTree): HTMLElement {
   const text = document.createElement('p');
   text.innerText = 'Press escape to close the menu. Press m to open it.';
   text.setAttribute('tabindex', '0');
+  text.setAttribute('aria-label', text.innerText);
   root.appendChild(text);
 
   return root;
@@ -119,11 +121,8 @@ function makeIndivVerbosityMenu(hierarchyLevel: Exclude<HierarchyLevel, 'root'>,
 
   const label = document.createElement('label');
   label.setAttribute('for', `${hierarchyLevel}-verbosity`);
-  label.innerText = capitalizeFirst(`${hierarchyLevel} verbosity:`);
-
-  const info = document.createElement('span');
-  info.setAttribute('tabindex', '0');
-  info.innerText = 'Description: ' + prettifyTokenTuples(options[Object.keys(options)[0]]);
+  const desc = 'Description: ' + prettifyTokenTuples(options[Object.keys(options)[0]]);
+  label.innerText = capitalizeFirst(`${hierarchyLevel} verbosity. ${desc}`);
 
   // Add all preset options, plus 'custom' to make a new preset
   for (let option of Object.keys(options)) {
@@ -149,7 +148,6 @@ function makeIndivVerbosityMenu(hierarchyLevel: Exclude<HierarchyLevel, 'root'>,
   container.id = `${hierarchyLevel}-verbosity-container`;
   container.appendChild(label);
   container.appendChild(dropdown);
-  container.append(info);
 
   return container;
 }
