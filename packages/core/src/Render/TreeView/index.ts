@@ -112,12 +112,14 @@ export function rerenderTreeDescription(tree: AccessibilityTree, ul: HTMLElement
 
 /**
  *
- * @param node The {@link HTMLElement} to find in the tree
- * @param tree The {@link AccessibilityTree} to look for the node in
+ * @param node The {@link HTMLElement} whose corresponding element we
+ *             want to find in the {@link AccessibilityTree} tree
+ * @param tree The {@link AccessibilityTree} to look for the matching node in
  * @returns An {@link AccessibilityTreeNode} matching the HTML node input
  */
 export function htmlNodeToTree(node: HTMLElement, tree: AccessibilityTree): AccessibilityTreeNode {
   let cur = tree.root;
+  // path has form root-1-2-3 etc; we split on -, remove the starting info, and map the rest to numbers
   const path = node.id.split('-').slice(2).map(x => Number(x));
   for (const idx of path) {
     cur = cur.children[idx];
