@@ -327,7 +327,7 @@ function findNumericField(node: AccessibilityTreeNode, axis: Axis): string | und
 
         field = key;
     }
-    
+
     return field;
 }
 
@@ -376,6 +376,26 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
         const axisScaleType = (axis: Axis) => `${axis.scaleType || axis.type} scale`;
         const legendChannel = (legend: Legend) => legend.channel ? `for ${legend.channel}` : '';
         const pluralize = (count: number, noun: string, suffix = 's') => `${count} ${noun}${count !== 1 ? suffix : ''}`;
+        function ordinal_suffix_of(i: number) { // st, nd, rd, th
+            var j = i % 10,
+                k = i % 100;
+            if (j == 1 && k != 11) {
+                return i + "st";
+            }
+            if (j == 2 && k != 12) {
+                return i + "nd";
+            }
+            if (j == 3 && k != 13) {
+                return i + "rd";
+            }
+            return i + "th";
+        }
+        const a_or_an_scale = (scaleType: string) => {
+            if (scaleType.charAt(0) === 'o') {
+                return `an ${scaleType}`;
+            }
+            return `a ${scaleType}`
+        }
         const facetValueStr = (facetValue?: string) => facetValue ? `${facetValue}` : '';
         const filteredValues = (guideFilterValues?: EncodingFilterValue) => {
             if (!guideFilterValues) return '';
@@ -392,7 +412,7 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
         }
         const indexStr = (index?: number, length?: number) => index !== undefined && length !== undefined ? `${index + 1} of ${length}` : '';
         const datum = (datum: OlliDatum, node: AccessibilityTreeNode) => {
-            return node.tableKeys?.map(field => { 
+            return node.tableKeys?.map(field => {
                 // maybe just literally filter out symbol here, so it can be returned in parent function like it should be?
                 // would then need some new way to concat data and parent in settings format but that's ok probably
                 const value = fmtValue(datum[field]);
@@ -407,12 +427,12 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
         }
 
         const maximumValue = (data: OlliDatum[], field: string) => {
-            return fmtValue(data.reduce((a, b) => Math.max(a,  Number(b[field])), 
+            return fmtValue(data.reduce((a, b) => Math.max(a,  Number(b[field])),
                                         Number(data[0][field])));
         }
 
         const minimumValue = (data: OlliDatum[], field: string) => {
-            return fmtValue(data.reduce((a, b) => Math.min(a,  Number(b[field])), 
+            return fmtValue(data.reduce((a, b) => Math.min(a,  Number(b[field])),
                                         Number(data[0][field])));
         }
 
@@ -427,17 +447,17 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
                     return [`faceted chart ${title}, ${node.children.length} views`, `a faceted chart ${title.length > 0 ? `titled ${title}`: title} with ${node.children.length} views`];
                 case 'chart':
                     title = chartTitle(olliVisSpec);
-                    return [title, title.length > 0 ? `titled ${title}` : title]  
+                    return [title, title.length > 0 ? `titled ${title}` : title]
                 case 'xAxis':
                 case 'yAxis':
-                    return Array(2).fill(`${axis.axisType}-axis ${guideTitle(axis)}`); 
+                    return Array(2).fill(`${axis.axisType}-axis ${guideTitle(axis)}`);
                 case 'legend':
                     return Array(2).fill(`legend ${guideTitle(legend)}`);
                 case 'grid':
                     return ['grid', `grid view of ${chartType(chart)}`];
                 default:
                     throw `Node type ${node.type} does not have the token name.`;
-            } 
+            }
         }
 
         function index(node: AccessibilityTreeNode):string[] {
@@ -456,7 +476,7 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
                     return Array(2).fill(chartType(chart));
                 case 'xAxis':
                 case 'yAxis':
-                    return [axisScaleType(axis), 'for a ' + axisScaleType(axis)];
+                    return [axisScaleType(axis), 'for ' + a_or_an_scale(axisScaleType(axis))];
                 case 'legend':
                     return Array(2).fill(legendChannel(legend));
                 case 'grid':
@@ -489,12 +509,12 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
                     const next = fmtValue(axis.values[1]);
                     const end = fmtValue(axis.values[axis.values.length - 1]);
                     const total = pluralize(axis.values.length, 'value');
-                    return (axis.type === 'discrete') ? 
+                    return (axis.type === 'discrete') ?
                     (
                         (axis.values.length === 2) ?
                         [`2 values: ${start}, ${next}`, `with 2 values: "${start}" and "${next}"`] :
                         [`${total} from ${start} to ${end}`, `with ${total} starting with "${start}" and ending with "${end}"`]
-                    ) : 
+                    ) :
                     [`from ${start} to ${end}`, `with values from "${start}" to "${end}"`]
                 case 'grid':
                     return ['', '']; // grid is weird
@@ -545,7 +565,7 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
         function aggregate(node: AccessibilityTreeNode):string[] {
             switch (node.type) {
                 case 'xAxis':
-                case 'yAxis': 
+                case 'yAxis':
                 case 'filteredData':
                     const sampleChild = findFirstDataChild(node);
                     if (!sampleChild || !axis  || !node.selected.length) return ['', ''];
@@ -556,7 +576,7 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
                     const avg = averageValue(node.selected, field);
                     const max = maximumValue(node.selected, field);
                     const min = minimumValue(node.selected, field);
-                    return [`average ${avg}, maximum ${max}, minimum ${min}`, 
+                    return [`average ${avg}, maximum ${max}, minimum ${min}`,
                     `the average for the "${field}" field is ${avg}, the maximum is ${max}, and the minimum is ${min}`];
                 case 'legend':
                 case 'grid':
@@ -575,7 +595,7 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
                     let maybeField = findNumericField(sampleChild, axis);
                     if (maybeField === undefined) return ['', ''];
                     let field: string = String(maybeField)
-                    
+
                     // Identify the sections we're comparing against
                     // Note - copy of the olliVisSpecToNode logic for guide types
                     let sections;
@@ -585,13 +605,13 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
                             const axis = guide as Axis;
                             switch (axis.type) {
                                 case "discrete":
-                                    sections = axis.values.map((value, idx)=> 
+                                    sections = axis.values.map((value, idx)=>
                                         node.parent!.selected.filter(d => String(d[axis.field]) === String(value))
                                     );
                                     break;
                                 case "continuous":
                                     const intervals = axisValuesToIntervals(axis.values);
-                                    sections = intervals.map(([a, b], idx) => 
+                                    sections = intervals.map(([a, b], idx) =>
                                         filterInterval(node.parent!.selected, axis.field, a, b)
                                     );
                                     break;
@@ -601,7 +621,7 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
                             const legend = guide as Legend;
                             switch (legend.type) {
                                 case "discrete":
-                                    sections = legend.values.map((value, idx) => 
+                                    sections = legend.values.map((value, idx) =>
                                         node.parent!.selected.filter(d => String(d[legend.field]) === String(value))
                                     );
                                     break;
@@ -627,14 +647,15 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
                         const avg = averageValue(interval, field);
                         avgs.push(Number(avg));
                     });
-                    
+
                     avgs.sort(function(a, b) {
                         return a - b;
                       });
                     const thisAvg = node.selected.length == 0 ? 0 : averageValue(node.selected, field)
                     const sectionsPos = avgs.indexOf(Number(thisAvg))/avgs.length;
                     const sectionsQuart = Math.max(1, Math.ceil(sectionsPos * 4)); // pos is btwn 0 and 1, no quartile 0
-                    return [`quartile ${sectionsQuart} by average`, `quartile ${sectionsQuart} when compared by section average over the "${field}" field`]
+                    return [`${ordinal_suffix_of(sectionsQuart)} quartile by average`, `This section's average ${field} is in the ${ordinal_suffix_of(sectionsQuart)} quartile  of all sections`]
+
 
                 case 'data':
                     // figure out what field we're calculating the quantile over
