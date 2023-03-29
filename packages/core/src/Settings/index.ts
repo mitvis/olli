@@ -25,6 +25,7 @@ export function renderMenu(tree: AccessibilityTree): HTMLElement {
   // Make the menu container
   const root = document.createElement("dialog");
   root.setAttribute("id", "settings");
+  root.setAttribute("role", "form");
 
   const legend = document.createElement("p");
   legend.setAttribute("tabindex", "0");
