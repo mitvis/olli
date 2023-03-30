@@ -63,7 +63,7 @@ export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTML
             })
 
             const submit = document.createElement('button');
-            submit.innerText = "Submit logs"
+            submit.innerText = "Finish study"
             submit.addEventListener('click', () => {
                 const formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSeNGFhokzskkyxfgZz6hVHK1W-TbItjzgMsOw_LbEICNGxRAg/formResponse?usp=pp_url&entry.1882377581='
                 fetch(formUrl + JSON.stringify(log), {
