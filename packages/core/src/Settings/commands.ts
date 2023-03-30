@@ -11,9 +11,7 @@ export function addMenuCommands(menu: HTMLElement, t: Tree) {
       const menu = document.getElementById('settings')!;
       menu.setAttribute('style', 'display: none');
       menu.setAttribute('aria-hidden', 'true');
-      setTimeout(() => { // The zero timeout should not be necessary but it is
-        t.setFocusToItem(t.lastFocusedItem);
-      }, 0);
+      t.setFocusToItem(t.lastFocusedItem);
 
     } else if (event.altKey && event.key === 'ArrowLeft') {
       // Reorder custom preset items

@@ -219,6 +219,7 @@ export class TreeItem {
                     // flag = true;
                 // } else {
                     if (this.inGroup) {
+                        if (this?.parent?.isExpandable && this.parent.isExpanded()) this.tree.collapseTreeItem(this.parent);
                         this.tree.setFocusToParentItem(this);
                         flag = true;
                     }
@@ -273,7 +274,7 @@ export class TreeItem {
             event.preventDefault();
         }
     }
-    
+
     handleClick(event: MouseEvent) {
         if (this.isExpandable) {
             if (this.isExpanded()) {
