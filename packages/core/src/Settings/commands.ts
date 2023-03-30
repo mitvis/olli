@@ -4,6 +4,8 @@ import { htmlNodeToTree, rerenderTreeDescription } from "../Render/TreeView";
 import { getDescriptionWithSettings, updateVerbosityDescription, getCurrentCustom, prettifyTokenTuples, focusTokens } from "./index";
 import { nodeIsTextInput } from "../utils";
 
+export const log: {[k: string]: string}[] = [];
+
 export function addMenuCommands(menu: HTMLElement, t: Tree) {
   menu.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
@@ -14,6 +16,8 @@ export function addMenuCommands(menu: HTMLElement, t: Tree) {
       setTimeout(() => { // The zero timeout should not be necessary but it is
         t.setFocusToItem(t.lastFocusedItem);
       }, 0);
+
+      log.push({'action': 'close', 'target': 'settings'});
 
     } else if (event.altKey && event.key === 'ArrowLeft') {
       // Reorder custom preset items
@@ -77,6 +81,8 @@ export function addTreeCommands(treeElt: HTMLElement, tree: AccessibilityTree, t
         setTimeout(() => {
           (menu.querySelector(':enabled') as any)?.focus();
         }, 0);
+
+        log.push({'action': 'open', 'target': 'settings'});
       }
 
       if (event.key === 'i') {
@@ -88,6 +94,8 @@ export function addTreeCommands(treeElt: HTMLElement, tree: AccessibilityTree, t
           (dropdown.firstElementChild! as HTMLElement).focus();
           dropdown.setAttribute('aria-selected', 'true');
         }, 0);
+
+        log.push({'action': 'open', 'target': 'commands'});
       }
     }
   })
@@ -105,6 +113,7 @@ export function addCommandsBoxCommands(commandsBox: HTMLElement, tree: Accessibi
 
     if (event.key === 'Enter') {
       const command = dropdown.selectedOptions[0].value;
+      log.push({'action': 'dropdown', 'target': 'commands', 'value': command});
 
       for (const token of tokenType) {
         if (command === token) {
@@ -164,7 +173,8 @@ export function addCommandsBoxCommands(commandsBox: HTMLElement, tree: Accessibi
     if (event.key === 'Enter' || event.key === 'Escape') {
       commandsBox.setAttribute('style', 'display: none');
       commandsBox.setAttribute('aria-hidden', 'true');
-        t.setFocusToItem(t.lastFocusedItem);
+      t.setFocusToItem(t.lastFocusedItem);
+      log.push({'action': 'close', 'target': 'commands'});
     }
 
     // Closed environment, can't tab out

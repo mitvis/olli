@@ -516,7 +516,6 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
                     const start = fmtValue(axis.values[0]);
                     const next = fmtValue(axis.values[1]);
                     const end = fmtValue(axis.values[axis.values.length - 1]);
-                    // const total = pluralize(axis.values.length, 'value');
                     return (axis.type === 'discrete') ?
                     (
                         (axis.values.length === 2) ?

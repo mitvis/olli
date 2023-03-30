@@ -19,10 +19,29 @@
 
   {% if include.customize %}
   <h5>Customization controls</h5>
-
+  <p>
+    The settings menu and command box allow you to make changes to the appearance of individual tokens.
+    You can access them with these keyboard commands:
+  </p>
   <ul>
     <li>m / Escape — open or close the settings menu</li>
     <li>i / Escape — open or close the command box</li>
+  </ul>
+  <p>
+    This is the list of tokens:
+  </p>
+  <ul>
+    <!-- copy of core/src/settings/data.ts tokenDescs -->
+    <li>index — index in set (e.g. "1 of 5 ")</li>
+    <li>type — type of element (e.g. "temporal scale", "line chart")</li>
+    <li>size — size of children (e.g. "10 values")</li>
+    <li>data — data value or range (e.g. "0 to 800 ", "price: 50 ")</li>
+    <li>aggregate — aggregate statistics including minimum, maximum, and average (e.g. "average: 50 ")</li>
+    <li>facet — facet name (e.g. "profit" and "expenditures")</li>
+    <li>name — name (e.g. "x-axis titled price")</li>
+    <li>children — children's names (e.g. at the root, "axes titled date and price")</li>
+    <li>quantile — quantile of current data (e.g. "quartile: 1 ")</li>
+    <li>depth — depth of element in tree (e.g. "depth: 3 ")</li>
   </ul>
   {% endif %}
 </div>

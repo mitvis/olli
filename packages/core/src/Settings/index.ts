@@ -1,8 +1,7 @@
 import { AccessibilityTree, AccessibilityTreeNode, TokenType, tokenType, tokenLength, HierarchyLevel, hierarchyLevel, nodeTypeToHierarchyLevel, hierarchyLevelToTokens } from "../Structure/Types";
-import { renderTree, rerenderTreeDescription } from "../Render/TreeView"
-import { Tree } from "../Render/TreeView/Tree"
+import { rerenderTreeDescription } from "../Render/TreeView"
 import { tokenDescs, defaultSettingsData } from "./data"
-import { srSpeakingHack } from "./commands"
+import { srSpeakingHack, log } from "./commands"
 
 /**
  * Constructs the settings menu from the settings objects above
@@ -158,7 +157,11 @@ export function updateVerbosityDescription(dropdown: HTMLSelectElement, tree: Ac
     rerenderTreeDescription(tree, document.getElementById('tree-root')!);
 
     srSpeakingHack(`${dropdown.id.split("-")[0]} verbosity set to ${dropdown.value}. ${desc}`);
+
+    log.push({'action': 'dropdown', 'target': `settings-${hierarchyLevel}`, 'value': dropdown.value});
   }
+
+  
 }
 
 function makeIndivCustomMenu(hierarchyLevel: Exclude<HierarchyLevel, 'root'>, tree: AccessibilityTree) {
@@ -224,7 +227,8 @@ function savePreset(hierarchyLevel: Exclude<HierarchyLevel, 'root'>, tree: Acces
   // Store the new preset in settingsData
   const settingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: string]: [TokenType, tokenLength][]}} = JSON.parse(localStorage.getItem('settingsData')!);
   const presetName = (document.getElementById(`${hierarchyLevel}-custom-name`)! as HTMLInputElement).value;
-  settingsData[hierarchyLevel][presetName] = getCurrentCustom(hierarchyLevel);
+  const custom = getCurrentCustom(hierarchyLevel);
+  settingsData[hierarchyLevel][presetName] = custom;
   localStorage.setItem('settingsData', JSON.stringify(settingsData));
   updateVerbosityDropdown(hierarchyLevel);
 
@@ -248,6 +252,8 @@ function savePreset(hierarchyLevel: Exclude<HierarchyLevel, 'root'>, tree: Acces
   option.innerText = presetName;
   option.value = presetName;
   commands.appendChild(option);
+
+  log.push({'action': 'custom', 'target': `settings-${hierarchyLevel}`, 'value': JSON.stringify(custom)});
 }
 
 export function getCurrentCustom(hierarchyLevel: string) {

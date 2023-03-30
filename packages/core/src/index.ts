@@ -5,7 +5,7 @@ import { renderTree } from "./Render/TreeView"
 import { olliVisSpecToTree } from "./Structure"
 import { AccessibilityTree } from "./Structure/Types"
 import { renderMenu, renderCommandsBox } from "./Settings"
-import { addMenuCommands, addTreeCommands, addCommandsBoxCommands } from "./Settings/commands"
+import { addMenuCommands, addTreeCommands, addCommandsBoxCommands, log } from "./Settings/commands"
 import { updateGlobalStateOnRender } from "./utils"
 
 export * from './Types';
@@ -61,6 +61,20 @@ export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTML
                     t.setFocusToItem(t.rootTreeItem);
                 }
             })
+
+            const submit = document.createElement('button');
+            submit.innerText = "Submit logs"
+            submit.addEventListener('click', () => {
+                const formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSeNGFhokzskkyxfgZz6hVHK1W-TbItjzgMsOw_LbEICNGxRAg/formResponse?usp=pp_url&entry.1882377581='
+                fetch(formUrl + JSON.stringify(log), {
+                    mode: 'no-cors',
+                    method: 'GET',
+                });
+            });
+            const submitHeader = document.createElement('h5');
+            submitHeader.innerText = 'Finish study';
+            htmlRendering.appendChild(submitHeader);
+            htmlRendering.appendChild(submit);
 
             addMenuCommands(menu, t);
             addTreeCommands(ul, tree, t);
