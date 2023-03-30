@@ -37,8 +37,10 @@
         <div>
             <h4>Olli tree view:</h4>
             <div id="AccessibilityTree-{{ adapter.name }}" class="Tree"></div>
-            <h4>{{adapter.name}} Visualization (aria-hidden):</h4>
-            <div id="Visualization-{{ adapter.name }}" aria-hidden="true"></div>
+            <div aria-hidden="true">
+                <h4>{{adapter.name}} Visualization (aria-hidden):</h4>
+                <div id="Visualization-{{ adapter.name }}"></div>
+            </div>
         </div>
         <!-- <h4>Code:</h4>
 

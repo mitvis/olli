@@ -71,23 +71,25 @@ export class Tree {
     }
 
     setFocusToItem(treeitem: TreeItem) {
-        for (var i = 0; i < this.treeItems.length; i++) {
-            var ti = this.treeItems[i];
+        window.requestAnimationFrame(() => {
+            for (var i = 0; i < this.treeItems.length; i++) {
+                var ti = this.treeItems[i];
 
-            if (ti === treeitem) {
-              ti.domNode.tabIndex = 0;
-              ti.domNode.focus();
-              ti.domNode.setAttribute('aria-selected', 'true');
-              this.lastFocusedItem = ti;
-              if (this.onFocus) {
-                this.onFocus(ti.domNode);
-              }
-              setOlliGlobalState({lastVisitedTree: this});
-            } else {
-              ti.domNode.tabIndex = -1;
-              ti.domNode.setAttribute('aria-selected', 'false');
+                if (ti === treeitem) {
+                  ti.domNode.tabIndex = 0;
+                  ti.domNode.focus();
+                  ti.domNode.setAttribute('aria-selected', 'true');
+                  this.lastFocusedItem = ti;
+                  if (this.onFocus) {
+                    this.onFocus(ti.domNode);
+                  }
+                  setOlliGlobalState({lastVisitedTree: this});
+                } else {
+                  ti.domNode.tabIndex = -1;
+                  ti.domNode.setAttribute('aria-selected', 'false');
+                }
             }
-        }
+        })
     }
 
     setFocusToNextItem(currentItem: TreeItem) {
@@ -120,8 +122,6 @@ export class Tree {
         if (currentItem.parent) {
             currentItem.parent.lastVisitedChild = currentItem;
             this.setFocusToItem(currentItem.parent);
-            // if (currentItem.isExpandable && currentItem.isExpanded()) this.collapseTreeItem(currentItem);
-            if (currentItem.parent.isExpandable && currentItem.parent.isExpanded()) this.collapseTreeItem(currentItem.parent);
         }
     }
 
@@ -290,7 +290,7 @@ export class Tree {
 
     currentlyTypingToken = () => {
         // don't activate any other commands if writing a preset name
-        if (document.activeElement && (document.activeElement.id.endsWith('custom-name') || 
+        if (document.activeElement && (document.activeElement.id.endsWith('custom-name') ||
             (document.activeElement.id === 'command-dropdown'))) {
             return true;
         }
