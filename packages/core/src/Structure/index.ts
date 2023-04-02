@@ -452,7 +452,7 @@ function nodeToDesc(node: AccessibilityTreeNode, olliVisSpec: OlliVisSpec, facet
             switch (node.type) {
                 case 'multiView':
                     let title = chartTitle(olliVisSpec);
-                    return [`faceted chart ${title}, ${node.children.length} views`, `a faceted chart ${title.length > 0 ? `titled ${title}`: title} with ${node.children.length} views`];
+                    return [`faceted chart ${title}, ${node.children.length} views`, `a faceted chart ${title.length > 0 ? `titled ${title} `: title}with ${node.children.length} views`];
                 case 'chart':
                     title = chartTitle(olliVisSpec);
                     return [title, title.length > 0 ? `titled ${title}` : title]

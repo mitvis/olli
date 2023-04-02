@@ -119,10 +119,14 @@ export function addCommandsBoxCommands(commandsBox: HTMLElement, tree: Accessibi
           const currentNode = t.lastFocusedItem.domNode;
           const treeNode: AccessibilityTreeNode = htmlNodeToTree(currentNode, tree);
           if (treeNode.description.has(command as TokenType)) {
-            const hLevel = nodeTypeToHierarchyLevel[treeNode.type] as Exclude<HierarchyLevel, 'root'>;
-            const verbosity = (document.getElementById(`${hLevel}-verbosity`) as HTMLSelectElement).value;
-            const length = settingsData[hLevel][verbosity].find(x => x[0] === command)![1];
-            srSpeakingHack(treeNode.description.get(command as TokenType)![length]);
+            const hLevel = nodeTypeToHierarchyLevel[treeNode.type] as HierarchyLevel;
+            if (hLevel === 'root') {
+              srSpeakingHack(treeNode.description.get(command as TokenType)![1]);
+            } else {
+              const verbosity = (document.getElementById(`${hLevel}-verbosity`) as HTMLSelectElement).value;
+              const length = settingsData[hLevel][verbosity].find(x => x[0] === command)![1];
+              srSpeakingHack(treeNode.description.get(command as TokenType)![length]);
+            }
           } else {
             srSpeakingHack(`No ${token} available`);
           }
