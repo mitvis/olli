@@ -55,13 +55,13 @@ export function addMenuCommands(menu: HTMLElement, t: Tree) {
   const first = menu.querySelector(':enabled')! as HTMLElement;
   const last = [...menu.querySelectorAll('select:enabled')].filter(x => !(x.parentElement as any).closest('#settings > div[aria-hidden="true"]')).reverse()[0]! as HTMLElement;
   first.addEventListener('keydown', (event) => {
-    if (event.key === "Tab" && event.shiftKey) {
+    if (event.key === "Tab" && event.shiftKey || event.key === 'ArrowUp') {
       event.preventDefault();
     }
   });
 
   last.addEventListener('keydown', (event) => {
-    if (event.key === "Tab" && !event.shiftKey) {
+    if (event.key === "Tab" && !event.shiftKey || event.key === 'ArrowDown') {
       event.preventDefault();
     }
   });
