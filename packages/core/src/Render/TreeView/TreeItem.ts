@@ -88,30 +88,6 @@ export class TreeItem {
 
             elem = elem.nextElementSibling;
         }
-
-        this.keyCode = Object.freeze({
-            RETURN: 13,
-            SPACE: 32,
-            PAGEUP: 33,
-            PAGEDOWN: 34,
-            END: 35,
-            HOME: 36,
-            LEFT: 37,
-            UP: 38,
-            RIGHT: 39,
-            DOWN: 40,
-            X: 88,
-            Y: 89,
-            L: 76,
-            G: 71,
-            W: 87,
-            A: 65,
-            S: 83,
-            D: 68,
-            ESCAPE: 27,
-            PLUS: 107,
-            MINUS: 189
-        });
     }
 
     init() {
@@ -130,7 +106,8 @@ export class TreeItem {
 
     isExpanded() {
         if (this.isExpandable) {
-            return this.domNode.getAttribute('aria-expanded') === 'true';
+            // return this.domNode.getAttribute('aria-expanded') === 'true';
+            return this.domNode.classList.contains('expanded');
         }
         return false;
     }
@@ -190,18 +167,8 @@ export class TreeItem {
         let flag = false;
         const typingToken = this.tree.currentlyTypingToken();
         switch (event.key) {
-            case 'Enter':
+            case 'Enter': // i think this is what JAWS users expect
             case ' ':
-                if (this.isExpandable) {
-                    if (this.isExpanded()) {
-                        this.tree.collapseTreeItem(this);
-                    }
-                    else {
-                        this.tree.expandTreeItem(this);
-                    }
-                }
-                flag = true;
-                break;
             case 'ArrowDown':
                 if (this.children.length > 0) {
                     if (this.isExpandable) {
@@ -213,17 +180,17 @@ export class TreeItem {
                 break;
             case 'Escape':
             case 'ArrowUp':
-                // if (this.isExpandable && this.isExpanded()) {
-                    // this.tree.setFocusToParentItem();
-                    // this.tree.collapseTreeItem(this);
-                    // flag = true;
-                // } else {
+                if (this.isExpandable && this.isExpanded()) {
+                    this.tree.collapseTreeItem(this);
+                    this.tree.setFocusToParentItem(this);
+                    flag = true;
+                } else {
                     if (this.inGroup) {
                         if (this?.parent?.isExpandable && this.parent.isExpanded()) this.tree.collapseTreeItem(this.parent);
                         this.tree.setFocusToParentItem(this);
                         flag = true;
                     }
-                // }
+                }
                 break;
             case 'ArrowLeft':
                 this.tree.setFocusToPreviousItem(this);

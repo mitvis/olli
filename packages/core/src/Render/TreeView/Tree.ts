@@ -198,11 +198,13 @@ export class Tree {
             if (currentItem.parent) {
                 currentItem.parent.children.forEach(item => {
                     if (item !== currentItem) {
-                        item.domNode.setAttribute('aria-expanded', 'false');
+                        // item.domNode.setAttribute('aria-expanded', 'false');
+                        item.domNode.classList.remove('expanded');
                     }
                 })
             }
-            currentItem.domNode.setAttribute('aria-expanded', 'true');
+            // currentItem.domNode.setAttribute('aria-expanded', 'true');
+            currentItem.domNode.classList.add('expanded');
             this.updateVisibleTreeItems();
         }
     }
@@ -217,9 +219,9 @@ export class Tree {
         }
 
         if (group) {
-            group.domNode.setAttribute('aria-expanded', 'false');
+            // group.domNode.setAttribute('aria-expanded', 'false');
+            group.domNode.classList.remove('expanded');
             this.updateVisibleTreeItems();
-            this.setFocusToItem(group);
         }
     }
 
@@ -235,7 +237,8 @@ export class Tree {
 
             while (parent && (parent !== this.domNode)) {
 
-                if ((parent as any).getAttribute('aria-expanded') == 'false') {
+                // if ((parent as HTMLElement).getAttribute('aria-expanded') === 'false') {
+                if (!(parent as HTMLElement).classList.contains('expanded')) {
                     ti.isVisible = false;
                 }
                 parent = parent.parentNode;
