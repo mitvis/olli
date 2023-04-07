@@ -40,10 +40,10 @@ import "./TreeStyle.css";
     const item = document.createElement('li');
     const id = idPrefix + '-' + (posinset - 1);
     item.setAttribute('role', 'treeitem');
-    item.setAttribute('aria-level', String(level));
-    item.setAttribute('aria-setsize', String(setsize));
-    item.setAttribute('aria-posinset', String(posinset));
-    item.setAttribute('aria-expanded', 'false');
+    // item.setAttribute('aria-level', String(level)); // commenting these out because they're tokens so it's redundant if SR reads them
+    // item.setAttribute('aria-setsize', String(setsize));
+    // item.setAttribute('aria-posinset', String(posinset));
+    // item.setAttribute('aria-expanded', 'false');
     item.setAttribute('data-nodetype', node.type);
     item.setAttribute('id', id);
     if (node.gridIndex) {
