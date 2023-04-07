@@ -108,7 +108,6 @@ function makeIndivVerbosityMenu(hierarchyLevel: Exclude<HierarchyLevel, 'root'>,
   label.setAttribute('for', `${hierarchyLevel}-verbosity`);
   const desc = 'Description: ' + prettifyTokenTuples(options[Object.keys(options)[0]]);
   label.innerText = capitalizeFirst(`${hierarchyLevel} verbosity. ${desc}`);
-  label.setAttribute('aria-live', 'assertive');
 
   // Add all preset options, plus 'custom' to make a new preset
   for (let option of Object.keys(options)) {
@@ -142,15 +141,20 @@ export function updateVerbosityDescription(dropdown: HTMLSelectElement, tree: Ac
 
   if (dropdown.value === 'custom') {
     // Open the customization menu
-    customMenu.setAttribute('style', 'display: block');
-    customMenu.setAttribute('aria-hidden', 'false');
+    window.requestAnimationFrame(() => {
+      customMenu.setAttribute('style', 'display: block');
+      customMenu.setAttribute('aria-hidden', 'false');
+    })
+
     const desc = "Create a custom preset using the preset menu. Set verbosity for each element; use alt+left and alt+right to reorder elements.";
     label.innerText = desc;
-    // srSpeakingHack(`${dropdown.id.split("-")[0]} verbosity set to ${dropdown.value}. ${desc}`);
+    srSpeakingHack(`${dropdown.id.split("-")[0]} verbosity set to ${dropdown.value}. ${desc}`);
   } else {
     // Close custom menu (if it was open)
-    customMenu.setAttribute('style', 'display: none');
-    customMenu.setAttribute('aria-hidden', 'true');
+    window.requestAnimationFrame(() => {
+      customMenu.setAttribute('style', 'display: none');
+      customMenu.setAttribute('aria-hidden', 'true');
+    })
 
     // Updates based on the new setting:
     // description tokens listed in the menu
@@ -159,7 +163,7 @@ export function updateVerbosityDescription(dropdown: HTMLSelectElement, tree: Ac
     // node description in the tree
     rerenderTreeDescription(tree, document.getElementById('tree-root')!);
 
-    // srSpeakingHack(`${dropdown.id.split("-")[0]} verbosity set to ${dropdown.value}. ${desc}`);
+    srSpeakingHack(`${dropdown.id.split("-")[0]} verbosity set to ${dropdown.value}. ${desc}`);
 
     log.push({'action': 'dropdown', 'target': `settings-${hierarchyLevel}`, 'value': dropdown.value});
   }
