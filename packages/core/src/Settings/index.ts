@@ -58,12 +58,12 @@ export function renderCommandsBox() {
   }
 
   // Speak token
-  for (const token of tokenType) {
+  for (const token of tokenType.concat().sort()) {
     createOption(token, token, dropdown);
   }
 
   // 'Focus' token by bringing up to front
-  for (const token of tokenType) {
+  for (const token of tokenType.concat().sort()) {
     createOption('focus ' + token, 'focus-' + token, dropdown);
   }
   createOption('clear', 'clear', dropdown);
