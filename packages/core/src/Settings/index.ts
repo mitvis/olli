@@ -269,7 +269,7 @@ export function getCurrentCustom(hierarchyLevel: string) {
   return tokens;
 }
 
-export const focusTokens = Object.fromEntries(tokenType.map(token => [token, false]));
+export const focusTokens: TokenType[] = [];
 
 /**
  * Given a node with all possible description tokens, return a formatted string
@@ -295,9 +295,10 @@ export function getDescriptionWithSettings(node: AccessibilityTreeNode, lengthFl
     tokenLengths = Object.fromEntries(settingsData[hierarchyLevel][value]);
   }
 
-  const description = [];
+  const startDesc = []
+  const restDesc = [];
   for (const [token, desc] of node.description.entries()) {
-    if (includeOrder.includes(token) || focusTokens[token]) {
+    if (includeOrder.includes(token) || focusTokens.includes(token)) {
       let length = 0; // default to short if no info
       if (lengthFlag) {
         // lengthFlag is a string from tokenLength enum; convert to its corresponding number
@@ -306,13 +307,15 @@ export function getDescriptionWithSettings(node: AccessibilityTreeNode, lengthFl
         length = tokenLengths[token];
       }
 
-      if (focusTokens[token]) { // put it up front
-        description.unshift(desc[length]);
+      if (focusTokens.includes(token)) { // put it up front
+        startDesc[focusTokens.indexOf(token)] = desc[length];
       } else { // use original order
-        description[includeOrder.indexOf(token)] = desc[length];
+        restDesc[includeOrder.indexOf(token)] = desc[length];
       }
     }
   }
+
+  const description = startDesc.concat(restDesc);
 
   function formatDescTokens(description: string[]) {
     return description.filter(x => x.length > 0).map(capitalizeFirst).join('. ') + '.';

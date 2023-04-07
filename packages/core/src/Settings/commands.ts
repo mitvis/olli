@@ -132,14 +132,12 @@ export function addCommandsBoxCommands(commandsBox: HTMLElement, tree: Accessibi
           }
         } else if (command === 'focus-' + token) {
           // 'Focus' the token by bringing it to the front
-          focusTokens[token] = true;
+          focusTokens.unshift(token);
           rerenderTreeDescription(tree, document.getElementById('tree-root')!);
         }
       }
       if (command === 'clear') { // Clear all focus
-        tokenType.forEach((token: TokenType) => {
-          focusTokens[token] = false;
-        });
+        focusTokens.splice(0, focusTokens.length);
         rerenderTreeDescription(tree, document.getElementById('tree-root')!);
       }
 
