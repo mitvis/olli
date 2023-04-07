@@ -57,7 +57,8 @@ export const updateGlobalStateOnRender = (t: Tree) => {
         switch (e.code) {
           case 'KeyT':
             const currentTree = lastVisitedTree || treesOnPage[0];
-            if (currentTree.domNode.firstElementChild.getAttribute('aria-selected') === 'true') {
+            // if (currentTree.domNode.firstElementChild.getAttribute('aria-selected') === 'true') {
+            if (currentTree.domNode.firstElementChild?.classList.contains('selected')) {
               // we are currently focusing on the root of this tree
               const idx = treesOnPage.indexOf(currentTree);
               if (e.shiftKey) {
