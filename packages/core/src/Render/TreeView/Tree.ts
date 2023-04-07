@@ -22,7 +22,7 @@ import { TreeItem } from "./TreeItem";
 *       An element with the role=tree attribute
 */
 export class Tree {
-    domNode: any;
+    domNode: HTMLElement;
     treeItems: TreeItem[];
     rootTreeItem!: TreeItem;
     lastFocusedItem!: TreeItem;
@@ -78,7 +78,8 @@ export class Tree {
                 if (ti === treeitem) {
                   ti.domNode.tabIndex = 0;
                   ti.domNode.focus();
-                  ti.domNode.setAttribute('aria-selected', 'true');
+                //   ti.domNode.setAttribute('aria-selected', 'true');
+                  ti.domNode.classList.add('selected');
                   this.lastFocusedItem = ti;
                   if (this.onFocus) {
                     this.onFocus(ti.domNode);
@@ -86,7 +87,8 @@ export class Tree {
                   setOlliGlobalState({lastVisitedTree: this});
                 } else {
                   ti.domNode.tabIndex = -1;
-                  ti.domNode.setAttribute('aria-selected', 'false');
+                //   ti.domNode.setAttribute('aria-selected', 'false');
+                  ti.domNode.classList.remove('selected');
                 }
             }
         })

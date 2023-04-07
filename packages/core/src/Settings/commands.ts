@@ -89,8 +89,10 @@ export function addTreeCommands(treeElt: HTMLElement, tree: AccessibilityTree, t
         dropdown.setAttribute('style', 'display: block');
         dropdown.setAttribute('aria-hidden', 'false');
         setTimeout(() => {
+          // TODO is there a way to do this with t.setFocusToItem?
           (dropdown.firstElementChild! as HTMLElement).focus();
-          dropdown.setAttribute('aria-selected', 'true');
+          // dropdown.setAttribute('aria-selected', 'true');
+          dropdown.classList.add('selected');
         }, 0);
 
         log.push({'action': 'open', 'target': 'commands'});
