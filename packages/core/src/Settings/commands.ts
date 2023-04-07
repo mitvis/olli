@@ -56,12 +56,14 @@ export function addMenuCommands(menu: HTMLElement, t: Tree) {
   const last = [...menu.querySelectorAll('select:enabled')].filter(x => !(x.parentElement as any).closest('#settings > div[aria-hidden="true"]')).reverse()[0]! as HTMLElement;
   first.addEventListener('keydown', (event) => {
     if (event.key === "Tab" && event.shiftKey || event.key === 'ArrowUp') {
+      srSpeakingHack('Beginning of settings menu');
       event.preventDefault();
     }
   });
 
   last.addEventListener('keydown', (event) => {
     if (event.key === "Tab" && !event.shiftKey || event.key === 'ArrowDown') {
+      srSpeakingHack('End of settings menu');
       event.preventDefault();
     }
   });
