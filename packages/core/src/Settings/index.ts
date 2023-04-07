@@ -22,7 +22,6 @@ export function renderMenu(tree: AccessibilityTree): HTMLElement {
   // Make the menu container
   const root = document.createElement("fieldset");
   root.setAttribute("id", "settings");
-  root.setAttribute("role", "dialog");
 
   const close = document.createElement("button");
   close.addEventListener("click", (event) => {
