@@ -194,9 +194,11 @@ export function srSpeakingHack(text: string) {
 
   window.setTimeout(function () {
     elt.innerText = text;
+
+    window.setTimeout(function () {
+      elt.remove();
+    }, 1000);
+
   }, 100);
 
-  window.setTimeout(function () {
-    elt.remove();
-  }, 1000);
 }
