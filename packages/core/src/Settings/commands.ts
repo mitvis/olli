@@ -34,6 +34,7 @@ export function addMenuCommands(menu: HTMLElement, t: Tree) {
 
           const hierarchyLevel = thisItem.id.split('-')[0];
           srSpeakingHack(prettifyTokenTuples(getCurrentCustom(hierarchyLevel)));
+          event.preventDefault();
         }
       }
     } else if (event.altKey && event.key === 'ArrowRight') {
@@ -46,6 +47,7 @@ export function addMenuCommands(menu: HTMLElement, t: Tree) {
 
           const hierarchyLevel = thisItem.id.split('-')[0];
           srSpeakingHack(prettifyTokenTuples(getCurrentCustom(hierarchyLevel)));
+          event.preventDefault();
         }
       }
     }
