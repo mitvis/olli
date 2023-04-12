@@ -148,14 +148,20 @@ export function updateVerbosityDescription(dropdown: HTMLSelectElement, tree: Ac
 
   if (dropdown.value === 'custom') {
     // Open the customization menu
-    customMenu.setAttribute('style', 'display: block');
-    customMenu.setAttribute('aria-hidden', 'false');
-    label.innerText = "Create a custom preset using the preset menu. Set verbosity for each element; use alt+left and alt+right to reorder elements."
-    srSpeakingHack('Custom menu open')
+    window.requestAnimationFrame(() => {
+      customMenu.setAttribute('style', 'display: block');
+      customMenu.setAttribute('aria-hidden', 'false');
+    })
+
+    const desc = "Create a custom preset using the preset menu. Set verbosity for each element; use alt+left and alt+right to reorder elements.";
+    label.innerText = desc;
+    srSpeakingHack(`${dropdown.id.split("-")[0]} verbosity set to ${dropdown.value}. ${desc}`);
   } else {
     // Close custom menu (if it was open)
-    customMenu.setAttribute('style', 'display: none');
-    customMenu.setAttribute('aria-hidden', 'true');
+    window.requestAnimationFrame(() => {
+      customMenu.setAttribute('style', 'display: none');
+      customMenu.setAttribute('aria-hidden', 'true');
+    })
 
     // Updates based on the new setting:
     // description tokens listed in the menu
@@ -169,7 +175,7 @@ export function updateVerbosityDescription(dropdown: HTMLSelectElement, tree: Ac
     log.push({'action': 'dropdown', 'target': `settings-${hierarchyLevel}`, 'value': dropdown.value});
   }
 
-  
+
 }
 
 function makeIndivCustomMenu(hierarchyLevel: Exclude<HierarchyLevel, 'root'>, tree: AccessibilityTree) {

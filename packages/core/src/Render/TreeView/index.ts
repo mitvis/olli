@@ -163,21 +163,21 @@ function createDataTable(dataNodes: AccessibilityTreeNode[], level: number) {
   // Create HTML table
   // Container + header
   const table = document.createElement("table");
-  table.setAttribute('aria-label', `Table with ${dataNodes.length} rows`);
-  table.setAttribute('aria-level', String(level));
-  table.setAttribute('aria-posinset', '1');
-  table.setAttribute('aria-setsize', '1');
+  // table.setAttribute('aria-label', `Table with ${dataNodes.length} rows`);
+  // table.setAttribute('aria-level', String(level));
+  // table.setAttribute('aria-posinset', '1');
+  // table.setAttribute('aria-setsize', '1');
 
   const tableBody = document.createElement("tbody");
   const thead = document.createElement("thead");
   const theadtr = document.createElement("tr");
-  theadtr.setAttribute('aria-label', `${orderedTableKeys?.join(', ')}`);
+  // theadtr.setAttribute('aria-label', `${orderedTableKeys?.join(', ')}`);
 
   orderedTableKeys?.forEach((key: string) => {
     const th = document.createElement("th");
     th.setAttribute('scope', 'col');
     th.innerText = key;
-    th.setAttribute('aria-label', key);
+    // th.setAttribute('aria-label', key);
     theadtr.appendChild(th);
   });
 
@@ -187,7 +187,7 @@ function createDataTable(dataNodes: AccessibilityTreeNode[], level: number) {
   // Individual rows
   dataNodes.forEach((node, _) => {
     const dataRow = document.createElement("tr")
-    dataRow.setAttribute('aria-label', `${orderedTableKeys?.map((key, idx) => `${key}: ${orderedTableKeysMap[idx] === 'quantile' ? node.description.get('quantile')![0] : fmtValue(node.selected[0][key])}`).join(', ')}`);
+    // dataRow.setAttribute('aria-label', `${orderedTableKeys?.map((key, idx) => `${key}: ${orderedTableKeysMap[idx] === 'quantile' ? node.description.get('quantile')![0] : fmtValue(node.selected[0][key])}`).join(', ')}`);
     orderedTableKeys?.forEach((key: string, idx: number) => {
       let value;
 
@@ -199,7 +199,7 @@ function createDataTable(dataNodes: AccessibilityTreeNode[], level: number) {
 
       const td = document.createElement("td")
       td.innerText = value;
-      td.setAttribute('aria-label', value);
+      // td.setAttribute('aria-label', value);
       dataRow.appendChild(td);
     })
     tableBody.appendChild(dataRow);
