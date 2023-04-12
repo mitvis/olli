@@ -99,6 +99,12 @@ function makeIndivVerbosityMenu(hierarchyLevel: Exclude<HierarchyLevel, 'root'>,
   const settingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: string]: [TokenType, tokenLength][]}} = JSON.parse(localStorage.getItem('settingsData')!);
   const options: {[k: string]: [TokenType, tokenLength][]} = settingsData[hierarchyLevel];
 
+  let storedLevel = localStorage.getItem(hierarchyLevel);
+  // let storedLevel: string;
+  if (!storedLevel) {
+    storedLevel = 'high';
+    localStorage.setItem(hierarchyLevel, 'high');
+  }
   // Make the dropdown container
   const dropdown = document.createElement('select');
   dropdown.id = `${hierarchyLevel}-verbosity`
@@ -120,8 +126,10 @@ function makeIndivVerbosityMenu(hierarchyLevel: Exclude<HierarchyLevel, 'root'>,
   custom.value = 'custom';
   dropdown.appendChild(custom);
 
+  dropdown.value = storedLevel;
   dropdown.addEventListener('change', (event) => {
     updateVerbosityDescription(dropdown, tree);
+    localStorage.setItem(hierarchyLevel, dropdown.value);
   })
 
   const container = document.createElement('div');
@@ -239,6 +247,7 @@ function savePreset(hierarchyLevel: Exclude<HierarchyLevel, 'root'>, tree: Acces
   updateVerbosityDescription(dropdown, tree);
   dropdown.focus();
   dropdown.setAttribute('aria-active', 'true');
+  localStorage.setItem(hierarchyLevel, presetName);
 
   function updateVerbosityDropdown(hierarchyLevel: string) {
     const settingsData: { [k in Exclude<HierarchyLevel, 'root'>]: {[k: string]: [TokenType, tokenLength][]}} = JSON.parse(localStorage.getItem('settingsData')!);
