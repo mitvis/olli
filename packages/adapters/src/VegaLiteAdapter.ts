@@ -119,6 +119,31 @@ function parseAxis(axisScenegraphNode: any, spec: any, data: OlliDataset): Axis 
     if (scaleType === 'temporal') {
         data.forEach(datum => {
             datum[field] = new Date(datum[field]);
+
+            if (encoding.timeUnit) {
+                switch (encoding.timeUnit) {
+                    case 'year':
+                        datum[field] = (datum[`${encoding.timeUnit}_${field}`] as Date).getFullYear();
+                        break;
+                    case 'quarter':
+                        const month = (datum[`${encoding.timeUnit}_${field}`] as Date).getMonth();
+                        if (month <= 2) {
+                            return 1;
+                        }
+                        if (month <= 5) {
+                            return 2;
+                        }
+                        if (month <= 8) {
+                            return 3;
+                        }
+                        if (month <= 11) {
+                            return 4;
+                        }
+                        break;
+                    // case 'month':
+                    //     return Date.toLocaleDateString('undefined', { weekday: 'long' });
+                }
+            }
         });
     }
 
