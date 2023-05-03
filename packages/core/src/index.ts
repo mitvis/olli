@@ -62,22 +62,22 @@ export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTML
                 }
             })
 
-            // const submit = document.createElement('button');
-            // submit.innerText = "Finish section";
-            // submit.setAttribute("aria-live", "polite");
-            // submit.addEventListener('click', () => {
-            //     const formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSeNGFhokzskkyxfgZz6hVHK1W-TbItjzgMsOw_LbEICNGxRAg/formResponse?usp=pp_url&entry.1882377581='
-            //     fetch(formUrl + JSON.stringify(log), {
-            //         mode: 'no-cors',
-            //         method: 'GET',
-            //     }).then(response =>
-            //         submit.innerText = 'All done, thank you'
-            //     );
-            // });
-            // const submitHeader = document.createElement('h5');
-            // submitHeader.innerText = 'Finish study section';
-            // htmlRendering.appendChild(submitHeader);
-            // htmlRendering.appendChild(submit);
+            const submit = document.createElement('button');
+            submit.innerText = "Finish section";
+            submit.setAttribute("aria-live", "polite");
+            submit.addEventListener('click', () => {
+                const formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSeNGFhokzskkyxfgZz6hVHK1W-TbItjzgMsOw_LbEICNGxRAg/formResponse?usp=pp_url&entry.1882377581='
+                fetch(formUrl + JSON.stringify(log), {
+                    mode: 'no-cors',
+                    method: 'GET',
+                }).then(response =>
+                    submit.innerText = 'All done, thank you'
+                );
+            });
+            const submitHeader = document.createElement('h5');
+            submitHeader.innerText = 'Finish study section';
+            htmlRendering.appendChild(submitHeader);
+            htmlRendering.appendChild(submit);
 
             addMenuCommands(menu, t);
             addTreeCommands(ul, tree, t);
