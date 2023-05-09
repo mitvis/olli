@@ -26,37 +26,11 @@ export class TreeItem {
     tree: Tree;
     domNode: HTMLElement;
     isExpandable: boolean;
-    isVisible: boolean;
     inGroup: boolean;
 
     parent?: TreeItem;
     children: TreeItem[];
     lastVisitedChild?: TreeItem;
-
-    keyCode!: Readonly<{
-        RETURN: number;
-        SPACE: number;
-        PAGEUP: number;
-        PAGEDOWN: number;
-        END: number;
-        HOME: number;
-        LEFT: number;
-        UP: number;
-        RIGHT: number;
-        DOWN: number;
-        X: number;
-        Y: number;
-        G: number;
-        L: number;
-        W: number;
-        A: number;
-        S: number;
-        D: number;
-        ESCAPE: number;
-        PLUS: number;
-        MINUS: number;
-
-    }>;
 
     constructor(node: HTMLElement, treeObj: Tree, parent?: TreeItem) {
 
@@ -65,7 +39,6 @@ export class TreeItem {
         this.domNode = node;
 
         this.isExpandable = false;
-        this.isVisible = false;
         this.inGroup = false;
 
         if (parent) {
@@ -89,29 +62,6 @@ export class TreeItem {
             elem = elem.nextElementSibling;
         }
 
-        this.keyCode = Object.freeze({
-            RETURN: 13,
-            SPACE: 32,
-            PAGEUP: 33,
-            PAGEDOWN: 34,
-            END: 35,
-            HOME: 36,
-            LEFT: 37,
-            UP: 38,
-            RIGHT: 39,
-            DOWN: 40,
-            X: 88,
-            Y: 89,
-            L: 76,
-            G: 71,
-            W: 87,
-            A: 65,
-            S: 83,
-            D: 68,
-            ESCAPE: 27,
-            PLUS: 107,
-            MINUS: 189
-        });
     }
 
     init() {
@@ -141,46 +91,6 @@ export class TreeItem {
         if (event.altKey || event.ctrlKey || event.metaKey) {
             return;
         }
-
-        // TODO this was lateral nav
-
-        // if (event.shiftKey) {
-        //     let root = this.getRootNode();
-        //     if (event.keyCode == this.keyCode.SPACE || event.keyCode == this.keyCode.RETURN) {
-        //         event.stopPropagation();
-        //     } else if (root.label.includes('nested charts') && event.target === this.domNode) {
-        //         const nodePosition = (item: TreeItem): number[] => {
-        //             let arr: number[] = [];
-        //             let node: TreeItem = item
-        //             while (node !== undefined) {
-        //                 if (node.parent) {
-        //                     let index: number = node.parent.children.indexOf(node);
-        //                     if (index !== -1) {
-        //                         arr.push(index)
-        //                     }
-        //                 }
-        //                 node = node.parent
-        //             }
-        //             return arr
-        //         }
-
-        //         if (event.keyCode === this.keyCode.LEFT) {
-        //             let pos: number[] = nodePosition(this).reverse()
-        //             pos[0] = pos[0] - 1
-        //             if (pos[0] >= 0) {
-        //                 this.shiftToNode(pos)
-        //             }
-        //         } else if (event.keyCode === this.keyCode.RIGHT) {
-        //             let pos: number[] = nodePosition(this).reverse()
-        //             pos[0] = pos[0] + 1
-        //             if (pos[pos.length - 1] < root.children.length) {
-        //                 this.shiftToNode(pos)
-        //             }
-        //         }
-        //     }
-        // } else {
-        //     this.checkBaseKeys(event)
-        // }
 
         this.checkBaseKeys(event);
 

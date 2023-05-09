@@ -64,7 +64,6 @@ export class Tree {
 
         findTreeitems(this.domNode, this, undefined);
 
-        this.updateVisibleTreeItems();
         this.rootTreeItem.domNode.tabIndex = 0;
     }
 
@@ -200,7 +199,6 @@ export class Tree {
                 })
             }
             currentItem.domNode.setAttribute('aria-expanded', 'true');
-            this.updateVisibleTreeItems();
         }
     }
 
@@ -215,30 +213,8 @@ export class Tree {
 
         if (group) {
             group.domNode.setAttribute('aria-expanded', 'false');
-            this.updateVisibleTreeItems();
             this.setFocusToItem(group);
         }
-    }
-
-    updateVisibleTreeItems(): void {
-        this.rootTreeItem = this.treeItems[0];
-
-        for (let i = 0; i < this.treeItems.length; i++) {
-            let ti = this.treeItems[i];
-
-            let parent = ti.domNode.parentNode;
-
-            ti.isVisible = true;
-
-            while (parent && (parent !== this.domNode)) {
-
-                if ((parent as any).getAttribute('aria-expanded') == 'false') {
-                    ti.isVisible = false;
-                }
-                parent = parent.parentNode;
-            }
-        }
-
     }
 
     focusOnNodeType(nodeType: NodeType, currentItem: TreeItem) {
