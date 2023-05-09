@@ -22,7 +22,7 @@ For a [user tutorial](https://mitvis.github.io/olli/tutorial), [quickstart guide
 
 - Run the docsite locally.
 - After making changes to the source files, make sure the changes are being built (i.e. that the webpack bundler was running with `npm run start` or that you manually ran `npm run build`).
-- Run `npm run deploy-docs` in either `core` or `adapters` to copy the built file from `./dist` to the correct place in the `docs/` folder.
+- Run `npm run deploy-docs` in either `core` or `adapters` to copy the built file from `./dist` to the correct place in the `docs/` folder. (Use `npm run deploy-docs -ws` from the `olli` directory to copy both at once.)
 - Use the example gallery at `localhost:4000/olli/examples` to test changes locally.
 
 ## Current Visualization Library Support
