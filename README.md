@@ -13,6 +13,18 @@ For a [user tutorial](https://mitvis.github.io/olli/tutorial), [quickstart guide
 - In the `core` or `adapters` package directories, run `npm run start` to start the webpack bundler in development mode with live reloading. Run `npm run build` to run webpack for production. (Note: `olli` must be built before `olli-adapters` the first time you run the build scripts.)
 - To run scripts for both packages at the same time, run commands from the `olli` directory using the `-ws` flag, e.g. `npm run build -ws`.
 
+### Running the docsite locally
+
+- The documentation site uses jekyll, and is served on github pages from the `docs/` folder. See more about jekyll and gh-pages [here](https://docs.github.com/en/pages/setting-up-a-github-pages-site-with-jekyll/testing-your-github-pages-site-locally-with-jekyll).
+- Run `bundle exec jekyll serve` to serve the page at `localhost:4000/olli`.
+
+### Testing local changes on the docsite
+
+- Run the docsite locally.
+- After making changes to the source files, make sure the changes are being built (i.e. that the webpack bundler was running with `npm run start` or that you manually ran `npm run build`).
+- Run `npm run deploy-docs` in either `core` or `adapters` to copy the built file from `./dist` to the correct place in the `docs/` folder.
+- Use the example gallery at `localhost:4000/olli/examples` to test changes locally.
+
 ## Current Visualization Library Support
 
 - [Vega](https://vega.github.io/vega/)
