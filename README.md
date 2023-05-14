@@ -1,6 +1,6 @@
 # Olli - Screen Reader Accessibility for Data Visualization
 
-Olli is an open-source library for converting data visualizations into accessible text structures for screen reader users. Starting with an existing visualization specification created with a supported toolkit, Olli produces a keyboard-navigable tree view with descriptions at varying levels of detail. Users can explore these structures both to get an initial overview, and to dive into the data in more detail. 
+Olli is an open-source library for converting data visualizations into accessible text structures for screen reader users. Starting with an existing visualization specification created with a supported toolkit, Olli produces a keyboard-navigable tree view with descriptions at varying levels of detail. Users can explore these structures both to get an initial overview, and to dive into the data in more detail.
 
 ## Using Olli
 
@@ -20,10 +20,8 @@ For a [user tutorial](https://mitvis.github.io/olli/tutorial), [quickstart guide
 
 ### Testing local changes on the docsite
 
-- Run the docsite locally.
-- After making changes to the source files, make sure the changes are being built (i.e. that the webpack bundler was running with `npm run start` or that you manually ran `npm run build`).
-- Run `npm run deploy-docs` in either `core` or `adapters` to copy the built file from `./dist` to the correct place in the `docs/` folder. (Use `npm run deploy-docs -ws` from the `olli` directory to copy both at once.)
-- Use the example gallery at `localhost:4000/olli/examples` to test changes locally.
+- Make sure you have run `npm run start` in `core` and/or `adapters`. This starts webpack in watch mode with the dev config.
+- Use the example gallery at `localhost:4000/olli/examples` to test changes locally. Changes to the source files will be live updated.
 
 ## Current Visualization Library Support
 
