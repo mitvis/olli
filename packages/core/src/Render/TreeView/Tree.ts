@@ -64,6 +64,7 @@ export class Tree {
 
         findTreeitems(this.domNode, this, undefined);
 
+        this.rootTreeItem = this.treeItems[0];
         this.rootTreeItem.domNode.tabIndex = 0;
     }
 
