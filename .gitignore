@@ -7,5 +7,6 @@ docs/.jekyll-cache
 docs/.jekyll-metadata
 docs/vendor
 docs/.ruby-version
+docs/olli/*-dev.js
 build-testing/
 dist/
