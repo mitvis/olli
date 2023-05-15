@@ -20,7 +20,9 @@ For a [user tutorial](https://mitvis.github.io/olli/tutorial), [quickstart guide
 
 ### Testing local changes on the docsite
 
-- Make sure you have run `npm run start` in `core` and/or `adapters`. This starts webpack in watch mode with the dev config.
+- Make sure you have run `npm run start` in both `core` and `adapters` at least once. Ensure that `docs/olli` contains both `olli-dev.js` and `adapters-dev.js`.
+- Run `npm run start` in the package(s) you are developing. This starts webpack in watch mode with the dev config.
+- Run `bundle exec jekyll serve --livereload` to serve the page at `localhost:4000/olli`.
 - Use the example gallery at `localhost:4000/olli/examples` to test changes locally. Changes to the source files will be live updated.
 
 ## Current Visualization Library Support
