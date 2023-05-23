@@ -9,6 +9,8 @@
  */
 
 
+import { htmlNodeToTree } from ".";
+import { AccessibilityTree, AccessibilityTreeNode } from "../../Structure/Types";
 import { Tree } from "./Tree";
 
 /*
@@ -25,6 +27,7 @@ import { Tree } from "./Tree";
 export class TreeItem {
     tree: Tree;
     domNode: HTMLElement;
+    olliNode?: AccessibilityTreeNode;
     isExpandable: boolean;
     inGroup: boolean;
 
@@ -32,11 +35,14 @@ export class TreeItem {
     children: TreeItem[];
     lastVisitedChild?: TreeItem;
 
-    constructor(node: HTMLElement, treeObj: Tree, parent?: TreeItem) {
+    constructor(node: HTMLElement, treeObj: Tree, olliTree: AccessibilityTree, parent?: TreeItem) {
 
         node.tabIndex = -1;
         this.tree = treeObj;
         this.domNode = node;
+        if (node.id) {
+            this.olliNode = htmlNodeToTree(node, olliTree);
+        }
 
         this.isExpandable = false;
         this.inGroup = false;

@@ -39,7 +39,7 @@ export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTML
         default:
             const ul = renderTree(tree);
             htmlRendering.appendChild(ul);
-            const t = new Tree(ul, config.onFocus);
+            const t = new Tree(ul, tree, config.onFocus);
             t.init();
             updateGlobalStateOnRender(t);
             break;

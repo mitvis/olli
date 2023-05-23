@@ -148,13 +148,13 @@ export function rerenderTreeDescription(tree: AccessibilityTree, ul: HTMLElement
 
   if (ul.children.length) {
     for (const li of ul.children) {
-      if (li.nodeName === 'TABLE') { 
+      if (li.nodeName === 'TABLE') {
         // (1) re-render the table, no need to recurse
         const parentLi = ul.parentElement!; // the parent li stores the relevant ID
         const tableData = htmlNodeToTree(parentLi, tree).children.filter(n => n.type === 'data');
         li.replaceWith(createDataTable(tableData, parentLi.id.split('-').length))
       } else { // li.nodeName is 'LI'
-        // (2) re-render the li's span child, 
+        // (2) re-render the li's span child,
         // and if it has a second child (which will be a ul), recurse on it
         const label = li.firstElementChild! as HTMLElement;
         label.innerText = htmlNodeToTree(li as HTMLElement, tree).description;

@@ -1,4 +1,4 @@
-import { NodeType } from "../../Structure/Types";
+import { AccessibilityTree, NodeType } from "../../Structure/Types";
 import { setOlliGlobalState } from "../../utils";
 import { TreeItem } from "./TreeItem";
 /*
@@ -23,30 +23,29 @@ import { TreeItem } from "./TreeItem";
 */
 export class Tree {
     domNode: any;
+    olliTree: AccessibilityTree;
     treeItems: TreeItem[];
     rootTreeItem!: TreeItem;
+    lastFocusedTreeItem!: TreeItem;
     onFocus?: (el: HTMLElement) => void;
 
-    constructor(node: HTMLElement, onFocus?: (el: HTMLElement) => void) {
-
+    constructor(node: HTMLElement, olliTree: AccessibilityTree, onFocus?: (el: HTMLElement) => void) {
         this.domNode = node;
-
+        this.olliTree = olliTree;
         this.treeItems = [];
-
         this.onFocus = onFocus;
-
     }
 
     init(): void {
 
-        function findTreeitems(node: any, tree: Tree, group: TreeItem | undefined) {
+        function findTreeitems(node: any, tree: Tree, olliTree: AccessibilityTree, group: TreeItem | undefined) {
 
             let elem = node.firstElementChild;
             let ti = group
 
             while (elem) {
                 if (['li', 'table', 'tr', 'th', 'td'].includes(elem.tagName.toLowerCase())) {
-                    ti = new TreeItem(elem, tree, group);
+                    ti = new TreeItem(elem, tree, olliTree, group);
                     ti.init();
                     if (group) {
                         group.children.push(ti);
@@ -55,20 +54,21 @@ export class Tree {
                 }
 
                 if (elem.firstElementChild) {
-                    findTreeitems(elem, tree, ti);
+                    findTreeitems(elem, tree, olliTree, ti);
                 }
 
                 elem = elem.nextElementSibling;
             }
         }
 
-        findTreeitems(this.domNode, this, undefined);
+        findTreeitems(this.domNode, this, this.olliTree, undefined);
 
         this.rootTreeItem = this.treeItems[0];
         this.rootTreeItem.domNode.tabIndex = 0;
     }
 
     setFocusToItem(treeitem: TreeItem) {
+        console.log(treeitem.olliNode);
         for (var i = 0; i < this.treeItems.length; i++) {
             var ti = this.treeItems[i];
 
@@ -76,6 +76,7 @@ export class Tree {
               ti.domNode.tabIndex = 0;
               ti.domNode.focus();
               ti.domNode.setAttribute('aria-selected', 'true');
+              this.lastFocusedTreeItem = ti;
               if (this.onFocus) {
                 this.onFocus(ti.domNode);
               }
@@ -117,7 +118,6 @@ export class Tree {
         if (currentItem.parent) {
             currentItem.parent.lastVisitedChild = currentItem;
             this.setFocusToItem(currentItem.parent);
-            // if (currentItem.isExpandable && currentItem.isExpanded()) this.collapseTreeItem(currentItem);
             if (currentItem.parent.isExpandable && currentItem.parent.isExpanded()) this.collapseTreeItem(currentItem.parent);
         }
     }
@@ -214,7 +214,6 @@ export class Tree {
 
         if (group) {
             group.domNode.setAttribute('aria-expanded', 'false');
-            this.setFocusToItem(group);
         }
     }
 
