@@ -1,9 +1,5 @@
-import { ObservablePlotAdapter } from "./ObservablePlotAdapter";
-import { VegaAdapter } from "./VegaAdapter";
-import { VegaLiteAdapter } from "./VegaLiteAdapter";
+import { ObservablePlotAdapter } from './ObservablePlotAdapter';
+import { VegaAdapter } from './VegaAdapter';
+import { VegaLiteAdapter } from './VegaLiteAdapter';
 
-export {
-  ObservablePlotAdapter,
-  VegaAdapter,
-  VegaLiteAdapter
-}
+export { ObservablePlotAdapter, VegaAdapter, VegaLiteAdapter };

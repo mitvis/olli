@@ -30,7 +30,7 @@ details of the accessible visualization. This lowers the barrier for
 visualization authors who lack specialized accessibility expertise to
 offer accessible visualization experiences.
 
-###  OlliVisSpec
+### OlliVisSpec
 
 An adapter takes in a visualization toolkit’s output (e.g. an SVG, or
 a scenegraph instance) and its original specification, and returns that
