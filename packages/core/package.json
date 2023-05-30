@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "css-loader": "^6.7.1",
+    "prettier": "2.8.8",
     "style-loader": "^3.3.1",
     "ts-loader": "^9.4.2",
     "webpack-merge": "^5.8.0"
