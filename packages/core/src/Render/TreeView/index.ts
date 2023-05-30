@@ -1,15 +1,15 @@
 // Adapted from: https://w3c.github.io/aria-practices/examples/treeview/treeview-1/treeview-1b.html
 
-import { AccessibilityTree, AccessibilityTreeNode } from "../../Structure/Types";
-import { fmtValue } from "../../utils";
-import "./TreeStyle.css";
+import { AccessibilityTree, AccessibilityTreeNode } from '../../Structure/Types';
+import { fmtValue } from '../../utils';
+import './TreeStyle.css';
 
 /**
  *
  * @param node A {@link AccessibilityTreeNode} to generate a navigable tree view from
  * @returns An {@link HTMLElement} ARIA TreeView of the navigable tree view for a visualization
  */
- export function renderTree(tree: AccessibilityTree): HTMLElement {
+export function renderTree(tree: AccessibilityTree): HTMLElement {
   const namespace = (Math.random() + 1).toString(36).substring(7);
 
   const node = tree.root;
@@ -29,12 +29,19 @@ import "./TreeStyle.css";
 
   // childContainer.querySelector('span')?.setAttribute('id', labelId);
 
-  root.appendChild(_renderTree(node, namespace, 1, 1, 1, "root"));
+  root.appendChild(_renderTree(node, namespace, 1, 1, 1, 'root'));
   root.querySelector('span')?.setAttribute('id', labelId);
 
   return root;
 
-  function _renderTree(node: AccessibilityTreeNode, namespace: string, level: number, posinset: number, setsize: number, idPrefix: string): HTMLElement {
+  function _renderTree(
+    node: AccessibilityTreeNode,
+    namespace: string,
+    level: number,
+    posinset: number,
+    setsize: number,
+    idPrefix: string
+  ): HTMLElement {
     const item = document.createElement('li');
     item.setAttribute('role', 'treeitem');
     item.setAttribute('aria-level', String(level));
@@ -57,45 +64,41 @@ import "./TreeStyle.css";
     item.appendChild(label);
 
     if (node.children.length) {
-
-      const dataChildren = node.children.filter(n => n.type === 'data');
-      const treeChildren = node.children.filter(n => n.type !== 'data');
+      const dataChildren = node.children.filter((n) => n.type === 'data');
+      const treeChildren = node.children.filter((n) => n.type !== 'data');
 
       const childContainer = document.createElement('ul');
       childContainer.setAttribute('role', 'group');
 
       if (dataChildren.length) {
         childContainer.appendChild(createDataTable(dataChildren, level + 1));
-      }
-      else {
+      } else {
         treeChildren.forEach((n, index, array) => {
           childContainer.appendChild(_renderTree(n, namespace, level + 1, index + 1, array.length, id));
-        })
+        });
       }
       item.appendChild(childContainer);
-
     }
 
     return item;
   }
 }
 
-
 function createDataTable(dataNodes: AccessibilityTreeNode[], level: number) {
-  const table = document.createElement("table");
+  const table = document.createElement('table');
   table.setAttribute('aria-label', `Table with ${dataNodes.length} rows`);
   table.setAttribute('aria-level', String(level));
   table.setAttribute('aria-posinset', '1');
   table.setAttribute('aria-setsize', '1');
 
-  const thead = document.createElement("thead");
-  const theadtr = document.createElement("tr");
+  const thead = document.createElement('thead');
+  const theadtr = document.createElement('tr');
   theadtr.setAttribute('aria-label', `${dataNodes[0].tableKeys?.join(', ')}`);
 
   dataNodes[0].tableKeys?.forEach((key: string) => {
-    const th = document.createElement("th");
+    const th = document.createElement('th');
     th.setAttribute('scope', 'col');
-    th.innerText = key
+    th.innerText = key;
     theadtr.appendChild(th);
   });
 
@@ -104,17 +107,20 @@ function createDataTable(dataNodes: AccessibilityTreeNode[], level: number) {
 
   //
 
-  const tableBody = document.createElement("tbody");
+  const tableBody = document.createElement('tbody');
 
   dataNodes.forEach((node) => {
-    const dataRow = document.createElement("tr")
-    dataRow.setAttribute('aria-label', `${node.tableKeys?.map(key => `${key}: ${fmtValue(node.selected[0][key])}`).join(', ')}`);
+    const dataRow = document.createElement('tr');
+    dataRow.setAttribute(
+      'aria-label',
+      `${node.tableKeys?.map((key) => `${key}: ${fmtValue(node.selected[0][key])}`).join(', ')}`
+    );
     node.tableKeys?.forEach((key: string) => {
-      const td = document.createElement("td")
+      const td = document.createElement('td');
       const value = fmtValue(node.selected[0][key]);
       td.innerText = value;
       dataRow.appendChild(td);
-    })
+    });
     tableBody.appendChild(dataRow);
   });
 
@@ -138,8 +144,8 @@ function createDataTable(dataNodes: AccessibilityTreeNode[], level: number) {
  * @param tree The {@link AccessibilityTreeNode} which is the tree's root
  * @param ul The {@link HTMLElement} which is the tree's root in the DOM
  */
-export function rerenderTreeDescription(tree: AccessibilityTree, ul: HTMLElement){
-   // The DOM's recursive tree structure is:
+export function rerenderTreeDescription(tree: AccessibilityTree, ul: HTMLElement) {
+  // The DOM's recursive tree structure is:
   // ul -> li[] | table
   // li -> [span, ul] | span
   // span and table have no children
@@ -151,9 +157,10 @@ export function rerenderTreeDescription(tree: AccessibilityTree, ul: HTMLElement
       if (li.nodeName === 'TABLE') {
         // (1) re-render the table, no need to recurse
         const parentLi = ul.parentElement!; // the parent li stores the relevant ID
-        const tableData = htmlNodeToTree(parentLi, tree).children.filter(n => n.type === 'data');
-        li.replaceWith(createDataTable(tableData, parentLi.id.split('-').length))
-      } else { // li.nodeName is 'LI'
+        const tableData = htmlNodeToTree(parentLi, tree).children.filter((n) => n.type === 'data');
+        li.replaceWith(createDataTable(tableData, parentLi.id.split('-').length));
+      } else {
+        // li.nodeName is 'LI'
         // (2) re-render the li's span child,
         // and if it has a second child (which will be a ul), recurse on it
         const label = li.firstElementChild! as HTMLElement;
@@ -176,7 +183,10 @@ export function rerenderTreeDescription(tree: AccessibilityTree, ul: HTMLElement
 export function htmlNodeToTree(node: HTMLElement, tree: AccessibilityTree): AccessibilityTreeNode {
   let cur = tree.root;
   // path has form root-1-2-3 etc; we split on -, remove the starting info, and map the rest to numbers
-  const path = node.id.split('-').slice(2).map(x => Number(x));
+  const path = node.id
+    .split('-')
+    .slice(2)
+    .map((x) => Number(x));
   for (const idx of path) {
     cur = cur.children[idx];
   }

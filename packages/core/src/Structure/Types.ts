@@ -1,10 +1,9 @@
-import { OlliDatum } from "../Types";
+import { OlliDatum } from '../Types';
 
 /**
  * Meta-data information to what kind of node is currently visited
  */
-export type NodeType = "chart" | "xAxis" | "yAxis" | "data" | "filteredData" | "legend" | "grid" | "multiView";
-
+export type NodeType = 'chart' | 'xAxis' | 'yAxis' | 'data' | 'filteredData' | 'legend' | 'grid' | 'multiView';
 
 export type EncodingFilterValue = string | [number | Date, number | Date];
 export type GridFilterValue = [EncodingFilterValue, EncodingFilterValue];
@@ -21,18 +20,18 @@ export type FilterValue = EncodingFilterValue | GridFilterValue;
  * gridIndex: if this node represents a cell in a grid view, the row/column coordinates of the cell *
  */
 export type AccessibilityTreeNode = {
-    type: NodeType,
-    parent: AccessibilityTreeNode | null,
-    selected: OlliDatum[],
-    description: string,
-    children: AccessibilityTreeNode[]
-    tableKeys?: string[],
-    filterValue?: FilterValue,
-    gridIndex?: {
-      i: number,
-      j: number
-    },
-}
+  type: NodeType;
+  parent: AccessibilityTreeNode | null;
+  selected: OlliDatum[];
+  description: string;
+  children: AccessibilityTreeNode[];
+  tableKeys?: string[];
+  filterValue?: FilterValue;
+  gridIndex?: {
+    i: number;
+    j: number;
+  };
+};
 
 /**
  * A {@link AccessibilityTree} is a tree representation of a visualization.
@@ -40,6 +39,6 @@ export type AccessibilityTreeNode = {
  * fieldsUsed: The data fields that are used by encodings (assists with rendering data tables)
  */
 export type AccessibilityTree = {
-    root: AccessibilityTreeNode,
-    fieldsUsed: string[]
-}
+  root: AccessibilityTreeNode;
+  fieldsUsed: string[];
+};

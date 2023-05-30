@@ -54,4 +54,3 @@ and aria-expanded attribute. Otherwise, a node is rendered as a
 list item with a `treeitem` ARIA role. The addition of the ARIA
 roles and extra attributes allow the screen reader to provide a more
 specific description of the node’s position of the tree.
-
