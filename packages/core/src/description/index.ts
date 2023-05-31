@@ -24,11 +24,15 @@ export function nodeToDescription(node: ElaboratedOlliNode, olliSpec: OlliSpec):
       if ('groupby' in node && olliSpec.mark === 'line') {
         return `${olliSpec.description} A multi-series line chart with 5 lines representing ${node.groupby.field}.`;
       }
-    // return 'The root node of the Olli tree. This node contains all of the data.';
+      return `${olliSpec.description} A ${olliSpec.mark} chart.`;
     case 'facet':
-      if ('predicate' in node && 'equal' in node.predicate && olliSpec.mark === 'line') {
-        return `A line representing ${node.predicate.equal}.`;
+      if ('predicate' in node && 'equal' in node.predicate) {
+        if (olliSpec.mark === 'line') {
+          return `A line representing ${node.predicate.equal}.`;
+        }
+        return `A ${olliSpec.mark} chart representing ${node.predicate.equal}.`;
       }
+      return `A facet.`;
     case 'xAxis':
     case 'yAxis':
     case 'legend':
@@ -37,7 +41,6 @@ export function nodeToDescription(node: ElaboratedOlliNode, olliSpec: OlliSpec):
         let first, last;
         if (node.groupby.type === 'quantitative' || node.groupby.type === 'temporal') {
           const bins = getBins(node.groupby, olliSpec.data);
-          console.log(bins);
           first = fmtValue(bins[0][0]);
           last = fmtValue(bins[bins.length - 1][1]);
         } else {
@@ -51,7 +54,6 @@ export function nodeToDescription(node: ElaboratedOlliNode, olliSpec: OlliSpec):
     case 'filteredData':
       if ('predicate' in node) {
         const selection = selectionTest(olliSpec.data, node.fullPredicate);
-        console.log(node.fullPredicate, selection);
         if ('range' in node.predicate) {
           return `${fmtValue(node.predicate.range[0])} to ${fmtValue(node.predicate.range[1])}. ${
             selection.length

@@ -1,6 +1,6 @@
 import { TopLevelSpec, compile } from 'vega-lite';
 import { VisAdapter, OlliSpec, OlliDataset, OlliEncodingChannel, OlliNode, isGuideChannel, olli } from 'olli';
-import { getData, getVegaScene, getVegaView } from './utils';
+import { getData, getVegaScene, getVegaView, typeInference } from './utils';
 import { tickValues } from 'vega-scale';
 
 /**
@@ -39,13 +39,14 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
           olliSpec.encoding[channel as OlliEncodingChannel] = encoding;
 
           if (isGuideChannel(channel as OlliEncodingChannel)) {
-            const scale = view.scale(channel);
-            if (scale) {
+            try {
+              const scaleName = spec.name ? `${spec.name}_${channel}` : channel;
+              const scale = view.scale(scaleName);
               const ticks = tickValues(scale, 6);
               if (ticks) {
                 olliSpec.encoding[channel as OlliEncodingChannel].bin = ticks;
               }
-            }
+            } catch (e) {}
           }
         }
 
@@ -83,6 +84,18 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
   } else {
     olliSpec.structure = getGuideNodes();
   }
+
+  // TODO: aggregate field names ... this feels hacky
+  Object.values(olliSpec.encoding).forEach((fieldDef) => {
+    if ('aggregate' in fieldDef) {
+      fieldDef.field = `${fieldDef.aggregate}_${fieldDef.field}`;
+    }
+  });
+
+  // infer missing measure types
+  Object.values(olliSpec.encoding).forEach((fieldDef) => {
+    fieldDef.type = typeInference(data, fieldDef.field);
+  });
 
   return olliSpec;
 };
