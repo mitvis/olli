@@ -52,8 +52,8 @@ export function nodeToDescription(node: ElaboratedOlliNode, tree: ElaboratedOlli
         let first, last;
         if (node.groupby.type === 'quantitative' || node.groupby.type === 'temporal') {
           const guide =
-            olliSpec.axes?.find((axis) => axis.field === node.groupby.field) ||
-            olliSpec.legends?.find((legend) => legend.field === node.groupby.field);
+            olliSpec.axes?.find((axis) => axis.field.field === node.groupby.field) ||
+            olliSpec.legends?.find((legend) => legend.field.field === node.groupby.field);
           const bins = getBins(node.groupby, olliSpec.data);
           first = fmtValue(bins[0][0]);
           last = fmtValue(bins[bins.length - 1][1]);

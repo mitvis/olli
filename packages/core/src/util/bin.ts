@@ -1,9 +1,8 @@
-import { OlliDataset } from 'olli';
 import { bin } from 'vega-statistics';
 import { LogicalComposition } from 'vega-lite/src/logical';
 import { FieldPredicate } from 'vega-lite/src/predicate';
 import { getDomain } from './data';
-import { OlliEncodingFieldDef, OlliValue } from '../Types';
+import { OlliEncodingFieldDef, OlliDataset } from '../Types';
 import * as d3 from 'd3';
 
 export function getBins(

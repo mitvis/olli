@@ -21,8 +21,8 @@ export function olliSpecToTree(olliSpec: OlliSpec, namespace: string): Elaborate
   }
 
   function nodeTypeFromGroupField(field: string, olliSpec: OlliSpec): OlliNodeType {
-    if (field === olliSpec.facetField) return 'root';
-    const axis = olliSpec.axes?.find((a) => a.field === field);
+    if (field === olliSpec.facet.field) return 'root';
+    const axis = olliSpec.axes?.find((a) => a.field.field === field);
     if (axis) {
       switch (axis.axisType) {
         case 'x':
@@ -31,7 +31,7 @@ export function olliSpecToTree(olliSpec: OlliSpec, namespace: string): Elaborate
           return 'yAxis';
       }
     }
-    const legend = olliSpec.legends?.find((l) => l.field === field);
+    const legend = olliSpec.legends?.find((l) => l.field.field === field);
     if (legend) {
       return 'legend';
     }
@@ -109,10 +109,10 @@ export function olliSpecToTree(olliSpec: OlliSpec, namespace: string): Elaborate
 }
 
 export function getFieldsUsed(olliSpec: OlliSpec, tree: ElaboratedOlliNode) {
-  if (olliSpec.axes || olliSpec.legends || olliSpec.facetField) {
+  if (olliSpec.axes || olliSpec.legends || olliSpec.facet) {
     const fields = new Set(
       [
-        olliSpec.facetField || [],
+        olliSpec.facet.field || [],
         olliSpec.axes.map((axis) => axis.field),
         olliSpec.legends.map((legend) => legend.field),
       ].flat()

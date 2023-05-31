@@ -1,8 +1,7 @@
-import { OlliDataset, OlliDatum } from 'olli';
 import { isDate, toNumber, isArray, inrange } from 'vega';
 import { LogicalAnd, LogicalComposition } from 'vega-lite/src/logical';
 import { FieldPredicate, FieldEqualPredicate } from 'vega-lite/src/predicate';
-import { OlliEncodingFieldDef, OlliValue } from '../Types';
+import { OlliEncodingFieldDef, OlliDataset, OlliDatum } from '../Types';
 import { serializeValue } from './values';
 import { getDomain } from './data';
 import { getBinPredicates } from './bin';
