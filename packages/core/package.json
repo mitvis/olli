@@ -26,6 +26,7 @@
   },
   "homepage": "https://mitvis.github.io/olli/",
   "dependencies": {
+    "d3-scale": "^4.0.2",
     "vega-lite": "^5.9.3",
     "vega-statistics": "^1.9.0",
     "webpack": "^5.76.0"
@@ -36,7 +37,7 @@
     "style-loader": "^3.3.1",
     "ts-loader": "^9.4.2",
     "typescript": "^5.0.4",
-    "webpack-merge": "^5.8.0",
-    "webpack-cli": "^4.10.0"
+    "webpack-cli": "^4.10.0",
+    "webpack-merge": "^5.8.0"
   }
 }

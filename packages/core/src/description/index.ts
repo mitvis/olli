@@ -54,7 +54,7 @@ export function nodeToDescription(node: ElaboratedOlliNode, tree: ElaboratedOlli
           const guide =
             olliSpec.axes?.find((axis) => axis.field === node.groupby.field) ||
             olliSpec.legends?.find((legend) => legend.field === node.groupby.field);
-          const bins = getBins(node.groupby, olliSpec.data, guide?.ticks);
+          const bins = getBins(node.groupby, olliSpec.data);
           first = fmtValue(bins[0][0]);
           last = fmtValue(bins[bins.length - 1][1]);
           return `${guideType} titled ${node.groupby.field} for a ${node.groupby.type} scale with values from ${first} to ${last}.`;

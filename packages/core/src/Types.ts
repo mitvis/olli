@@ -30,7 +30,6 @@ export type MeasureType = 'quantitative' | 'ordinal' | 'nominal' | 'temporal';
 type Guide = {
   type: MeasureType;
   field: string;
-  ticks?: OlliValue[];
   title?: string;
 };
 

@@ -144,11 +144,7 @@ export function datumToPredicate(datum: OlliDatum, fieldDefs: OlliEncodingFieldD
   };
 }
 
-export function fieldToPredicates(
-  fieldDef: OlliEncodingFieldDef,
-  data: OlliDataset,
-  ticks?: OlliValue[]
-): FieldPredicate[] {
+export function fieldToPredicates(fieldDef: OlliEncodingFieldDef, data: OlliDataset): FieldPredicate[] {
   if (fieldDef.type === 'nominal' || fieldDef.type === 'ordinal') {
     const domain = getDomain(fieldDef, data);
     return domain.map((value) => {
@@ -158,7 +154,7 @@ export function fieldToPredicates(
       };
     });
   } else {
-    const bins = getBinPredicates(fieldDef, data, ticks);
+    const bins = getBinPredicates(fieldDef, data);
     return bins;
   }
 }
