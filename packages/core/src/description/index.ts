@@ -57,7 +57,9 @@ export function nodeToDescription(node: ElaboratedOlliNode, tree: ElaboratedOlli
           const bins = getBins(node.groupby, olliSpec.data);
           first = fmtValue(bins[0][0]);
           last = fmtValue(bins[bins.length - 1][1]);
-          return `${guideType} titled ${node.groupby.field} for a ${node.groupby.type} scale with values from ${first} to ${last}.`;
+          return `${guideType} titled ${node.groupby.field} for a ${
+            'scaleType' in guide ? guide.scaleType || node.groupby.type : node.groupby.type
+          } scale with values from ${first} to ${last}.`;
         } else {
           const domain = getDomain(node.groupby, olliSpec.data);
           first = fmtValue(domain[0]);

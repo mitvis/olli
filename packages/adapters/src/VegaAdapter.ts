@@ -1,4 +1,15 @@
-import { Spec, ScaleDataRef, Scale, ScaleData, Scene, SceneItem, isString, SignalRef, ScaleMultiFieldsRef } from 'vega';
+import {
+  Spec,
+  ScaleDataRef,
+  Scale,
+  ScaleData,
+  Scene,
+  SceneItem,
+  isString,
+  SignalRef,
+  ScaleMultiFieldsRef,
+  SceneGroup,
+} from 'vega';
 import {
   OlliVisSpec,
   VisAdapter,
@@ -19,7 +30,6 @@ import {
   getVegaView,
   guideTypeFromScale,
   isNumeric,
-  SceneGroup,
 } from './utils';
 
 /**

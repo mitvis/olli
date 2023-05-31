@@ -1,8 +1,6 @@
 import { TopLevelSpec, compile } from 'vega-lite';
 import { VisAdapter, OlliSpec, OlliAxis, OlliLegend, OlliNode } from 'olli';
 import { getData, getVegaScene, getVegaView, typeInference } from './utils';
-// @ts-ignore
-import { tickValues } from 'vega-scale';
 
 /**
  * Adapter to deconstruct Vega-Lite visualizations into an {@link OlliVisSpec}
@@ -23,46 +21,62 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
   };
 
   if ('mark' in spec) {
-    // TODO vega-lite mark type exceeds olli mark type, should do some validation
-    // get mark type
-    let mark: any = spec.mark;
-    if (mark && mark.type) {
-      // e.g. "mark": {"type": "line", "point": true}
-      mark = mark.type;
-    }
-    olliSpec.mark = mark;
-
     // unit spec
+
+    const getMark = (spec: any) => {
+      // TODO vega-lite mark type exceeds olli mark type, should do some validation
+      const mark: any = spec.mark;
+      if (mark && mark.type) {
+        // e.g. "mark": {"type": "line", "point": true}
+        return mark.type;
+      }
+      return mark;
+    };
+    olliSpec.mark = getMark(spec);
+
+    const getFieldFromEncoding = (encoding) => {
+      if ('aggregate' in encoding) {
+        return `${encoding.aggregate}_${encoding.field}`;
+      }
+
+      return 'condition' in encoding ? encoding.condition.field : encoding.field;
+    };
+
     if (spec.encoding) {
       Object.entries(spec.encoding).forEach(([channel, encoding]) => {
+        const fieldDef = { ...encoding };
+        fieldDef.field = getFieldFromEncoding(encoding);
+        fieldDef.type = encoding.type || typeInference(data, fieldDef.field);
+
         if (['row', 'column', 'facet'].includes(channel)) {
-          olliSpec.facetField = encoding.field;
+          // add facet field
+          olliSpec.facetField = fieldDef;
         } else if (olliSpec.mark === 'line' && ['color', 'detail'].includes(channel)) {
           // treat multi-series line charts as facets
-          olliSpec.facetField = encoding.field;
+          olliSpec.facetField = fieldDef;
         } else if (['x', 'y'].includes(channel)) {
-          if (olliSpec.mark === 'bar' && encoding.type === 'quantitative') {
+          // add axes
+          if (olliSpec.mark === 'bar' && fieldDef.type === 'quantitative') {
             return; // skip quantitative channel for bar charts
           }
           olliSpec.axes.push({
             axisType: channel as 'x' | 'y',
-            field: encoding.field,
-            type: encoding.type,
+            field: fieldDef,
             title: encoding.title,
           });
         } else if (['color', 'opacity'].includes(channel)) {
+          // add legends
           olliSpec.legends.push({
             channel,
-            field: encoding.field,
-            type: encoding.type,
+            field: fieldDef,
             title: encoding.title,
           });
         }
 
-        if (encoding.type === 'temporal') {
+        if (fieldDef.type === 'temporal') {
           // convert temporal data into Date objects
           data.forEach((datum) => {
-            datum[encoding.field] = new Date(datum[encoding.field]);
+            datum[fieldDef.field] = new Date(datum[fieldDef.field]);
           });
         }
       });
@@ -70,10 +84,7 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
       function guideNodes(): OlliNode[] {
         return olliSpec.axes.concat(olliSpec.legends).map((guide) => {
           return {
-            groupby: {
-              field: guide.field,
-              type: guide.type,
-            },
+            groupby: guide.field,
             children: [],
           };
         });
@@ -82,10 +93,7 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
       // create structure
       if (olliSpec.facetField) {
         olliSpec.structure = {
-          groupby: {
-            field: olliSpec.facetField,
-            type: Object.values(spec.encoding).find((encoding) => encoding.field === olliSpec.facetField).type,
-          },
+          groupby: olliSpec.facetField,
           children: guideNodes(),
         };
       } else {
@@ -96,24 +104,7 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
     // TODO: handle layer and concat specs
   }
 
-  // TODO: aggregate field names ... this feels hacky
-  // Object.values(olliSpec.encoding).forEach((fieldDef) => {
-  //   if ('aggregate' in fieldDef) {
-  //     fieldDef.field = `${fieldDef.aggregate}_${fieldDef.field}`;
-  //   }
-  // });
+  // TODO: aggregate field names
 
-  // infer missing measure types
-  // Object.values(olliSpec.encoding).forEach((fieldDef) => {
-  //   fieldDef.type = typeInference(data, fieldDef.field);
-  // });
-
-  // return olliSpec;
-
-  // for testing
-
-  return {
-    data: olliSpec.data,
-    structure: olliSpec.structure,
-  };
+  return olliSpec;
 };

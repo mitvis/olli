@@ -20,7 +20,7 @@ export interface OlliSpec {
   mark?: OlliMark;
   axes?: OlliAxis[];
   legends?: OlliLegend[];
-  facetField?: string;
+  facet?: OlliEncodingFieldDef;
   title?: string;
   description?: string; // possible chart description included with the spec
 }
@@ -28,8 +28,7 @@ export interface OlliSpec {
 export type MeasureType = 'quantitative' | 'ordinal' | 'nominal' | 'temporal';
 
 type Guide = {
-  type: MeasureType;
-  field: string;
+  field: OlliEncodingFieldDef;
   title?: string;
 };
 
