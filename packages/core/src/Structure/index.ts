@@ -14,7 +14,7 @@ export function olliSpecToTree(olliSpec: OlliSpec, namespace: string): Elaborate
     }
     return {
       id: namespace,
-      nodeType: 'root',
+      nodeType: 'other',
       fullPredicate: { and: [] },
       children: nodes,
     };
@@ -22,7 +22,7 @@ export function olliSpecToTree(olliSpec: OlliSpec, namespace: string): Elaborate
 
   function nodeTypeFromGroupField(field: string, olliSpec: OlliSpec): OlliNodeType {
     if (field === olliSpec.facetField) return 'root';
-    const axis = olliSpec.axes.find((a) => a.field === field);
+    const axis = olliSpec.axes?.find((a) => a.field === field);
     if (axis) {
       switch (axis.axisType) {
         case 'x':
@@ -31,7 +31,7 @@ export function olliSpecToTree(olliSpec: OlliSpec, namespace: string): Elaborate
           return 'yAxis';
       }
     }
-    const legend = olliSpec.legends.find((l) => l.field === field);
+    const legend = olliSpec.legends?.find((l) => l.field === field);
     if (legend) {
       return 'legend';
     }
@@ -62,8 +62,8 @@ export function olliSpecToTree(olliSpec: OlliSpec, namespace: string): Elaborate
         const fieldDef = node.groupby;
         const nodeType = nodeTypeFromGroupField(fieldDef.field, olliSpec);
         const guide =
-          olliSpec.axes.find((a) => a.field === fieldDef.field) ||
-          olliSpec.legends.find((l) => l.field === fieldDef.field);
+          olliSpec.axes?.find((a) => a.field === fieldDef.field) ||
+          olliSpec.legends?.find((l) => l.field === fieldDef.field);
         const childPreds = fieldToPredicates(fieldDef, data, guide?.ticks);
 
         return {
@@ -111,13 +111,36 @@ export function olliSpecToTree(olliSpec: OlliSpec, namespace: string): Elaborate
   return tree;
 }
 
-export function getFieldsUsed(olliSpec: OlliSpec) {
-  const fields = [
-    olliSpec.facetField || [],
-    olliSpec.axes.map((axis) => axis.field),
-    olliSpec.legends.map((legend) => legend.field),
-  ].flat();
-  return fields;
+export function getFieldsUsed(olliSpec: OlliSpec, tree: ElaboratedOlliNode) {
+  if (olliSpec.axes || olliSpec.legends || olliSpec.facetField) {
+    const fields = new Set(
+      [
+        olliSpec.facetField || [],
+        olliSpec.axes.map((axis) => axis.field),
+        olliSpec.legends.map((legend) => legend.field),
+      ].flat()
+    );
+    return fields;
+  } else {
+    const queue = [tree];
+    const fields = new Set();
+    while (queue.length > 0) {
+      const node = queue.shift();
+      if ('groupby' in node) {
+        const field = node.groupby.field;
+        if (!fields.has(field)) {
+          fields.add(field);
+        }
+      } else if ('predicate' in node) {
+        const field = node.predicate.field;
+        if (!fields.has(field)) {
+          fields.add(field);
+        }
+      }
+      queue.push(...node.children);
+    }
+    return fields;
+  }
 }
 
 export function addParentRefs(tree: ElaboratedOlliNode) {

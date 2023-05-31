@@ -5,6 +5,7 @@ import { getBins } from '../util/bin';
 import { getDomain } from '../util/data';
 import { selectionTest } from '../util/selection';
 import { fmtValue } from '../util/values';
+import { getFieldsUsed } from '../Structure';
 
 export function generateDescriptions(olliSpec: OlliSpec, tree: ElaboratedOlliNode) {
   const queue = [tree];
@@ -13,12 +14,12 @@ export function generateDescriptions(olliSpec: OlliSpec, tree: ElaboratedOlliNod
     if (!node) {
       continue;
     }
-    node.description = nodeToDescription(node, olliSpec);
+    node.description = nodeToDescription(node, tree, olliSpec);
     queue.push(...node.children);
   }
 }
 
-export function nodeToDescription(node: ElaboratedOlliNode, olliSpec: OlliSpec): string {
+export function nodeToDescription(node: ElaboratedOlliNode, tree: ElaboratedOlliNode, olliSpec: OlliSpec): string {
   const index = (node.parent?.children.indexOf(node) || 0) + 1;
   const siblings = (node.parent?.children || []).length;
   switch (node.nodeType) {
@@ -51,8 +52,8 @@ export function nodeToDescription(node: ElaboratedOlliNode, olliSpec: OlliSpec):
         let first, last;
         if (node.groupby.type === 'quantitative' || node.groupby.type === 'temporal') {
           const guide =
-            olliSpec.axes.find((axis) => axis.field === node.groupby.field) ||
-            olliSpec.legends.find((legend) => legend.field === node.groupby.field);
+            olliSpec.axes?.find((axis) => axis.field === node.groupby.field) ||
+            olliSpec.legends?.find((legend) => legend.field === node.groupby.field);
           const bins = getBins(node.groupby, olliSpec.data, guide?.ticks);
           first = fmtValue(bins[0][0]);
           last = fmtValue(bins[bins.length - 1][1]);
@@ -74,6 +75,31 @@ export function nodeToDescription(node: ElaboratedOlliNode, olliSpec: OlliSpec):
           )}. ${selection.length} values.`;
         } else if ('equal' in node.predicate) {
           return `${index} of ${siblings}. ${fmtValue(node.predicate.equal as OlliValue)}. ${selection.length} values.`;
+        }
+      }
+    case 'other':
+      if ('groupby' in node) {
+        if (!node.parent) {
+          const fields = getFieldsUsed(olliSpec, tree);
+          return `A dataset with ${fields.size} fields${
+            fields.size <= 3 ? ' ' + [...fields].join(', ') : ''
+          }, grouped by ${node.groupby.field}.`;
+        }
+        return `${node.children.length} groups, grouped by ${node.groupby.field}.`;
+      } else if ('predicate' in node) {
+        let predicateDescription;
+        if ('range' in node.predicate) {
+          predicateDescription = `is between ${fmtValue(node.predicate.range[0])} to ${fmtValue(
+            node.predicate.range[1]
+          )}`;
+        } else if ('equal' in node.predicate) {
+          predicateDescription = `is ${fmtValue(node.predicate.equal as OlliValue)}`;
+        }
+        return `${index} of ${siblings}. ${node.predicate.field} ${predicateDescription}.`;
+      } else {
+        if (!node.parent) {
+          const fields = getFieldsUsed(olliSpec, tree);
+          return `A dataset with ${fields.size} fields${fields.size <= 3 ? ' ' + [...fields].join(', ') : ''}.`;
         }
       }
   }

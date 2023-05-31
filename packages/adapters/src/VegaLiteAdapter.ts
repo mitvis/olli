@@ -126,5 +126,12 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
   //   fieldDef.type = typeInference(data, fieldDef.field);
   // });
 
-  return olliSpec;
+  // return olliSpec;
+
+  // for testing
+
+  return {
+    data: olliSpec.data,
+    structure: olliSpec.structure,
+  };
 };

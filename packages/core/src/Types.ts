@@ -16,13 +16,13 @@ export type OlliDataset = OlliDatum[];
 export interface OlliSpec {
   // selection?: OlliDataset; // optional: an initial top level selection (subset of data)
   data: OlliDataset;
+  structure: OlliNode | OlliNode[];
   mark?: OlliMark;
-  axes: OlliAxis[];
-  legends: OlliLegend[];
+  axes?: OlliAxis[];
+  legends?: OlliLegend[];
   facetField?: string;
   title?: string;
   description?: string; // possible chart description included with the spec
-  structure: OlliNode | OlliNode[];
 }
 
 export type MeasureType = 'quantitative' | 'ordinal' | 'nominal' | 'temporal';

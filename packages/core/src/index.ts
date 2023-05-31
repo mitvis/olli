@@ -1,10 +1,10 @@
 import { OlliSpec } from './Types';
-import { ElaboratedOlliNode } from './structure/Types';
-import { Tree } from './render/TreeView/Tree';
-import { renderTree } from './render/TreeView';
-import { olliSpecToTree, treeToNodeLookup } from './structure';
+import { ElaboratedOlliNode } from './Structure/Types';
+import { Tree } from './Render/TreeView/Tree';
+import { renderTree } from './Render/TreeView';
+import { olliSpecToTree, treeToNodeLookup } from './Structure';
 import { updateGlobalStateOnRender } from './util/globalState';
-import { generateDescriptions } from './description';
+import { generateDescriptions } from './Description';
 
 export * from './Types';
 
