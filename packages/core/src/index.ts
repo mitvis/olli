@@ -7,6 +7,7 @@ import { updateGlobalStateOnRender } from './util/globalState';
 import { generateDescriptions } from './Description';
 
 export * from './Types';
+export * from './Structure/Types';
 
 /**
  * The configuration object outlining how an accessible visualization should be rendered based on a {@link OlliSpec}.

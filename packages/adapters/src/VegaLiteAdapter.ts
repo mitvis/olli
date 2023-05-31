@@ -1,5 +1,5 @@
 import { TopLevelSpec, compile } from 'vega-lite';
-import { VisAdapter, OlliSpec, OlliAxis, OlliLegend, OlliNode } from 'olli';
+import { VisAdapter, OlliSpec, OlliNode } from 'olli';
 import { getData, getVegaScene, getVegaView, typeInference } from './utils';
 
 /**
@@ -50,10 +50,10 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
 
         if (['row', 'column', 'facet'].includes(channel)) {
           // add facet field
-          olliSpec.facetField = fieldDef;
+          olliSpec.facet = fieldDef;
         } else if (olliSpec.mark === 'line' && ['color', 'detail'].includes(channel)) {
           // treat multi-series line charts as facets
-          olliSpec.facetField = fieldDef;
+          olliSpec.facet = fieldDef;
         } else if (['x', 'y'].includes(channel)) {
           // add axes
           if (olliSpec.mark === 'bar' && fieldDef.type === 'quantitative') {
@@ -82,7 +82,7 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
       });
 
       function guideNodes(): OlliNode[] {
-        return olliSpec.axes.concat(olliSpec.legends).map((guide) => {
+        return [].concat(olliSpec.axes, olliSpec.legends).map((guide) => {
           return {
             groupby: guide.field,
             children: [],
@@ -91,9 +91,9 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
       }
 
       // create structure
-      if (olliSpec.facetField) {
+      if (olliSpec.facet) {
         olliSpec.structure = {
-          groupby: olliSpec.facetField,
+          groupby: olliSpec.facet,
           children: guideNodes(),
         };
       } else {
