@@ -44,37 +44,19 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
           if (olliSpec.mark === 'bar' && encoding.type === 'quantitative') {
             return; // skip quantitative channel for bar charts
           }
-          const axis: OlliAxis = {
+          olliSpec.axes.push({
             axisType: channel as 'x' | 'y',
             field: encoding.field,
             type: encoding.type,
             title: encoding.title,
-          };
-          try {
-            const scaleName = spec.name ? `${spec.name}_${channel}` : channel;
-            const scale = view.scale(scaleName);
-            const ticks = tickValues(scale, 6);
-            if (ticks) {
-              axis.ticks = ticks;
-            }
-          } catch (e) {}
-          olliSpec.axes.push(axis);
+          });
         } else if (['color', 'opacity'].includes(channel)) {
-          const legend: OlliLegend = {
+          olliSpec.legends.push({
             channel,
             field: encoding.field,
             type: encoding.type,
             title: encoding.title,
-          };
-          try {
-            const scaleName = spec.name ? `${spec.name}_${channel}` : channel;
-            const scale = view.scale(scaleName);
-            const ticks = tickValues(scale, 6);
-            if (ticks) {
-              legend.ticks = ticks;
-            }
-          } catch (e) {}
-          olliSpec.legends.push(legend);
+          });
         }
 
         if (encoding.type === 'temporal') {
