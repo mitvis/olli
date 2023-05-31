@@ -37,10 +37,13 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
       Object.entries(spec.encoding).forEach(([channel, encoding]) => {
         if (['row', 'column', 'facet'].includes(channel)) {
           olliSpec.facetField = encoding.field;
-        } else if (spec.mark === 'line' && ['color', 'detail'].includes(channel)) {
+        } else if (olliSpec.mark === 'line' && ['color', 'detail'].includes(channel)) {
           // treat multi-series line charts as facets
           olliSpec.facetField = encoding.field;
         } else if (['x', 'y'].includes(channel)) {
+          if (olliSpec.mark === 'bar' && encoding.type === 'quantitative') {
+            return; // skip quantitative channel for bar charts
+          }
           const axis: OlliAxis = {
             axisType: channel as 'x' | 'y',
             field: encoding.field,
