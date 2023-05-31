@@ -1,5 +1,6 @@
-import { AccessibilityTree, NodeType } from '../../Structure/Types';
-import { setOlliGlobalState } from '../../utils';
+import { OlliNodeLookup } from '../../structure/Types';
+import { OlliNodeType } from '../../structure/Types';
+import { setOlliGlobalState } from '../../util/globalState';
 import { TreeItem } from './TreeItem';
 /*
  *   This content is licensed according to the W3C Software License at
@@ -23,27 +24,27 @@ import { TreeItem } from './TreeItem';
  */
 export class Tree {
   domNode: any;
-  olliTree: AccessibilityTree;
   treeItems: TreeItem[];
+  olliNodeLookup: OlliNodeLookup;
   rootTreeItem!: TreeItem;
   lastFocusedTreeItem!: TreeItem;
   onFocus?: (el: HTMLElement) => void;
 
-  constructor(node: HTMLElement, olliTree: AccessibilityTree, onFocus?: (el: HTMLElement) => void) {
+  constructor(node: HTMLElement, lookup: OlliNodeLookup, onFocus?: (el: HTMLElement) => void) {
     this.domNode = node;
-    this.olliTree = olliTree;
     this.treeItems = [];
+    this.olliNodeLookup = lookup;
     this.onFocus = onFocus;
   }
 
   init(): void {
-    function findTreeitems(node: any, tree: Tree, olliTree: AccessibilityTree, group: TreeItem | undefined) {
+    function findTreeitems(node, tree: Tree, lookup: OlliNodeLookup, group: TreeItem | undefined) {
       let elem = node.firstElementChild;
       let ti = group;
 
       while (elem) {
         if (['li', 'table', 'tr', 'th', 'td'].includes(elem.tagName.toLowerCase())) {
-          ti = new TreeItem(elem, tree, olliTree, group);
+          ti = new TreeItem(elem, tree, lookup[elem.id], group);
           ti.init();
           if (group) {
             group.children.push(ti);
@@ -52,21 +53,38 @@ export class Tree {
         }
 
         if (elem.firstElementChild) {
-          findTreeitems(elem, tree, olliTree, ti);
+          findTreeitems(elem, tree, lookup, ti);
         }
 
         elem = elem.nextElementSibling;
       }
     }
 
-    findTreeitems(this.domNode, this, this.olliTree, undefined);
+    findTreeitems(this.domNode, this, this.olliNodeLookup, undefined);
 
     this.rootTreeItem = this.treeItems[0];
     this.rootTreeItem.domNode.tabIndex = 0;
+
+    this.renderTreeDescription();
+  }
+
+  renderTreeDescription() {
+    _renderTreeDescription(this.domNode, this.olliNodeLookup);
+
+    function _renderTreeDescription(ul: HTMLElement, lookup: OlliNodeLookup) {
+      if (ul.children.length) {
+        for (const li of ul.children) {
+          const label = li.firstElementChild! as HTMLElement;
+          label.innerText = lookup[li.id].description;
+          if (li.children[1]) {
+            _renderTreeDescription(li.children[1] as HTMLElement, lookup);
+          }
+        }
+      }
+    }
   }
 
   setFocusToItem(treeitem: TreeItem) {
-    console.log(treeitem.olliNode);
     for (var i = 0; i < this.treeItems.length; i++) {
       var ti = this.treeItems[i];
 
@@ -223,7 +241,7 @@ export class Tree {
     }
   }
 
-  focusOnNodeType(nodeType: NodeType, currentItem: TreeItem) {
+  focusOnNodeType(nodeType: OlliNodeType, currentItem: TreeItem) {
     const expandParents = (node: TreeItem | undefined) => {
       if (node) {
         if (node.isExpandable && !node.isExpanded()) {
@@ -242,18 +260,18 @@ export class Tree {
       });
     };
 
-    let iterNodeType: NodeType = currentItem.domNode.getAttribute('data-nodetype') as NodeType;
+    let iterNodeType: OlliNodeType = currentItem.domNode.getAttribute('data-nodetype') as OlliNodeType;
     let iterItem: TreeItem = currentItem;
-    while (iterNodeType !== 'chart') {
+    while (iterNodeType !== 'root') {
       if (!iterNodeType) return;
       if (iterItem.parent) {
         iterItem = iterItem.parent;
-        iterNodeType = iterItem.domNode.getAttribute('data-nodetype') as NodeType;
+        iterNodeType = iterItem.domNode.getAttribute('data-nodetype') as OlliNodeType;
       } else return;
     }
 
     const targetItem = iterItem.children.find((item) => {
-      const nt = item.domNode.getAttribute('data-nodetype') as NodeType;
+      const nt = item.domNode.getAttribute('data-nodetype') as OlliNodeType;
       return nodeType === nt;
     });
 

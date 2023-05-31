@@ -77,7 +77,7 @@ function parseFacets(spec: Spec, scene: SceneGroup, data: OlliDataset): FacetedC
   let multiViewChart = facetedChart({
     charts: charts,
     data,
-    facetedField: facetField,
+    OlliSpec: facetField,
   });
 
   return multiViewChart;

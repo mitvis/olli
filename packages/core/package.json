@@ -26,6 +26,7 @@
   },
   "homepage": "https://mitvis.github.io/olli/",
   "dependencies": {
+    "vega-statistics": "^1.9.0",
     "webpack": "^5.76.0"
   },
   "devDependencies": {

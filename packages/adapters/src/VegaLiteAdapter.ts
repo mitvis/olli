@@ -1,197 +1,88 @@
 import { TopLevelSpec, compile } from 'vega-lite';
-import { VisAdapter, OlliVisSpec, Chart, Axis, Legend, facetedChart, chart, OlliDataset } from 'olli';
-import {
-  filterUniqueObjects,
-  findScenegraphNodes,
-  getData,
-  getVegaScene,
-  guideTypeFromScale,
-  guideTypeFromVLEncoding,
-  isNumeric,
-  SceneGroup,
-} from './utils';
+import { VisAdapter, OlliSpec, OlliDataset, OlliEncodingChannel, OlliNode, isGuideChannel, olli } from 'olli';
+import { getData, getVegaScene, getVegaView } from './utils';
+import { tickValues } from 'vega-scale';
 
 /**
  * Adapter to deconstruct Vega-Lite visualizations into an {@link OlliVisSpec}
  * @param spec The Vega-Lite Spec that rendered the visualization
  * @returns An {@link OlliVisSpec} of the deconstructed Vega-Lite visualization
  */
-export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSpec): Promise<OlliVisSpec> => {
-  const scene: SceneGroup = await getVegaScene(compile(spec).spec);
+export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSpec): Promise<OlliSpec> => {
+  const view = await getVegaView(compile(spec).spec);
+  const scene = getVegaScene(view);
   const data = getData(scene);
   const description = spec.description; // possible text description included with spec
-  if (scene.items.some((node: any) => node.role === 'scope')) {
-    // looking for role === 'scope' means we're using parseMultiView to handle
-    // both faceted charts and multi-series lines
-    return { description, ...parseMultiView(spec, scene, data) };
-  } else {
-    return { description, ...parseChart(spec, scene, data) };
-  }
-};
-
-/**
- * @param scenegraph The Vega Scenegraph from the view
- * @param spec The Vega-Lite Spec that rendered the visualization
- * @returns An {@link OlliVisSpec} of the deconstructed Vega-Lite visualization
- */
-function parseMultiView(spec: TopLevelSpec, scene: SceneGroup, data: OlliDataset): OlliVisSpec {
-  const axes = filterUniqueObjects<Axis>(
-    findScenegraphNodes(scene, 'axis').map((axis: any) => parseAxis(axis, spec, data))
-  );
-  const legends = filterUniqueObjects<Legend>(
-    findScenegraphNodes(scene, 'legend').map((legend: any) => parseLegend(legend, spec))
-  );
-  const getFacetedField = (spec: any) => {
-    if (spec.encoding?.facet?.field) {
-      return spec.encoding?.facet?.field;
-    }
-    if (spec.encoding?.color?.field) {
-      return spec.encoding?.color?.field;
-    }
-    if (spec.encoding?.color?.condition?.field) {
-      return spec.encoding?.color?.condition?.field;
-    }
+  const olliSpec: OlliSpec = {
+    description,
+    data,
+    encoding: {},
+    structure: [],
   };
-  const facetedField = getFacetedField(spec);
-  let nestedHeirarchies: Map<any, Chart> = new Map(
-    scene.items
-      .filter((el: any) => el.role === 'scope')[0]
-      .items.map((chart: any) => {
-        const chartData = parseChart(spec, chart, data);
-        chartData.axes = axes;
-        chartData.legends = legends;
-        return [chart.datum[facetedField], chartData];
-      })
-  );
 
-  let node = facetedChart({
-    data,
-    charts: nestedHeirarchies,
-    facetedField,
-  });
+  if ('mark' in spec) {
+    let mark: any = spec.mark; // TODO vega-lite mark type exceeds olli mark type, should do some validation
+    if (mark && mark.type) {
+      // e.g. "mark": {"type": "line", "point": true}
+      mark = mark.type;
+    }
+    olliSpec.mark = mark;
+    // unit spec
+    if (spec.encoding) {
+      Object.entries(spec.encoding).forEach(([channel, encoding]) => {
+        if (['row', 'column'].includes(channel)) {
+          olliSpec.encoding['facet'] = encoding;
+        } else if (spec.mark === 'line' && channel === 'color') {
+          // treat multi-series line charts as facets
+          olliSpec.encoding['facet'] = encoding;
+        } else if (channel in OlliEncodingChannel) {
+          olliSpec.encoding[channel as OlliEncodingChannel] = encoding;
 
-  return node;
-}
-
-/**
- * @param scene The Vega Scenegraph from the view
- * @param spec The Vega-Lite Spec that rendered the visualization
- * @returns An {@link OlliVisSpec} of the deconstructed Vega-Lite visualization
- */
-function parseChart(spec: any, scene: SceneGroup, data: OlliDataset): Chart {
-  let axes: Axis[] = findScenegraphNodes(scene, 'axis').map((axis: any) => parseAxis(axis, spec, data));
-  let legends: Legend[] = findScenegraphNodes(scene, 'legend').map((legend: any) => parseLegend(legend, spec));
-  let mark: any = spec.mark; // TODO vega-lite mark type exceeds olli mark type, should do some validation
-  if (mark && mark.type) {
-    // e.g. "mark": {"type": "line", "point": true}
-    mark = mark.type;
-  }
-  let node = chart({
-    axes: axes.filter((axis: Axis) => axis.field !== undefined),
-    legends: legends,
-    data,
-    mark,
-  });
-  return node;
-}
-
-/**
- *
- * @param scene The Vega Scenegraph from the view
- * @param axisScenegraphNode The specific scenegraph node of an axis
- * @param spec The Vega-Lite Spec that rendered the visualization
- * @returns A {@link Axis} from the converted axisScenegraphNode
- */
-function parseAxis(axisScenegraphNode: any, spec: any, data: OlliDataset): Axis {
-  const axisView = axisScenegraphNode.items[0];
-  const orient = axisView.orient;
-  const axisType = orient === 'bottom' || orient === 'top' ? 'x' : 'y';
-  const encoding = spec.encoding[axisType];
-  const ticks = axisView.items.find((n: any) => n.role === 'axis-tick').items.map((n: any) => n.datum.value);
-
-  let field: string;
-
-  if (encoding.aggregate) {
-    // field = Object.keys(data[0]).find((key: string) => key.includes(encoding.field))
-    field = `${encoding.aggregate}_${encoding.field}`;
-  } else {
-    field = encoding.field;
-  }
-
-  const scaleType = encoding.type;
-  const type = scaleType ? guideTypeFromVLEncoding(scaleType) : encoding.aggregate ? 'continuous' : 'discrete';
-
-  // convert temporal values into date objects
-  if (scaleType === 'temporal') {
-    data.forEach((datum) => {
-      datum[field] = new Date(datum[field]);
-
-      if (encoding.timeUnit) {
-        switch (encoding.timeUnit) {
-          case 'year':
-            datum[field] = (datum[`${encoding.timeUnit}_${field}`] as Date).getFullYear();
-            break;
-          case 'quarter':
-            const month = (datum[`${encoding.timeUnit}_${field}`] as Date).getMonth();
-            if (month <= 2) {
-              return 1;
+          if (isGuideChannel(channel as OlliEncodingChannel)) {
+            const scale = view.scale(channel);
+            if (scale) {
+              const ticks = tickValues(scale, 6);
+              if (ticks) {
+                olliSpec.encoding[channel as OlliEncodingChannel].bin = ticks;
+              }
             }
-            if (month <= 5) {
-              return 2;
-            }
-            if (month <= 8) {
-              return 3;
-            }
-            if (month <= 11) {
-              return 4;
-            }
-            break;
-          // case 'month':
-          //     return Date.toLocaleDateString('undefined', { weekday: 'long' });
+          }
         }
+
+        if (encoding.type === 'temporal') {
+          // convert temporal data into Date objects
+          data.forEach((datum) => {
+            datum[encoding.field] = new Date(datum[encoding.field]);
+          });
+        }
+      });
+    }
+  } else {
+    // TODO: handle layer and concat specs
+  }
+
+  function getGuideNodes() {
+    return Object.entries(olliSpec.encoding).flatMap(([channel, fieldDef]) => {
+      if (isGuideChannel(channel as OlliEncodingChannel)) {
+        return [
+          {
+            groupby: fieldDef,
+            children: [],
+          },
+        ];
       }
+      return [];
     });
   }
 
-  return {
-    type,
-    values: ticks,
-    title: encoding.title || undefined,
-    field: field,
-    scaleType,
-    axisType: axisType,
-  };
-}
+  if (olliSpec.encoding.facet) {
+    olliSpec.structure = {
+      groupby: olliSpec.encoding.facet,
+      children: getGuideNodes(),
+    };
+  } else {
+    olliSpec.structure = getGuideNodes();
+  }
 
-/**
- *
- * @param scenegraph The Vega Scenegraph from the view
- * @param legendScenegraphNode The specific scenegraph node of a legend
- * @param spec The Vega-Lite Spec that rendered the visualization
- * @returns A {@link legend} from the converted legendScenegraphNode
- */
-function parseLegend(legendScenegraphNode: any, spec: any): Legend {
-  const labels: any[] = legendScenegraphNode.items[0].items.find((n: any) => n.role === 'legend-entry').items[0]
-    .items[0].items;
-
-  const values = labels.map((n: any) => n.items.find((el: any) => el.role === 'legend-label').items[0].datum.value);
-
-  const encoding = spec.encoding['color']?.condition || spec.encoding['color'];
-
-  const encType = encoding.type;
-
-  const type = encType
-    ? guideTypeFromVLEncoding(encType)
-    : values.every((t: any) => isNumeric(String(t)))
-    ? 'continuous'
-    : 'discrete';
-
-  // TODO legend channel currently hardcoded to color
-  return {
-    type,
-    values,
-    title: encoding.title ? encoding.title : encoding.field,
-    field: encoding.field,
-    channel: 'color',
-  };
-}
+  return olliSpec;
+};

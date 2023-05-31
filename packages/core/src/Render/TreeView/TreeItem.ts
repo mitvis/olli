@@ -8,8 +8,7 @@
  *           for a tree being used as a file viewer
  */
 
-import { htmlNodeToTree } from '.';
-import { AccessibilityTree, AccessibilityTreeNode } from '../../Structure/Types';
+import { ElaboratedOlliNode } from '../../structure/Types';
 import { Tree } from './Tree';
 
 /*
@@ -26,7 +25,7 @@ import { Tree } from './Tree';
 export class TreeItem {
   tree: Tree;
   domNode: HTMLElement;
-  olliNode?: AccessibilityTreeNode;
+  olliNode: ElaboratedOlliNode;
   isExpandable: boolean;
   inGroup: boolean;
 
@@ -34,13 +33,11 @@ export class TreeItem {
   children: TreeItem[];
   lastVisitedChild?: TreeItem;
 
-  constructor(node: HTMLElement, treeObj: Tree, olliTree: AccessibilityTree, parent?: TreeItem) {
+  constructor(node: HTMLElement, treeObj: Tree, olliNode: ElaboratedOlliNode, parent?: TreeItem) {
     node.tabIndex = -1;
     this.tree = treeObj;
     this.domNode = node;
-    if (node.id) {
-      this.olliNode = htmlNodeToTree(node, olliTree);
-    }
+    this.olliNode = olliNode;
 
     this.isExpandable = false;
     this.inGroup = false;

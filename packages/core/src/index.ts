@@ -1,18 +1,17 @@
-import { OlliVisSpec } from './Types';
-import { renderTable } from './Render/Table';
-import { Tree } from './Render/TreeView/Tree';
-import { renderTree } from './Render/TreeView';
-import { olliVisSpecToTree } from './Structure';
-import { AccessibilityTree } from './Structure/Types';
-import { updateGlobalStateOnRender } from './utils';
+import { OlliSpec } from './Types';
+import { ElaboratedOlliNode } from './structure/Types';
+import { Tree } from './render/TreeView/Tree';
+import { renderTree } from './render/TreeView';
+import { olliSpecToTree, treeToNodeLookup } from './structure';
+import { updateGlobalStateOnRender } from './util/globalState';
+import { generateDescriptions } from './description';
 
 export * from './Types';
 
 /**
- * The configuration object outlining how an accessible visualization should be rendered based on a {@link OlliVisSpec}.
+ * The configuration object outlining how an accessible visualization should be rendered based on a {@link OlliSpec}.
  */
 export type OlliConfigOptions = {
-  renderType?: 'tree' | 'table';
   onFocus?: (elem: HTMLElement) => void;
 };
 
@@ -20,30 +19,29 @@ export type OlliConfigOptions = {
  *
  * @param config The {@link OlliConfigOptions} object to specify how an accessible visualization should be generated.
  */
-export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTMLElement {
-  const tree: AccessibilityTree = olliVisSpecToTree(olliVisSpec);
+export function olli(olliSpec: OlliSpec, config?: OlliConfigOptions): HTMLElement {
+  console.log('olliSpec', olliSpec);
+  const namespace = (Math.random() + 1).toString(36).substring(7);
+  const tree: ElaboratedOlliNode = olliSpecToTree(olliSpec, namespace);
+  const lookup = treeToNodeLookup(tree);
+
+  console.log('tree', tree);
 
   const htmlRendering: HTMLElement = document.createElement('div');
   htmlRendering.classList.add('olli-vis');
 
   config = {
-    renderType: config?.renderType || 'tree',
     onFocus: config?.onFocus,
   };
 
-  switch (config.renderType) {
-    case 'table':
-      htmlRendering.appendChild(renderTable(tree.root.selected, tree.fieldsUsed));
-      break;
-    case 'tree':
-    default:
-      const ul = renderTree(tree);
-      htmlRendering.appendChild(ul);
-      const t = new Tree(ul, tree, config.onFocus);
-      t.init();
-      updateGlobalStateOnRender(t);
-      break;
-  }
+  const ul = renderTree(tree);
+  htmlRendering.appendChild(ul);
+
+  generateDescriptions(olliSpec, tree);
+
+  const t = new Tree(ul, lookup, config.onFocus);
+  t.init();
+  updateGlobalStateOnRender(t);
 
   return htmlRendering;
 }

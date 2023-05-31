@@ -73,7 +73,7 @@ function plotToFacetedChart(plot: any, svg: Element): FacetedChart {
     type: 'facetedChart',
     charts: charts,
     data: plotMark.data,
-    facetedField: facetField,
+    OlliSpec: facetField,
   };
 
   return facetedChart;

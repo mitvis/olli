@@ -1,18 +1,5 @@
-import { Tree } from './Render/TreeView/Tree';
-import { OlliValue } from './Types';
-
-export const fmtValue = (value: OlliValue): string => {
-  if (value instanceof Date) {
-    return value.toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  } else if (typeof value !== 'string' && !isNaN(value) && value % 1 != 0) {
-    return Number(value).toFixed(2);
-  }
-  return String(value);
-};
+import { Tree } from '../render/TreeView/Tree';
+import { nodeIsTextInput } from './events';
 
 export interface OlliGlobalState {
   keyListenerAttached: boolean;
@@ -32,18 +19,6 @@ export const setOlliGlobalState = (state: Partial<OlliGlobalState>) => {
     ...(window as any)._olli,
     ...state,
   };
-};
-
-const nodeIsTextInput = (activeElement: Element | null): boolean => {
-  switch (activeElement?.nodeName) {
-    case 'INPUT':
-    case 'TEXTAREA':
-    case 'SELECT':
-    case 'OPTION':
-      return true;
-  }
-  if (typeof activeElement?.getAttribute('contenteditable') === 'string') return true;
-  return false;
 };
 
 export const updateGlobalStateOnRender = (t: Tree) => {

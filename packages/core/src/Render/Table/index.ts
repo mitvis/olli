@@ -1,5 +1,5 @@
 import { OlliDataset, OlliDatum } from '../../Types';
-import { fmtValue } from '../../utils';
+import { fmtValue } from '../../util/values';
 
 /**
  *
