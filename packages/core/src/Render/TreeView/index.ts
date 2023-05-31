@@ -1,7 +1,7 @@
 // Adapted from: https://w3c.github.io/aria-practices/examples/treeview/treeview-1/treeview-1b.html
 
 import { nodeToDescription } from '../../description';
-import { ElaboratedOlliNode, OlliNode, OlliNodeLookup } from '../../structure/Types';
+import { ElaboratedOlliNode, OlliNode, OlliNodeLookup } from '../../Structure/Types';
 import { fmtValue } from '../../util/values';
 import './TreeStyle.css';
 

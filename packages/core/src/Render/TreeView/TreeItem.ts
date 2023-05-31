@@ -8,7 +8,7 @@
  *           for a tree being used as a file viewer
  */
 
-import { ElaboratedOlliNode } from '../../structure/Types';
+import { ElaboratedOlliNode } from '../../Structure/Types';
 import { Tree } from './Tree';
 
 /*

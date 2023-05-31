@@ -1,6 +1,6 @@
 import { OlliValue } from '../Types';
 import { OlliDataset, OlliSpec } from '../Types';
-import { ElaboratedOlliNode, OlliNode, OlliNodeLookup } from '../structure/Types';
+import { ElaboratedOlliNode, OlliNode, OlliNodeLookup } from '../Structure/Types';
 import { getBins } from '../util/bin';
 import { getDomain } from '../util/data';
 import { selectionTest } from '../util/selection';
@@ -19,20 +19,30 @@ export function generateDescriptions(olliSpec: OlliSpec, tree: ElaboratedOlliNod
 }
 
 export function nodeToDescription(node: ElaboratedOlliNode, olliSpec: OlliSpec): string {
+  const index = (node.parent?.children.indexOf(node) || 0) + 1;
+  const siblings = (node.parent?.children || []).length;
   switch (node.nodeType) {
     case 'root':
       if ('groupby' in node && olliSpec.mark === 'line') {
-        return `${olliSpec.description} A multi-series line chart with 5 lines representing ${node.groupby.field}.`;
+        return `${olliSpec.description} A multi-series line chart with 5 lines for ${
+          node.groupby.field
+        }, with axes ${olliSpec.axes.map((a) => a.title || a.field).join(' and ')}.`;
       }
       return `${olliSpec.description} A ${olliSpec.mark} chart.`;
     case 'facet':
       if ('predicate' in node && 'equal' in node.predicate) {
         if (olliSpec.mark === 'line') {
-          return `A line representing ${node.predicate.equal}.`;
+          return `${index} of ${siblings}. A line titled ${node.predicate.equal}, with axes ${olliSpec.axes
+            .map((a) => a.title || a.field)
+            .join(' and ')}.`;
         }
-        return `A ${olliSpec.mark} chart representing ${node.predicate.equal}.`;
+        return `${index} of ${siblings}.A ${olliSpec.mark} chart titled ${
+          node.predicate.equal
+        }, with axes ${olliSpec.axes.map((a) => a.title || a.field).join(' and ')}.`;
       }
-      return `A facet.`;
+      return `${index} of ${siblings}. A facet with axes ${olliSpec.axes
+        .map((a) => a.title || a.field)
+        .join(' and ')}.`;
     case 'xAxis':
     case 'yAxis':
     case 'legend':
@@ -40,26 +50,30 @@ export function nodeToDescription(node: ElaboratedOlliNode, olliSpec: OlliSpec):
       if ('groupby' in node) {
         let first, last;
         if (node.groupby.type === 'quantitative' || node.groupby.type === 'temporal') {
-          const bins = getBins(node.groupby, olliSpec.data);
+          const guide =
+            olliSpec.axes.find((axis) => axis.field === node.groupby.field) ||
+            olliSpec.legends.find((legend) => legend.field === node.groupby.field);
+          const bins = getBins(node.groupby, olliSpec.data, guide?.ticks);
           first = fmtValue(bins[0][0]);
           last = fmtValue(bins[bins.length - 1][1]);
+          return `${guideType} titled ${node.groupby.field} for a ${node.groupby.type} scale with values from ${first} to ${last}.`;
         } else {
           const domain = getDomain(node.groupby, olliSpec.data);
           first = fmtValue(domain[0]);
           last = fmtValue(domain[domain.length - 1]);
+          return `${guideType} titled ${node.groupby.field} for a ${node.groupby.type} scale with ${domain.length} values from ${first} to ${last}.`;
         }
-        return `${guideType} titled ${node.groupby.field} for a ${node.groupby.type} scale with values from ${first} to ${last}.`;
       }
       return `${guideType}.`;
     case 'filteredData':
       if ('predicate' in node) {
         const selection = selectionTest(olliSpec.data, node.fullPredicate);
         if ('range' in node.predicate) {
-          return `${fmtValue(node.predicate.range[0])} to ${fmtValue(node.predicate.range[1])}. ${
-            selection.length
-          } values.`;
+          return `${index} of ${siblings}. ${fmtValue(node.predicate.range[0])} to ${fmtValue(
+            node.predicate.range[1]
+          )}. ${selection.length} values.`;
         } else if ('equal' in node.predicate) {
-          return `${fmtValue(node.predicate.equal as OlliValue)}. ${selection.length} values.`;
+          return `${index} of ${siblings}. ${fmtValue(node.predicate.equal as OlliValue)}. ${selection.length} values.`;
         }
       }
   }

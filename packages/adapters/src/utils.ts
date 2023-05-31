@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { Scene, Spec, parse, View, SceneItem, SceneContext, SceneGroup } from 'vega';
+import { Scene, Spec, parse, View, SceneItem, SceneGroup } from 'vega';
 import { isNumeric as vlIsNumeric } from 'vega-lite';
 import { OlliDataset } from 'olli';
 

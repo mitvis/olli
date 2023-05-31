@@ -16,6 +16,7 @@ import {
   findScenegraphNodes,
   getData,
   getVegaScene,
+  getVegaView,
   guideTypeFromScale,
   isNumeric,
   SceneGroup,
@@ -28,7 +29,7 @@ import {
  * generate the Accessibility Tree Encoding
  */
 export const VegaAdapter: VisAdapter<Spec> = async (spec: Spec): Promise<OlliVisSpec> => {
-  const scene: SceneGroup = await getVegaScene(spec);
+  const scene: SceneGroup = getVegaScene(await getVegaView(spec));
   const data = getData(scene);
   const description = spec.description; // possible text description included with spec
   if (scene.items.some((el: any) => el.role === 'scope')) {

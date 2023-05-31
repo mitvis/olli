@@ -1,4 +1,4 @@
-import { OlliNode } from './structure/Types';
+import { OlliNode } from './Structure/Types';
 
 export type OlliMark = 'point' | 'bar' | 'line';
 
@@ -17,32 +17,42 @@ export interface OlliSpec {
   // selection?: OlliDataset; // optional: an initial top level selection (subset of data)
   data: OlliDataset;
   mark?: OlliMark;
-  encoding: OlliEncoding;
+  axes: OlliAxis[];
+  legends: OlliLegend[];
+  facetField?: string;
   title?: string;
   description?: string; // possible chart description included with the spec
   structure: OlliNode | OlliNode[];
 }
 
+export type MeasureType = 'quantitative' | 'ordinal' | 'nominal' | 'temporal';
+
+type Guide = {
+  type: MeasureType;
+  field: string;
+  ticks?: OlliValue[];
+  title?: string;
+};
+
+/**
+ * Extending the {@link Guide} interface for visualization axes
+ */
+export interface OlliAxis extends Guide {
+  axisType: 'x' | 'y';
+  scaleType?: string; // e.g. linear, logarithmic, band
+}
+
+/**
+ * Extending the {@link Guide} interface for visualization legends
+ */
+export interface OlliLegend extends Guide {
+  channel?: string; // e.g. color, opacity
+}
+
 export interface OlliEncodingFieldDef {
   field: string;
-  type: 'quantitative' | 'ordinal' | 'nominal' | 'temporal';
-  bin?: boolean | OlliValue[];
+  type: MeasureType;
 }
-
-export enum OlliEncodingChannel {
-  x = 'x',
-  y = 'y',
-  color = 'color',
-  facet = 'facet',
-}
-
-export function isGuideChannel(channel: OlliEncodingChannel): boolean {
-  return ['x', 'y', 'color'].includes(channel);
-}
-
-export type OlliEncoding = {
-  [channel in OlliEncodingChannel]?: OlliEncodingFieldDef;
-};
 
 /**
  * Interface describing how a visualization adapter should be created

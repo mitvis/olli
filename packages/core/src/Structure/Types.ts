@@ -17,12 +17,13 @@ export interface OlliPredicateNode {
 
 export type OlliNode = OlliGroupNode | OlliPredicateNode;
 
-export type OlliNodeType = 'root' | 'facet' | 'xAxis' | 'yAxis' | 'legend' | 'filteredData';
+export type OlliNodeType = 'root' | 'facet' | 'xAxis' | 'yAxis' | 'legend' | 'filteredData' | 'other';
 
 export interface ElaboratedOlliNode {
   id: string;
   nodeType: OlliNodeType;
   fullPredicate: LogicalAnd<FieldPredicate>;
+  parent?: ElaboratedOlliNode;
   children: ElaboratedOlliNode[];
   groupby?: OlliEncodingFieldDef;
   predicate?: FieldPredicate;

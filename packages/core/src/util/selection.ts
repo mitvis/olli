@@ -2,7 +2,7 @@ import { OlliDataset, OlliDatum } from 'olli';
 import { isDate, toNumber, isArray, inrange } from 'vega';
 import { LogicalAnd, LogicalComposition } from 'vega-lite/src/logical';
 import { FieldPredicate, FieldEqualPredicate } from 'vega-lite/src/predicate';
-import { OlliEncodingFieldDef } from '../Types';
+import { OlliEncodingFieldDef, OlliValue } from '../Types';
 import { serializeValue } from './values';
 import { getDomain } from './data';
 import { getBinPredicates } from './bin';
@@ -144,7 +144,11 @@ export function datumToPredicate(datum: OlliDatum, fieldDefs: OlliEncodingFieldD
   };
 }
 
-export function fieldToPredicates(fieldDef: OlliEncodingFieldDef, data: OlliDataset): FieldPredicate[] {
+export function fieldToPredicates(
+  fieldDef: OlliEncodingFieldDef,
+  data: OlliDataset,
+  ticks?: OlliValue[]
+): FieldPredicate[] {
   if (fieldDef.type === 'nominal' || fieldDef.type === 'ordinal') {
     const domain = getDomain(fieldDef, data);
     return domain.map((value) => {
@@ -154,7 +158,7 @@ export function fieldToPredicates(fieldDef: OlliEncodingFieldDef, data: OlliData
       };
     });
   } else {
-    const bins = getBinPredicates(fieldDef, data);
+    const bins = getBinPredicates(fieldDef, data, ticks);
     return bins;
   }
 }

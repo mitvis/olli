@@ -1,8 +1,8 @@
 import { LogicalAnd } from 'vega-lite/src/logical';
 import { FieldPredicate } from 'vega-lite/src/predicate';
-import { OlliSpec, OlliDataset, OlliEncodingFieldDef, OlliEncodingChannel } from '../Types';
+import { OlliSpec, OlliDataset } from '../Types';
 import { fieldToPredicates } from '../util/selection';
-import { ElaboratedOlliNode, OlliNode, OlliNodeLookup } from './Types';
+import { ElaboratedOlliNode, OlliNode, OlliNodeLookup, OlliNodeType } from './Types';
 
 export function olliSpecToTree(olliSpec: OlliSpec, namespace: string): ElaboratedOlliNode {
   /**
@@ -20,22 +20,26 @@ export function olliSpecToTree(olliSpec: OlliSpec, namespace: string): Elaborate
     };
   }
 
-  function nodeTypeFromChannel(channel: OlliEncodingChannel) {
-    switch (channel) {
-      case 'x':
-        return 'xAxis';
-      case 'y':
-        return 'yAxis';
-      case 'facet':
-        return 'root';
-      case 'color':
-        return 'legend';
+  function nodeTypeFromGroupField(field: string, olliSpec: OlliSpec): OlliNodeType {
+    if (field === olliSpec.facetField) return 'root';
+    const axis = olliSpec.axes.find((a) => a.field === field);
+    if (axis) {
+      switch (axis.axisType) {
+        case 'x':
+          return 'xAxis';
+        case 'y':
+          return 'yAxis';
+      }
     }
+    const legend = olliSpec.legends.find((l) => l.field === field);
+    if (legend) {
+      return 'legend';
+    }
+    return 'other';
   }
 
   function elaborateOlliNodes(
     olliNodes: OlliNode[],
-    fields: OlliEncodingFieldDef[],
     data: OlliDataset,
     fullPredicate: LogicalAnd<FieldPredicate>,
     idPrefix: string
@@ -56,11 +60,12 @@ export function olliSpecToTree(olliSpec: OlliSpec, namespace: string): Elaborate
     return olliNodes.map((node, idx) => {
       if ('groupby' in node) {
         const fieldDef = node.groupby;
-        const childPreds = fieldToPredicates(fieldDef, data);
-        const encode = Object.entries(olliSpec.encoding).find(([_, fd]) => {
-          return fd.field === fieldDef.field;
-        });
-        const nodeType = nodeTypeFromChannel(encode[0] as OlliEncodingChannel);
+        const nodeType = nodeTypeFromGroupField(fieldDef.field, olliSpec);
+        const guide =
+          olliSpec.axes.find((a) => a.field === fieldDef.field) ||
+          olliSpec.legends.find((l) => l.field === fieldDef.field);
+        const childPreds = fieldToPredicates(fieldDef, data, guide?.ticks);
+
         return {
           id: `${idPrefix}-${idx}`,
           fullPredicate,
@@ -76,7 +81,7 @@ export function olliSpecToTree(olliSpec: OlliSpec, namespace: string): Elaborate
               nodeType: nodeType === 'root' ? 'facet' : 'filteredData',
               predicate: p,
               fullPredicate: childFullPred,
-              children: elaborateOlliNodes(node.children, fields, data, childFullPred, childId),
+              children: elaborateOlliNodes(node.children, data, childFullPred, childId),
             };
           }),
         };
@@ -91,16 +96,39 @@ export function olliSpecToTree(olliSpec: OlliSpec, namespace: string): Elaborate
           nodeType: 'filteredData',
           fullPredicate: nextFullPred,
           predicate,
-          children: elaborateOlliNodes(node.children, fields, data, nextFullPred, nextId),
+          children: elaborateOlliNodes(node.children, data, nextFullPred, nextId),
         };
+      } else {
+        throw new Error('Invalid node type');
       }
     });
   }
 
   const nodes = Array.isArray(olliSpec.structure) ? olliSpec.structure : [olliSpec.structure];
-  const fields = Object.values(olliSpec.encoding);
 
-  return ensureFirstLayerHasOneRoot(elaborateOlliNodes(nodes, fields, olliSpec.data, { and: [] }, namespace));
+  const tree = ensureFirstLayerHasOneRoot(elaborateOlliNodes(nodes, olliSpec.data, { and: [] }, namespace));
+  addParentRefs(tree);
+  return tree;
+}
+
+export function getFieldsUsed(olliSpec: OlliSpec) {
+  const fields = [
+    olliSpec.facetField || [],
+    olliSpec.axes.map((axis) => axis.field),
+    olliSpec.legends.map((legend) => legend.field),
+  ].flat();
+  return fields;
+}
+
+export function addParentRefs(tree: ElaboratedOlliNode) {
+  const queue = [tree];
+  while (queue.length > 0) {
+    const node = queue.shift();
+    node.children.forEach((child) => {
+      child.parent = node;
+    });
+    queue.push(...node.children);
+  }
 }
 
 export function treeToNodeLookup(tree: ElaboratedOlliNode): OlliNodeLookup {

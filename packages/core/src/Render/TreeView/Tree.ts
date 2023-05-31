@@ -1,5 +1,5 @@
-import { OlliNodeLookup } from '../../structure/Types';
-import { OlliNodeType } from '../../structure/Types';
+import { OlliNodeLookup } from '../../Structure/Types';
+import { OlliNodeType } from '../../Structure/Types';
 import { setOlliGlobalState } from '../../util/globalState';
 import { TreeItem } from './TreeItem';
 /*

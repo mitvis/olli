@@ -1,4 +1,4 @@
-import { Tree } from '../render/TreeView/Tree';
+import { Tree } from '../Render/TreeView/Tree';
 import { nodeIsTextInput } from './events';
 
 export interface OlliGlobalState {
