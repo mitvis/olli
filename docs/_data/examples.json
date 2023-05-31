@@ -105,6 +105,14 @@
       {
         "name": "Vega-Lite",
         "code": "/examples/multiSeriesChart-vl.html"
+      },
+      {
+        "name": "Vega",
+        "code": "/examples/multiSeriesChart-v.html"
+      },
+      {
+        "name": "ObservablePlot",
+        "code": "/examples/multiSeriesChart-op.html"
       }
     ]
   },
