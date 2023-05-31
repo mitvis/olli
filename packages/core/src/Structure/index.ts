@@ -21,7 +21,7 @@ export function olliSpecToTree(olliSpec: OlliSpec, namespace: string): Elaborate
   }
 
   function nodeTypeFromGroupField(field: string, olliSpec: OlliSpec): OlliNodeType {
-    if (field === olliSpec.facet.field) return 'root';
+    if (field === olliSpec.facet?.field) return 'root';
     const axis = olliSpec.axes?.find((a) => a.field.field === field);
     if (axis) {
       switch (axis.axisType) {
@@ -108,19 +108,19 @@ export function olliSpecToTree(olliSpec: OlliSpec, namespace: string): Elaborate
   return tree;
 }
 
-export function getFieldsUsed(olliSpec: OlliSpec, tree: ElaboratedOlliNode) {
+export function getFieldsUsed(olliSpec: OlliSpec, tree: ElaboratedOlliNode): Set<string> {
   if (olliSpec.axes || olliSpec.legends || olliSpec.facet) {
     const fields = new Set(
       [
-        olliSpec.facet.field || [],
-        olliSpec.axes.map((axis) => axis.field),
-        olliSpec.legends.map((legend) => legend.field),
+        olliSpec.facet?.field || [],
+        olliSpec.axes?.map((axis) => axis.field.field),
+        olliSpec.legends?.map((legend) => legend.field.field),
       ].flat()
     );
     return fields;
   } else {
     const queue = [tree];
-    const fields = new Set();
+    const fields = new Set<string>();
     while (queue.length > 0) {
       const node = queue.shift();
       if ('groupby' in node) {

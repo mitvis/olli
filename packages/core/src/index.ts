@@ -20,12 +20,12 @@ export type OlliConfigOptions = {
  * @param config The {@link OlliConfigOptions} object to specify how an accessible visualization should be generated.
  */
 export function olli(olliSpec: OlliSpec, config?: OlliConfigOptions): HTMLElement {
-  console.log('olliSpec', olliSpec);
+  // console.log('olliSpec', olliSpec);
   const namespace = (Math.random() + 1).toString(36).substring(7);
   const tree: ElaboratedOlliNode = olliSpecToTree(olliSpec, namespace);
   const lookup = treeToNodeLookup(tree);
 
-  console.log('tree', tree);
+  // console.log('tree', tree);
 
   const htmlRendering: HTMLElement = document.createElement('div');
   htmlRendering.classList.add('olli-vis');
