@@ -5,6 +5,7 @@ import { renderTree } from './Render/TreeView';
 import { olliSpecToTree, treeToNodeLookup } from './Structure';
 import { updateGlobalStateOnRender } from './util/globalState';
 import { generateDescriptions } from './Description';
+import { predicateToSelectionStore } from './util/selection';
 
 export * from './Types';
 export * from './Structure/Types';
