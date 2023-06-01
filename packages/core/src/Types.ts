@@ -16,14 +16,19 @@ export type OlliMark = 'point' | 'bar' | 'line';
  * Spec describing a visualization
  */
 export interface OlliSpec {
-  selection?: LogicalComposition<FieldPredicate>; // optional: an initial top level selection (subset of data)
+  // required: data and fields
   data: OlliDataset;
   fields: OlliFieldDef[];
+  // specification of the chart's structure
   structure?: OlliNode | OlliNode[];
+  // information about the chart's visual encodings
   mark?: OlliMark;
   axes?: OlliAxis[];
   legends?: OlliLegend[];
   facet?: string;
+  // an optional initial top level selection query
+  selection?: LogicalComposition<FieldPredicate>;
+  // additional info used for description
   title?: string;
   description?: string; // possible chart description included with the spec
 }
