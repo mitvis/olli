@@ -71,8 +71,7 @@ export function predicateToSelectionStore(predicate: LogicalComposition<FieldPre
       };
     } else if ('or' in predicate) {
       const or = predicate.or;
-      // TODO this would likely require changes to vega. but why is vlSelectionTest like this anyway?
-      // why does vlSelectionTest not use expr? https://github.com/vega/vega-lite/blob/172c4286d60b468e033f8232b24fe6547ca3302c/src/util.ts#L248
+      // TODO this would likely require changes to vega.
     } else if ('not' in predicate) {
       const not = predicate.not;
       // TODO same as above
