@@ -19,7 +19,7 @@ export interface OlliSpec {
   // required: data and fields
   data: OlliDataset;
   fields: OlliFieldDef[];
-  // specification of the chart's structure
+  // specification of the chart's structure (inferred if not provided)
   structure?: OlliNode | OlliNode[];
   // information about the chart's visual encodings
   mark?: OlliMark;
@@ -28,14 +28,14 @@ export interface OlliSpec {
   facet?: string;
   // an optional initial top level selection query
   selection?: LogicalComposition<FieldPredicate>;
-  // additional info used for description
+  // additional optional info used for description
   title?: string;
-  description?: string; // possible chart description included with the spec
+  description?: string;
 }
 
 type Guide = {
   field: string;
-  title?: string;
+  title?: string; // optional human-readable title used for description
 };
 
 /**
@@ -57,7 +57,7 @@ export type MeasureType = 'quantitative' | 'ordinal' | 'nominal' | 'temporal';
 
 export interface OlliFieldDef {
   field: string;
-  type?: MeasureType;
+  type?: MeasureType; // optional, but will be inferred if not provided
 }
 
 /**
