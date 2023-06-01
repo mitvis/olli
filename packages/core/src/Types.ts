@@ -18,7 +18,7 @@ export type OlliDataset = OlliDatum[];
 export interface OlliSpec {
   selection?: LogicalComposition<FieldPredicate>; // optional: an initial top level selection (subset of data)
   data: OlliDataset;
-  structure: OlliNode | OlliNode[];
+  structure?: OlliNode | OlliNode[];
   mark?: OlliMark;
   axes?: OlliAxis[];
   legends?: OlliLegend[];

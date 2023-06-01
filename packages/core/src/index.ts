@@ -6,9 +6,11 @@ import { olliSpecToTree, treeToNodeLookup } from './Structure';
 import { updateGlobalStateOnRender } from './util/globalState';
 import { generateDescriptions } from './Description';
 import { predicateToSelectionStore } from './util/selection';
+import { inferStructure } from './Structure/infer';
 
 export * from './Types';
 export * from './Structure/Types';
+export * from './util/types';
 
 /**
  * The configuration object outlining how an accessible visualization should be rendered based on a {@link OlliSpec}.
@@ -22,8 +24,12 @@ export type OlliConfigOptions = {
  * @param config The {@link OlliConfigOptions} object to specify how an accessible visualization should be generated.
  */
 export function olli(olliSpec: OlliSpec, config?: OlliConfigOptions): HTMLElement {
-  // console.log('olliSpec', olliSpec);
   const namespace = (Math.random() + 1).toString(36).substring(7);
+
+  if (!olliSpec.structure) {
+    olliSpec.structure = inferStructure(olliSpec);
+  }
+
   const tree: ElaboratedOlliNode = olliSpecToTree(olliSpec, namespace);
   const lookup = treeToNodeLookup(tree);
 

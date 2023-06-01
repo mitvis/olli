@@ -1,6 +1,6 @@
 import { TopLevelSpec, compile } from 'vega-lite';
-import { VisAdapter, OlliSpec, OlliNode } from 'olli';
-import { getData, getVegaScene, getVegaView, typeInference } from './utils';
+import { VisAdapter, OlliSpec, OlliNode, typeInference } from 'olli';
+import { getData, getVegaScene, getVegaView } from './utils';
 
 /**
  * Adapter to deconstruct Vega-Lite visualizations into an {@link OlliVisSpec}
