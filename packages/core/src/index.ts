@@ -30,6 +30,9 @@ export function olli(olliSpec: OlliSpec, config?: OlliConfigOptions): HTMLElemen
   const tree: ElaboratedOlliNode = olliSpecToTree(olliSpec, namespace);
   const lookup = treeToNodeLookup(tree);
 
+  console.log('olliSpec', olliSpec);
+  console.log('tree', tree);
+
   const htmlRendering: HTMLElement = document.createElement('div');
   htmlRendering.classList.add('olli-vis');
 

@@ -10,12 +10,12 @@ export function olliSpecToTree(olliSpec: OlliSpec, namespace: string): Elaborate
    * If the top level has multiple nodes, we wrap them in a single node
    */
   function ensureFirstLayerHasOneRoot(nodes: ElaboratedOlliNode[]): ElaboratedOlliNode {
-    if (nodes.length === 1) {
+    if (nodes.length === 1 && !['xAxis', 'yAxis'].includes(nodes[0].nodeType)) {
       return nodes[0];
     }
     return {
       id: namespace,
-      nodeType: 'other',
+      nodeType: 'root',
       fullPredicate: { and: [] },
       children: nodes,
     };

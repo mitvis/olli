@@ -36,7 +36,7 @@ export function nodeToDescription(node: ElaboratedOlliNode, tree: ElaboratedOlli
             .map((a) => a.title || a.field)
             .join(' and ')}.`;
         }
-        return `${index} of ${siblings}.A ${olliSpec.mark} chart titled ${
+        return `${index} of ${siblings}. A ${olliSpec.mark} chart titled ${
           node.predicate.equal
         }, with axes ${olliSpec.axes.map((a) => a.title || a.field).join(' and ')}.`;
       }
