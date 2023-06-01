@@ -1,4 +1,3 @@
-import { OlliEncodingFieldDef } from '../Types';
 import { FieldPredicate } from 'vega-lite/src/predicate';
 import { LogicalAnd } from 'vega-lite/src/logical';
 
@@ -6,7 +5,7 @@ import { LogicalAnd } from 'vega-lite/src/logical';
  * Node types describing an Olli tree structure
  */
 export interface OlliGroupNode {
-  groupby: OlliEncodingFieldDef;
+  groupby: string;
   children: OlliNode[];
 }
 
@@ -25,7 +24,7 @@ export interface ElaboratedOlliNode {
   fullPredicate: LogicalAnd<FieldPredicate>;
   parent?: ElaboratedOlliNode;
   children: ElaboratedOlliNode[];
-  groupby?: OlliEncodingFieldDef;
+  groupby?: string;
   predicate?: FieldPredicate;
   description?: string;
 }

@@ -15,6 +15,7 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
   const olliSpec: OlliSpec = {
     description,
     data,
+    fields: [],
     axes: [],
     legends: [],
     structure: [],
@@ -50,28 +51,33 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
 
         if (['row', 'column', 'facet'].includes(channel)) {
           // add facet field
-          olliSpec.facet = fieldDef;
+          olliSpec.facet = fieldDef.field;
         } else if (olliSpec.mark === 'line' && ['color', 'detail'].includes(channel)) {
           // treat multi-series line charts as facets
-          olliSpec.facet = fieldDef;
+          olliSpec.facet = fieldDef.field;
         } else if (['x', 'y'].includes(channel)) {
           // add axes
-          if (olliSpec.mark === 'bar' && fieldDef.type === 'quantitative') {
-            return; // skip quantitative channel for bar charts
+          if (!(olliSpec.mark === 'bar' && fieldDef.type === 'quantitative')) {
+            // skip quantitative channel for bar charts
+            olliSpec.axes.push({
+              axisType: channel as 'x' | 'y',
+              field: fieldDef.field,
+              title: encoding.title,
+            });
           }
-          olliSpec.axes.push({
-            axisType: channel as 'x' | 'y',
-            field: fieldDef,
-            title: encoding.title,
-          });
         } else if (['color', 'opacity'].includes(channel)) {
           // add legends
           olliSpec.legends.push({
-            channel,
-            field: fieldDef,
+            channel: channel as any,
+            field: fieldDef.field,
             title: encoding.title,
           });
+        } else {
+          // TODO: handle other channels
         }
+
+        // add field to list of field defs
+        olliSpec.fields.push(fieldDef);
 
         if (fieldDef.type === 'temporal') {
           // convert temporal data into Date objects

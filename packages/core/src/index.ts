@@ -5,8 +5,7 @@ import { renderTree } from './Render/TreeView';
 import { olliSpecToTree, treeToNodeLookup } from './Structure';
 import { updateGlobalStateOnRender } from './util/globalState';
 import { generateDescriptions } from './Description';
-import { predicateToSelectionStore } from './util/selection';
-import { inferStructure } from './Structure/infer';
+import { elaborateSpec } from './util/elaborate';
 
 export * from './Types';
 export * from './Structure/Types';
@@ -26,14 +25,10 @@ export type OlliConfigOptions = {
 export function olli(olliSpec: OlliSpec, config?: OlliConfigOptions): HTMLElement {
   const namespace = (Math.random() + 1).toString(36).substring(7);
 
-  if (!olliSpec.structure) {
-    olliSpec.structure = inferStructure(olliSpec);
-  }
+  olliSpec = elaborateSpec(olliSpec);
 
   const tree: ElaboratedOlliNode = olliSpecToTree(olliSpec, namespace);
   const lookup = treeToNodeLookup(tree);
-
-  // console.log('tree', tree);
 
   const htmlRendering: HTMLElement = document.createElement('div');
   htmlRendering.classList.add('olli-vis');

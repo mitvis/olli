@@ -1,9 +1,9 @@
 import { isDate, toNumber, isArray, inrange } from 'vega';
 import { LogicalAnd, LogicalComposition } from 'vega-lite/src/logical';
 import { FieldPredicate, FieldEqualPredicate } from 'vega-lite/src/predicate';
-import { OlliEncodingFieldDef, OlliDataset, OlliDatum, OlliValue } from '../Types';
+import { OlliFieldDef, OlliDataset, OlliDatum, OlliValue, OlliSpec } from '../Types';
 import { serializeValue } from './values';
-import { getDomain } from './data';
+import { getDomain, getFieldDef } from './data';
 import { getBinPredicates } from './bin';
 
 const TYPE_ENUM = 'E',
@@ -154,7 +154,7 @@ function testPoint(datum: OlliDatum, entry: { unit?: string; fields: any; values
   });
 }
 
-export function datumToPredicate(datum: OlliDatum, fieldDefs: OlliEncodingFieldDef[]): LogicalAnd<FieldEqualPredicate> {
+export function datumToPredicate(datum: OlliDatum, fieldDefs: OlliFieldDef[]): LogicalAnd<FieldEqualPredicate> {
   return {
     and: fieldDefs.map((fieldDef) => {
       return {
@@ -165,17 +165,19 @@ export function datumToPredicate(datum: OlliDatum, fieldDefs: OlliEncodingFieldD
   };
 }
 
-export function fieldToPredicates(fieldDef: OlliEncodingFieldDef, data: OlliDataset): FieldPredicate[] {
+export function fieldToPredicates(field: string, olliSpec: OlliSpec): FieldPredicate[] {
+  const data = olliSpec.data;
+  const fieldDef = getFieldDef(field, olliSpec);
   if (fieldDef.type === 'nominal' || fieldDef.type === 'ordinal') {
-    const domain = getDomain(fieldDef, data);
+    const domain = getDomain(field, data);
     return domain.map((value) => {
       return {
-        field: fieldDef.field,
+        field: field,
         equal: serializeValue(value, fieldDef),
       };
     });
   } else {
-    const bins = getBinPredicates(fieldDef, data);
+    const bins = getBinPredicates(field, olliSpec);
     return bins;
   }
 }

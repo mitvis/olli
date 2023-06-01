@@ -1,5 +1,4 @@
 import { OlliAxis, OlliLegend, OlliSpec } from '../Types';
-import { typeInference } from '../util/types';
 import { OlliNode } from './Types';
 
 export function inferStructure(olliSpec: OlliSpec): OlliNode | OlliNode[] {
@@ -45,15 +44,9 @@ export function inferStructure(olliSpec: OlliSpec): OlliNode | OlliNode[] {
     // TODO can try inferences with data mtypes
     // otherwise, just give all fields flat
     const fields = Object.keys(olliSpec.data[0]);
-    const fieldDefs = fields.map((field) => {
+    return fields.map((field) => {
       return {
-        field,
-        type: typeInference(olliSpec.data, field),
-      };
-    });
-    return fieldDefs.map((fieldDef) => {
-      return {
-        groupby: fieldDef,
+        groupby: field,
         children: [],
       };
     });

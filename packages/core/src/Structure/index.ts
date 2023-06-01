@@ -3,6 +3,7 @@ import { FieldPredicate } from 'vega-lite/src/predicate';
 import { OlliSpec, OlliDataset } from '../Types';
 import { fieldToPredicates } from '../util/selection';
 import { ElaboratedOlliNode, OlliNode, OlliNodeLookup, OlliNodeType } from './Types';
+import { getFieldDef } from '../util/data';
 
 export function olliSpecToTree(olliSpec: OlliSpec, namespace: string): ElaboratedOlliNode {
   /**
@@ -21,8 +22,8 @@ export function olliSpecToTree(olliSpec: OlliSpec, namespace: string): Elaborate
   }
 
   function nodeTypeFromGroupField(field: string, olliSpec: OlliSpec): OlliNodeType {
-    if (field === olliSpec.facet?.field) return 'root';
-    const axis = olliSpec.axes?.find((a) => a.field.field === field);
+    if (field === olliSpec.facet) return 'root';
+    const axis = olliSpec.axes?.find((a) => a.field === field);
     if (axis) {
       switch (axis.axisType) {
         case 'x':
@@ -31,7 +32,7 @@ export function olliSpecToTree(olliSpec: OlliSpec, namespace: string): Elaborate
           return 'yAxis';
       }
     }
-    const legend = olliSpec.legends?.find((l) => l.field.field === field);
+    const legend = olliSpec.legends?.find((l) => l.field === field);
     if (legend) {
       return 'legend';
     }
@@ -59,9 +60,8 @@ export function olliSpecToTree(olliSpec: OlliSpec, namespace: string): Elaborate
     }
     return olliNodes.map((node, idx) => {
       if ('groupby' in node) {
-        const fieldDef = node.groupby;
-        const nodeType = nodeTypeFromGroupField(fieldDef.field, olliSpec);
-        const childPreds = fieldToPredicates(fieldDef, data);
+        const nodeType = nodeTypeFromGroupField(node.groupby, olliSpec);
+        const childPreds = fieldToPredicates(node.groupby, olliSpec);
 
         return {
           id: `${idPrefix}-${idx}`,
@@ -106,38 +106,6 @@ export function olliSpecToTree(olliSpec: OlliSpec, namespace: string): Elaborate
   const tree = ensureFirstLayerHasOneRoot(elaborateOlliNodes(nodes, olliSpec.data, { and: [] }, namespace));
   addParentRefs(tree);
   return tree;
-}
-
-export function getFieldsUsed(olliSpec: OlliSpec, tree: ElaboratedOlliNode): Set<string> {
-  if (olliSpec.axes || olliSpec.legends || olliSpec.facet) {
-    const fields = new Set(
-      [
-        olliSpec.facet?.field || [],
-        olliSpec.axes?.map((axis) => axis.field.field),
-        olliSpec.legends?.map((legend) => legend.field.field),
-      ].flat()
-    );
-    return fields;
-  } else {
-    const queue = [tree];
-    const fields = new Set<string>();
-    while (queue.length > 0) {
-      const node = queue.shift();
-      if ('groupby' in node) {
-        const field = node.groupby.field;
-        if (!fields.has(field)) {
-          fields.add(field);
-        }
-      } else if ('predicate' in node) {
-        const field = node.predicate.field;
-        if (!fields.has(field)) {
-          fields.add(field);
-        }
-      }
-      queue.push(...node.children);
-    }
-    return fields;
-  }
 }
 
 export function addParentRefs(tree: ElaboratedOlliNode) {

@@ -2,10 +2,9 @@ import { OlliValue } from '../Types';
 import { OlliDataset, OlliSpec } from '../Types';
 import { ElaboratedOlliNode, OlliNode, OlliNodeLookup } from '../Structure/Types';
 import { getBins } from '../util/bin';
-import { getDomain } from '../util/data';
+import { getDomain, getFieldDef } from '../util/data';
 import { selectionTest } from '../util/selection';
 import { fmtValue } from '../util/values';
-import { getFieldsUsed } from '../Structure';
 
 export function generateDescriptions(olliSpec: OlliSpec, tree: ElaboratedOlliNode) {
   const queue = [tree];
@@ -26,45 +25,46 @@ export function nodeToDescription(node: ElaboratedOlliNode, tree: ElaboratedOlli
     case 'root':
       if ('groupby' in node && olliSpec.mark === 'line') {
         return `${olliSpec.description} A multi-series line chart with 5 lines for ${
-          node.groupby.field
-        }, with axes ${olliSpec.axes.map((a) => a.title || a.field.field).join(' and ')}.`;
+          node.groupby
+        }, with axes ${olliSpec.axes.map((a) => a.title || a.field).join(' and ')}.`;
       }
       return `${olliSpec.description} A ${olliSpec.mark} chart.`;
     case 'facet':
       if ('predicate' in node && 'equal' in node.predicate) {
         if (olliSpec.mark === 'line') {
           return `${index} of ${siblings}. A line titled ${node.predicate.equal}, with axes ${olliSpec.axes
-            .map((a) => a.title || a.field.field)
+            .map((a) => a.title || a.field)
             .join(' and ')}.`;
         }
         return `${index} of ${siblings}.A ${olliSpec.mark} chart titled ${
           node.predicate.equal
-        }, with axes ${olliSpec.axes.map((a) => a.title || a.field.field).join(' and ')}.`;
+        }, with axes ${olliSpec.axes.map((a) => a.title || a.field).join(' and ')}.`;
       }
       return `${index} of ${siblings}. A facet with axes ${olliSpec.axes
-        .map((a) => a.title || a.field.field)
+        .map((a) => a.title || a.field)
         .join(' and ')}.`;
     case 'xAxis':
     case 'yAxis':
     case 'legend':
       const guideType = node.nodeType === 'xAxis' ? 'X-axis' : node.nodeType === 'yAxis' ? 'Y-axis' : 'Legend';
       if ('groupby' in node) {
+        const fieldDef = getFieldDef(node.groupby, olliSpec);
         let first, last;
-        if (node.groupby.type === 'quantitative' || node.groupby.type === 'temporal') {
+        if (fieldDef.type === 'quantitative' || fieldDef.type === 'temporal') {
           const guide =
-            olliSpec.axes?.find((axis) => axis.field.field === node.groupby.field) ||
-            olliSpec.legends?.find((legend) => legend.field.field === node.groupby.field);
-          const bins = getBins(node.groupby, olliSpec.data);
+            olliSpec.axes?.find((axis) => axis.field === node.groupby) ||
+            olliSpec.legends?.find((legend) => legend.field === node.groupby);
+          const bins = getBins(node.groupby, olliSpec);
           first = fmtValue(bins[0][0]);
           last = fmtValue(bins[bins.length - 1][1]);
-          return `${guideType} titled ${node.groupby.field} for a ${
-            'scaleType' in guide ? guide.scaleType || node.groupby.type : node.groupby.type
+          return `${guideType} titled ${node.groupby} for a ${
+            'scaleType' in guide ? guide.scaleType || fieldDef.type : fieldDef.type
           } scale with values from ${first} to ${last}.`;
         } else {
           const domain = getDomain(node.groupby, olliSpec.data);
           first = fmtValue(domain[0]);
           last = fmtValue(domain[domain.length - 1]);
-          return `${guideType} titled ${node.groupby.field} for a ${node.groupby.type} scale with ${domain.length} values from ${first} to ${last}.`;
+          return `${guideType} titled ${node.groupby} for a ${fieldDef.type} scale with ${domain.length} values from ${first} to ${last}.`;
         }
       }
       return `${guideType}.`;
@@ -82,12 +82,12 @@ export function nodeToDescription(node: ElaboratedOlliNode, tree: ElaboratedOlli
     case 'other':
       if ('groupby' in node) {
         if (!node.parent) {
-          const fields = getFieldsUsed(olliSpec, tree);
-          return `A dataset with ${fields.size} fields${
-            fields.size <= 3 ? ' ' + [...fields].join(', ') : ''
-          }, grouped by ${node.groupby.field}.`;
+          const fields = olliSpec.fields.map((f) => f.field);
+          return `A dataset with ${fields.length} fields${
+            fields.length <= 3 ? ' ' + [...fields].join(', ') : ''
+          }, grouped by ${node.groupby}.`;
         }
-        return `${node.children.length} groups, grouped by ${node.groupby.field}.`;
+        return `${node.children.length} groups, grouped by ${node.groupby}.`;
       } else if ('predicate' in node) {
         let predicateDescription;
         if ('range' in node.predicate) {
@@ -100,8 +100,8 @@ export function nodeToDescription(node: ElaboratedOlliNode, tree: ElaboratedOlli
         return `${index} of ${siblings}. ${node.predicate.field} ${predicateDescription}.`;
       } else {
         if (!node.parent) {
-          const fields = getFieldsUsed(olliSpec, tree);
-          return `A dataset with ${fields.size} fields${fields.size <= 3 ? ' ' + [...fields].join(', ') : ''}.`;
+          const fields = olliSpec.fields.map((f) => f.field);
+          return `A dataset with ${fields.length} fields${fields.length <= 3 ? ' ' + [...fields].join(', ') : ''}.`;
         }
       }
   }

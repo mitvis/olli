@@ -2,8 +2,6 @@ import { LogicalComposition } from 'vega-lite/src/logical';
 import { OlliNode } from './Structure/Types';
 import { FieldPredicate } from 'vega-lite/src/predicate';
 
-export type OlliMark = 'point' | 'bar' | 'line';
-
 export type OlliValue = string | number | Date;
 
 export interface OlliDatum {
@@ -12,25 +10,26 @@ export interface OlliDatum {
 
 export type OlliDataset = OlliDatum[];
 
+export type OlliMark = 'point' | 'bar' | 'line';
+
 /**
  * Spec describing a visualization
  */
 export interface OlliSpec {
   selection?: LogicalComposition<FieldPredicate>; // optional: an initial top level selection (subset of data)
   data: OlliDataset;
+  fields: OlliFieldDef[];
   structure?: OlliNode | OlliNode[];
   mark?: OlliMark;
   axes?: OlliAxis[];
   legends?: OlliLegend[];
-  facet?: OlliEncodingFieldDef;
+  facet?: string;
   title?: string;
   description?: string; // possible chart description included with the spec
 }
 
-export type MeasureType = 'quantitative' | 'ordinal' | 'nominal' | 'temporal';
-
 type Guide = {
-  field: OlliEncodingFieldDef;
+  field: string;
   title?: string;
 };
 
@@ -46,12 +45,14 @@ export interface OlliAxis extends Guide {
  * Extending the {@link Guide} interface for visualization legends
  */
 export interface OlliLegend extends Guide {
-  channel?: string; // e.g. color, opacity
+  channel: 'color' | 'opacity' | 'size';
 }
 
-export interface OlliEncodingFieldDef {
+export type MeasureType = 'quantitative' | 'ordinal' | 'nominal' | 'temporal';
+
+export interface OlliFieldDef {
   field: string;
-  type: MeasureType;
+  type?: MeasureType;
 }
 
 /**
