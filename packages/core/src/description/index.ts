@@ -28,7 +28,11 @@ export function nodeToDescription(node: ElaboratedOlliNode, tree: ElaboratedOlli
           node.groupby
         }, with axes ${olliSpec.axes.map((a) => a.title || a.field).join(' and ')}.`;
       }
-      return `${olliSpec.description} A ${olliSpec.mark} chart.`;
+      if (olliSpec.mark) {
+        return `${olliSpec.description?.concat(' ') || ''}A ${olliSpec.mark} chart.`;
+      }
+      const fields = olliSpec.fields.map((f) => f.field);
+      return `A dataset with ${fields.length} fields${fields.length <= 3 ? ' ' + [...fields].join(', ') : ''}.`;
     case 'facet':
       if ('predicate' in node && 'equal' in node.predicate) {
         if (olliSpec.mark === 'line') {
@@ -98,11 +102,6 @@ export function nodeToDescription(node: ElaboratedOlliNode, tree: ElaboratedOlli
           predicateDescription = `is ${fmtValue(node.predicate.equal as OlliValue)}`;
         }
         return `${index} of ${siblings}. ${node.predicate.field} ${predicateDescription}.`;
-      } else {
-        if (!node.parent) {
-          const fields = olliSpec.fields.map((f) => f.field);
-          return `A dataset with ${fields.length} fields${fields.length <= 3 ? ' ' + [...fields].join(', ') : ''}.`;
-        }
       }
   }
 }
