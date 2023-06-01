@@ -1,7 +1,7 @@
 import { isDate, toNumber, isArray, inrange } from 'vega';
 import { LogicalAnd, LogicalComposition } from 'vega-lite/src/logical';
 import { FieldPredicate, FieldEqualPredicate } from 'vega-lite/src/predicate';
-import { OlliEncodingFieldDef, OlliDataset, OlliDatum } from '../Types';
+import { OlliEncodingFieldDef, OlliDataset, OlliDatum, OlliValue } from '../Types';
 import { serializeValue } from './values';
 import { getDomain } from './data';
 import { getBinPredicates } from './bin';
@@ -42,38 +42,60 @@ export const predicateToTupleType = (predicate: FieldPredicate) => {
   return 'E';
 };
 
-export function predicateToSelectionStore(predicate: LogicalComposition<FieldPredicate>) {
+export interface SelectionStore {
+  unit: string;
+  fields: { type: string; field: string }[];
+  values: (OlliValue | [number, number])[];
+}
+
+export function predicateToSelectionStore(predicate: LogicalComposition<FieldPredicate>): SelectionStore {
   if (predicate) {
-    const and = (predicate as LogicalAnd<FieldPredicate>).and as FieldPredicate[];
-    const getPredValue = (p: FieldPredicate) => {
-      const pred = p as any;
-      const key = Object.keys(pred).find((k) => k !== 'field')!; // find the value key e.g. 'eq', 'lte'
-      const value = pred[key];
+    const getPredValue = (p: FieldPredicate): OlliValue | [number, number] => {
+      const key = Object.keys(p).find((k) => k !== 'field')!; // find the value key e.g. 'eq', 'lte'
+      const value = p[key];
       return value;
     };
-    const tuple_fields = and
-      ? and.map((p) => {
-          const pred = p as FieldPredicate; // TODO: this will currently only support a non-nested "and" composition or a single pred because i do not want to deal
-          return {
-            type: predicateToTupleType(pred),
-            field: pred.field,
-          };
-        })
-      : [
-          {
-            type: predicateToTupleType(predicate as FieldPredicate),
-            field: (predicate as FieldPredicate).field,
-          },
-        ];
-    const tuple_values = and ? and.map(getPredValue) : [getPredValue(predicate as FieldPredicate)];
-    if (!tuple_fields.length && !tuple_values.length) {
-      return null;
+    if ('and' in predicate) {
+      const and = predicate.and;
+      const stores = and.map((p) => predicateToSelectionStore(p));
+      const tuple_fields = stores.flatMap((store) => {
+        return store.fields;
+      });
+      const tuple_values = stores.flatMap((store) => {
+        return store.values;
+      });
+      return {
+        unit: '',
+        fields: tuple_fields,
+        values: tuple_values,
+      };
+    } else if ('or' in predicate) {
+      const or = predicate.or;
+      // TODO
+    } else if ('not' in predicate) {
+      const not = predicate.not;
+      // TODO
+    } else {
+      // predicate is FieldPredicate
+      const tuple_fields = [
+        {
+          type: predicateToTupleType(predicate),
+          field: predicate.field,
+        },
+      ];
+      const tuple_values = [getPredValue(predicate)];
+      if (!tuple_fields.length && !tuple_values.length) {
+        return null;
+      }
+      return {
+        unit: '',
+        fields: tuple_fields,
+        values: tuple_values,
+      };
     }
-    return {
-      unit: '',
-      fields: tuple_fields,
-      values: tuple_values,
-    };
+    // if (!tuple_fields.length && !tuple_values.length) {
+    //   return null;
+    // }
   }
 }
 
