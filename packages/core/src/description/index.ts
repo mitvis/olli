@@ -27,22 +27,22 @@ export function nodeToDescription(node: ElaboratedOlliNode, tree: ElaboratedOlli
       if ('groupby' in node && olliSpec.mark === 'line') {
         return `${olliSpec.description} A multi-series line chart with 5 lines for ${
           node.groupby.field
-        }, with axes ${olliSpec.axes.map((a) => a.title || a.field).join(' and ')}.`;
+        }, with axes ${olliSpec.axes.map((a) => a.title || a.field.field).join(' and ')}.`;
       }
       return `${olliSpec.description} A ${olliSpec.mark} chart.`;
     case 'facet':
       if ('predicate' in node && 'equal' in node.predicate) {
         if (olliSpec.mark === 'line') {
           return `${index} of ${siblings}. A line titled ${node.predicate.equal}, with axes ${olliSpec.axes
-            .map((a) => a.title || a.field)
+            .map((a) => a.title || a.field.field)
             .join(' and ')}.`;
         }
         return `${index} of ${siblings}.A ${olliSpec.mark} chart titled ${
           node.predicate.equal
-        }, with axes ${olliSpec.axes.map((a) => a.title || a.field).join(' and ')}.`;
+        }, with axes ${olliSpec.axes.map((a) => a.title || a.field.field).join(' and ')}.`;
       }
       return `${index} of ${siblings}. A facet with axes ${olliSpec.axes
-        .map((a) => a.title || a.field)
+        .map((a) => a.title || a.field.field)
         .join(' and ')}.`;
     case 'xAxis':
     case 'yAxis':
