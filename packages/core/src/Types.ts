@@ -1,4 +1,6 @@
+import { LogicalComposition } from 'vega-lite/src/logical';
 import { OlliNode } from './Structure/Types';
+import { FieldPredicate } from 'vega-lite/src/predicate';
 
 export type OlliMark = 'point' | 'bar' | 'line';
 
@@ -14,7 +16,7 @@ export type OlliDataset = OlliDatum[];
  * Spec describing a visualization
  */
 export interface OlliSpec {
-  // selection?: OlliDataset; // optional: an initial top level selection (subset of data)
+  selection?: LogicalComposition<FieldPredicate>; // optional: an initial top level selection (subset of data)
   data: OlliDataset;
   structure: OlliNode | OlliNode[];
   mark?: OlliMark;
