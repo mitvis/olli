@@ -1,12 +1,12 @@
 import { OlliValue } from '../Types';
-import { OlliDataset, OlliSpec } from '../Types';
-import { ElaboratedOlliNode, OlliNode, OlliNodeLookup } from '../Structure/Types';
+import { OlliSpec } from '../Types';
+import { ElaboratedOlliNode } from '../Structure/Types';
 import { getBins } from '../util/bin';
 import { getDomain, getFieldDef } from '../util/data';
 import { selectionTest } from '../util/selection';
 import { fmtValue } from '../util/values';
 import { FieldPredicate } from 'vega-lite/src/predicate';
-import { LogicalAnd, LogicalComposition } from 'vega-lite/src/logical';
+import { LogicalComposition } from 'vega-lite/src/logical';
 
 export function generateDescriptions(olliSpec: OlliSpec, tree: ElaboratedOlliNode) {
   const queue = [tree];

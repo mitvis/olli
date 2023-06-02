@@ -1,19 +1,7 @@
-// Adapted from: https://w3c.github.io/aria-practices/examples/treeview/treeview-1/treeview-1b.html
-
-import { nodeToDescription } from '../../Description';
-import { ElaboratedOlliNode, OlliNode, OlliNodeLookup } from '../../Structure/Types';
+import { ElaboratedOlliNode } from '../../Structure/Types';
 import { OlliSpec } from '../../Types';
-import { selectionTest } from '../../util/selection';
-import { fmtValue } from '../../util/values';
-import { makeDialog, openTableDialog } from '../Dialog';
-import { renderTable } from '../Table';
 import './TreeStyle.css';
 
-/**
- *
- * @param node A {@link AccessibilityTreeNode} to generate a navigable tree view from
- * @returns An {@link HTMLElement} ARIA TreeView of the navigable tree view for a visualization
- */
 export function renderTree(node: ElaboratedOlliNode, olliSpec: OlliSpec, renderContainer: HTMLElement): HTMLElement {
   const root = document.createElement('ul');
   const labelId = `${node.id}-label`;
@@ -37,7 +25,6 @@ export function renderTree(node: ElaboratedOlliNode, olliSpec: OlliSpec, renderC
     item.setAttribute('id', node.id);
 
     const label = document.createElement('span');
-    // label.textContent = nodeToDescription(node);
     item.appendChild(label);
 
     if (node.children.length) {

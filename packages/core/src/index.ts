@@ -12,26 +12,16 @@ export * from './Types';
 export * from './Structure/Types';
 export * from './util/types';
 
-/**
- * The configuration object outlining how an accessible visualization should be rendered based on a {@link OlliSpec}.
- */
 export type OlliConfigOptions = {
   onFocus?: (elem: HTMLElement, olliNode: ElaboratedOlliNode) => void;
 };
 
-/**
- *
- * @param config The {@link OlliConfigOptions} object to specify how an accessible visualization should be generated.
- */
 export function olli(olliSpec: OlliSpec, config?: OlliConfigOptions): HTMLElement {
-  console.log('olliSpec', olliSpec);
   olliSpec = elaborateSpec(olliSpec);
   const tree: ElaboratedOlliNode = olliSpecToTree(olliSpec);
   const lookup = treeToNodeLookup(tree);
 
   generateDescriptions(olliSpec, tree);
-
-  console.log('tree', tree);
 
   const renderContainer: HTMLElement = document.createElement('div');
   renderContainer.classList.add('olli-vis');

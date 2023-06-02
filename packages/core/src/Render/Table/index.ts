@@ -1,11 +1,6 @@
 import { OlliDataset, OlliDatum } from '../../Types';
 import { fmtValue } from '../../util/values';
 
-/**
- *
- * @param tree The {@link AccessibilityTreeNode} to generate a table from
- * @returns An {@link HTMLElement} table of the data used in a visualization
- */
 export function renderTable(data: OlliDataset, fields: string[]): HTMLElement {
   const table = document.createElement('table');
   const thead = document.createElement('thead');

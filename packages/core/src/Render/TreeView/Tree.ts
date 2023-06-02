@@ -1,3 +1,4 @@
+// Adapted from: https://w3c.github.io/aria-practices/examples/treeview/treeview-1/treeview-1b.html
 import { ElaboratedOlliNode, OlliNodeLookup } from '../../Structure/Types';
 import { OlliNodeType } from '../../Structure/Types';
 import { setOlliGlobalState } from '../../util/globalState';
@@ -10,17 +11,6 @@ import { TreeItem } from './TreeItem';
  *
  *   Desc:   Tree widget that implements ARIA Authoring Practices
  *           for a tree being used as a file viewer
- */
-
-/*
- *   @constructor
- *
- *   @desc
- *       Tree item object for representing the state and user interactions for a
- *       tree widget
- *
- *   @param node
- *       An element with the role=tree attribute
  */
 
 export interface TreeCallbacks {
