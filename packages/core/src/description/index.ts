@@ -26,9 +26,23 @@ export function nodeToDescription(node: ElaboratedOlliNode, olliSpec: OlliSpec):
   switch (node.nodeType) {
     case 'root':
       if ('groupby' in node && olliSpec.mark === 'line') {
-        return `${olliSpec.description} A multi-series line chart with 5 lines for ${
+        return `${olliSpec.description?.concat(' ') || ''}A multi-series line chart with 5 lines for ${
           node.groupby
         }, with axes ${olliSpec.axes.map((a) => a.title || a.field).join(' and ')}.`;
+      }
+      if (
+        olliSpec.mark === 'point' &&
+        olliSpec.axes?.length === 2 &&
+        olliSpec.axes.every((a) => getFieldDef(a.field, olliSpec).type === 'quantitative')
+      ) {
+        return `${olliSpec.description?.concat(' ') || ''}A scatterplot with axes ${olliSpec.axes
+          .map((a) => a.title || a.field)
+          .join(' and ')}.`;
+      }
+      if (olliSpec.mark && olliSpec.axes?.length) {
+        return `${olliSpec.description?.concat(' ') || ''}A ${olliSpec.mark} chart with axes ${olliSpec.axes
+          .map((a) => a.title || a.field)
+          .join(' and ')}.`;
       }
       if (olliSpec.mark) {
         return `${olliSpec.description?.concat(' ') || ''}A ${olliSpec.mark} chart.`;
