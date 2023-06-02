@@ -52,10 +52,7 @@ export class TreeItem {
     let elem = node.firstElementChild;
 
     while (elem) {
-      // if (['ul', 'table', 'th', 'td'].includes(elem.tagName.toLowerCase())) {
-
-      if (['ul', 'table', 'thead', 'tbody', 'tr', 'td', 'th'].includes(elem.tagName.toLowerCase())) {
-        // if (['ul', 'table'].includes(elem.tagName.toLowerCase())) {
+      if (elem.tagName.toLowerCase() == 'ul') {
         this.isExpandable = true;
         break;
       }

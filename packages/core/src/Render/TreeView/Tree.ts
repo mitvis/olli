@@ -1,4 +1,4 @@
-// Adapted from: https://w3c.github.io/aria-practices/examples/treeview/treeview-1/treeview-1b.html
+// Adapted from: https://www.w3.org/WAI/ARIA/apg/patterns/treeview/examples/treeview-1b/
 import { ElaboratedOlliNode, OlliNodeLookup } from '../../Structure/Types';
 import { OlliNodeType } from '../../Structure/Types';
 import { setOlliGlobalState } from '../../util/globalState';
@@ -39,7 +39,7 @@ export class Tree {
       let ti = group;
 
       while (elem) {
-        if (['li', 'table', 'tr', 'th', 'td'].includes(elem.tagName.toLowerCase())) {
+        if (elem.tagName.toLowerCase() === 'li') {
           ti = new TreeItem(elem, tree, lookup[elem.id], group);
           ti.init();
           if (group) {
