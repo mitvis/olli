@@ -18,7 +18,6 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
     fields: [],
     axes: [],
     legends: [],
-    structure: [],
   };
 
   if ('mark' in spec) {
@@ -57,14 +56,11 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
           olliSpec.facet = fieldDef.field;
         } else if (['x', 'y'].includes(channel)) {
           // add axes
-          if (!(olliSpec.mark === 'bar' && fieldDef.type === 'quantitative')) {
-            // skip quantitative channel for bar charts
-            olliSpec.axes.push({
-              axisType: channel as 'x' | 'y',
-              field: fieldDef.field,
-              title: encoding.title,
-            });
-          }
+          olliSpec.axes.push({
+            axisType: channel as 'x' | 'y',
+            field: fieldDef.field,
+            title: encoding.title,
+          });
         } else if (['color', 'opacity'].includes(channel)) {
           // add legends
           olliSpec.legends.push({
@@ -88,25 +84,6 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
           });
         }
       });
-
-      function guideNodes(): OlliNode[] {
-        return [].concat(olliSpec.axes, olliSpec.legends).map((guide) => {
-          return {
-            groupby: guide.field,
-            children: [],
-          };
-        });
-      }
-
-      // create structure
-      if (olliSpec.facet) {
-        olliSpec.structure = {
-          groupby: olliSpec.facet,
-          children: guideNodes(),
-        };
-      } else {
-        olliSpec.structure = guideNodes();
-      }
     }
   } else {
     // TODO: handle layer and concat specs

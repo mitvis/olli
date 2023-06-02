@@ -1,5 +1,4 @@
 import { Scene, Spec, parse, View, SceneItem, SceneGroup } from 'vega';
-import { isNumeric as vlIsNumeric } from 'vega-lite';
 import { OlliDataset } from 'olli';
 
 export async function getVegaView(spec: Spec): Promise<View> {
@@ -76,43 +75,4 @@ export function getData(scene: SceneGroup): OlliDataset {
   } catch (error) {
     throw new Error(`No data found in the Vega scenegraph \n ${error}`);
   }
-}
-
-export const guideTypeFromScale = (scaleType: string): 'discrete' | 'continuous' => {
-  switch (scaleType) {
-    case 'linear':
-    case 'log':
-    case 'pow':
-    case 'sqrt':
-    case 'symlog':
-    case 'time':
-    case 'utc':
-    case 'sequential':
-      return 'continuous';
-    case 'ordinal':
-    case 'band':
-    case 'point':
-    case 'quantile':
-    case 'quantize':
-    case 'threshold':
-    case 'bin-ordinal':
-    default:
-      return 'discrete';
-  }
-};
-
-export const guideTypeFromVLEncoding = (encodingType: string): 'discrete' | 'continuous' => {
-  switch (encodingType) {
-    case 'quantitative':
-    case 'temporal':
-      return 'continuous';
-    case 'ordinal':
-    case 'nominal':
-    default:
-      return 'discrete';
-  }
-};
-
-export function isNumeric(value: string): boolean {
-  return vlIsNumeric(value.replaceAll(',', ''));
 }

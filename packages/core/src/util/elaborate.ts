@@ -20,7 +20,7 @@ export function elaborateSpec(olliSpec: OlliSpec): OlliSpec {
   });
 
   // infer structure if not provided
-  if (!olliSpec.structure) {
+  if (!olliSpec.structure || [olliSpec.structure].flat().length === 0) {
     olliSpec.structure = inferStructure(olliSpec);
   }
 

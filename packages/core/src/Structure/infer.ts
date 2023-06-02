@@ -1,4 +1,5 @@
 import { OlliAxis, OlliLegend, OlliSpec } from '../Types';
+import { getFieldDef } from '../util/data';
 import { OlliNode } from './Types';
 
 export function inferStructure(olliSpec: OlliSpec): OlliNode | OlliNode[] {
@@ -21,12 +22,25 @@ export function inferStructure(olliSpec: OlliSpec): OlliNode | OlliNode[] {
     return nodes;
   }
 
-  if (olliSpec.facet && (olliSpec.axes || olliSpec.legends)) {
-    return {
-      groupby: olliSpec.facet,
-      children: nodesFromGuides(olliSpec.axes, olliSpec.legends),
-    };
-  } else if (olliSpec.mark === 'line' && olliSpec.legends) {
+  if (olliSpec.facet) {
+    if (olliSpec.axes?.length || olliSpec.legends?.length) {
+      return {
+        groupby: olliSpec.facet,
+        children: nodesFromGuides(olliSpec.axes, olliSpec.legends),
+      };
+    } else {
+      return {
+        groupby: olliSpec.facet,
+        children: olliSpec.fields
+          .filter((f) => f.field !== olliSpec.facet)
+          .map((f) => {
+            return {
+              groupby: f.field,
+            };
+          }),
+      };
+    }
+  } else if (olliSpec.mark === 'line' && olliSpec.legends?.length) {
     const colorLegend = olliSpec.legends.find((legend) => legend.channel === 'color');
     if (colorLegend) {
       // multi-series line
@@ -38,15 +52,32 @@ export function inferStructure(olliSpec: OlliSpec): OlliNode | OlliNode[] {
         ),
       };
     }
-  } else if (olliSpec.axes || olliSpec.legends) {
+  } else if (olliSpec.mark === 'bar') {
+    if (olliSpec.axes?.length) {
+      const quantAxis = olliSpec.axes?.find((axis) => getFieldDef(axis.field, olliSpec).type === 'quantitative');
+      return nodesFromGuides(
+        olliSpec.axes.filter((axis) => axis !== quantAxis),
+        olliSpec.legends
+      );
+    } else {
+      const quantField = olliSpec.fields.find((field) => field.type === 'quantitative');
+      return olliSpec.fields
+        .filter((field) => field !== quantField)
+        .map((fieldDef) => {
+          return {
+            groupby: fieldDef.field,
+            children: [],
+          };
+        });
+    }
+  } else if (olliSpec.axes?.length || olliSpec.legends?.length) {
     return nodesFromGuides(olliSpec.axes, olliSpec.legends);
-  } else if (olliSpec.data.length) {
+  } else {
     // TODO can try inferences with data mtypes
     // otherwise, just give all fields flat
-    const fields = Object.keys(olliSpec.data[0]);
-    return fields.map((field) => {
+    return olliSpec.fields.map((fieldDef) => {
       return {
-        groupby: field,
+        groupby: fieldDef.field,
         children: [],
       };
     });
