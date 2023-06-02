@@ -77,7 +77,9 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
         }
 
         // add field to list of field defs
-        olliSpec.fields.push(fieldDef);
+        if (!olliSpec.fields.find((f) => f.field === fieldDef.field)) {
+          olliSpec.fields.push(fieldDef);
+        }
 
         if (fieldDef.type === 'temporal') {
           // convert temporal data into Date objects

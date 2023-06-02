@@ -3,9 +3,9 @@ import { FieldPredicate } from 'vega-lite/src/predicate';
 import { OlliSpec, OlliDataset } from '../Types';
 import { fieldToPredicates } from '../util/selection';
 import { ElaboratedOlliNode, OlliNode, OlliNodeLookup, OlliNodeType } from './Types';
-import { getFieldDef } from '../util/data';
 
-export function olliSpecToTree(olliSpec: OlliSpec, namespace: string): ElaboratedOlliNode {
+export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
+  const namespace = (Math.random() + 1).toString(36).substring(7);
   /**
    * If the top level has multiple nodes, we wrap them in a single node
    */

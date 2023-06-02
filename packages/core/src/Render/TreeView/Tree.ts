@@ -1,4 +1,4 @@
-import { OlliNodeLookup } from '../../Structure/Types';
+import { ElaboratedOlliNode, OlliNodeLookup } from '../../Structure/Types';
 import { OlliNodeType } from '../../Structure/Types';
 import { setOlliGlobalState } from '../../util/globalState';
 import { TreeItem } from './TreeItem';
@@ -22,19 +22,25 @@ import { TreeItem } from './TreeItem';
  *   @param node
  *       An element with the role=tree attribute
  */
+
+export interface TreeCallbacks {
+  onFocus?: (el: HTMLElement, olliNode: ElaboratedOlliNode) => void;
+  onTable: (olliNode: ElaboratedOlliNode) => void;
+}
+
 export class Tree {
   domNode: any;
   treeItems: TreeItem[];
   olliNodeLookup: OlliNodeLookup;
   rootTreeItem!: TreeItem;
   lastFocusedTreeItem!: TreeItem;
-  onFocus?: (el: HTMLElement) => void;
+  callbacks: TreeCallbacks;
 
-  constructor(node: HTMLElement, lookup: OlliNodeLookup, onFocus?: (el: HTMLElement) => void) {
+  constructor(node: HTMLElement, lookup: OlliNodeLookup, config: TreeCallbacks) {
     this.domNode = node;
     this.treeItems = [];
     this.olliNodeLookup = lookup;
-    this.onFocus = onFocus;
+    this.callbacks = config;
   }
 
   init(): void {
@@ -75,9 +81,11 @@ export class Tree {
       if (ul.children.length) {
         for (const li of ul.children) {
           const label = li.firstElementChild! as HTMLElement;
-          label.innerText = lookup[li.id].description;
-          if (li.children[1]) {
-            _renderTreeDescription(li.children[1] as HTMLElement, lookup);
+          if (lookup[li.id]) {
+            label.innerText = lookup[li.id].description;
+            if (li.children[1]) {
+              _renderTreeDescription(li.children[1] as HTMLElement, lookup);
+            }
           }
         }
       }
@@ -93,8 +101,8 @@ export class Tree {
         ti.domNode.focus();
         ti.domNode.setAttribute('aria-selected', 'true');
         this.lastFocusedTreeItem = ti;
-        if (this.onFocus) {
-          this.onFocus(ti.domNode);
+        if (this.callbacks.onFocus) {
+          this.callbacks.onFocus(ti.domNode, ti.olliNode);
         }
         setOlliGlobalState({ lastVisitedTree: this });
       } else {

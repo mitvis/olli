@@ -5,6 +5,7 @@ import { getBins } from '../util/bin';
 import { getDomain, getFieldDef } from '../util/data';
 import { selectionTest } from '../util/selection';
 import { fmtValue } from '../util/values';
+import { FieldPredicate } from 'vega-lite/src/predicate';
 
 export function generateDescriptions(olliSpec: OlliSpec, tree: ElaboratedOlliNode) {
   const queue = [tree];
@@ -78,9 +79,11 @@ export function nodeToDescription(node: ElaboratedOlliNode, olliSpec: OlliSpec):
         if ('range' in node.predicate) {
           return `${index} of ${siblings}. ${fmtValue(node.predicate.range[0])} to ${fmtValue(
             node.predicate.range[1]
-          )}. ${selection.length} values.`;
+          )}. ${selection.length} values. Press t to open table.`;
         } else if ('equal' in node.predicate) {
-          return `${index} of ${siblings}. ${fmtValue(node.predicate.equal as OlliValue)}. ${selection.length} values.`;
+          return `${index} of ${siblings}. ${fmtValue(node.predicate.equal as OlliValue)}. ${
+            selection.length
+          } values. Press t to open table.`;
         }
       }
     case 'other':
@@ -104,4 +107,27 @@ export function nodeToDescription(node: ElaboratedOlliNode, olliSpec: OlliSpec):
         return `${index} of ${siblings}. ${node.predicate.field} ${predicateDescription}.`;
       }
   }
+}
+
+export function predicateToDescription(predicate: FieldPredicate) {
+  if ('equal' in predicate) {
+    return `${predicate.field} equals ${predicate.equal}`;
+  }
+  if ('range' in predicate) {
+    return `${predicate.field} is between ${predicate.range[0]} and ${predicate.range[1]}`;
+  }
+  if ('lt' in predicate) {
+    return `${predicate.field} is less than ${predicate.lt}`;
+  }
+  if ('lte' in predicate) {
+    return `${predicate.field} is less than or equal to ${predicate.lte}`;
+  }
+  if ('gt' in predicate) {
+    return `${predicate.field} is greater than ${predicate.gt}`;
+  }
+  if ('gte' in predicate) {
+    return `${predicate.field} is greater than or equal to ${predicate.gte}`;
+  }
+
+  return '';
 }

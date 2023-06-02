@@ -95,7 +95,6 @@ export class TreeItem {
   }
 
   checkBaseKeys(event: KeyboardEvent) {
-    let flag = false;
     switch (event.key) {
       case 'Enter':
       case ' ':
@@ -106,7 +105,6 @@ export class TreeItem {
             this.tree.expandTreeItem(this);
           }
         }
-        flag = true;
         break;
       case 'ArrowDown':
         if (this.children.length > 0) {
@@ -115,40 +113,28 @@ export class TreeItem {
             this.tree.setFocusToNextLayer(this);
           }
         }
-        flag = true;
         break;
       case 'Escape':
       case 'ArrowUp':
-        // if (this.isExpandable && this.isExpanded()) {
-        // this.tree.setFocusToParentItem();
-        // this.tree.collapseTreeItem(this);
-        // flag = true;
-        // } else {
         if (this.inGroup) {
           this.tree.setFocusToParentItem(this);
-          flag = true;
         }
-        // }
         break;
       case 'ArrowLeft':
         this.tree.setFocusToPreviousItem(this);
-        flag = true;
         break;
       case 'ArrowRight':
         this.tree.setFocusToNextItem(this);
-        flag = true;
         break;
       case 'Home':
         if (this.parent) {
           this.tree.setFocusToFirstInLayer(this);
-          flag = true;
         }
         break;
 
       case 'End':
         if (this.parent) {
           this.tree.setFocusToLastInLayer(this);
-          flag = true;
         }
         break;
       case 'x':
@@ -172,12 +158,15 @@ export class TreeItem {
       case 'd':
         this.tree.setFocusGridRight(this);
         break;
+      case 't':
+        if ('predicate' in this.olliNode || this.olliNode.nodeType === 'root') {
+          this.tree.callbacks.onTable(this.olliNode);
+        }
+        break;
     }
 
-    if (flag) {
-      event.stopPropagation();
-      event.preventDefault();
-    }
+    event.stopPropagation();
+    event.preventDefault();
   }
 
   handleClick(event: MouseEvent) {
