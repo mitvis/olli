@@ -89,7 +89,5 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
     // TODO: handle layer and concat specs
   }
 
-  // TODO: aggregate field names
-
   return olliSpec;
 };
