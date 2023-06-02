@@ -18,10 +18,10 @@ export type OlliMark = 'point' | 'bar' | 'line';
 export interface OlliSpec {
   // required: data and fields
   data: OlliDataset;
-  fields: OlliFieldDef[];
-  // specification of the chart's structure (inferred if not provided)
+  // semi-required: specification of the fields/typings and structure (inferred if not provided)
+  fields?: OlliFieldDef[];
   structure?: OlliNode | OlliNode[];
-  // information about the chart's visual encodings
+  // optional information about the chart's visual encodings for descriptions
   mark?: OlliMark;
   axes?: OlliAxis[];
   legends?: OlliLegend[];

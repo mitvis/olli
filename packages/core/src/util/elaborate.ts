@@ -4,6 +4,13 @@ import { typeInference } from './types';
 
 // fills in default values for missing spec fields
 export function elaborateSpec(olliSpec: OlliSpec): OlliSpec {
+  // if fields not provided, use all fields in data
+  olliSpec.fields =
+    olliSpec.fields ||
+    Object.keys(olliSpec.data[0]).map((field) => {
+      return { field };
+    });
+
   // infer types of fields if not provided
   olliSpec.fields = olliSpec.fields.map((fieldDef) => {
     return {

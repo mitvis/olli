@@ -89,16 +89,17 @@ export function nodeToDescription(node: ElaboratedOlliNode, olliSpec: OlliSpec):
       }
       return `${guideType}.`;
     case 'filteredData':
+      const instructions = node.children.length ? '' : ' Press t to open table.';
       if ('predicate' in node) {
         const selection = selectionTest(olliSpec.data, node.fullPredicate);
         if ('range' in node.predicate) {
           return `${index} of ${siblings}. ${fmtValue(node.predicate.range[0])} to ${fmtValue(
             node.predicate.range[1]
-          )}. ${selection.length} values. Press t to open table.`;
+          )}. ${selection.length} values.${instructions}`;
         } else if ('equal' in node.predicate) {
           return `${index} of ${siblings}. ${fmtValue(node.predicate.equal as OlliValue)}. ${
             selection.length
-          } values. Press t to open table.`;
+          } values.${instructions}`;
         }
       }
     case 'other':
