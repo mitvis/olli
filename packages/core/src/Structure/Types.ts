@@ -6,12 +6,12 @@ import { LogicalAnd } from 'vega-lite/src/logical';
  */
 export interface OlliGroupNode {
   groupby: string;
-  children: OlliNode[];
+  children?: OlliNode[];
 }
 
 export interface OlliPredicateNode {
   predicate: FieldPredicate;
-  children: OlliNode[];
+  children?: OlliNode[];
 }
 
 export type OlliNode = OlliGroupNode | OlliPredicateNode;

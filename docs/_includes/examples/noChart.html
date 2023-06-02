@@ -6,6 +6,12 @@
         { "a": "G", "b": 19 }, { "a": "H", "b": 87 }
       ],
     "fields": [{"field": "a"}, {"field": "b"}],
+    "structure": {
+      "groupby": "a",
+      "children": [{
+        "groupby": "b"
+      }]
+    }
   }
 
   document.getElementById("AccessibilityTree-Vega-Lite").append(olli(spec))

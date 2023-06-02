@@ -13,12 +13,12 @@ export function generateDescriptions(olliSpec: OlliSpec, tree: ElaboratedOlliNod
     if (!node) {
       continue;
     }
-    node.description = nodeToDescription(node, tree, olliSpec);
+    node.description = nodeToDescription(node, olliSpec);
     queue.push(...node.children);
   }
 }
 
-export function nodeToDescription(node: ElaboratedOlliNode, tree: ElaboratedOlliNode, olliSpec: OlliSpec): string {
+export function nodeToDescription(node: ElaboratedOlliNode, olliSpec: OlliSpec): string {
   const index = (node.parent?.children.indexOf(node) || 0) + 1;
   const siblings = (node.parent?.children || []).length;
   switch (node.nodeType) {
