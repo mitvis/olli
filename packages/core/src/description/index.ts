@@ -6,6 +6,7 @@ import { getDomain, getFieldDef } from '../util/data';
 import { selectionTest } from '../util/selection';
 import { fmtValue } from '../util/values';
 import { FieldPredicate } from 'vega-lite/src/predicate';
+import { LogicalAnd, LogicalComposition } from 'vega-lite/src/logical';
 
 export function generateDescriptions(olliSpec: OlliSpec, tree: ElaboratedOlliNode) {
   const queue = [tree];
@@ -109,7 +110,20 @@ export function nodeToDescription(node: ElaboratedOlliNode, olliSpec: OlliSpec):
   }
 }
 
-export function predicateToDescription(predicate: FieldPredicate) {
+export function predicateToDescription(predicate: LogicalComposition<FieldPredicate>) {
+  if ('and' in predicate) {
+    return predicate.and.map(predicateToDescription).join(' and ');
+  }
+  if ('or' in predicate) {
+    return predicate.or.map(predicateToDescription).join(' or ');
+  }
+  if ('not' in predicate) {
+    return `not ${predicateToDescription(predicate.not)}`;
+  }
+  return fieldPredicateToDescription(predicate);
+}
+
+function fieldPredicateToDescription(predicate: FieldPredicate) {
   if ('equal' in predicate) {
     return `${predicate.field} equals ${predicate.equal}`;
   }

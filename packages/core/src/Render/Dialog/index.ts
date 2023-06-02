@@ -62,7 +62,7 @@ export function openTableDialog(olliNode: ElaboratedOlliNode, olliSpec: OlliSpec
     selectionTest(olliSpec.data, olliNode.fullPredicate),
     olliSpec.fields.map((f) => f.field)
   );
-  const dialog = makeDialog('Table View', predicateToDescription(olliNode.predicate), table, () => {
+  const dialog = makeDialog('Table View', predicateToDescription(olliNode.fullPredicate), table, () => {
     dialog.remove();
   });
 
