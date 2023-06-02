@@ -3,13 +3,15 @@ import { ElaboratedOlliNode } from '../../Structure/Types';
 import { OlliSpec } from '../../Types';
 import { selectionTest } from '../../util/selection';
 import { renderTable } from '../Table';
+import { Tree } from '../TreeView/Tree';
 import './dialog.css';
 
 export function makeDialog(
+  tree: Tree,
   title: string,
   instructions: string,
   content: HTMLElement,
-  onClose: () => void
+  onClose?: () => void
 ): HTMLElement {
   const dialog = document.createElement('div');
   dialog.setAttribute('class', 'olli-dialog');
@@ -30,7 +32,10 @@ export function makeDialog(
 
   const closeDialog = () => {
     dialog.remove();
-    onClose();
+    tree.setFocusToItem(tree.lastFocusedTreeItem);
+    if (onClose) {
+      onClose();
+    }
   };
 
   dialog.addEventListener('keydown', (e) => {
@@ -57,14 +62,17 @@ export function makeDialog(
   return dialog;
 }
 
-export function openTableDialog(olliNode: ElaboratedOlliNode, olliSpec: OlliSpec, renderContainer: HTMLElement) {
+export function openTableDialog(
+  olliNode: ElaboratedOlliNode,
+  olliSpec: OlliSpec,
+  tree: Tree,
+  renderContainer: HTMLElement
+) {
   const table = renderTable(
     selectionTest(olliSpec.data, olliNode.fullPredicate),
     olliSpec.fields.map((f) => f.field)
   );
-  const dialog = makeDialog('Table View', predicateToDescription(olliNode.fullPredicate), table, () => {
-    dialog.remove();
-  });
+  const dialog = makeDialog(tree, 'Table View', predicateToDescription(olliNode.fullPredicate), table);
 
   renderContainer.querySelectorAll('.olli-dialog').forEach((el) => {
     el.remove();

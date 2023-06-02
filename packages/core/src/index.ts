@@ -31,7 +31,7 @@ export function olli(olliSpec: OlliSpec, config?: OlliConfigOptions): HTMLElemen
   const treeConfig: TreeCallbacks = {
     onFocus: config?.onFocus,
     onTable: (node: ElaboratedOlliNode) => {
-      openTableDialog(node, olliSpec, renderContainer);
+      openTableDialog(node, olliSpec, t, renderContainer);
     },
   };
 
