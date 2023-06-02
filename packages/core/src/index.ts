@@ -25,7 +25,7 @@ export function olli(olliSpec: OlliSpec, config?: OlliConfigOptions): HTMLElemen
 
   const renderContainer: HTMLElement = document.createElement('div');
   renderContainer.classList.add('olli-vis');
-  const ul = renderTree(tree, olliSpec, renderContainer);
+  const ul = renderTree(tree);
   renderContainer.appendChild(ul);
 
   const treeConfig: TreeCallbacks = {

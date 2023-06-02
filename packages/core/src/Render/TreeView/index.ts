@@ -1,8 +1,7 @@
 import { ElaboratedOlliNode } from '../../Structure/Types';
-import { OlliSpec } from '../../Types';
 import './TreeStyle.css';
 
-export function renderTree(node: ElaboratedOlliNode, olliSpec: OlliSpec, renderContainer: HTMLElement): HTMLElement {
+export function renderTree(node: ElaboratedOlliNode): HTMLElement {
   const root = document.createElement('ul');
   const labelId = `${node.id}-label`;
 
