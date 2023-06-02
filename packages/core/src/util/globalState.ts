@@ -33,7 +33,7 @@ export const updateGlobalStateOnRender = (t: Tree) => {
       if (!nodeIsTextInput(document.activeElement)) {
         const { lastVisitedTree, treesOnPage } = getOlliGlobalState();
         switch (e.code) {
-          case 'KeyT':
+          case 'KeyO':
             const currentTree = lastVisitedTree || treesOnPage[0];
             if (currentTree.domNode.firstElementChild.getAttribute('aria-selected') === 'true') {
               // we are currently focusing on the root of this tree
