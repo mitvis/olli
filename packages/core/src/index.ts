@@ -3,7 +3,7 @@ import { ElaboratedOlliNode } from './Structure/Types';
 import { OlliRuntime, TreeCallbacks } from './Runtime/OlliRuntime';
 import { updateGlobalStateOnInitialRender } from './util/globalState';
 import { elaborateSpec } from './util/elaborate';
-import { openTableDialog } from './Render/Dialog';
+import { openSelectionDialog, openTableDialog } from './Render/Dialog';
 
 export * from './Types';
 export * from './Structure/Types';
@@ -23,6 +23,9 @@ export function olli(olliSpec: OlliSpec, config?: OlliConfigOptions): HTMLElemen
     onFocus: config?.onFocus,
     onTable: (node: ElaboratedOlliNode) => {
       openTableDialog(node, t, renderContainer);
+    },
+    onSelection: () => {
+      openSelectionDialog(t, renderContainer);
     },
   };
 

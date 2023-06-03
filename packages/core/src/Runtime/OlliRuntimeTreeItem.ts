@@ -148,6 +148,9 @@ export class OlliRuntimeTreeItem {
           this.tree.callbacks.onTable(this.olliNode);
         }
         break;
+      case 'f':
+        this.tree.callbacks.onSelection();
+        break;
     }
 
     event.stopPropagation();

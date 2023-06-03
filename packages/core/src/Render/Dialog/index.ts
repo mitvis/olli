@@ -5,13 +5,17 @@ import { selectionTest } from '../../util/selection';
 import { renderTable } from '../Table';
 import { OlliRuntime } from '../../Runtime/OlliRuntime';
 import './dialog.css';
+import { makeSelectionMenu } from './selectionMenu';
 
 export function makeDialog(
   tree: OlliRuntime,
   title: string,
   instructions: string,
   content: HTMLElement,
-  onClose?: () => void
+  callbacks?: {
+    onClose?: () => void;
+    onOk?: () => void;
+  }
 ): HTMLElement {
   const dialog = document.createElement('div');
   dialog.setAttribute('class', 'olli-dialog');
@@ -33,8 +37,8 @@ export function makeDialog(
   const closeDialog = () => {
     dialog.remove();
     tree.setFocusToItem(tree.lastFocusedTreeItem);
-    if (onClose) {
-      onClose();
+    if (callbacks?.onClose) {
+      callbacks?.onClose();
     }
   };
 
@@ -57,9 +61,36 @@ export function makeDialog(
   dialogContent.appendChild(instructionsElem);
   dialogContent.appendChild(contentContainer);
 
+  if (callbacks?.onOk) {
+    // add cancel button
+    const cancelButton = document.createElement('button');
+    cancelButton.innerText = 'Cancel';
+    cancelButton.addEventListener('click', closeDialog);
+    dialogContent.appendChild(cancelButton);
+    // add ok button
+    const okButton = document.createElement('button');
+    okButton.innerText = 'Ok';
+    okButton.addEventListener('click', () => {
+      callbacks?.onOk();
+      closeDialog();
+    });
+    dialogContent.appendChild(okButton);
+  }
+
   dialog.appendChild(dialogContent);
 
   return dialog;
+}
+
+function openDialog(dialog: HTMLElement, renderContainer: HTMLElement) {
+  renderContainer.querySelectorAll('.olli-dialog').forEach((el) => {
+    el.remove();
+  });
+  renderContainer.appendChild(dialog);
+
+  window.requestAnimationFrame(() => {
+    dialog.querySelector('button').focus();
+  });
 }
 
 export function openTableDialog(olliNode: ElaboratedOlliNode, tree: OlliRuntime, renderContainer: HTMLElement) {
@@ -70,12 +101,17 @@ export function openTableDialog(olliNode: ElaboratedOlliNode, tree: OlliRuntime,
   );
   const dialog = makeDialog(tree, 'Table View', predicateToDescription(olliNode.fullPredicate), table);
 
-  renderContainer.querySelectorAll('.olli-dialog').forEach((el) => {
-    el.remove();
-  });
-  renderContainer.appendChild(dialog);
+  openDialog(dialog, renderContainer);
+}
 
-  window.requestAnimationFrame(() => {
-    dialog.querySelector('button').focus();
-  });
+export function openSelectionDialog(tree: OlliRuntime, renderContainer: HTMLElement) {
+  const menu = makeSelectionMenu(tree.olliSpec);
+
+  const onOk = () => {
+    tree.setSelection(JSON.parse(menu.getAttribute('data-state')));
+  };
+
+  const dialog = makeDialog(tree, 'Filter Menu', 'Define a custom filter.', menu, { onOk });
+
+  openDialog(dialog, renderContainer);
 }

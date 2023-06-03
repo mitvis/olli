@@ -23,6 +23,7 @@ import { selectionTest } from '../util/selection';
 export interface TreeCallbacks {
   onFocus?: (el: HTMLElement, olliNode: ElaboratedOlliNode) => void;
   onTable: (olliNode: ElaboratedOlliNode) => void;
+  onSelection: () => void;
 }
 
 export class OlliRuntime {
@@ -101,27 +102,29 @@ export class OlliRuntime {
   }
 
   setSelection(selection: LogicalAnd<FieldPredicate> | FieldPredicate) {
-    const lastNode = this.lastFocusedTreeItem.olliNode;
+    const lastNode = this.lastFocusedTreeItem?.olliNode;
     this.olliSpec.selection = selection;
     this.init();
-    // find the nearest node to the last selected node and set focus to it
-    if (lastNode.nodeType === 'root') {
-      this.setFocusToItem(this.rootTreeItem);
-    } else {
-      const items = this.treeItems.filter((ti) => ti.olliNode.nodeType === lastNode.nodeType);
-      if ('groupby' in lastNode) {
-        const item = items.find((ti) => ti.olliNode.groupby === lastNode.groupby);
-        this.setFocusToItem(item || this.rootTreeItem);
-      } else if ('predicate' in lastNode) {
-        const pitems = items.filter((ti) => 'predicate' in ti.olliNode);
-        const lastNodeSelection = selectionTest(this.olliSpec.data, { and: [selection, lastNode.predicate] });
-        const item = pitems.find((ti) => {
-          const tiSelection = selectionTest(this.olliSpec.data, { and: [selection, ti.olliNode.predicate] });
-          return tiSelection.some((d) => lastNodeSelection.includes(d));
-        });
-        this.setFocusToItem(item || this.rootTreeItem);
-      } else {
+    if (lastNode) {
+      // find the nearest node to the last selected node and set focus to it
+      if (lastNode.nodeType === 'root') {
         this.setFocusToItem(this.rootTreeItem);
+      } else {
+        const items = this.treeItems.filter((ti) => ti.olliNode.nodeType === lastNode.nodeType);
+        if ('groupby' in lastNode) {
+          const item = items.find((ti) => ti.olliNode.groupby === lastNode.groupby);
+          this.setFocusToItem(item || this.rootTreeItem);
+        } else if ('predicate' in lastNode) {
+          const pitems = items.filter((ti) => 'predicate' in ti.olliNode);
+          const lastNodeSelection = selectionTest(this.olliSpec.data, { and: [selection, lastNode.predicate] });
+          const item = pitems.find((ti) => {
+            const tiSelection = selectionTest(this.olliSpec.data, { and: [selection, ti.olliNode.predicate] });
+            return tiSelection.some((d) => lastNodeSelection.includes(d));
+          });
+          this.setFocusToItem(item || this.rootTreeItem);
+        } else {
+          this.setFocusToItem(this.rootTreeItem);
+        }
       }
     }
   }
