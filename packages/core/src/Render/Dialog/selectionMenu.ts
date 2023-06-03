@@ -86,7 +86,11 @@ export function makeSelectionMenu(olliSpec: OlliSpec): HTMLElement {
         valueInput2.setAttribute('type', 'datetime-local');
         valueContainer.replaceChildren(valueInput1, valueInput2);
         valueInput1.onchange = valueInput2.onchange = () => {
-          console.log('date range', valueInput1.value, valueInput2.value);
+          const value1 = serializeValue(new Date(valueInput1.value), fieldDef);
+          const value2 = serializeValue(new Date(valueInput2.value), fieldDef);
+          const predicate: FieldPredicate = { field: selectedField, range: [value1, value2] };
+          state.and[0] = predicate;
+          menu.setAttribute('data-state', JSON.stringify(state));
         };
       }
     } else {
@@ -108,7 +112,11 @@ export function makeSelectionMenu(olliSpec: OlliSpec): HTMLElement {
         valueInput.setAttribute('type', 'datetime-local');
         valueContainer.replaceChildren(valueInput);
         valueInput.onchange = () => {
-          console.log('date', valueInput.value);
+          const value = serializeValue(new Date(valueInput.value), fieldDef);
+          const op = valueToPredicateOp(selectedOp);
+          const predicate = { field: selectedField, [op]: value };
+          state.and[0] = predicate;
+          menu.setAttribute('data-state', JSON.stringify(state));
         };
       }
     }
