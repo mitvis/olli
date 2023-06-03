@@ -8,6 +8,7 @@
  *           for a tree being used as a file viewer
  */
 
+import { openSelectionDialog, openTableDialog } from '../Render/Dialog';
 import { ElaboratedOlliNode } from '../Structure/Types';
 import { OlliRuntime } from './OlliRuntime';
 
@@ -145,11 +146,11 @@ export class OlliRuntimeTreeItem {
         break;
       case 't':
         if ('predicate' in this.olliNode || this.olliNode.nodeType === 'root') {
-          this.tree.callbacks.onTable(this.olliNode);
+          openTableDialog(this.olliNode, this.tree);
         }
         break;
       case 'f':
-        this.tree.callbacks.onSelection();
+        openSelectionDialog(this.tree);
         break;
     }
 

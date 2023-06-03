@@ -93,7 +93,7 @@ function openDialog(dialog: HTMLElement, renderContainer: HTMLElement) {
   });
 }
 
-export function openTableDialog(olliNode: ElaboratedOlliNode, tree: OlliRuntime, renderContainer: HTMLElement) {
+export function openTableDialog(olliNode: ElaboratedOlliNode, tree: OlliRuntime) {
   const olliSpec = tree.olliSpec;
   const table = renderTable(
     selectionTest(olliSpec.data, olliNode.fullPredicate),
@@ -101,10 +101,10 @@ export function openTableDialog(olliNode: ElaboratedOlliNode, tree: OlliRuntime,
   );
   const dialog = makeDialog(tree, 'Table View', predicateToDescription(olliNode.fullPredicate), table);
 
-  openDialog(dialog, renderContainer);
+  openDialog(dialog, tree.renderContainer);
 }
 
-export function openSelectionDialog(tree: OlliRuntime, renderContainer: HTMLElement) {
+export function openSelectionDialog(tree: OlliRuntime) {
   const menu = makeSelectionMenu(tree.olliSpec);
 
   const onOk = () => {
@@ -113,5 +113,5 @@ export function openSelectionDialog(tree: OlliRuntime, renderContainer: HTMLElem
 
   const dialog = makeDialog(tree, 'Filter Menu', 'Define a custom filter.', menu, { onOk });
 
-  openDialog(dialog, renderContainer);
+  openDialog(dialog, tree.renderContainer);
 }

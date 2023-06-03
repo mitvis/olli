@@ -3,7 +3,8 @@ import { ElaboratedOlliNode } from './Structure/Types';
 import { OlliRuntime, TreeCallbacks } from './Runtime/OlliRuntime';
 import { updateGlobalStateOnInitialRender } from './util/globalState';
 import { elaborateSpec } from './util/elaborate';
-import { openSelectionDialog, openTableDialog } from './Render/Dialog';
+import { LogicalComposition } from 'vega-lite/src/logical';
+import { FieldPredicate } from 'vega-lite/src/predicate';
 
 export * from './Types';
 export * from './Structure/Types';
@@ -11,6 +12,7 @@ export * from './util/types';
 
 export type OlliConfigOptions = {
   onFocus?: (elem: HTMLElement, olliNode: ElaboratedOlliNode) => void;
+  onSelection?: (predicate: LogicalComposition<FieldPredicate>) => void;
 };
 
 export function olli(olliSpec: OlliSpec, config?: OlliConfigOptions): HTMLElement {
@@ -19,17 +21,12 @@ export function olli(olliSpec: OlliSpec, config?: OlliConfigOptions): HTMLElemen
   const renderContainer: HTMLElement = document.createElement('div');
   renderContainer.classList.add('olli-vis');
 
-  const treeConfig: TreeCallbacks = {
+  const treeCallbacks: TreeCallbacks = {
     onFocus: config?.onFocus,
-    onTable: (node: ElaboratedOlliNode) => {
-      openTableDialog(node, t, renderContainer);
-    },
-    onSelection: () => {
-      openSelectionDialog(t, renderContainer);
-    },
+    onSelection: config?.onSelection,
   };
 
-  const t = new OlliRuntime(olliSpec, renderContainer, treeConfig);
+  const t = new OlliRuntime(olliSpec, renderContainer, treeCallbacks);
   t.init();
   updateGlobalStateOnInitialRender(t);
 

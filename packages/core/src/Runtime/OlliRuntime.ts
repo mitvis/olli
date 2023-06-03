@@ -7,7 +7,7 @@ import { OlliRuntimeTreeItem } from './OlliRuntimeTreeItem';
 import { olliSpecToTree, treeToNodeLookup } from '../Structure';
 import { generateDescriptions } from '../Description';
 import { renderTree } from '../Render/TreeView';
-import { LogicalAnd } from 'vega-lite/src/logical';
+import { LogicalAnd, LogicalComposition } from 'vega-lite/src/logical';
 import { FieldPredicate } from 'vega-lite/src/predicate';
 import { selectionTest } from '../util/selection';
 /*
@@ -22,8 +22,7 @@ import { selectionTest } from '../util/selection';
 
 export interface TreeCallbacks {
   onFocus?: (el: HTMLElement, olliNode: ElaboratedOlliNode) => void;
-  onTable: (olliNode: ElaboratedOlliNode) => void;
-  onSelection: () => void;
+  onSelection?: (predicate: LogicalComposition<FieldPredicate>) => void;
 }
 
 export class OlliRuntime {
@@ -36,10 +35,10 @@ export class OlliRuntime {
   lastFocusedTreeItem: OlliRuntimeTreeItem;
   callbacks: TreeCallbacks;
 
-  constructor(olliSpec: OlliSpec, renderContainer: HTMLElement, config: TreeCallbacks) {
+  constructor(olliSpec: OlliSpec, renderContainer: HTMLElement, callbacks: TreeCallbacks) {
     this.olliSpec = olliSpec;
     this.renderContainer = renderContainer;
-    this.callbacks = config;
+    this.callbacks = callbacks;
     this.treeItems = [];
   }
 
@@ -126,6 +125,9 @@ export class OlliRuntime {
           this.setFocusToItem(this.rootTreeItem);
         }
       }
+    }
+    if (this.callbacks?.onSelection) {
+      this.callbacks.onSelection(selection);
     }
   }
 
