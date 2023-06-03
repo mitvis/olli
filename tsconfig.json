@@ -1,6 +1,32 @@
 {
-  "extends": "./tsconfig.build.json",
+  "exclude": [
+    "node_modules",
+    "./packages/*/dist"
+  ],
   "include": [
-      "./packages/*/**.ts"
-  ]
+    "./packages/*/src",
+    "./packages/*/src/**/*"
+  ],
+  "compilerOptions": {
+    "target": "ES2015",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext",
+      "es2015"
+    ],
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "composite": true
+  }
 }
