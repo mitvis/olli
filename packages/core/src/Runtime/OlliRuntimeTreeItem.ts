@@ -22,18 +22,18 @@ import { OlliRuntime } from './OlliRuntime';
  *       An element with the role=tree attribute
  */
 
-export class OlliRuntimeNode {
+export class OlliRuntimeTreeItem {
   tree: OlliRuntime;
   domNode: HTMLElement;
   olliNode: ElaboratedOlliNode;
   isExpandable: boolean;
   inGroup: boolean;
 
-  parent?: OlliRuntimeNode;
-  children: OlliRuntimeNode[];
-  lastVisitedChild?: OlliRuntimeNode;
+  parent?: OlliRuntimeTreeItem;
+  children: OlliRuntimeTreeItem[];
+  lastVisitedChild?: OlliRuntimeTreeItem;
 
-  constructor(node: HTMLElement, treeObj: OlliRuntime, olliNode: ElaboratedOlliNode, parent?: OlliRuntimeNode) {
+  constructor(node: HTMLElement, treeObj: OlliRuntime, olliNode: ElaboratedOlliNode, parent?: OlliRuntimeTreeItem) {
     node.tabIndex = -1;
     this.tree = treeObj;
     this.domNode = node;

@@ -3,7 +3,7 @@ import { ElaboratedOlliNode, OlliNodeLookup } from '../Structure/Types';
 import { OlliNodeType } from '../Structure/Types';
 import { OlliSpec } from '../Types';
 import { setOlliGlobalState } from '../util/globalState';
-import { OlliRuntimeNode } from './OlliRuntimeNode';
+import { OlliRuntimeTreeItem } from './OlliRuntimeTreeItem';
 import { olliSpecToTree, treeToNodeLookup } from '../Structure';
 import { generateDescriptions } from '../Description';
 import { renderTree } from '../Render/TreeView';
@@ -30,9 +30,9 @@ export class OlliRuntime {
   renderContainer: HTMLElement;
   rootDomNode: HTMLElement;
   olliNodeLookup: OlliNodeLookup;
-  treeItems: OlliRuntimeNode[];
-  rootTreeItem: OlliRuntimeNode;
-  lastFocusedTreeItem: OlliRuntimeNode;
+  treeItems: OlliRuntimeTreeItem[];
+  rootTreeItem: OlliRuntimeTreeItem;
+  lastFocusedTreeItem: OlliRuntimeTreeItem;
   callbacks: TreeCallbacks;
 
   constructor(olliSpec: OlliSpec, renderContainer: HTMLElement, config: TreeCallbacks) {
@@ -43,13 +43,13 @@ export class OlliRuntime {
   }
 
   init(): void {
-    function findTreeitems(node, tree: OlliRuntime, lookup: OlliNodeLookup, group: OlliRuntimeNode | undefined) {
+    function findTreeitems(node, tree: OlliRuntime, lookup: OlliNodeLookup, group: OlliRuntimeTreeItem | undefined) {
       let elem = node.firstElementChild;
       let ti = group;
 
       while (elem) {
         if (elem.tagName.toLowerCase() === 'li') {
-          ti = new OlliRuntimeNode(elem, tree, lookup[elem.id], group);
+          ti = new OlliRuntimeTreeItem(elem, tree, lookup[elem.id], group);
           ti.init();
           if (group) {
             group.children.push(ti);
@@ -126,7 +126,7 @@ export class OlliRuntime {
     }
   }
 
-  setFocusToItem(treeitem: OlliRuntimeNode) {
+  setFocusToItem(treeitem: OlliRuntimeTreeItem) {
     for (var i = 0; i < this.treeItems.length; i++) {
       var ti = this.treeItems[i];
 
@@ -148,7 +148,7 @@ export class OlliRuntime {
     }
   }
 
-  setFocusToNextItem(currentItem: OlliRuntimeNode) {
+  setFocusToNextItem(currentItem: OlliRuntimeTreeItem) {
     if (currentItem.parent) {
       const nodeIndex = currentItem.parent.children.indexOf(currentItem);
       if (nodeIndex < currentItem.parent.children.length - 1) {
@@ -157,7 +157,7 @@ export class OlliRuntime {
     }
   }
 
-  setFocusToPreviousItem(currentItem: OlliRuntimeNode) {
+  setFocusToPreviousItem(currentItem: OlliRuntimeTreeItem) {
     if (currentItem.parent) {
       let nodeIndex = currentItem.parent.children.indexOf(currentItem);
       if (nodeIndex > 0) {
@@ -166,7 +166,7 @@ export class OlliRuntime {
     }
   }
 
-  setFocusToNextLayer(currentItem: OlliRuntimeNode) {
+  setFocusToNextLayer(currentItem: OlliRuntimeTreeItem) {
     if (currentItem.lastVisitedChild) {
       this.setFocusToItem(currentItem.lastVisitedChild);
     } else {
@@ -174,26 +174,26 @@ export class OlliRuntime {
     }
   }
 
-  setFocusToParentItem(currentItem: OlliRuntimeNode) {
+  setFocusToParentItem(currentItem: OlliRuntimeTreeItem) {
     if (currentItem.parent) {
       currentItem.parent.lastVisitedChild = currentItem;
       this.setFocusToItem(currentItem.parent);
     }
   }
 
-  setFocusToFirstInLayer(currentItem: OlliRuntimeNode) {
+  setFocusToFirstInLayer(currentItem: OlliRuntimeTreeItem) {
     if (currentItem.parent) {
       this.setFocusToItem(currentItem.parent.children[0]);
     }
   }
 
-  setFocusToLastInLayer(currentItem: OlliRuntimeNode) {
+  setFocusToLastInLayer(currentItem: OlliRuntimeTreeItem) {
     if (currentItem.parent) {
       this.setFocusToItem(currentItem.parent.children[currentItem.parent.children.length - 1]);
     }
   }
 
-  expandTreeItem(currentItem: OlliRuntimeNode) {
+  expandTreeItem(currentItem: OlliRuntimeTreeItem) {
     if (currentItem.isExpandable) {
       if (currentItem.parent) {
         currentItem.parent.children.forEach((item) => {
@@ -206,8 +206,8 @@ export class OlliRuntime {
     }
   }
 
-  collapseTreeItem(item: OlliRuntimeNode): void {
-    let group: OlliRuntimeNode | undefined;
+  collapseTreeItem(item: OlliRuntimeTreeItem): void {
+    let group: OlliRuntimeTreeItem | undefined;
 
     if (item.isExpanded()) {
       group = item;
@@ -220,7 +220,7 @@ export class OlliRuntime {
     }
   }
 
-  expandParents(node: OlliRuntimeNode) {
+  expandParents(node: OlliRuntimeTreeItem) {
     if (node.parent) {
       if (node.parent.isExpandable && !node.parent.isExpanded()) {
         this.expandParents(node.parent);
@@ -229,7 +229,7 @@ export class OlliRuntime {
     }
   }
 
-  collapseChildren(node: OlliRuntimeNode) {
+  collapseChildren(node: OlliRuntimeTreeItem) {
     node?.children?.forEach((child) => {
       if (child.isExpandable && child.isExpanded()) {
         this.collapseChildren(child);
@@ -238,8 +238,8 @@ export class OlliRuntime {
     });
   }
 
-  focusOnNodeType(nodeType: OlliNodeType, currentItem: OlliRuntimeNode) {
-    let iterItem: OlliRuntimeNode = currentItem;
+  focusOnNodeType(nodeType: OlliNodeType, currentItem: OlliRuntimeTreeItem) {
+    let iterItem: OlliRuntimeTreeItem = currentItem;
     while (iterItem) {
       if (iterItem.olliNode.nodeType === nodeType) {
         this.setFocusToItem(iterItem);
