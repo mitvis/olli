@@ -20,10 +20,6 @@ export type OlliConfigOptions = {
 export function olli(olliSpec: OlliSpec, config?: OlliConfigOptions): HTMLElement {
   olliSpec = elaborateSpec(olliSpec);
 
-  if (olliSpec.selection) {
-    olliSpec.data = selectionTest(olliSpec.data, olliSpec.selection);
-  }
-
   const tree: ElaboratedOlliNode = olliSpecToTree(olliSpec);
   const lookup = treeToNodeLookup(tree);
 
