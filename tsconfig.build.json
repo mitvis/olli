@@ -24,6 +24,7 @@
       "declarationMap": true,
       "sourceMap": true,
       "composite": true,
+      "rootDir": ".",
       "paths": {
           "olli": ["./packages/core/"],
           "olli-adapters": ["./packages/adapters/"]

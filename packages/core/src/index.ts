@@ -7,6 +7,7 @@ import { updateGlobalStateOnRender } from './util/globalState';
 import { generateDescriptions } from './Description';
 import { elaborateSpec } from './util/elaborate';
 import { openTableDialog } from './Render/Dialog';
+import { selectionTest } from './util/selection';
 
 export * from './Types';
 export * from './Structure/Types';
@@ -18,6 +19,11 @@ export type OlliConfigOptions = {
 
 export function olli(olliSpec: OlliSpec, config?: OlliConfigOptions): HTMLElement {
   olliSpec = elaborateSpec(olliSpec);
+
+  if (olliSpec.selection) {
+    olliSpec.data = selectionTest(olliSpec.data, olliSpec.selection);
+  }
+
   const tree: ElaboratedOlliNode = olliSpecToTree(olliSpec);
   const lookup = treeToNodeLookup(tree);
 

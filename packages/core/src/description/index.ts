@@ -26,11 +26,11 @@ export function nodeToDescription(node: ElaboratedOlliNode, olliSpec: OlliSpec):
   const chartType = () => {
     if (olliSpec.mark) {
       if (olliSpec.mark === 'point' && olliSpec.axes?.length === 2) {
-        if (olliSpec.axes.every((a) => getFieldDef(a.field, olliSpec).type === 'quantitative')) {
+        if (olliSpec.axes.every((a) => getFieldDef(a.field, olliSpec.fields).type === 'quantitative')) {
           return 'scatterplot';
         } else if (
-          olliSpec.axes.find((a) => getFieldDef(a.field, olliSpec).type === 'quantitative') &&
-          !olliSpec.axes.find((a) => getFieldDef(a.field, olliSpec).type === 'temporal')
+          olliSpec.axes.find((a) => getFieldDef(a.field, olliSpec.fields).type === 'quantitative') &&
+          !olliSpec.axes.find((a) => getFieldDef(a.field, olliSpec.fields).type === 'temporal')
         ) {
           return 'dotplot';
         }
@@ -78,13 +78,13 @@ export function nodeToDescription(node: ElaboratedOlliNode, olliSpec: OlliSpec):
     case 'legend':
       const guideType = node.nodeType === 'xAxis' ? 'X-axis' : node.nodeType === 'yAxis' ? 'Y-axis' : 'Legend';
       if ('groupby' in node) {
-        const fieldDef = getFieldDef(node.groupby, olliSpec);
+        const fieldDef = getFieldDef(node.groupby, olliSpec.fields);
         let first, last;
         if (fieldDef.type === 'quantitative' || fieldDef.type === 'temporal') {
           const guide =
             olliSpec.axes?.find((axis) => axis.field === node.groupby) ||
             olliSpec.legends?.find((legend) => legend.field === node.groupby);
-          const bins = getBins(node.groupby, olliSpec);
+          const bins = getBins(node.groupby, olliSpec.data, olliSpec.fields);
           first = fmtValue(bins[0][0]);
           last = fmtValue(bins[bins.length - 1][1]);
           return `${guideType} titled ${node.groupby} for a ${
