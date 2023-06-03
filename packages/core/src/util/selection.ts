@@ -59,10 +59,10 @@ export function predicateToSelectionStore(predicate: LogicalComposition<FieldPre
       const and = predicate.and;
       const stores = and.map((p) => predicateToSelectionStore(p));
       const tuple_fields = stores.flatMap((store) => {
-        return store.fields;
+        return store?.fields || [];
       });
       const tuple_values = stores.flatMap((store) => {
-        return store.values;
+        return store?.values || [];
       });
       return {
         unit: '',

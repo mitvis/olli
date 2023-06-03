@@ -8,8 +8,8 @@
  *           for a tree being used as a file viewer
  */
 
-import { ElaboratedOlliNode } from '../../Structure/Types';
-import { Tree } from './Tree';
+import { ElaboratedOlliNode } from '../Structure/Types';
+import { OlliRuntime } from './OlliRuntime';
 
 /*
  *   @constructor
@@ -22,18 +22,18 @@ import { Tree } from './Tree';
  *       An element with the role=tree attribute
  */
 
-export class TreeItem {
-  tree: Tree;
+export class OlliRuntimeNode {
+  tree: OlliRuntime;
   domNode: HTMLElement;
   olliNode: ElaboratedOlliNode;
   isExpandable: boolean;
   inGroup: boolean;
 
-  parent?: TreeItem;
-  children: TreeItem[];
-  lastVisitedChild?: TreeItem;
+  parent?: OlliRuntimeNode;
+  children: OlliRuntimeNode[];
+  lastVisitedChild?: OlliRuntimeNode;
 
-  constructor(node: HTMLElement, treeObj: Tree, olliNode: ElaboratedOlliNode, parent?: TreeItem) {
+  constructor(node: HTMLElement, treeObj: OlliRuntime, olliNode: ElaboratedOlliNode, parent?: OlliRuntimeNode) {
     node.tabIndex = -1;
     this.tree = treeObj;
     this.domNode = node;
@@ -142,18 +142,6 @@ export class TreeItem {
         break;
       case 'l':
         this.tree.focusOnNodeType('legend', this);
-        break;
-      case 'w':
-        this.tree.setFocusGridUp(this);
-        break;
-      case 'a':
-        this.tree.setFocusGridLeft(this);
-        break;
-      case 's':
-        this.tree.setFocusGridDown(this);
-        break;
-      case 'd':
-        this.tree.setFocusGridRight(this);
         break;
       case 't':
         if ('predicate' in this.olliNode || this.olliNode.nodeType === 'root') {

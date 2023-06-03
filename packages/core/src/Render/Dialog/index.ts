@@ -3,11 +3,11 @@ import { ElaboratedOlliNode } from '../../Structure/Types';
 import { OlliSpec } from '../../Types';
 import { selectionTest } from '../../util/selection';
 import { renderTable } from '../Table';
-import { Tree } from '../TreeView/Tree';
+import { OlliRuntime } from '../../Runtime/OlliRuntime';
 import './dialog.css';
 
 export function makeDialog(
-  tree: Tree,
+  tree: OlliRuntime,
   title: string,
   instructions: string,
   content: HTMLElement,
@@ -62,12 +62,8 @@ export function makeDialog(
   return dialog;
 }
 
-export function openTableDialog(
-  olliNode: ElaboratedOlliNode,
-  olliSpec: OlliSpec,
-  tree: Tree,
-  renderContainer: HTMLElement
-) {
+export function openTableDialog(olliNode: ElaboratedOlliNode, tree: OlliRuntime, renderContainer: HTMLElement) {
+  const olliSpec = tree.olliSpec;
   const table = renderTable(
     selectionTest(olliSpec.data, olliNode.fullPredicate),
     olliSpec.fields.map((f) => f.field)
