@@ -56,8 +56,13 @@ export const updateGlobalStateOnInitialRender = (t: OlliRuntime) => {
                 }
               }
             } else {
-              // we are not focused on the root of the tree, so jump there
-              currentInstance.setFocusToItem(currentInstance.rootTreeItem);
+              if (document.activeElement === currentInstance.lastFocusedTreeItem.domNode) {
+                // we are not focused on the root of the tree, so jump there
+                currentInstance.setFocusToItem(currentInstance.rootTreeItem);
+              } else {
+                // we are focused somewhere else, so jump back to the last focused item
+                currentInstance.setFocusToItem(currentInstance.lastFocusedTreeItem);
+              }
             }
             break;
         }
