@@ -48,6 +48,10 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
         fieldDef.field = getFieldFromEncoding(encoding);
         fieldDef.type = encoding.type || typeInference(data, fieldDef.field);
 
+        if (!fieldDef.field) {
+          return;
+        }
+
         if (['row', 'column', 'facet'].includes(channel)) {
           // add facet field
           olliSpec.facet = fieldDef.field;
@@ -70,6 +74,7 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
           });
         } else {
           // TODO: handle other channels
+          return;
         }
 
         // add field to list of field defs
