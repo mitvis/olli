@@ -1,4 +1,4 @@
-import { LogicalComposition } from 'vega-lite/src/logical';
+import { LogicalAnd } from 'vega-lite/src/logical';
 import { OlliNode } from './Structure/Types';
 import { FieldPredicate } from 'vega-lite/src/predicate';
 
@@ -27,7 +27,7 @@ export interface OlliSpec {
   legends?: OlliLegend[];
   facet?: string;
   // an optional initial top level selection query
-  selection?: LogicalComposition<FieldPredicate>;
+  selection?: LogicalAnd<FieldPredicate> | FieldPredicate;
   // additional optional info used for description
   title?: string;
   description?: string;

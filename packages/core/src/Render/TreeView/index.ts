@@ -24,6 +24,7 @@ export function renderTree(node: ElaboratedOlliNode): HTMLElement {
     item.setAttribute('id', node.id);
 
     const label = document.createElement('span');
+    label.innerText = node.description;
     item.appendChild(label);
 
     if (node.children.length) {

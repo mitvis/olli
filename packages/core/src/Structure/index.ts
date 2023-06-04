@@ -1,7 +1,7 @@
 import { LogicalAnd } from 'vega-lite/src/logical';
 import { FieldPredicate } from 'vega-lite/src/predicate';
 import { OlliSpec, OlliDataset } from '../Types';
-import { fieldToPredicates } from '../util/selection';
+import { fieldToPredicates, selectionTest } from '../util/selection';
 import { ElaboratedOlliNode, OlliNode, OlliNodeLookup, OlliNodeType } from './Types';
 
 export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
@@ -51,7 +51,7 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
     return olliNodes.map((node, idx) => {
       if ('groupby' in node) {
         const nodeType = nodeTypeFromGroupField(node.groupby, olliSpec);
-        const childPreds = fieldToPredicates(node.groupby, olliSpec);
+        const childPreds = fieldToPredicates(node.groupby, data, olliSpec.fields);
 
         return {
           id: `${idPrefix}-${idx}`,
@@ -93,7 +93,9 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
 
   const nodes = Array.isArray(olliSpec.structure) ? olliSpec.structure : [olliSpec.structure];
 
-  const tree = ensureFirstLayerHasOneRoot(elaborateOlliNodes(nodes, olliSpec.data, { and: [] }, namespace));
+  const data = olliSpec.selection ? selectionTest(olliSpec.data, olliSpec.selection) : olliSpec.data;
+
+  const tree = ensureFirstLayerHasOneRoot(elaborateOlliNodes(nodes, data, { and: [] }, namespace));
   addParentRefs(tree);
   return tree;
 }

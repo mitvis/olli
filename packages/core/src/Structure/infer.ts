@@ -54,7 +54,7 @@ export function inferStructure(olliSpec: OlliSpec): OlliNode | OlliNode[] {
     }
   } else if (olliSpec.mark === 'bar') {
     if (olliSpec.axes?.length) {
-      const quantAxis = olliSpec.axes?.find((axis) => getFieldDef(axis.field, olliSpec).type === 'quantitative');
+      const quantAxis = olliSpec.axes?.find((axis) => getFieldDef(axis.field, olliSpec.fields).type === 'quantitative');
       return nodesFromGuides(
         olliSpec.axes.filter((axis) => axis !== quantAxis),
         olliSpec.legends

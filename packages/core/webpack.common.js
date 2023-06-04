@@ -20,7 +20,7 @@ module.exports = {
   },
   output: {
     filename: 'olli.js',
-    path: path.resolve('./', 'dist'),
+    path: path.resolve(__dirname, 'dist'),
     library: {
       type: 'umd',
     },

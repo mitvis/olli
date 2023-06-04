@@ -2,16 +2,16 @@ import { bin } from 'vega-statistics';
 import { LogicalComposition } from 'vega-lite/src/logical';
 import { FieldPredicate } from 'vega-lite/src/predicate';
 import { getDomain, getFieldDef } from './data';
-import { OlliSpec } from '../Types';
+import { OlliDataset, OlliFieldDef } from '../Types';
 import * as d3 from 'd3';
 
 export function getBins(
   field: string,
-  olliSpec: OlliSpec,
+  data: OlliDataset,
+  fields: OlliFieldDef[],
   domainFilter?: LogicalComposition<FieldPredicate>
 ): [number, number][] {
-  const data = olliSpec.data;
-  const fieldDef = getFieldDef(field, olliSpec);
+  const fieldDef = getFieldDef(field, fields);
   const domain = getDomain(field, data, domainFilter);
   const bins = [];
   let ticks;
@@ -44,8 +44,13 @@ export function getBins(
   return bins;
 }
 
-export function getBinPredicates(field: string, olliSpec: OlliSpec, domainFilter?: LogicalComposition<FieldPredicate>) {
-  const bins = getBins(field, olliSpec, domainFilter);
+export function getBinPredicates(
+  field: string,
+  data: OlliDataset,
+  fields: OlliFieldDef[],
+  domainFilter?: LogicalComposition<FieldPredicate>
+) {
+  const bins = getBins(field, data, fields, domainFilter);
   return bins.map((bin, idx) => {
     return {
       field: field,

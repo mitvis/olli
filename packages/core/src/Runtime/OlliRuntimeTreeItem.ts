@@ -8,8 +8,9 @@
  *           for a tree being used as a file viewer
  */
 
-import { ElaboratedOlliNode } from '../../Structure/Types';
-import { Tree } from './Tree';
+import { openSelectionDialog, openTableDialog } from '../Render/Dialog';
+import { ElaboratedOlliNode } from '../Structure/Types';
+import { OlliRuntime } from './OlliRuntime';
 
 /*
  *   @constructor
@@ -22,18 +23,18 @@ import { Tree } from './Tree';
  *       An element with the role=tree attribute
  */
 
-export class TreeItem {
-  tree: Tree;
+export class OlliRuntimeTreeItem {
+  tree: OlliRuntime;
   domNode: HTMLElement;
   olliNode: ElaboratedOlliNode;
   isExpandable: boolean;
   inGroup: boolean;
 
-  parent?: TreeItem;
-  children: TreeItem[];
-  lastVisitedChild?: TreeItem;
+  parent?: OlliRuntimeTreeItem;
+  children: OlliRuntimeTreeItem[];
+  lastVisitedChild?: OlliRuntimeTreeItem;
 
-  constructor(node: HTMLElement, treeObj: Tree, olliNode: ElaboratedOlliNode, parent?: TreeItem) {
+  constructor(node: HTMLElement, treeObj: OlliRuntime, olliNode: ElaboratedOlliNode, parent?: OlliRuntimeTreeItem) {
     node.tabIndex = -1;
     this.tree = treeObj;
     this.domNode = node;
@@ -104,11 +105,8 @@ export class TreeItem {
         }
         break;
       case 'ArrowDown':
-        if (this.children.length > 0) {
-          if (this.isExpandable) {
-            this.tree.expandTreeItem(this);
-            this.tree.setFocusToNextLayer(this);
-          }
+        if (this.children.length > 0 && this.isExpandable) {
+          this.tree.setFocusToNextLayer(this);
         }
         break;
       case 'Escape':
@@ -143,22 +141,13 @@ export class TreeItem {
       case 'l':
         this.tree.focusOnNodeType('legend', this);
         break;
-      case 'w':
-        this.tree.setFocusGridUp(this);
-        break;
-      case 'a':
-        this.tree.setFocusGridLeft(this);
-        break;
-      case 's':
-        this.tree.setFocusGridDown(this);
-        break;
-      case 'd':
-        this.tree.setFocusGridRight(this);
-        break;
       case 't':
         if ('predicate' in this.olliNode || this.olliNode.nodeType === 'root') {
-          this.tree.callbacks.onTable(this.olliNode);
+          openTableDialog(this.olliNode, this.tree);
         }
+        break;
+      case 'f':
+        openSelectionDialog(this.tree);
         break;
     }
 

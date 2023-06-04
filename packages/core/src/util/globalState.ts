@@ -1,10 +1,10 @@
-import { Tree } from '../Render/TreeView/Tree';
+import { OlliRuntime } from '../Runtime/OlliRuntime';
 import { nodeIsTextInput } from './events';
 
 export interface OlliGlobalState {
   keyListenerAttached: boolean;
-  lastVisitedTree: Tree;
-  treesOnPage: Tree[];
+  lastVisitedInstance: OlliRuntime;
+  instancesOnPage: OlliRuntime[];
 }
 
 export const getOlliGlobalState = (): OlliGlobalState => {
@@ -21,43 +21,48 @@ export const setOlliGlobalState = (state: Partial<OlliGlobalState>) => {
   };
 };
 
-export const updateGlobalStateOnRender = (t: Tree) => {
+export const updateGlobalStateOnInitialRender = (t: OlliRuntime) => {
   // append t to list of trees on page
   setOlliGlobalState({
-    treesOnPage: (getOlliGlobalState().treesOnPage || []).concat([t]),
+    instancesOnPage: (getOlliGlobalState().instancesOnPage || []).concat([t]),
   });
 
   // add key listener if not already attached
   if (!getOlliGlobalState().keyListenerAttached) {
     document.addEventListener('keydown', (e: any) => {
       if (!nodeIsTextInput(document.activeElement)) {
-        const { lastVisitedTree, treesOnPage } = getOlliGlobalState();
+        const { lastVisitedInstance, instancesOnPage } = getOlliGlobalState();
         switch (e.code) {
           case 'KeyO':
-            const currentTree = lastVisitedTree || treesOnPage[0];
-            if (currentTree.domNode.firstElementChild.getAttribute('aria-selected') === 'true') {
+            const currentInstance = lastVisitedInstance || instancesOnPage[0];
+            if (currentInstance.rootDomNode.firstElementChild.getAttribute('aria-selected') === 'true') {
               // we are currently focusing on the root of this tree
-              const idx = treesOnPage.indexOf(currentTree);
+              const idx = instancesOnPage.indexOf(currentInstance);
               if (e.shiftKey) {
                 // shift + t means jump to the prev one
                 if (idx > 0) {
-                  const prev = treesOnPage[idx - 1];
+                  const prev = instancesOnPage[idx - 1];
                   prev.setFocusToItem(prev.rootTreeItem);
                 } else {
                   // TODO play some sort of earcon / notification to indicate you are at a boundary
                 }
               } else {
                 // jump to the next one
-                if (idx < treesOnPage.length - 1) {
-                  const next = treesOnPage[idx + 1];
+                if (idx < instancesOnPage.length - 1) {
+                  const next = instancesOnPage[idx + 1];
                   next.setFocusToItem(next.rootTreeItem);
                 } else {
                   // TODO play some sort of earcon / notification to indicate you are at a boundary
                 }
               }
             } else {
-              // we are not focused on the root of the tree, so jump there
-              currentTree.setFocusToItem(currentTree.rootTreeItem);
+              if (document.activeElement === currentInstance.lastFocusedTreeItem.domNode) {
+                // we are not focused on the root of the tree, so jump there
+                currentInstance.setFocusToItem(currentInstance.rootTreeItem);
+              } else {
+                // we are focused somewhere else, so jump back to the last focused item
+                currentInstance.setFocusToItem(currentInstance.lastFocusedTreeItem);
+              }
             }
             break;
         }

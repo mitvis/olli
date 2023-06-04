@@ -9,28 +9,29 @@ import { FieldPredicate } from 'vega-lite/src/predicate';
 import { LogicalComposition } from 'vega-lite/src/logical';
 
 export function generateDescriptions(olliSpec: OlliSpec, tree: ElaboratedOlliNode) {
+  const data = olliSpec.selection ? selectionTest(olliSpec.data, olliSpec.selection) : olliSpec.data;
   const queue = [tree];
   while (queue.length > 0) {
     const node = queue.shift();
     if (!node) {
       continue;
     }
-    node.description = nodeToDescription(node, olliSpec);
+    node.description = nodeToDescription(node, data, olliSpec);
     queue.push(...node.children);
   }
 }
 
-export function nodeToDescription(node: ElaboratedOlliNode, olliSpec: OlliSpec): string {
+export function nodeToDescription(node: ElaboratedOlliNode, data, olliSpec: OlliSpec): string {
   const index = `${(node.parent?.children.indexOf(node) || 0) + 1} of ${(node.parent?.children || []).length}. `;
   const description = olliSpec.description?.concat(' ') || '';
   const chartType = () => {
     if (olliSpec.mark) {
       if (olliSpec.mark === 'point' && olliSpec.axes?.length === 2) {
-        if (olliSpec.axes.every((a) => getFieldDef(a.field, olliSpec).type === 'quantitative')) {
+        if (olliSpec.axes.every((a) => getFieldDef(a.field, olliSpec.fields).type === 'quantitative')) {
           return 'scatterplot';
         } else if (
-          olliSpec.axes.find((a) => getFieldDef(a.field, olliSpec).type === 'quantitative') &&
-          !olliSpec.axes.find((a) => getFieldDef(a.field, olliSpec).type === 'temporal')
+          olliSpec.axes.find((a) => getFieldDef(a.field, olliSpec.fields).type === 'quantitative') &&
+          !olliSpec.axes.find((a) => getFieldDef(a.field, olliSpec.fields).type === 'temporal')
         ) {
           return 'dotplot';
         }
@@ -78,20 +79,20 @@ export function nodeToDescription(node: ElaboratedOlliNode, olliSpec: OlliSpec):
     case 'legend':
       const guideType = node.nodeType === 'xAxis' ? 'X-axis' : node.nodeType === 'yAxis' ? 'Y-axis' : 'Legend';
       if ('groupby' in node) {
-        const fieldDef = getFieldDef(node.groupby, olliSpec);
+        const fieldDef = getFieldDef(node.groupby, olliSpec.fields);
         let first, last;
         if (fieldDef.type === 'quantitative' || fieldDef.type === 'temporal') {
           const guide =
             olliSpec.axes?.find((axis) => axis.field === node.groupby) ||
             olliSpec.legends?.find((legend) => legend.field === node.groupby);
-          const bins = getBins(node.groupby, olliSpec);
+          const bins = getBins(node.groupby, data, olliSpec.fields);
           first = fmtValue(bins[0][0]);
           last = fmtValue(bins[bins.length - 1][1]);
           return `${guideType} titled ${node.groupby} for a ${
             'scaleType' in guide ? guide.scaleType || fieldDef.type : fieldDef.type
           } scale with values from ${first} to ${last}.`;
         } else {
-          const domain = getDomain(node.groupby, olliSpec.data);
+          const domain = getDomain(node.groupby, data);
           first = fmtValue(domain[0]);
           last = fmtValue(domain[domain.length - 1]);
           return `${guideType} titled ${node.groupby} for a ${fieldDef.type} scale with ${domain.length} values from ${first} to ${last}.`;
@@ -101,7 +102,7 @@ export function nodeToDescription(node: ElaboratedOlliNode, olliSpec: OlliSpec):
     case 'filteredData':
       const instructions = node.children.length ? '' : ' Press t to open table.';
       if ('predicate' in node) {
-        const selection = selectionTest(olliSpec.data, node.fullPredicate);
+        const selection = selectionTest(data, node.fullPredicate);
         if ('range' in node.predicate) {
           return `${index}${fmtValue(node.predicate.range[0])} to ${fmtValue(node.predicate.range[1])}. ${
             selection.length

@@ -19,6 +19,6 @@ export function getDomain(
   return [...unique_vals].filter((x) => x !== null && x !== undefined).sort((a: any, b: any) => a - b);
 }
 
-export function getFieldDef(field: string, olliSpec: OlliSpec): OlliFieldDef {
-  return olliSpec.fields.find((f) => f.field === field);
+export function getFieldDef(field: string, fields: OlliFieldDef[]): OlliFieldDef {
+  return fields.find((f) => f.field === field);
 }
