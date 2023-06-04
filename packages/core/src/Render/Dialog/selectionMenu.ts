@@ -139,6 +139,7 @@ export function makeSelectionMenu(olliSpec: OlliSpec): HTMLElement {
     const predicate = state.and[0] as FieldPredicate;
 
     const field = predicate.field;
+    const fieldDef = getFieldDef(field, olliSpec.fields);
     const op = Object.keys(predicate).find((key) => key !== 'field');
     const value = predicate[op];
     fieldSelect.value = field;
@@ -149,14 +150,29 @@ export function makeSelectionMenu(olliSpec: OlliSpec): HTMLElement {
       const valueInput1 = value[0];
       const valueInput2 = value[1];
       const valueInputs = valueContainer.querySelectorAll('input');
-      valueInputs[0].value = valueInput1;
-      valueInputs[1].value = valueInput2;
+      if (fieldDef.type === 'temporal') {
+        const valueInputDate1 = new Date(value[0]);
+        valueInputDate1.setMinutes(valueInputDate1.getMinutes() - valueInputDate1.getTimezoneOffset());
+        valueInputs[0].value = valueInputDate1.toISOString().slice(0, 16);
+        const valueInputDate2 = new Date(value[1]);
+        valueInputDate2.setMinutes(valueInputDate2.getMinutes() - valueInputDate2.getTimezoneOffset());
+        valueInputs[1].value = valueInputDate2.toISOString().slice(0, 16);
+      } else {
+        valueInputs[0].value = valueInput1;
+        valueInputs[1].value = valueInput2;
+      }
     } else if (op === 'equal' && valueContainer.querySelector('select')) {
       const valueSelect = valueContainer.querySelector('select');
       valueSelect.value = value;
     } else {
       const valueInput = valueContainer.querySelector('input');
-      valueInput.value = value;
+      if (fieldDef.type === 'temporal') {
+        const valueInputDate = new Date(value);
+        valueInputDate.setMinutes(valueInputDate.getMinutes() - valueInputDate.getTimezoneOffset());
+        valueInput.value = valueInputDate.toISOString().slice(0, 16);
+      } else {
+        valueInput.value = value;
+      }
     }
   }
 

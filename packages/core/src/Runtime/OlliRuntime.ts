@@ -126,9 +126,6 @@ export class OlliRuntime {
         }
       }
     }
-    if (this.callbacks?.onSelection) {
-      this.callbacks.onSelection(selection);
-    }
   }
 
   setFocusToItem(treeitem: OlliRuntimeTreeItem) {

@@ -9,6 +9,7 @@ import { FieldPredicate } from 'vega-lite/src/predicate';
 export * from './Types';
 export * from './Structure/Types';
 export * from './util/types';
+export type { OlliGlobalState } from './util/globalState';
 
 export type OlliConfigOptions = {
   onFocus?: (elem: HTMLElement, olliNode: ElaboratedOlliNode) => void;

@@ -108,7 +108,11 @@ export function openSelectionDialog(tree: OlliRuntime) {
   const menu = makeSelectionMenu(tree.olliSpec);
 
   const onOk = () => {
-    tree.setSelection(JSON.parse(menu.getAttribute('data-state')));
+    const predicate = JSON.parse(menu.getAttribute('data-state'));
+    tree.setSelection(predicate);
+    if (tree.callbacks?.onSelection) {
+      tree.callbacks?.onSelection(predicate);
+    }
   };
 
   const dialog = makeDialog(tree, 'Filter Menu', 'Define a custom filter.', menu, { onOk });
