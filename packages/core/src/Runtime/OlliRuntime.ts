@@ -209,16 +209,8 @@ export class OlliRuntime {
   }
 
   collapseTreeItem(item: OlliRuntimeTreeItem): void {
-    let group: OlliRuntimeTreeItem | undefined;
-
-    if (item.isExpanded()) {
-      group = item;
-    } else if (item.parent) {
-      group = item.parent;
-    }
-
-    if (group) {
-      group.domNode.setAttribute('aria-expanded', 'false');
+    if (item && item.isExpanded()) {
+      item.domNode.setAttribute('aria-expanded', 'false');
     }
   }
 
@@ -238,6 +230,7 @@ export class OlliRuntime {
         this.collapseTreeItem(child);
       }
     });
+    this.collapseTreeItem(node);
   }
 
   focusOnNodeType(nodeType: OlliNodeType, currentItem: OlliRuntimeTreeItem) {

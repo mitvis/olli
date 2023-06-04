@@ -105,11 +105,8 @@ export class OlliRuntimeTreeItem {
         }
         break;
       case 'ArrowDown':
-        if (this.children.length > 0) {
-          if (this.isExpandable) {
-            this.tree.expandTreeItem(this);
-            this.tree.setFocusToNextLayer(this);
-          }
+        if (this.children.length > 0 && this.isExpandable) {
+          this.tree.setFocusToNextLayer(this);
         }
         break;
       case 'Escape':
