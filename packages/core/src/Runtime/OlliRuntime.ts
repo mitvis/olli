@@ -20,7 +20,7 @@ import { selectionTest } from '../util/selection';
  *           for a tree being used as a file viewer
  */
 
-export interface TreeCallbacks {
+export interface RuntimeCallbacks {
   onFocus?: (el: HTMLElement, olliNode: ElaboratedOlliNode) => void;
   onSelection?: (predicate: LogicalComposition<FieldPredicate>) => void;
 }
@@ -33,9 +33,9 @@ export class OlliRuntime {
   treeItems: OlliRuntimeTreeItem[];
   rootTreeItem: OlliRuntimeTreeItem;
   lastFocusedTreeItem: OlliRuntimeTreeItem;
-  callbacks: TreeCallbacks;
+  callbacks: RuntimeCallbacks;
 
-  constructor(olliSpec: OlliSpec, renderContainer: HTMLElement, callbacks: TreeCallbacks) {
+  constructor(olliSpec: OlliSpec, renderContainer: HTMLElement, callbacks: RuntimeCallbacks) {
     this.olliSpec = olliSpec;
     this.renderContainer = renderContainer;
     this.callbacks = callbacks;
