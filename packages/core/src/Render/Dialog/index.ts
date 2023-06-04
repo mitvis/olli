@@ -108,7 +108,7 @@ export function openSelectionDialog(tree: OlliRuntime) {
   const menu = makeSelectionMenu(tree.olliSpec);
 
   const onOk = () => {
-    const predicate = JSON.parse(menu.getAttribute('data-state'));
+    const predicate = { and: JSON.parse(menu.getAttribute('data-state')) };
     tree.setSelection(predicate);
     if (tree.callbacks?.onSelection) {
       tree.callbacks?.onSelection(predicate);

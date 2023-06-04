@@ -3,20 +3,94 @@ import { OlliSpec } from '../../Types';
 import { getDomain, getFieldDef } from '../../util/data';
 import { serializeValue } from '../../util/values';
 
-export function makeSelectionMenu(olliSpec: OlliSpec): HTMLElement {
-  const menu = document.createElement('div');
+// this would have been so much easier with some ui framework : \
 
+export function makeSelectionMenu(olliSpec: OlliSpec): HTMLElement {
+  const state: FieldPredicate[] = olliSpec.selection
+    ? 'and' in olliSpec.selection
+      ? (olliSpec.selection.and as FieldPredicate[])
+      : [olliSpec.selection]
+    : [];
+
+  const menu = document.createElement('div');
+  const container = document.createElement('div');
+
+  const predicateContainers = [];
+
+  // set initial values from olliSpec.selection
+  if (state.length) {
+    state.forEach((predicate, idx) => {
+      if (predicateContainers.length <= idx) {
+        predicateContainers.push(makePredicateContainer(menu, olliSpec, state, predicateContainers));
+      }
+      const predicateContainer = predicateContainers[idx];
+      setPredicateContainerFromState(predicateContainer, predicate, olliSpec);
+    });
+  }
+
+  container.replaceChildren(...predicateContainers);
+
+  const addButton = document.createElement('button');
+  addButton.innerText = 'Add condition';
+  addButton.onclick = () => {
+    predicateContainers.push(makePredicateContainer(menu, olliSpec, state, predicateContainers));
+    container.replaceChildren(...predicateContainers);
+  };
+
+  menu.replaceChildren(container, addButton);
+
+  menu.setAttribute('data-state', JSON.stringify(state));
+
+  return menu;
+}
+
+function predicateOpToValue(op) {
+  switch (op) {
+    case 'equal':
+      return '=';
+    case 'range':
+      return 'between';
+    case 'lt':
+      return '<';
+    case 'lte':
+      return '<=';
+    case 'gt':
+      return '>';
+    case 'gte':
+      return '>=';
+  }
+}
+
+function valueToPredicateOp(op) {
+  switch (op) {
+    case '=':
+      return 'equal';
+    case 'between':
+      return 'range';
+    case '<':
+      return 'lt';
+    case '<=':
+      return 'lte';
+    case '>':
+      return 'gt';
+    case '>=':
+      return 'gte';
+  }
+}
+
+function makePredicateContainer(menu: HTMLElement, olliSpec: OlliSpec, state, predicateContainers: HTMLElement[]) {
   const predicateContainer = document.createElement('div');
 
   const fieldSelect = document.createElement('select');
-  fieldSelect.setAttribute('id', 'olli-field-select');
+  fieldSelect.classList.add('olli-field-select');
   fieldSelect.setAttribute('name', 'olli-field-select');
 
   const opSelect = document.createElement('select');
-  opSelect.setAttribute('id', 'olli-op-select');
+  opSelect.classList.add('olli-op-select');
   opSelect.setAttribute('name', 'olli-op-select');
 
   const valueContainer = document.createElement('span');
+  valueContainer.classList.add('olli-value-container');
 
   const fieldOptions = olliSpec.fields.map((field) => {
     const option = document.createElement('option');
@@ -60,7 +134,8 @@ export function makeSelectionMenu(olliSpec: OlliSpec): HTMLElement {
       valueSelect.onchange = () => {
         const value = valueSelect.value;
         const predicate: FieldPredicate = { field: selectedField, equal: value };
-        state.and[0] = predicate;
+        const index = predicateContainers.indexOf(predicateContainer);
+        state[index] = predicate;
         menu.setAttribute('data-state', JSON.stringify(state));
       };
     } else if (selectedOp === 'between') {
@@ -75,7 +150,8 @@ export function makeSelectionMenu(olliSpec: OlliSpec): HTMLElement {
           const value1 = Number(valueInput1.value);
           const value2 = Number(valueInput2.value);
           const predicate: FieldPredicate = { field: selectedField, range: [value1, value2] };
-          state.and[0] = predicate;
+          const index = predicateContainers.indexOf(predicateContainer);
+          state[index] = predicate;
           menu.setAttribute('data-state', JSON.stringify(state));
         };
       } else if (fieldDef.type === 'temporal') {
@@ -89,7 +165,8 @@ export function makeSelectionMenu(olliSpec: OlliSpec): HTMLElement {
           const value1 = serializeValue(new Date(valueInput1.value), fieldDef);
           const value2 = serializeValue(new Date(valueInput2.value), fieldDef);
           const predicate: FieldPredicate = { field: selectedField, range: [value1, value2] };
-          state.and[0] = predicate;
+          const index = predicateContainers.indexOf(predicateContainer);
+          state[index] = predicate;
           menu.setAttribute('data-state', JSON.stringify(state));
         };
       }
@@ -103,7 +180,8 @@ export function makeSelectionMenu(olliSpec: OlliSpec): HTMLElement {
           const value = Number(valueInput.value);
           const op = valueToPredicateOp(selectedOp);
           const predicate = { field: selectedField, [op]: value };
-          state.and[0] = predicate;
+          const index = predicateContainers.indexOf(predicateContainer);
+          state[index] = predicate;
           menu.setAttribute('data-state', JSON.stringify(state));
         };
       } else if (fieldDef.type === 'temporal') {
@@ -115,7 +193,8 @@ export function makeSelectionMenu(olliSpec: OlliSpec): HTMLElement {
           const value = serializeValue(new Date(valueInput.value), fieldDef);
           const op = valueToPredicateOp(selectedOp);
           const predicate = { field: selectedField, [op]: value };
-          state.and[0] = predicate;
+          const index = predicateContainers.indexOf(predicateContainer);
+          state[index] = predicate;
           menu.setAttribute('data-state', JSON.stringify(state));
         };
       }
@@ -123,92 +202,67 @@ export function makeSelectionMenu(olliSpec: OlliSpec): HTMLElement {
   };
 
   predicateContainer.replaceChildren(fieldSelect, opSelect, valueContainer);
-  menu.replaceChildren(predicateContainer);
+
+  const removeButton = document.createElement('button');
+  removeButton.innerText = 'Remove condition';
+  removeButton.onclick = () => {
+    const index = predicateContainers.indexOf(predicateContainer);
+    predicateContainers.splice(index, 1);
+    state.splice(index, 1);
+    menu.setAttribute('data-state', JSON.stringify(state));
+    predicateContainer.remove();
+  };
+  predicateContainer.appendChild(removeButton);
+
   fieldSelect.onchange(null);
+  return predicateContainer;
+}
 
-  const state: { and: Partial<FieldPredicate>[] } = olliSpec.selection
-    ? 'and' in olliSpec.selection
-      ? olliSpec.selection
-      : { and: [olliSpec.selection as any] }
-    : { and: [] };
-  menu.setAttribute('data-state', JSON.stringify(state));
+function setPredicateContainerFromState(
+  predicateContainer: HTMLElement,
+  predicate: FieldPredicate,
+  olliSpec: OlliSpec
+) {
+  const fieldSelect: HTMLSelectElement = predicateContainer.querySelector('.olli-field-select');
+  const opSelect: HTMLSelectElement = predicateContainer.querySelector('.olli-op-select');
+  const valueContainer = predicateContainer.querySelector('.olli-value-container');
 
-  // set initial values from initialPredicate
-  // TODO handle 'and', nesting, etc
-  if (state.and.length) {
-    const predicate = state.and[0] as FieldPredicate;
+  const field = predicate.field;
+  const fieldDef = getFieldDef(field, olliSpec.fields);
+  const op = Object.keys(predicate).find((key) => key !== 'field');
+  const value = predicate[op];
 
-    const field = predicate.field;
-    const fieldDef = getFieldDef(field, olliSpec.fields);
-    const op = Object.keys(predicate).find((key) => key !== 'field');
-    const value = predicate[op];
-    fieldSelect.value = field;
-    fieldSelect.onchange(null);
-    opSelect.value = predicateOpToValue(op);
-    opSelect.onchange(null);
-    if (op === 'range') {
-      const valueInput1 = value[0];
-      const valueInput2 = value[1];
-      const valueInputs = valueContainer.querySelectorAll('input');
-      if (fieldDef.type === 'temporal') {
-        const valueInputDate1 = new Date(value[0]);
-        valueInputDate1.setMinutes(valueInputDate1.getMinutes() - valueInputDate1.getTimezoneOffset());
-        valueInputs[0].value = valueInputDate1.toISOString().slice(0, 16);
-        const valueInputDate2 = new Date(value[1]);
-        valueInputDate2.setMinutes(valueInputDate2.getMinutes() - valueInputDate2.getTimezoneOffset());
-        valueInputs[1].value = valueInputDate2.toISOString().slice(0, 16);
-      } else {
-        valueInputs[0].value = valueInput1;
-        valueInputs[1].value = valueInput2;
-      }
-    } else if (op === 'equal' && valueContainer.querySelector('select')) {
-      const valueSelect = valueContainer.querySelector('select');
-      valueSelect.value = value;
+  fieldSelect.value = field;
+  fieldSelect.onchange(null);
+  opSelect.value = predicateOpToValue(op);
+  opSelect.onchange(null);
+
+  if (op === 'range') {
+    const valueInput1 = value[0];
+    const valueInput2 = value[1];
+    const valueInputs = valueContainer.querySelectorAll('input');
+    if (fieldDef.type === 'temporal') {
+      const valueInputDate1 = new Date(value[0]);
+      valueInputDate1.setMinutes(valueInputDate1.getMinutes() - valueInputDate1.getTimezoneOffset());
+      valueInputs[0].value = valueInputDate1.toISOString().slice(0, 16);
+      const valueInputDate2 = new Date(value[1]);
+      valueInputDate2.setMinutes(valueInputDate2.getMinutes() - valueInputDate2.getTimezoneOffset());
+      valueInputs[1].value = valueInputDate2.toISOString().slice(0, 16);
     } else {
-      const valueInput = valueContainer.querySelector('input');
-      if (fieldDef.type === 'temporal') {
-        const valueInputDate = new Date(value);
-        valueInputDate.setMinutes(valueInputDate.getMinutes() - valueInputDate.getTimezoneOffset());
-        valueInput.value = valueInputDate.toISOString().slice(0, 16);
-      } else {
-        valueInput.value = value;
-      }
+      valueInputs[0].value = valueInput1;
+      valueInputs[1].value = valueInput2;
     }
-  }
-
-  return menu;
-}
-
-function predicateOpToValue(op) {
-  switch (op) {
-    case 'equal':
-      return '=';
-    case 'range':
-      return 'between';
-    case 'lt':
-      return '<';
-    case 'lte':
-      return '<=';
-    case 'gt':
-      return '>';
-    case 'gte':
-      return '>=';
-  }
-}
-
-function valueToPredicateOp(op) {
-  switch (op) {
-    case '=':
-      return 'equal';
-    case 'between':
-      return 'range';
-    case '<':
-      return 'lt';
-    case '<=':
-      return 'lte';
-    case '>':
-      return 'gt';
-    case '>=':
-      return 'gte';
+  } else if (op === 'equal' && valueContainer.querySelector('select')) {
+    const valueSelect = valueContainer.querySelector('select');
+    valueSelect.value = value;
+  } else {
+    const valueInput = valueContainer.querySelector('input');
+    if (fieldDef.type === 'temporal') {
+      const valueInputDate = new Date(value);
+      valueInputDate.setMinutes(valueInputDate.getMinutes() - valueInputDate.getTimezoneOffset());
+      valueInput.value = valueInputDate.toISOString().slice(0, 16);
+    } else {
+      valueInput.value = value;
+    }
   }
 }
