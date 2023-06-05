@@ -150,9 +150,11 @@ export class OlliRuntimeTreeItem {
         openSelectionDialog(this.tree);
         break;
     }
-
-    event.stopPropagation();
-    event.preventDefault();
+    // 'o' is an olli globalState key event
+    if (!['o'].includes(event.key)) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
   }
 
   handleClick(event: MouseEvent) {

@@ -56,7 +56,10 @@ export const updateGlobalStateOnInitialRender = (t: OlliRuntime) => {
                 }
               }
             } else {
-              if (document.activeElement === currentInstance.lastFocusedTreeItem.domNode) {
+              if (
+                !currentInstance.lastFocusedTreeItem ||
+                document.activeElement === currentInstance.lastFocusedTreeItem.domNode
+              ) {
                 // we are not focused on the root of the tree, so jump there
                 currentInstance.setFocusToItem(currentInstance.rootTreeItem);
               } else {
