@@ -1,9 +1,9 @@
 {
   "name": "olli-adapters",
-  "version": "1.0.7",
+  "version": "2.0.0",
   "description": "Visualization toolkit adapters for Olli, a library for converting web visualizations into accessible text structures for blind and low-vision screen reader users.",
   "main": "./dist/adapters.js",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/src/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "webpack --config webpack.dev.js",
@@ -37,6 +37,7 @@
   },
   "devDependencies": {
     "prettier": "2.8.8",
+    "typescript": "~4.9.5",
     "webpack-cli": "^4.10.0"
   }
 }

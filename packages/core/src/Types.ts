@@ -1,7 +1,6 @@
-/**
- * Detailing the different marks that can exist in a chart
- */
-export type OlliMark = 'point' | 'bar' | 'line';
+import { LogicalAnd } from 'vega-lite/src/logical';
+import { OlliNode } from './Structure/Types';
+import { FieldPredicate } from 'vega-lite/src/predicate';
 
 export type OlliValue = string | number | Date;
 
@@ -11,64 +10,38 @@ export interface OlliDatum {
 
 export type OlliDataset = OlliDatum[];
 
+export type OlliMark = 'point' | 'bar' | 'line';
+
 /**
- * Base information that is common to all OlliVisSpecs
+ * Spec describing a visualization
  */
-type BaseOlliVisSpec = {
-  type: 'chart' | 'facetedChart';
+export interface OlliSpec {
+  // required: data and fields
   data: OlliDataset;
-  selection?: OlliDataset; // optional: an initial top level selection (subset of data)
-  title?: string;
-  description?: string; // possible chart description included with the spec
-};
-
-/**
- * The grammar of graphics information that has to be parsed from a single view visualization.
- */
-export interface Chart extends BaseOlliVisSpec {
-  type: 'chart';
-  axes: Axis[];
-  legends: Legend[];
+  // semi-required: specification of the fields/typings and structure (inferred if not provided)
+  fields?: OlliFieldDef[];
+  structure?: OlliNode | OlliNode[];
+  // optional information about the chart's visual encodings for descriptions
   mark?: OlliMark;
-}
-
-/**
- * plots that may have multiple charts contained within a single specification
- */
-export interface FacetedChart extends BaseOlliVisSpec {
-  type: 'facetedChart';
-  charts: Map<string, Chart>; // maps facet value to chart
-  facetedField: string;
-}
-
-export type OlliVisSpec = Chart | FacetedChart;
-
-export const chart = (fields: Omit<Chart, 'type'>): Chart => {
-  return { ...fields, type: 'chart' };
-};
-
-export const facetedChart = (fields: Omit<FacetedChart, 'type'>): FacetedChart => {
-  return { ...fields, type: 'facetedChart' };
-};
-
-/**
- * The {@link Guide} is an the information needed for generating various nodes on the Accessibility Tree where
- *   type: discrete (e.g. for nominal, ordinal data) or continuous (e.g. for quantitative, temporal data)
- *   values: array of values (ex: tick values for a continuous axis, category names for a discrete axis)
- *   field: name of the field encoded by the axis
- *   title: human-readable axis title
- */
-export type Guide = {
-  type: 'discrete' | 'continuous';
-  values: string[] | number[];
-  field: string;
+  axes?: OlliAxis[];
+  legends?: OlliLegend[];
+  facet?: string;
+  // an optional initial top level selection query
+  selection?: LogicalAnd<FieldPredicate> | FieldPredicate;
+  // additional optional info used for description
   title?: string;
+  description?: string;
+}
+
+type Guide = {
+  field: string;
+  title?: string; // optional human-readable title used for description
 };
 
 /**
  * Extending the {@link Guide} interface for visualization axes
  */
-export interface Axis extends Guide {
+export interface OlliAxis extends Guide {
   axisType: 'x' | 'y';
   scaleType?: string; // e.g. linear, logarithmic, band
 }
@@ -76,11 +49,18 @@ export interface Axis extends Guide {
 /**
  * Extending the {@link Guide} interface for visualization legends
  */
-export interface Legend extends Guide {
-  channel?: string; // e.g. color, opacity
+export interface OlliLegend extends Guide {
+  channel: 'color' | 'opacity' | 'size';
+}
+
+export type MeasureType = 'quantitative' | 'ordinal' | 'nominal' | 'temporal';
+
+export interface OlliFieldDef {
+  field: string;
+  type?: MeasureType; // optional, but will be inferred if not provided
 }
 
 /**
  * Interface describing how a visualization adapter should be created
  */
-export type VisAdapter<T> = (spec: T) => Promise<OlliVisSpec>;
+export type VisAdapter<T> = (spec: T) => Promise<OlliSpec>;

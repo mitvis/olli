@@ -1,25 +1,16 @@
-import { Spec, ScaleDataRef, Scale, ScaleData, Scene, SceneItem, isString, SignalRef, ScaleMultiFieldsRef } from 'vega';
 import {
-  OlliVisSpec,
-  VisAdapter,
-  chart,
-  Chart,
-  Axis,
-  Legend,
-  facetedChart,
-  FacetedChart,
-  OlliMark,
-  OlliDataset,
-} from 'olli';
-import {
-  filterUniqueObjects,
-  findScenegraphNodes,
-  getData,
-  getVegaScene,
-  guideTypeFromScale,
-  isNumeric,
+  Spec,
+  ScaleDataRef,
+  Scale,
+  ScaleData,
+  Scene,
+  SceneItem,
+  ScaleMultiFieldsRef,
   SceneGroup,
-} from './utils';
+  SignalRef,
+} from 'vega';
+import { OlliSpec, VisAdapter, OlliMark, OlliDataset, OlliAxis, OlliLegend } from 'olli';
+import { filterUniqueObjects, findScenegraphNodes, getData, getVegaScene, getVegaView } from './utils';
 
 /**
  * Adapter function that breaks down a Vega visualization into it's basic visual grammar
@@ -27,8 +18,8 @@ import {
  * @returns the {@link OlliVisSpec}, the non-concrete visualization information that can be later used to
  * generate the Accessibility Tree Encoding
  */
-export const VegaAdapter: VisAdapter<Spec> = async (spec: Spec): Promise<OlliVisSpec> => {
-  const scene: SceneGroup = await getVegaScene(spec);
+export const VegaAdapter: VisAdapter<Spec> = async (spec: Spec): Promise<OlliSpec> => {
+  const scene: SceneGroup = getVegaScene(await getVegaView(spec));
   const data = getData(scene);
   const description = spec.description; // possible text description included with spec
   if (scene.items.some((el: any) => el.role === 'scope')) {
@@ -38,14 +29,13 @@ export const VegaAdapter: VisAdapter<Spec> = async (spec: Spec): Promise<OlliVis
   }
 };
 
-function parseFacets(spec: Spec, scene: SceneGroup, data: OlliDataset): FacetedChart {
-  const axes = filterUniqueObjects<Axis>(
+function parseFacets(spec: Spec, scene: SceneGroup, data: OlliDataset): OlliSpec {
+  const axes = filterUniqueObjects<OlliAxis>(
     findScenegraphNodes(scene, 'axis').map((axisNode: any) => parseAxisInformation(spec, axisNode, data))
   );
-  const legends = filterUniqueObjects<Legend>(
+  const legends = filterUniqueObjects<OlliLegend>(
     findScenegraphNodes(scene, 'legend').map((legendNode: any) => parseLegendInformation(spec, legendNode, data))
   );
-  const chartItems = scene.items.filter((el: any) => el.role === 'scope')[0].items;
   let facetField: string;
   const facetMarkSpec = spec.marks?.find((m: any, i: number) => m.from && m.from.facet)! as any;
 
@@ -59,31 +49,16 @@ function parseFacets(spec: Spec, scene: SceneGroup, data: OlliDataset): FacetedC
     facetField = facetDef;
   }
 
-  const charts: Map<string, Chart> = new Map(
-    chartItems.map((chartNode) => {
-      const chart: Chart = parseSingleChart(spec, chartNode, data);
-      const key = (chartNode.datum as any)[facetField];
-      chart.title =
-        findScenegraphNodes(chartNode, 'title-text').length > 0
-          ? findScenegraphNodes(chartNode, 'title-text')[0].items[0].text
-          : '';
-      chart.axes = axes;
-      chart.legends = legends;
-      chart.mark = mark;
-      return [key, chart];
-    })
-  );
-
-  let multiViewChart = facetedChart({
-    charts: charts,
+  return {
+    mark,
     data,
-    facetedField: facetField,
-  });
-
-  return multiViewChart;
+    axes,
+    legends,
+    facet: facetField,
+  };
 }
 
-function parseSingleChart(spec: Spec, scene: Scene | SceneItem, data: OlliDataset): Chart {
+function parseSingleChart(spec: Spec, scene: Scene | SceneItem, data: OlliDataset): OlliSpec {
   const axes = findScenegraphNodes(scene, 'axis').map((axisNode: any) => parseAxisInformation(spec, axisNode, data));
   const legends = findScenegraphNodes(scene, 'legend').map((legendNode: any) =>
     parseLegendInformation(spec, legendNode, data)
@@ -95,16 +70,13 @@ function parseSingleChart(spec: Spec, scene: Scene | SceneItem, data: OlliDatase
 
   const mark = vegaMarkToOlliMark(spec.marks?.map((mark) => mark.type)[0]); // TODO write a better way to get the mark type
 
-  let chartNode = chart({
+  return {
     data,
-    mark,
     axes,
     legends,
-  });
-  if (chartTitle) {
-    chartNode.title = chartTitle;
-  }
-  return chartNode;
+    mark,
+    title: chartTitle,
+  };
 }
 
 function vegaMarkToOlliMark(mark?: string): OlliMark | undefined {
@@ -123,9 +95,8 @@ function vegaMarkToOlliMark(mark?: string): OlliMark | undefined {
 /**
  * @returns a key-value pairing of the axis orientation and the {@link Guide} of the corresponding axis
  */
-function parseAxisInformation(spec: Spec, axis: any, data: OlliDataset): Axis {
+function parseAxisInformation(spec: Spec, axis: any, data: OlliDataset): OlliAxis {
   const axisView = axis.items[0];
-  const ticks: any[] = axisView.items.find((n: any) => n.role === 'axis-tick').items.map((n: any) => n.datum.value);
   const title: string = axisView.items.find((n: any) => n.role === 'axis-title')?.items?.[0]?.text;
   const scaleName: string = axisView.datum.scale;
   const scaleSpec = spec.scales?.find((specScale: Scale) => specScale.name === scaleName)!;
@@ -166,12 +137,6 @@ function parseAxisInformation(spec: Spec, axis: any, data: OlliDataset): Axis {
   //
 
   const scaleType = scaleSpec?.type;
-  const type = scaleType
-    ? guideTypeFromScale(scaleType)
-    : ticks.every((t: string | number) => !isString(t) || (isString(t) && isNumeric(t)))
-    ? 'continuous'
-    : 'discrete';
-
   const axisType = axisView.orient === 'bottom' || axisView.orient === 'top' ? 'x' : 'y';
 
   // convert temporal values into date objects
@@ -182,8 +147,6 @@ function parseAxisInformation(spec: Spec, axis: any, data: OlliDataset): Axis {
   }
 
   return {
-    type,
-    values: ticks,
     title: title,
     field: field,
     scaleType,
@@ -194,33 +157,25 @@ function parseAxisInformation(spec: Spec, axis: any, data: OlliDataset): Axis {
 /**
  * @returns a key-value pairing of the legend name and the {@link Guide} of the corresponding axis
  */
-function parseLegendInformation(spec: Spec, legendNode: any, data: OlliDataset): Legend {
+function parseLegendInformation(spec: Spec, legendNode: any, data: OlliDataset): OlliLegend {
   const scaleName: string = legendNode.items[0].datum.scales[Object.keys(legendNode.items[0].datum.scales)[0]];
   const scaleSpec = spec.scales?.find((specScale: any) => specScale.name === scaleName);
-  const labels: any[] = legendNode.items[0].items.find((n: any) => n.role === 'legend-entry').items[0].items[0].items;
   const title: string = legendNode.items[0].items.find((n: any) => n.role === 'legend-title').items[0].text;
 
   let field: string | undefined;
   const legendDomain = scaleSpec?.domain;
-  if ((legendDomain as ScaleDataRef).field) {
-    field = (legendDomain as ScaleDataRef)!.field as string;
+  if ('field' in legendDomain) {
+    if (!(legendDomain.field as SignalRef).signal) {
+      field = legendDomain.field as string;
+    }
   } else {
     if (Object.keys(data[0]).some((key: string) => key.toLocaleString() === title.toLocaleLowerCase())) {
       field = title.toLocaleLowerCase();
     }
   }
 
-  const values = labels.map((n: any) => n.items.find((el: any) => el.role === 'legend-label').items[0].datum.value);
-
-  const type = scaleSpec?.type
-    ? guideTypeFromScale(scaleSpec.type)
-    : values.every((t: string | number) => !isString(t) || (isString(t) && isNumeric(t)))
-    ? 'continuous'
-    : 'discrete';
-
   return {
-    type,
-    values,
+    channel: scaleName as any,
     title: title,
     field: field as string,
   };

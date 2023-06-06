@@ -1,22 +1,15 @@
-import { Scene, Spec, parse, View, SceneItem, SceneContext } from 'vega';
-import { isNumeric as vlIsNumeric } from 'vega-lite';
+import { Scene, Spec, parse, View, SceneItem, SceneGroup } from 'vega';
 import { OlliDataset } from 'olli';
 
-export async function getVegaScene(spec: Spec): Promise<SceneGroup> {
+export async function getVegaView(spec: Spec): Promise<View> {
   const runtime = parse(spec);
   let view = await new View(runtime).renderer('svg').hover().runAsync();
-
-  return (view.scenegraph() as any).root.items[0] as SceneGroup;
+  return view;
 }
 
-// TODO pending https://github.com/vega/vega/issues/3562
-export type SceneGroup = SceneItem & {
-  context: SceneContext;
-  items: Scene[];
-  height: number;
-  width: number;
-  stroke?: string;
-};
+export function getVegaScene(view: View): SceneGroup {
+  return (view.scenegraph() as any).root.items[0] as SceneGroup;
+}
 
 export function filterUniqueObjects<T>(arr: T[]): T[] {
   return arr.filter((value, index) => {
@@ -82,43 +75,4 @@ export function getData(scene: SceneGroup): OlliDataset {
   } catch (error) {
     throw new Error(`No data found in the Vega scenegraph \n ${error}`);
   }
-}
-
-export const guideTypeFromScale = (scaleType: string): 'discrete' | 'continuous' => {
-  switch (scaleType) {
-    case 'linear':
-    case 'log':
-    case 'pow':
-    case 'sqrt':
-    case 'symlog':
-    case 'time':
-    case 'utc':
-    case 'sequential':
-      return 'continuous';
-    case 'ordinal':
-    case 'band':
-    case 'point':
-    case 'quantile':
-    case 'quantize':
-    case 'threshold':
-    case 'bin-ordinal':
-    default:
-      return 'discrete';
-  }
-};
-
-export const guideTypeFromVLEncoding = (encodingType: string): 'discrete' | 'continuous' => {
-  switch (encodingType) {
-    case 'quantitative':
-    case 'temporal':
-      return 'continuous';
-    case 'ordinal':
-    case 'nominal':
-    default:
-      return 'discrete';
-  }
-};
-
-export function isNumeric(value: string): boolean {
-  return vlIsNumeric(value.replaceAll(',', ''));
 }

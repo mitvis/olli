@@ -8,9 +8,9 @@
  *           for a tree being used as a file viewer
  */
 
-import { htmlNodeToTree } from '.';
-import { AccessibilityTree, AccessibilityTreeNode } from '../../Structure/Types';
-import { Tree } from './Tree';
+import { openSelectionDialog, openTableDialog } from '../Render/Dialog';
+import { ElaboratedOlliNode } from '../Structure/Types';
+import { OlliRuntime } from './OlliRuntime';
 
 /*
  *   @constructor
@@ -23,24 +23,22 @@ import { Tree } from './Tree';
  *       An element with the role=tree attribute
  */
 
-export class TreeItem {
-  tree: Tree;
+export class OlliRuntimeTreeItem {
+  tree: OlliRuntime;
   domNode: HTMLElement;
-  olliNode?: AccessibilityTreeNode;
+  olliNode: ElaboratedOlliNode;
   isExpandable: boolean;
   inGroup: boolean;
 
-  parent?: TreeItem;
-  children: TreeItem[];
-  lastVisitedChild?: TreeItem;
+  parent?: OlliRuntimeTreeItem;
+  children: OlliRuntimeTreeItem[];
+  lastVisitedChild?: OlliRuntimeTreeItem;
 
-  constructor(node: HTMLElement, treeObj: Tree, olliTree: AccessibilityTree, parent?: TreeItem) {
+  constructor(node: HTMLElement, treeObj: OlliRuntime, olliNode: ElaboratedOlliNode, parent?: OlliRuntimeTreeItem) {
     node.tabIndex = -1;
     this.tree = treeObj;
     this.domNode = node;
-    if (node.id) {
-      this.olliNode = htmlNodeToTree(node, olliTree);
-    }
+    this.olliNode = olliNode;
 
     this.isExpandable = false;
     this.inGroup = false;
@@ -55,10 +53,7 @@ export class TreeItem {
     let elem = node.firstElementChild;
 
     while (elem) {
-      // if (['ul', 'table', 'th', 'td'].includes(elem.tagName.toLowerCase())) {
-
-      if (['ul', 'table', 'thead', 'tbody', 'tr', 'td', 'th'].includes(elem.tagName.toLowerCase())) {
-        // if (['ul', 'table'].includes(elem.tagName.toLowerCase())) {
+      if (elem.tagName.toLowerCase() == 'ul') {
         this.isExpandable = true;
         break;
       }
@@ -98,7 +93,6 @@ export class TreeItem {
   }
 
   checkBaseKeys(event: KeyboardEvent) {
-    let flag = false;
     switch (event.key) {
       case 'Enter':
       case ' ':
@@ -109,49 +103,33 @@ export class TreeItem {
             this.tree.expandTreeItem(this);
           }
         }
-        flag = true;
         break;
       case 'ArrowDown':
-        if (this.children.length > 0) {
-          if (this.isExpandable) {
-            this.tree.expandTreeItem(this);
-            this.tree.setFocusToNextLayer(this);
-          }
+        if (this.children.length > 0 && this.isExpandable) {
+          this.tree.setFocusToNextLayer(this);
         }
-        flag = true;
         break;
       case 'Escape':
       case 'ArrowUp':
-        // if (this.isExpandable && this.isExpanded()) {
-        // this.tree.setFocusToParentItem();
-        // this.tree.collapseTreeItem(this);
-        // flag = true;
-        // } else {
         if (this.inGroup) {
           this.tree.setFocusToParentItem(this);
-          flag = true;
         }
-        // }
         break;
       case 'ArrowLeft':
         this.tree.setFocusToPreviousItem(this);
-        flag = true;
         break;
       case 'ArrowRight':
         this.tree.setFocusToNextItem(this);
-        flag = true;
         break;
       case 'Home':
         if (this.parent) {
           this.tree.setFocusToFirstInLayer(this);
-          flag = true;
         }
         break;
 
       case 'End':
         if (this.parent) {
           this.tree.setFocusToLastInLayer(this);
-          flag = true;
         }
         break;
       case 'x':
@@ -163,24 +141,21 @@ export class TreeItem {
       case 'l':
         this.tree.focusOnNodeType('legend', this);
         break;
-      case 'w':
-        this.tree.setFocusGridUp(this);
+      case 't':
+        if ('predicate' in this.olliNode || this.olliNode.nodeType === 'root') {
+          openTableDialog(this.olliNode, this.tree);
+        }
         break;
-      case 'a':
-        this.tree.setFocusGridLeft(this);
+      case 'f':
+        openSelectionDialog(this.tree);
         break;
-      case 's':
-        this.tree.setFocusGridDown(this);
-        break;
-      case 'd':
-        this.tree.setFocusGridRight(this);
-        break;
+      default:
+        // return to avoid preventing default event action
+        return;
     }
 
-    if (flag) {
-      event.stopPropagation();
-      event.preventDefault();
-    }
+    event.stopPropagation();
+    event.preventDefault();
   }
 
   handleClick(event: MouseEvent) {

@@ -5,6 +5,9 @@ const exec = require('child_process').exec;
 module.exports = merge(common, {
   mode: 'development',
   watch: true,
+  watchOptions: {
+    ignored: /dist/,
+  },
   plugins: [
     {
       apply: (compiler) => {

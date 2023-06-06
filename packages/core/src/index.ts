@@ -1,49 +1,35 @@
-import { OlliVisSpec } from './Types';
-import { renderTable } from './Render/Table';
-import { Tree } from './Render/TreeView/Tree';
-import { renderTree } from './Render/TreeView';
-import { olliVisSpecToTree } from './Structure';
-import { AccessibilityTree } from './Structure/Types';
-import { updateGlobalStateOnRender } from './utils';
+import { OlliSpec } from './Types';
+import { ElaboratedOlliNode } from './Structure/Types';
+import { OlliRuntime, RuntimeCallbacks } from './Runtime/OlliRuntime';
+import { updateGlobalStateOnInitialRender } from './util/globalState';
+import { elaborateSpec } from './util/elaborate';
+import { LogicalComposition } from 'vega-lite/src/logical';
+import { FieldPredicate } from 'vega-lite/src/predicate';
 
 export * from './Types';
+export * from './Structure/Types';
+export * from './util/types';
+export type { OlliGlobalState } from './util/globalState';
 
-/**
- * The configuration object outlining how an accessible visualization should be rendered based on a {@link OlliVisSpec}.
- */
 export type OlliConfigOptions = {
-  renderType?: 'tree' | 'table';
-  onFocus?: (elem: HTMLElement) => void;
+  onFocus?: (elem: HTMLElement, olliNode: ElaboratedOlliNode) => void;
+  onSelection?: (predicate: LogicalComposition<FieldPredicate>) => void;
 };
 
-/**
- *
- * @param config The {@link OlliConfigOptions} object to specify how an accessible visualization should be generated.
- */
-export function olli(olliVisSpec: OlliVisSpec, config?: OlliConfigOptions): HTMLElement {
-  const tree: AccessibilityTree = olliVisSpecToTree(olliVisSpec);
+export function olli(olliSpec: OlliSpec, config?: OlliConfigOptions): HTMLElement {
+  olliSpec = elaborateSpec(olliSpec);
 
-  const htmlRendering: HTMLElement = document.createElement('div');
-  htmlRendering.classList.add('olli-vis');
+  const renderContainer: HTMLElement = document.createElement('div');
+  renderContainer.classList.add('olli-vis');
 
-  config = {
-    renderType: config?.renderType || 'tree',
+  const treeCallbacks: RuntimeCallbacks = {
     onFocus: config?.onFocus,
+    onSelection: config?.onSelection,
   };
 
-  switch (config.renderType) {
-    case 'table':
-      htmlRendering.appendChild(renderTable(tree.root.selected, tree.fieldsUsed));
-      break;
-    case 'tree':
-    default:
-      const ul = renderTree(tree);
-      htmlRendering.appendChild(ul);
-      const t = new Tree(ul, tree, config.onFocus);
-      t.init();
-      updateGlobalStateOnRender(t);
-      break;
-  }
+  const t = new OlliRuntime(olliSpec, renderContainer, treeCallbacks);
+  t.init();
+  updateGlobalStateOnInitialRender(t);
 
-  return htmlRendering;
+  return renderContainer;
 }

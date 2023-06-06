@@ -1,17 +1,12 @@
 import { OlliDataset, OlliDatum } from '../../Types';
-import { fmtValue } from '../../utils';
+import { fmtValue } from '../../util/values';
 
-/**
- *
- * @param tree The {@link AccessibilityTreeNode} to generate a table from
- * @returns An {@link HTMLElement} table of the data used in a visualization
- */
-export function renderTable(data: OlliDataset, fieldsUsed: string[]): HTMLElement {
+export function renderTable(data: OlliDataset, fields: string[]): HTMLElement {
   const table = document.createElement('table');
   const thead = document.createElement('thead');
   const theadtr = document.createElement('tr');
 
-  fieldsUsed.forEach((field: string) => {
+  fields.forEach((field: string) => {
     const th = document.createElement('th');
     th.setAttribute('scope', 'col');
     th.innerText = field;
@@ -25,7 +20,7 @@ export function renderTable(data: OlliDataset, fieldsUsed: string[]): HTMLElemen
 
   data.forEach((data: OlliDatum) => {
     const dataRow = document.createElement('tr');
-    fieldsUsed.forEach((field: string) => {
+    fields.forEach((field: string) => {
       const td = document.createElement('td');
       td.innerText = fmtValue(data[field]);
       dataRow.appendChild(td);
