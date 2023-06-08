@@ -37,7 +37,19 @@ export function makeSelectionMenu(olliSpec: OlliSpec): HTMLElement {
     container.replaceChildren(...predicateContainers);
   };
 
-  menu.replaceChildren(container, addButton);
+  const clearButton = document.createElement('button');
+  clearButton.innerText = 'Clear conditions';
+  clearButton.onclick = () => {
+    predicateContainers.forEach((predicateContainer) => {
+      predicateContainer.remove();
+    });
+    predicateContainers.splice(0, predicateContainers.length);
+    container.replaceChildren(...predicateContainers);
+    state.splice(0, state.length);
+    menu.setAttribute('data-state', JSON.stringify(state));
+  };
+
+  menu.replaceChildren(container, addButton, clearButton);
 
   menu.setAttribute('data-state', JSON.stringify(state));
 
@@ -116,6 +128,12 @@ function makePredicateContainer(menu: HTMLElement, olliSpec: OlliSpec, state, pr
     opSelect.onchange(null);
   };
 
+  function updateState(predicate) {
+    const index = predicateContainers.indexOf(predicateContainer);
+    state[index] = predicate;
+    menu.setAttribute('data-state', JSON.stringify(state));
+  }
+
   opSelect.onchange = () => {
     const selectedField = fieldSelect.value;
     const selectedOp = opSelect.value;
@@ -134,9 +152,7 @@ function makePredicateContainer(menu: HTMLElement, olliSpec: OlliSpec, state, pr
       valueSelect.onchange = () => {
         const value = valueSelect.value;
         const predicate: FieldPredicate = { field: selectedField, equal: value };
-        const index = predicateContainers.indexOf(predicateContainer);
-        state[index] = predicate;
-        menu.setAttribute('data-state', JSON.stringify(state));
+        updateState(predicate);
       };
     } else if (selectedOp === 'between') {
       if (fieldDef.type === 'quantitative') {
@@ -150,9 +166,7 @@ function makePredicateContainer(menu: HTMLElement, olliSpec: OlliSpec, state, pr
           const value1 = Number(valueInput1.value);
           const value2 = Number(valueInput2.value);
           const predicate: FieldPredicate = { field: selectedField, range: [value1, value2] };
-          const index = predicateContainers.indexOf(predicateContainer);
-          state[index] = predicate;
-          menu.setAttribute('data-state', JSON.stringify(state));
+          updateState(predicate);
         };
       } else if (fieldDef.type === 'temporal') {
         // two datetime inputs
@@ -165,9 +179,7 @@ function makePredicateContainer(menu: HTMLElement, olliSpec: OlliSpec, state, pr
           const value1 = serializeValue(new Date(valueInput1.value), fieldDef);
           const value2 = serializeValue(new Date(valueInput2.value), fieldDef);
           const predicate: FieldPredicate = { field: selectedField, range: [value1, value2] };
-          const index = predicateContainers.indexOf(predicateContainer);
-          state[index] = predicate;
-          menu.setAttribute('data-state', JSON.stringify(state));
+          updateState(predicate);
         };
       }
     } else {
@@ -180,9 +192,7 @@ function makePredicateContainer(menu: HTMLElement, olliSpec: OlliSpec, state, pr
           const value = Number(valueInput.value);
           const op = valueToPredicateOp(selectedOp);
           const predicate = { field: selectedField, [op]: value };
-          const index = predicateContainers.indexOf(predicateContainer);
-          state[index] = predicate;
-          menu.setAttribute('data-state', JSON.stringify(state));
+          updateState(predicate);
         };
       } else if (fieldDef.type === 'temporal') {
         // datetime input
@@ -193,9 +203,7 @@ function makePredicateContainer(menu: HTMLElement, olliSpec: OlliSpec, state, pr
           const value = serializeValue(new Date(valueInput.value), fieldDef);
           const op = valueToPredicateOp(selectedOp);
           const predicate = { field: selectedField, [op]: value };
-          const index = predicateContainers.indexOf(predicateContainer);
-          state[index] = predicate;
-          menu.setAttribute('data-state', JSON.stringify(state));
+          updateState(predicate);
         };
       }
     }

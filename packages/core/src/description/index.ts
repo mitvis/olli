@@ -86,17 +86,22 @@ export function nodeToDescription(node: ElaboratedOlliNode, data, olliSpec: Olli
             olliSpec.axes?.find((axis) => axis.field === node.groupby) ||
             olliSpec.legends?.find((legend) => legend.field === node.groupby);
           const bins = getBins(node.groupby, data, olliSpec.fields);
-          first = fmtValue(bins[0][0]);
-          last = fmtValue(bins[bins.length - 1][1]);
-          return `${guideType} titled ${node.groupby} for a ${
-            'scaleType' in guide ? guide.scaleType || fieldDef.type : fieldDef.type
-          } scale with values from ${first} to ${last}.`;
+          if (bins.length) {
+            first = fmtValue(bins[0][0]);
+            last = fmtValue(bins[bins.length - 1][1]);
+            return `${guideType} titled ${node.groupby} for a ${
+              'scaleType' in guide ? guide.scaleType || fieldDef.type : fieldDef.type
+            } scale with values from ${first} to ${last}.`;
+          }
         } else {
           const domain = getDomain(node.groupby, data);
-          first = fmtValue(domain[0]);
-          last = fmtValue(domain[domain.length - 1]);
-          return `${guideType} titled ${node.groupby} for a ${fieldDef.type} scale with ${domain.length} values from ${first} to ${last}.`;
+          if (domain.length) {
+            first = fmtValue(domain[0]);
+            last = fmtValue(domain[domain.length - 1]);
+            return `${guideType} titled ${node.groupby} for a ${fieldDef.type} scale with ${domain.length} values from ${first} to ${last}.`;
+          }
         }
+        return `${guideType} titled ${node.groupby} for a ${fieldDef.type} scale.`;
       }
       return `${guideType}.`;
     case 'filteredData':

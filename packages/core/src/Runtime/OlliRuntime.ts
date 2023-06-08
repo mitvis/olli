@@ -5,7 +5,7 @@ import { OlliSpec } from '../Types';
 import { setOlliGlobalState } from '../util/globalState';
 import { OlliRuntimeTreeItem } from './OlliRuntimeTreeItem';
 import { olliSpecToTree, treeToNodeLookup } from '../Structure';
-import { generateDescriptions } from '../Description';
+import { generateDescriptions } from '../description';
 import { renderTree } from '../Render/TreeView';
 import { LogicalAnd, LogicalComposition } from 'vega-lite/src/logical';
 import { FieldPredicate } from 'vega-lite/src/predicate';

@@ -1,4 +1,4 @@
-import { predicateToDescription } from '../../Description';
+import { predicateToDescription } from '../../description';
 import { ElaboratedOlliNode } from '../../Structure/Types';
 import { OlliSpec } from '../../Types';
 import { selectionTest } from '../../util/selection';
