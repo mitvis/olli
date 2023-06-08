@@ -17,6 +17,7 @@
       "esnext",
       "es2015"
     ],
+    "rootDir": ".",
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
