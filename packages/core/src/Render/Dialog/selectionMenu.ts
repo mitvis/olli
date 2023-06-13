@@ -7,34 +7,64 @@ import { generateDescriptions } from '../../description/index'
 
 // this would have been so much easier with some ui framework : \
 
-export function makeDropDownMenu(olliNode: ElaboratedOlliNode, olliSpec: OlliSpec): HTMLElement {
+export function makeDropDownMenu(olliNode: ElaboratedOlliNode, tree: OlliRuntime): HTMLElement {
     const container = document.createElement('div')
+    console.log(tree)
 
-    // Layer 1
-    const dropDownContainer = document.createElement('div')
-    const dropDownLabel = document.createElement('label')
-    dropDownLabel.setAttribute('for', 'olli-node-select')
-    dropDownLabel.innerText = 'Choose a node: '
-    const dropDown = document.createElement('select')
-    dropDown.classList.add('olli-node-select');
-    dropDown.setAttribute('name', 'olli-node-select');
-    dropDown.setAttribute('id', 'olli-node-select');
-    dropDownContainer.replaceChildren(dropDownLabel, dropDown)
+    // Layer 1 -- Select a Node
+    const nodeSelectContainer = document.createElement('div')
+    const nodeSelectLabel = document.createElement('label')
+    nodeSelectLabel.setAttribute('for', 'olli-node-select')
+    nodeSelectLabel.innerText = 'Layer 1: '
+    const nodeSelect = document.createElement('select')
+    nodeSelect.classList.add('olli-node-select');
+    nodeSelect.setAttribute('name', 'olli-node-select');
+    nodeSelect.setAttribute('id', 'olli-node-select');
+    nodeSelectContainer.replaceChildren(nodeSelectLabel, nodeSelect)
 
-    console.log(olliSpec)
-
-    const dropDownOptions = olliSpec.structure.map((node) => {
+    const topOption = document.createElement('option');
+    topOption.setAttribute('value', tree.rootTreeItem.olliNode.description);
+    topOption.innerText = tree.rootTreeItem.olliNode.description;
+    const nodeSelectOptions = tree.rootTreeItem.olliNode.children.map((node) => {
         const option = document.createElement('option');
-        // TODO: Somehow generate description for the node?
-        // generateDescriptions(olliSpec, node);
-        option.setAttribute('value', node.groupby);
-        option.innerText = node.groupby;
+        option.setAttribute('value', node.id);
+        option.innerText = node.description;
         return option;
     });
-    dropDown.replaceChildren(...dropDownOptions);
+    nodeSelect.replaceChildren(...[topOption, ...nodeSelectOptions]);
+
+    // Layer 2 -- Range
+    const rangeSelectContainer = document.createElement('div')
+    const rangeSelectLabel = document.createElement('label')
+    rangeSelectLabel.setAttribute('for', 'olli-range-select')
+    rangeSelectLabel.innerText = 'Layer 2: '
+    const rangeSelect = document.createElement('select')
+    rangeSelect.classList.add('olli-range-select');
+    rangeSelect.setAttribute('name', 'olli-range-select');
+    rangeSelect.setAttribute('id', 'olli-range-select');
+    rangeSelectContainer.replaceChildren(rangeSelectLabel, rangeSelect)
+
+    nodeSelect.onchange = () => {
+        const selectedField = nodeSelectOptions[nodeSelect.selectedIndex];
+        console.log(selectedField.getAttribute('id'))
+        // const fieldDef = getFieldDef(selectedField, olliSpec.fields);
+        // let ops = ['='];
+        // if (fieldDef.type === 'quantitative' || fieldDef.type === 'temporal') {
+        //     ops = ['between', '<', '<=', '>', '>=', '='];
+        // }
+        // const opOptions = ops.map((op) => {
+        //     const option = document.createElement('option');
+        //     option.setAttribute('value', op);
+        //     option.innerText = op;
+        //     return option;
+        // });
+        // opSelect.replaceChildren(...opOptions);
+        // opSelect.onchange(null);
+    };
 
 
-    container.appendChild(dropDownContainer);
+    container.appendChild(nodeSelectContainer);
+    container.appendChild(rangeSelectContainer);
     return container;
 }
 

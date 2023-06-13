@@ -122,7 +122,7 @@ export function openSelectionDialog(tree: OlliRuntime) {
 
 
 export function openTargetedNavigationDialog(olliNode: ElaboratedOlliNode, tree: OlliRuntime) {
-    const menu = makeDropDownMenu(olliNode, tree.olliSpec);
+    const menu = makeDropDownMenu(olliNode, tree);
 
     const onOk = () => {
         const predicate = { and: JSON.parse(menu.getAttribute('data-state')) };
