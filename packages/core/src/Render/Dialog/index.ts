@@ -5,7 +5,7 @@ import { selectionTest } from '../../util/selection';
 import { renderTable } from '../Table';
 import { OlliRuntime } from '../../Runtime/OlliRuntime';
 import './dialog.css';
-import { makeSelectionMenu } from './selectionMenu';
+import { makeSelectionMenu, makeDropDownMenu } from './selectionMenu';
 
 export function makeDialog(
   tree: OlliRuntime,
@@ -118,4 +118,21 @@ export function openSelectionDialog(tree: OlliRuntime) {
   const dialog = makeDialog(tree, 'Filter Menu', 'Define a custom filter.', menu, { onOk });
 
   openDialog(dialog, tree.renderContainer);
+}
+
+
+export function openTargetedNavigationDialog(olliNode: ElaboratedOlliNode, tree: OlliRuntime) {
+    const menu = makeDropDownMenu(olliNode, tree.olliSpec);
+
+    const onOk = () => {
+        const predicate = { and: JSON.parse(menu.getAttribute('data-state')) };
+        tree.setSelection(predicate);
+        if (tree.callbacks?.onSelection) {
+            tree.callbacks?.onSelection(predicate);
+        }
+    };
+
+    const dialog = makeDialog(tree, 'Targeted Navigation Menu', 'Navigate quickly to part of this chart.', menu, { onOk });
+
+    openDialog(dialog, tree.renderContainer);
 }

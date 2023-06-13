@@ -1,9 +1,43 @@
 import { FieldPredicate } from 'vega-lite/src/predicate';
 import { OlliSpec } from '../../Types';
+import { ElaboratedOlliNode } from '../Structure/Types';
 import { getDomain, getFieldDef } from '../../util/data';
 import { serializeValue } from '../../util/values';
+import { generateDescriptions } from '../../description/index'
 
 // this would have been so much easier with some ui framework : \
+
+export function makeDropDownMenu(olliNode: ElaboratedOlliNode, olliSpec: OlliSpec): HTMLElement {
+    const container = document.createElement('div')
+
+    // Layer 1
+    const dropDownContainer = document.createElement('div')
+    const dropDownLabel = document.createElement('label')
+    dropDownLabel.setAttribute('for', 'olli-node-select')
+    dropDownLabel.innerText = 'Choose a node: '
+    const dropDown = document.createElement('select')
+    dropDown.classList.add('olli-node-select');
+    dropDown.setAttribute('name', 'olli-node-select');
+    dropDown.setAttribute('id', 'olli-node-select');
+    dropDownContainer.replaceChildren(dropDownLabel, dropDown)
+
+    console.log(olliSpec)
+
+    const dropDownOptions = olliSpec.structure.map((node) => {
+        const option = document.createElement('option');
+        // TODO: Somehow generate description for the node?
+        // generateDescriptions(olliSpec, node);
+        option.setAttribute('value', node.groupby);
+        option.innerText = node.groupby;
+        return option;
+    });
+    dropDown.replaceChildren(...dropDownOptions);
+
+
+    container.appendChild(dropDownContainer);
+    return container;
+}
+
 
 export function makeSelectionMenu(olliSpec: OlliSpec): HTMLElement {
   const state: FieldPredicate[] = olliSpec.selection
