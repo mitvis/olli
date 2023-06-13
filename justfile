@@ -1,16 +1,13 @@
 set dotenv-load
 
-default:
+list:
   @just --list
+
+bundle-install:
+  @cd docs && bundle install
 
 docs:
   @cd docs && bundle exec jekyll serve
 
-run-core:
+run:
   @cd packages/core && npm run start
-
-build-core:
-  @cd packages/core && npm run build
-
-run-all:
-  @npm run build -ws
