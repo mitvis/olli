@@ -148,22 +148,22 @@ export function predicateToDescription(predicate: LogicalComposition<FieldPredic
 
 function fieldPredicateToDescription(predicate: FieldPredicate) {
   if ('equal' in predicate) {
-    return `${predicate.field} equals ${predicate.equal}`;
+    return `${predicate.field} equals ${fmtValue(predicate.equal as OlliValue)}`;
   }
   if ('range' in predicate) {
-    return `${predicate.field} is between ${predicate.range[0]} and ${predicate.range[1]}`;
+    return `${predicate.field} is between ${fmtValue(predicate.range[0])} and ${fmtValue(predicate.range[1])}`;
   }
   if ('lt' in predicate) {
-    return `${predicate.field} is less than ${predicate.lt}`;
+    return `${predicate.field} is less than ${fmtValue(predicate.lt as OlliValue)}`;
   }
   if ('lte' in predicate) {
-    return `${predicate.field} is less than or equal to ${predicate.lte}`;
+    return `${predicate.field} is less than or equal to ${fmtValue(predicate.lte as OlliValue)}`;
   }
   if ('gt' in predicate) {
-    return `${predicate.field} is greater than ${predicate.gt}`;
+    return `${predicate.field} is greater than ${fmtValue(predicate.gt as OlliValue)}`;
   }
   if ('gte' in predicate) {
-    return `${predicate.field} is greater than or equal to ${predicate.gte}`;
+    return `${predicate.field} is greater than or equal to ${fmtValue(predicate.gte as OlliValue)}`;
   }
 
   return '';
