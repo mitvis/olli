@@ -52,6 +52,7 @@ export function nodeToDescription(node: ElaboratedOlliNode, data, olliSpec: Olli
     return '';
   };
   const axes = olliSpec.axes.map((a) => a.title || a.field).join(' and ');
+  const pluralize = (count: number, noun: string, suffix = 's') => `${count} ${noun}${count !== 1 ? suffix : ''}`;
 
   switch (node.nodeType) {
     case 'root':
@@ -98,7 +99,10 @@ export function nodeToDescription(node: ElaboratedOlliNode, data, olliSpec: Olli
           if (domain.length) {
             first = fmtValue(domain[0]);
             last = fmtValue(domain[domain.length - 1]);
-            return `${guideType} titled ${node.groupby} for a ${fieldDef.type} scale with ${domain.length} values from ${first} to ${last}.`;
+            return `${guideType} titled ${node.groupby} for a ${fieldDef.type} scale with ${pluralize(
+              domain.values.length,
+              'value'
+            )} from ${first} to ${last}.`;
           }
         }
         return `${guideType} titled ${node.groupby} for a ${fieldDef.type} scale.`;
@@ -108,20 +112,23 @@ export function nodeToDescription(node: ElaboratedOlliNode, data, olliSpec: Olli
       const instructions = node.children.length ? '' : ' Press t to open table.';
       if ('predicate' in node) {
         const selection = selectionTest(data, node.fullPredicate);
-        if ('range' in node.predicate) {
-          return `${index}${fmtValue(node.predicate.range[0])} to ${fmtValue(node.predicate.range[1])}. ${
-            selection.length
-          } values.${instructions}`;
-        } else if ('equal' in node.predicate) {
-          return `${index}${fmtValue(node.predicate.equal as OlliValue)}. ${selection.length} values.${instructions}`;
-        }
+        return `${index}${predicateToDescription(node.predicate)}. ${pluralize(
+          selection.length,
+          'value'
+        )}.${instructions}`;
       }
+    case 'annotations':
+      return `${node.children.length} annotations.`;
     case 'other':
       if ('groupby' in node) {
         return `${node.children.length} groups, grouped by ${node.groupby}.`;
       } else if ('predicate' in node) {
         const instructions = node.children.length ? '' : ' Press t to open table.';
-        return `${index}${predicateToDescription(node.predicate)}.${instructions}`;
+        const selection = selectionTest(data, node.fullPredicate);
+        return `${index}${predicateToDescription(node.predicate)}. ${pluralize(
+          selection.length,
+          'value'
+        )}.${instructions}`;
       }
   }
 }

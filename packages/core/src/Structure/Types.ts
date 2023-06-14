@@ -14,9 +14,13 @@ export interface OlliPredicateNode {
   children?: OlliNode[];
 }
 
-export type OlliNode = OlliGroupNode | OlliPredicateNode;
+export interface OlliAnnotationNode {
+  annotations: OlliNode[];
+}
 
-export type OlliNodeType = 'root' | 'facet' | 'xAxis' | 'yAxis' | 'legend' | 'filteredData' | 'other';
+export type OlliNode = OlliGroupNode | OlliPredicateNode | OlliAnnotationNode;
+
+export type OlliNodeType = 'root' | 'facet' | 'xAxis' | 'yAxis' | 'legend' | 'filteredData' | 'annotations' | 'other';
 
 export interface ElaboratedOlliNode {
   id: string;
