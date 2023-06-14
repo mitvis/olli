@@ -121,7 +121,7 @@ export function nodeToDescription(node: ElaboratedOlliNode, data, olliSpec: Olli
         return `${node.children.length} groups, grouped by ${node.groupby}.`;
       } else if ('predicate' in node) {
         const instructions = node.children.length ? '' : ' Press t to open table.';
-        return `${index}${node.predicate.field} ${predicateToDescription(node.predicate)}.${instructions}`;
+        return `${index}${predicateToDescription(node.predicate)}.${instructions}`;
       }
   }
 }
