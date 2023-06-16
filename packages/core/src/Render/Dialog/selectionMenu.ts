@@ -31,7 +31,8 @@ export function makeDropDownMenu(olliNode: ElaboratedOlliNode, tree: OlliRuntime
         option.innerText = node.description;
         return option;
     });
-    nodeSelect.replaceChildren(...[topOption, ...nodeSelectOptions]);
+    const allOptions = [topOption, ...nodeSelectOptions]
+    nodeSelect.replaceChildren(...allOptions);
 
     // Layer 2 -- Range
     const rangeSelectContainer = document.createElement('div')
@@ -44,7 +45,7 @@ export function makeDropDownMenu(olliNode: ElaboratedOlliNode, tree: OlliRuntime
     rangeSelect.setAttribute('id', 'olli-range-select');
     rangeSelectContainer.replaceChildren(rangeSelectLabel, rangeSelect)
 
-    let rangeSelectOptions = tree.rootTreeItem.olliNode.children.map((node) => {
+    let rangeSelectOptions = olliNode.children.map((node) => {
         const option = document.createElement('option');
         option.setAttribute('value', node.id);
         option.innerText = node.description;
@@ -53,8 +54,11 @@ export function makeDropDownMenu(olliNode: ElaboratedOlliNode, tree: OlliRuntime
     rangeSelect.replaceChildren(...rangeSelectOptions);
 
     nodeSelect.onchange = () => {
-        const selectedField = nodeSelectOptions[nodeSelect.selectedIndex];
+        console.log(nodeSelect.selectedIndex)
+        const selectedField = allOptions[nodeSelect.selectedIndex];
+        console.log(selectedField)
         const selectedFieldChildren = tree.olliNodeLookup[selectedField.value].children;
+        console.log(selectedFieldChildren)
 
         let rangeSelectOptions = selectedFieldChildren.map((node) => {
             const option = document.createElement('option');
@@ -63,7 +67,7 @@ export function makeDropDownMenu(olliNode: ElaboratedOlliNode, tree: OlliRuntime
             return option;
         });
         rangeSelect.replaceChildren(...rangeSelectOptions);
-        rangeSelect.onchange(null);
+        // rangeSelect.onchange(null);
     };
 
 
