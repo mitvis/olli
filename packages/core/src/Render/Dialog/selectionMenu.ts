@@ -10,6 +10,7 @@ import { generateDescriptions } from '../../description/index'
 export function makeDropDownMenu(olliNode: ElaboratedOlliNode, tree: OlliRuntime): HTMLElement {
     const container = document.createElement('div')
     console.log(tree)
+    let finalTreeItems = [];
 
     // Layer 1 -- Select a Node
     const nodeSelectContainer = document.createElement('div')
@@ -64,11 +65,31 @@ export function makeDropDownMenu(olliNode: ElaboratedOlliNode, tree: OlliRuntime
             return option;
         });
         rangeSelect.replaceChildren(...rangeSelectOptions);
+
+        rangeSelect.onchange = () => {
+            finalTreeItems = [
+                allOptions[nodeSelect.selectedIndex].value,
+                rangeSelectOptions[rangeSelect.selectedIndex].value
+            ];
+            // console.log(finalTreeItems)
+        }
+
+        finalTreeItems = [
+            allOptions[nodeSelect.selectedIndex].value,
+            rangeSelectOptions[rangeSelect.selectedIndex].value
+        ];
+        // console.log(finalTreeItems)
     };
 
+    finalTreeItems = [
+        allOptions[nodeSelect.selectedIndex].value,
+        rangeSelectOptions[rangeSelect.selectedIndex].value
+    ];
+    // console.log(finalTreeItems)
 
     container.appendChild(nodeSelectContainer);
     container.appendChild(rangeSelectContainer);
+    container.setAttribute('data-state', JSON.stringify(finalTreeItems))
     return container;
 }
 

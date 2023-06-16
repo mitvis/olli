@@ -125,11 +125,15 @@ export function openTargetedNavigationDialog(olliNode: ElaboratedOlliNode, tree:
     const menu = makeDropDownMenu(olliNode, tree);
 
     const onOk = () => {
-        const itemId = { and: JSON.parse(menu.getAttribute('data-state')) };
-        tree.setFocusToItem(predicate);
-        if (tree.callbacks?.onSelection) {
-            tree.callbacks?.onSelection(predicate);
+        const itemIds = JSON.parse(menu.getAttribute('data-state'));
+        for (let itemId in itemIds) {
+            let treeItem = tree.olliNodeLookup[itemIds[itemId]];
+            console.log(treeItem);
+            tree.setFocusToItem(treeItem);
         }
+        // if (tree.callbacks?.onSelection) {
+        //     tree.callbacks?.onSelection(predicate);
+        // }
     };
 
     const dialog = makeDialog(
