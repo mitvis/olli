@@ -125,14 +125,17 @@ export function openTargetedNavigationDialog(olliNode: ElaboratedOlliNode, tree:
     const menu = makeDropDownMenu(olliNode, tree);
 
     const onOk = () => {
-        const predicate = { and: JSON.parse(menu.getAttribute('data-state')) };
-        tree.setSelection(predicate);
+        const itemId = { and: JSON.parse(menu.getAttribute('data-state')) };
+        tree.setFocusToItem(predicate);
         if (tree.callbacks?.onSelection) {
             tree.callbacks?.onSelection(predicate);
         }
     };
 
-    const dialog = makeDialog(tree, 'Targeted Navigation Menu', 'Navigate quickly to part of this chart.', menu, { onOk });
+    const dialog = makeDialog(
+        tree, 'Targeted Navigation Menu',
+        'Navigate quickly a part of this chart.', menu, { onOk }
+    );
 
     openDialog(dialog, tree.renderContainer);
 }
