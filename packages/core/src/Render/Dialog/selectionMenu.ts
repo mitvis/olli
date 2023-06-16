@@ -44,22 +44,26 @@ export function makeDropDownMenu(olliNode: ElaboratedOlliNode, tree: OlliRuntime
     rangeSelect.setAttribute('id', 'olli-range-select');
     rangeSelectContainer.replaceChildren(rangeSelectLabel, rangeSelect)
 
+    let rangeSelectOptions = tree.rootTreeItem.olliNode.children.map((node) => {
+        const option = document.createElement('option');
+        option.setAttribute('value', node.id);
+        option.innerText = node.description;
+        return option;
+    });
+    rangeSelect.replaceChildren(...rangeSelectOptions);
+
     nodeSelect.onchange = () => {
         const selectedField = nodeSelectOptions[nodeSelect.selectedIndex];
-        console.log(selectedField.getAttribute('id'))
-        // const fieldDef = getFieldDef(selectedField, olliSpec.fields);
-        // let ops = ['='];
-        // if (fieldDef.type === 'quantitative' || fieldDef.type === 'temporal') {
-        //     ops = ['between', '<', '<=', '>', '>=', '='];
-        // }
-        // const opOptions = ops.map((op) => {
-        //     const option = document.createElement('option');
-        //     option.setAttribute('value', op);
-        //     option.innerText = op;
-        //     return option;
-        // });
-        // opSelect.replaceChildren(...opOptions);
-        // opSelect.onchange(null);
+        const selectedFieldChildren = tree.olliNodeLookup[selectedField.value].children;
+
+        let rangeSelectOptions = selectedFieldChildren.map((node) => {
+            const option = document.createElement('option');
+            option.setAttribute('value', node.id);
+            option.innerText = node.description;
+            return option;
+        });
+        rangeSelect.replaceChildren(...rangeSelectOptions);
+        rangeSelect.onchange(null);
     };
 
 
