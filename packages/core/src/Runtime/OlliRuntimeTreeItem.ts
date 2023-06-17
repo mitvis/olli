@@ -8,7 +8,7 @@
  *           for a tree being used as a file viewer
  */
 
-import { openSelectionDialog, openTableDialog } from '../Render/Dialog';
+import { openSelectionDialog, openSpatialNavDialog, openTableDialog } from '../Render/Dialog';
 import { ElaboratedOlliNode } from '../Structure/Types';
 import { OlliRuntime } from './OlliRuntime';
 
@@ -143,12 +143,14 @@ export class OlliRuntimeTreeItem {
         break;
       case 't':
         if ('predicate' in this.olliNode || this.olliNode.nodeType === 'root') {
-          openTableDialog(this.olliNode, this.tree);
+          openTableDialog(this.olliNode.fullPredicate, this.tree);
         }
         break;
       case 'f':
         openSelectionDialog(this.tree);
         break;
+      case 'g':
+        openSpatialNavDialog(this.tree);
       default:
         // return to avoid preventing default event action
         return;

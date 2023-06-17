@@ -24,6 +24,6 @@
 }
 
 .olli-dialog #olli-dialog-content:has(table) {
-  max-height: 300px;
+  max-height: 50vh;
   overflow-y: auto;
 }

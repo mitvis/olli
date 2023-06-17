@@ -6,6 +6,9 @@ import { renderTable } from '../Table';
 import { OlliRuntime } from '../../Runtime/OlliRuntime';
 import './dialog.css';
 import { makeSelectionMenu } from './selectionMenu';
+import { makeSpatialNavMenu } from './spatialNavMenu';
+import { LogicalAnd } from 'vega-lite/src/logical';
+import { FieldPredicate } from 'vega-lite/src/predicate';
 
 export function makeDialog(
   tree: OlliRuntime,
@@ -93,13 +96,13 @@ function openDialog(dialog: HTMLElement, renderContainer: HTMLElement) {
   });
 }
 
-export function openTableDialog(olliNode: ElaboratedOlliNode, tree: OlliRuntime) {
+export function openTableDialog(predicate: LogicalAnd<FieldPredicate>, tree: OlliRuntime) {
   const olliSpec = tree.olliSpec;
   const table = renderTable(
-    selectionTest(olliSpec.data, olliNode.fullPredicate),
+    selectionTest(olliSpec.data, predicate),
     olliSpec.fields.map((f) => f.field)
   );
-  const dialog = makeDialog(tree, 'Table View', predicateToDescription(olliNode.fullPredicate), table);
+  const dialog = makeDialog(tree, 'Table View', predicateToDescription(predicate), table);
 
   openDialog(dialog, tree.renderContainer);
 }
@@ -116,6 +119,14 @@ export function openSelectionDialog(tree: OlliRuntime) {
   };
 
   const dialog = makeDialog(tree, 'Filter Menu', 'Define a custom filter.', menu, { onOk });
+
+  openDialog(dialog, tree.renderContainer);
+}
+
+export function openSpatialNavDialog(tree: OlliRuntime) {
+  const menu = makeSpatialNavMenu(tree);
+
+  const dialog = makeDialog(tree, 'Grid Menu', 'Navigate the chart as a grid.', menu);
 
   openDialog(dialog, tree.renderContainer);
 }
