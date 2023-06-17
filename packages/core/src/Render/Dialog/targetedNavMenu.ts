@@ -1,4 +1,6 @@
 import { OlliRuntime } from '../../Runtime/OlliRuntime';
+import { ElaboratedOlliNode } from '../../Structure/Types';
+import { selectionTest } from '../../util/selection';
 
 export function makeTargetedNavMenu(tree: OlliRuntime): HTMLElement {
   const container = document.createElement('div');
@@ -11,7 +13,12 @@ export function makeTargetedNavMenu(tree: OlliRuntime): HTMLElement {
     const layerDiv = document.createElement('div');
     const layerChildContainer = document.createElement('div');
     const layerSelect = document.createElement('select');
-    const layerOptions = node.children.map((child) => {
+    const sortedByValueCount = [...node.children].sort((a: ElaboratedOlliNode, b: ElaboratedOlliNode) => {
+      const aCount = selectionTest(tree.olliSpec.data, a.fullPredicate).length;
+      const bCount = selectionTest(tree.olliSpec.data, b.fullPredicate).length;
+      return bCount - aCount;
+    });
+    const layerOptions = sortedByValueCount.map((child) => {
       const option = document.createElement('option');
       option.setAttribute('value', child.id);
       option.innerText = child.description;
