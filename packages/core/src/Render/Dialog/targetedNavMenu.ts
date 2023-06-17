@@ -15,6 +15,9 @@ export function makeTargetedNavMenu(tree: OlliRuntime): HTMLElement {
       const option = document.createElement('option');
       option.setAttribute('value', child.id);
       option.innerText = child.description;
+      if (tree.lastFocusedTreeItem?.olliNode.id.startsWith(child.id)) {
+        option.setAttribute('selected', 'selected');
+      }
       return option;
     });
     layerSelect.replaceChildren(...layerOptions);
