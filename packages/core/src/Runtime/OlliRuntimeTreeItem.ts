@@ -150,7 +150,7 @@ export class OlliRuntimeTreeItem {
         openSelectionDialog(this.tree);
         break;
       case 'r':
-        openTargetedNavigationDialog(this.olliNode, this.tree);
+        openTargetedNavigationDialog(this.tree);
         break;
       default:
         // return to avoid preventing default event action

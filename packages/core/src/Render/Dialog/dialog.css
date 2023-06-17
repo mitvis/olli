@@ -23,6 +23,10 @@
   margin-top: 0;
 }
 
+.olli-dialog #olli-dialog-content * {
+  max-width: 100%;;
+}
+
 .olli-dialog #olli-dialog-content:has(table) {
   max-height: 300px;
   overflow-y: auto;

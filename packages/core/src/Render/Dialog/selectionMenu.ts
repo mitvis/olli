@@ -1,98 +1,9 @@
 import { FieldPredicate } from 'vega-lite/src/predicate';
 import { OlliSpec } from '../../Types';
-import { ElaboratedOlliNode } from '../Structure/Types';
 import { getDomain, getFieldDef } from '../../util/data';
 import { serializeValue } from '../../util/values';
-import { generateDescriptions } from '../../description/index'
 
 // this would have been so much easier with some ui framework : \
-
-export function makeDropDownMenu(olliNode: ElaboratedOlliNode, tree: OlliRuntime): HTMLElement {
-    const container = document.createElement('div')
-    console.log(tree)
-    let finalTreeItems = [];
-
-    // Layer 1 -- Select a Node
-    const nodeSelectContainer = document.createElement('div')
-    const nodeSelectLabel = document.createElement('label')
-    nodeSelectLabel.setAttribute('for', 'olli-node-select')
-    nodeSelectLabel.innerText = 'Layer 1: '
-    const nodeSelect = document.createElement('select')
-    nodeSelect.classList.add('olli-node-select');
-    nodeSelect.setAttribute('name', 'olli-node-select');
-    nodeSelect.setAttribute('id', 'olli-node-select');
-    nodeSelectContainer.replaceChildren(nodeSelectLabel, nodeSelect)
-
-    const topOption = document.createElement('option');
-    topOption.setAttribute('value', tree.rootTreeItem.olliNode.id);
-    topOption.innerText = tree.rootTreeItem.olliNode.description;
-    const nodeSelectOptions = tree.rootTreeItem.olliNode.children.map((node) => {
-        const option = document.createElement('option');
-        option.setAttribute('value', node.id);
-        option.innerText = node.description;
-        return option;
-    });
-    const allOptions = [topOption, ...nodeSelectOptions]
-    nodeSelect.replaceChildren(...allOptions);
-
-    // Layer 2 -- Range
-    const rangeSelectContainer = document.createElement('div')
-    const rangeSelectLabel = document.createElement('label')
-    rangeSelectLabel.setAttribute('for', 'olli-range-select')
-    rangeSelectLabel.innerText = 'Layer 2: '
-    const rangeSelect = document.createElement('select')
-    rangeSelect.classList.add('olli-range-select');
-    rangeSelect.setAttribute('name', 'olli-range-select');
-    rangeSelect.setAttribute('id', 'olli-range-select');
-    rangeSelectContainer.replaceChildren(rangeSelectLabel, rangeSelect)
-
-    let rangeSelectOptions = tree.rootTreeItem.olliNode.children.map((node) => {
-        const option = document.createElement('option');
-        option.setAttribute('value', node.id);
-        option.innerText = node.description;
-        return option;
-    });
-    rangeSelect.replaceChildren(...rangeSelectOptions);
-
-    nodeSelect.onchange = () => {
-        const selectedField = allOptions[nodeSelect.selectedIndex];
-        const selectedFieldChildren = tree.olliNodeLookup[selectedField.value].children;
-
-        let rangeSelectOptions = selectedFieldChildren.map((node) => {
-            const option = document.createElement('option');
-            option.setAttribute('value', node.id);
-            option.innerText = node.description;
-            return option;
-        });
-        rangeSelect.replaceChildren(...rangeSelectOptions);
-
-        rangeSelect.onchange = () => {
-            finalTreeItems = [
-                allOptions[nodeSelect.selectedIndex].value,
-                rangeSelectOptions[rangeSelect.selectedIndex].value
-            ];
-            // console.log(finalTreeItems)
-        }
-
-        finalTreeItems = [
-            allOptions[nodeSelect.selectedIndex].value,
-            rangeSelectOptions[rangeSelect.selectedIndex].value
-        ];
-        // console.log(finalTreeItems)
-    };
-
-    finalTreeItems = [
-        allOptions[nodeSelect.selectedIndex].value,
-        rangeSelectOptions[rangeSelect.selectedIndex].value
-    ];
-    // console.log(finalTreeItems)
-
-    container.appendChild(nodeSelectContainer);
-    container.appendChild(rangeSelectContainer);
-    container.setAttribute('data-state', JSON.stringify(finalTreeItems))
-    return container;
-}
-
 
 export function makeSelectionMenu(olliSpec: OlliSpec): HTMLElement {
   const state: FieldPredicate[] = olliSpec.selection

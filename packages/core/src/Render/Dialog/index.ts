@@ -5,7 +5,8 @@ import { selectionTest } from '../../util/selection';
 import { renderTable } from '../Table';
 import { OlliRuntime } from '../../Runtime/OlliRuntime';
 import './dialog.css';
-import { makeSelectionMenu, makeDropDownMenu } from './selectionMenu';
+import { makeSelectionMenu } from './selectionMenu';
+import { makeTargetedNavMenu } from './targetedNavMenu';
 
 export function makeDialog(
   tree: OlliRuntime,
@@ -71,8 +72,8 @@ export function makeDialog(
     const okButton = document.createElement('button');
     okButton.innerText = 'Ok';
     okButton.addEventListener('click', () => {
-      callbacks?.onOk();
       closeDialog();
+      callbacks?.onOk();
     });
     dialogContent.appendChild(okButton);
   }
@@ -120,26 +121,20 @@ export function openSelectionDialog(tree: OlliRuntime) {
   openDialog(dialog, tree.renderContainer);
 }
 
+export function openTargetedNavigationDialog(tree: OlliRuntime) {
+  const menu = makeTargetedNavMenu(tree);
 
-export function openTargetedNavigationDialog(olliNode: ElaboratedOlliNode, tree: OlliRuntime) {
-    const menu = makeDropDownMenu(olliNode, tree);
+  const onOk = () => {
+    const selectedNodeId = menu.getAttribute('data-state');
+    console.log(selectedNodeId);
+    const treeItem = tree.treeItems.find((item) => item.olliNode.id === selectedNodeId);
+    console.log(treeItem);
+    if (treeItem) {
+      tree.setFocusToItem(treeItem);
+    }
+  };
 
-    const onOk = () => {
-        const itemIds = JSON.parse(menu.getAttribute('data-state'));
-        for (let itemId in itemIds) {
-            let treeItem = tree.olliNodeLookup[itemIds[itemId]];
-            console.log(treeItem);
-            tree.setFocusToItem(treeItem);
-        }
-        // if (tree.callbacks?.onSelection) {
-        //     tree.callbacks?.onSelection(predicate);
-        // }
-    };
+  const dialog = makeDialog(tree, 'Targeted Navigation Menu', 'Jump to a location in this chart.', menu, { onOk });
 
-    const dialog = makeDialog(
-        tree, 'Targeted Navigation Menu',
-        'Navigate quickly a part of this chart.', menu, { onOk }
-    );
-
-    openDialog(dialog, tree.renderContainer);
+  openDialog(dialog, tree.renderContainer);
 }
