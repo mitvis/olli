@@ -1,6 +1,6 @@
 import { OlliValue } from '../Types';
 import { OlliSpec } from '../Types';
-import { ElaboratedOlliNode, OlliNode } from '../Structure/Types';
+import { ElaboratedOlliNode, OlliNodeType } from '../Structure/Types';
 import { getBins } from '../util/bin';
 import { getDomain, getFieldDef } from '../util/data';
 import { selectionTest } from '../util/selection';
@@ -25,12 +25,23 @@ export function getCustomizedDescription(node: ElaboratedOlliNode) {
   function capitalizeFirst(s: string) {
     return s.slice(0, 1).toUpperCase() + s.slice(1)
   }
-  return Array.from(node.description.values()).map(capitalizeFirst).join('. ') + '.';
+
+  function removeFinalPeriod(s: string) {
+    if (s.endsWith('.')) {
+      return s.slice(0, -1);
+    }
+    return s;
+  }
+
+  return Array.from(node.description.values())
+    .filter(s => s.length > 0)
+    .map(capitalizeFirst)
+    .map(removeFinalPeriod).join('. ') + '.';
 }
 
 export function nodeToDescription(node: ElaboratedOlliNode, dataset, olliSpec: OlliSpec): Map<string, string> {
   const indexStr = `${(node.parent?.children.indexOf(node) || 0) + 1} of ${(node.parent?.children || []).length}`;
-  const description = olliSpec.description?.concat(' ') || '';
+  const description = olliSpec.description || '';
   const chartType = () => {
     if (olliSpec.mark) {
       if (olliSpec.mark === 'point' && olliSpec.axes?.length === 2) {
@@ -65,18 +76,12 @@ export function nodeToDescription(node: ElaboratedOlliNode, dataset, olliSpec: O
     switch (node.nodeType) {
       case 'root':
         if ('groupby' in node) {
-          return `${description}A ${chartTypePrefix(node)}${chartType()} with ${node.children.length} views for ${
-            node.groupby
-          }, with axes ${axes}`;
-        }
-        if (olliSpec.mark && olliSpec.axes?.length) {
-          return `${olliSpec.description?.concat(' ') || ''}A ${chartType()} with axes ${axes}`;
+          return description;
         }
         if (olliSpec.mark) {
-          return `${olliSpec.description?.concat(' ') || ''}A ${chartType()}`;
+          return olliSpec.description || '';
         }
-        const fields = olliSpec.fields.map((f) => f.field);
-        return `A dataset with ${fields.length} fields${fields.length <= 3 ? ' ' + [...fields].join(', ') : ''}`;
+        return '';
       case 'facet':
         if ('predicate' in node && 'equal' in node.predicate) {
           return `titled ${node.predicate.equal}`;
@@ -105,6 +110,14 @@ export function nodeToDescription(node: ElaboratedOlliNode, dataset, olliSpec: O
 
   function type(node: ElaboratedOlliNode): string {
     switch (node.nodeType) {
+      case 'root':
+        if ('groupby' in node) {
+          return `a ${chartTypePrefix(node)}${chartType()}`;
+        }
+        if (olliSpec.mark) {
+          return `a ${chartType()}`;
+        }
+        return 'a dataset';
       case 'facet':
         const facetName = olliSpec.mark === 'line' ? 'line' : olliSpec.mark ? chartType() : 'facet';
         return `a ${facetName}`;
@@ -114,15 +127,12 @@ export function nodeToDescription(node: ElaboratedOlliNode, dataset, olliSpec: O
         const guideType = node.nodeType === 'xAxis' ? 'X-axis' : node.nodeType === 'yAxis' ? 'Y-axis' : 'Legend';
         if ('groupby' in node) {
           const fieldDef = getFieldDef(node.groupby, olliSpec.fields);
-          let first, last;
           if (fieldDef.type === 'quantitative' || fieldDef.type === 'temporal') {
             const guide =
               olliSpec.axes?.find((axis) => axis.field === node.groupby) ||
               olliSpec.legends?.find((legend) => legend.field === node.groupby);
             const bins = getBins(node.groupby, dataset, olliSpec.fields);
             if (bins.length) {
-              first = fmtValue(bins[0][0]);
-              last = fmtValue(bins[bins.length - 1][1]);
               return `for a ${
                 'scaleType' in guide ? guide.scaleType || fieldDef.type : fieldDef.type
               } scale`;
@@ -139,6 +149,15 @@ export function nodeToDescription(node: ElaboratedOlliNode, dataset, olliSpec: O
 
   function children(node: ElaboratedOlliNode): string {
     switch (node.nodeType) {
+      case 'root':
+        if ('groupby' in node || (olliSpec.mark && olliSpec.axes?.length)) {
+          return `with axes ${axes}`;
+        }
+        const fields = olliSpec.fields.map((f) => f.field);
+        if (fields.length <= 3) {
+          return ' ' + [...fields].join(', ');
+        }
+        return '';
       case 'facet':
         return `with axes ${axes}`;
       default:
@@ -196,6 +215,17 @@ export function nodeToDescription(node: ElaboratedOlliNode, dataset, olliSpec: O
 
   function size(node: ElaboratedOlliNode): string {
     switch (node.nodeType) {
+      case 'root':
+        if ('groupby' in node) {
+          return `with ${node.children.length} views for ${
+            node.groupby
+          }`;
+        }
+        if ((olliSpec.mark && olliSpec.axes?.length) || olliSpec.mark) {
+          return '';
+        }
+        const fields = olliSpec.fields.map((f) => f.field);
+        return `with ${fields.length} fields`;
       case 'filteredData':
         if ('predicate' in node) {
           const instructions = node.children.length ? '' : ' Press t to open table';
@@ -225,8 +255,8 @@ export function nodeToDescription(node: ElaboratedOlliNode, dataset, olliSpec: O
     }
   }
 
-  const nodeTypeToTokens = new Map<string, string[]>([
-    ['root', ['name']],
+  const nodeTypeToTokens = new Map<OlliNodeType, string[]>([
+    ['root', ['name', 'type', 'size', 'children']],
     ['facet', ['index', 'type', 'name', 'children']],
     ['xAxis', ['name', 'type', 'data']],
     ['yAxis', ['name', 'type', 'data']],
