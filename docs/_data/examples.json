@@ -152,5 +152,25 @@
         "code": "/examples/histogram-vl.html"
       }
     ]
+  },
+  {
+    "title": "Wilkinson Dot Plot",
+    "url": "/gallery/wilkinsonDotPlot.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/wilkinsonDotPlot-vl.html"
+      }
+    ]
+  },
+  {
+    "title": "Density Plot",
+    "url": "/gallery/densityPlot.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/densityPlot-vl.html"
+      }
+    ]
   }
 ]
