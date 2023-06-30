@@ -7,8 +7,9 @@ import { selectionTest } from '../util/selection';
 import { fmtValue } from '../util/values';
 import { FieldPredicate } from 'vega-lite/src/predicate';
 import { LogicalComposition } from 'vega-lite/src/logical';
+import { llmDescribe } from '../util/llm';
 
-export function generateDescriptions(olliSpec: OlliSpec, tree: ElaboratedOlliNode) {
+export async function generateDescriptions(olliSpec: OlliSpec, tree: ElaboratedOlliNode) {
   const data = olliSpec.selection ? selectionTest(olliSpec.data, olliSpec.selection) : olliSpec.data;
   const queue = [tree];
   while (queue.length > 0) {
@@ -16,12 +17,12 @@ export function generateDescriptions(olliSpec: OlliSpec, tree: ElaboratedOlliNod
     if (!node) {
       continue;
     }
-    node.description = nodeToDescription(node, data, olliSpec);
+    node.description = await nodeToDescription(node, data, olliSpec);
     queue.push(...node.children);
   }
 }
 
-export function nodeToDescription(node: ElaboratedOlliNode, data, olliSpec: OlliSpec): string {
+export async function nodeToDescription(node: ElaboratedOlliNode, data, olliSpec: OlliSpec): Promise<string> {
   const index = `${(node.parent?.children.indexOf(node) || 0) + 1} of ${(node.parent?.children || []).length}. `;
   const description = olliSpec.description?.concat(' ') || '';
   const chartType = () => {
@@ -112,10 +113,10 @@ export function nodeToDescription(node: ElaboratedOlliNode, data, olliSpec: Olli
       const instructions = node.children.length ? '' : ' Press t to open table.';
       if ('predicate' in node) {
         const selection = selectionTest(data, node.fullPredicate);
-        return `${index}${predicateToDescription(node.predicate)}. ${pluralize(
-          selection.length,
-          'value'
-        )}.${instructions}`;
+        const llmDesc = await llmDescribe(selection);
+        return `${index}${predicateToDescription(node.predicate)}. ${pluralize(selection.length, 'value')}.${
+          llmDesc ? ' ' + llmDesc : ''
+        }${instructions}`;
       }
     case 'annotations':
       return `${node.children.length} annotations.`;
@@ -125,10 +126,10 @@ export function nodeToDescription(node: ElaboratedOlliNode, data, olliSpec: Olli
       } else if ('predicate' in node) {
         const instructions = node.children.length ? '' : ' Press t to open table.';
         const selection = selectionTest(data, node.fullPredicate);
-        return `${index}${predicateToDescription(node.predicate)}. ${pluralize(
-          selection.length,
-          'value'
-        )}.${instructions}`;
+        const llmDesc = await llmDescribe(selection);
+        return `${index}${predicateToDescription(node.predicate)}. ${pluralize(selection.length, 'value')}.${
+          llmDesc ? ' ' + llmDesc : ''
+        }${instructions}`;
       }
   }
 }

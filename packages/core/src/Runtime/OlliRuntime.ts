@@ -68,18 +68,18 @@ export class OlliRuntime {
     const tree: ElaboratedOlliNode = olliSpecToTree(this.olliSpec);
     this.olliNodeLookup = treeToNodeLookup(tree);
 
-    generateDescriptions(this.olliSpec, tree);
+    generateDescriptions(this.olliSpec, tree).then(() => {
+      const ul = renderTree(tree);
+      this.rootDomNode = ul;
+      this.renderContainer.replaceChildren(ul);
 
-    const ul = renderTree(tree);
-    this.rootDomNode = ul;
-    this.renderContainer.replaceChildren(ul);
+      this.treeItems = [];
 
-    this.treeItems = [];
+      findTreeitems(this.rootDomNode, this, this.olliNodeLookup, undefined);
 
-    findTreeitems(this.rootDomNode, this, this.olliNodeLookup, undefined);
-
-    this.rootTreeItem = this.treeItems[0];
-    this.rootTreeItem.domNode.tabIndex = 0;
+      this.rootTreeItem = this.treeItems[0];
+      this.rootTreeItem.domNode.tabIndex = 0;
+    });
   }
 
   renderTreeDescription() {

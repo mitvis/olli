@@ -28,6 +28,8 @@
   "dependencies": {
     "d3-scale": "^4.0.2",
     "dayjs": "^1.11.7",
+    "exponential-backoff": "^3.1.1",
+    "openai": "^3.3.0",
     "vega-lite": "^5.9.3",
     "vega-statistics": "^1.9.0",
     "webpack": "^5.76.0"
