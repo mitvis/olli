@@ -132,5 +132,25 @@
         "code": "/examples/groupedBarChart-vl.html"
       }
     ]
+  },
+  {
+    "title": "Population Pyramid",
+    "url": "/gallery/populationPyramid.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/populationPyramid-vl.html"
+      }
+    ]
+  },
+  {
+    "title": "Histogram",
+    "url": "/gallery/histogram.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/histogram-vl.html"
+      }
+    ]
   }
 ]
