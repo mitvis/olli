@@ -112,5 +112,15 @@
         "code": "/examples/facetedChart-op.html"
       }
     ]
+  },
+  {
+    "title": "Aggregate Bar Chart",
+    "url": "/gallery/aggregateBarChart.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/aggregateBarChart-vl.html"
+      },
+    ]
   }
 ]
