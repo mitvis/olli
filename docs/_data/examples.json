@@ -120,7 +120,17 @@
       {
         "name": "Vega-Lite",
         "code": "/examples/aggregateBarChart-vl.html"
-      },
+      }
+    ]
+  },
+  {
+    "title": "Grouped Bar Chart",
+    "url": "/gallery/groupedBarChart.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/groupedBarChart-vl.html"
+      }
     ]
   }
 ]
