@@ -33,7 +33,7 @@
     "webpack": "^5.76.0"
   },
   "peerDependencies": {
-    "olli": "^1.0.5"
+    "olli": "^2.0.0"
   },
   "devDependencies": {
     "prettier": "2.8.8",
