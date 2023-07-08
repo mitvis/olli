@@ -71,6 +71,13 @@ export class OlliRuntimeTreeItem {
     this.keyboardManager = new KeyboardManager(this.domNode);
     this.keyboardManager.addActions([
       {
+        key: 'h',
+        title: 'Display help documentation modal',
+        action: () => {
+          this.keyboardManager.launchHelpDialog();
+        }
+      },
+      {
         key: 'Enter',
         title: 'Expand and collapse the current layer of the tree',
         action: () => {
