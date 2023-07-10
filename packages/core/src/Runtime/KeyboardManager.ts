@@ -26,6 +26,7 @@ export class KeyboardManager {
             this.target.setAttribute("tabIndex", "0");
         }
         this.helpModal = null;
+        this.actions = {};
     }
 
     private handleEvents(e: KeyboardEvent): void {
