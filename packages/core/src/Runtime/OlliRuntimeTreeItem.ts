@@ -92,6 +92,7 @@ export class OlliRuntimeTreeItem {
       },
       {
         key: ' ',
+        keyDescription: 'Space',
         title: 'Expand and collapse the current layer of the tree',
         action: () => {
           if (this.isExpandable) {
