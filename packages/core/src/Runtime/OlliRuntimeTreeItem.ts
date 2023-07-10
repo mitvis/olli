@@ -67,7 +67,6 @@ export class OlliRuntimeTreeItem {
   init() {
     this.domNode.tabIndex = -1;
 
-    // this.domNode.addEventListener('keydown', this.handleKeydown.bind(this));
     this.keyboardManager = new KeyboardManager(this.domNode);
     this.keyboardManager.addActions([
       {
