@@ -80,6 +80,11 @@ export class OlliRuntime {
 
     this.rootTreeItem = this.treeItems[0];
     this.rootTreeItem.domNode.tabIndex = 0;
+
+    const helpComment = "Press 'h' to open the Olli Help Menu for a list of controls.";
+    const helpElement = document.createElement("em");
+    helpElement.textContent = helpComment;
+    this.rootDomNode.appendChild(helpElement);
   }
 
   renderTreeDescription() {
