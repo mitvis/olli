@@ -85,7 +85,7 @@ export class KeyboardManager {
         });
         dialog.appendChild(closeButton);
 
-        const heading = "Keyboard Manager";
+        const heading = "Olli Help Menu";
         const h1 = document.createElement("h1");
         h1.textContent = heading;
         dialog.setAttribute("aria-live", heading);
