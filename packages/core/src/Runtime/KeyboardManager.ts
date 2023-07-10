@@ -96,6 +96,7 @@ export class KeyboardManager {
         Object.entries(this.actions).forEach(([keystroke, details]) => {
             const tr = document.createElement("tr");
             const th = document.createElement("th");
+            th.style.textAlign = 'left'; 
             th.scope = "row";
             th.textContent = details.title;
             tr.appendChild(th);
