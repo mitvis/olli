@@ -1,3 +1,4 @@
+import { getCustomizedDescription } from '../../Customization';
 import { OlliRuntime } from '../../Runtime/OlliRuntime';
 import { ElaboratedOlliNode } from '../../Structure/Types';
 import { selectionTest } from '../../util/selection';
@@ -6,7 +7,7 @@ export function makeTargetedNavMenu(tree: OlliRuntime): HTMLElement {
   const container = document.createElement('div');
   let selectedNodeId = tree.rootTreeItem.olliNode.id;
 
-  function generateChildSelects(node) {
+  function generateChildSelects(node: ElaboratedOlliNode) {
     if (!node.children || !node.children.length) {
       return null;
     }
@@ -21,7 +22,7 @@ export function makeTargetedNavMenu(tree: OlliRuntime): HTMLElement {
     const layerOptions = sortedByValueCount.map((child) => {
       const option = document.createElement('option');
       option.setAttribute('value', child.id);
-      option.innerText = child.description;
+      option.innerText = getCustomizedDescription(child);
       if (tree.lastFocusedTreeItem?.olliNode.id.startsWith(child.id)) {
         option.setAttribute('selected', 'selected');
       }
