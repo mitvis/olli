@@ -30,7 +30,7 @@ export interface ElaboratedOlliNode {
   children: ElaboratedOlliNode[];
   groupby?: string;
   predicate?: FieldPredicate;
-  description?: string;
+  description: Map<string, string>,
 }
 
 export type OlliNodeLookup = { [id: string]: ElaboratedOlliNode };
