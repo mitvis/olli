@@ -85,6 +85,14 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
           predicate,
           children: elaborateOlliNodes(node.children, data, nextFullPred, nextId),
         };
+      } else if ('annotations' in node) {
+        const id = `${idPrefix}-${idx}`;
+        return {
+          id: id,
+          fullPredicate,
+          nodeType: 'annotations',
+          children: elaborateOlliNodes(node.annotations, data, fullPredicate, id),
+        };
       } else {
         throw new Error('Invalid node type');
       }
