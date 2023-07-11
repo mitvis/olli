@@ -8,7 +8,7 @@
  *           for a tree being used as a file viewer
  */
 
-import { openSelectionDialog, openTableDialog } from '../Render/Dialog';
+import { openSelectionDialog, openTableDialog, openTargetedNavigationDialog } from '../Render/Dialog';
 import { ElaboratedOlliNode } from '../Structure/Types';
 import { OlliRuntime } from './OlliRuntime';
 
@@ -148,6 +148,9 @@ export class OlliRuntimeTreeItem {
         break;
       case 'f':
         openSelectionDialog(this.tree);
+        break;
+      case 'r':
+        openTargetedNavigationDialog(this.tree);
         break;
       default:
         // return to avoid preventing default event action
