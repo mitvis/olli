@@ -1,4 +1,4 @@
-import { OlliValue } from '../Types';
+import { OlliDataset, OlliValue } from '../Types';
 import { OlliSpec } from '../Types';
 import { ElaboratedOlliNode, OlliNodeType } from '../Structure/Types';
 import { getBins } from '../util/bin';
@@ -8,22 +8,9 @@ import { fmtValue } from '../util/values';
 import { FieldPredicate } from 'vega-lite/src/predicate';
 import { LogicalComposition } from 'vega-lite/src/logical';
 
-export function generateDescriptions(olliSpec: OlliSpec, tree: ElaboratedOlliNode) {
-  const data = olliSpec.selection ? selectionTest(olliSpec.data, olliSpec.selection) : olliSpec.data;
-  const queue = [tree];
-  while (queue.length > 0) {
-    const node = queue.shift();
-    if (!node) {
-      continue;
-    }
-    node.description = nodeToDescription(node, data, olliSpec);
-    queue.push(...node.children);
-  }
-}
-
 export function getCustomizedDescription(node: ElaboratedOlliNode) {
   function capitalizeFirst(s: string) {
-    return s.slice(0, 1).toUpperCase() + s.slice(1)
+    return s.slice(0, 1).toUpperCase() + s.slice(1);
   }
 
   function removeFinalPeriod(s: string) {
@@ -33,13 +20,20 @@ export function getCustomizedDescription(node: ElaboratedOlliNode) {
     return s;
   }
 
-  return Array.from(node.description.values())
-    .filter(s => s.length > 0)
-    .map(capitalizeFirst)
-    .map(removeFinalPeriod).join('. ') + '.';
+  return (
+    Array.from(node.description.values())
+      .filter((s) => s.length > 0)
+      .map(capitalizeFirst)
+      .map(removeFinalPeriod)
+      .join('. ') + '.'
+  );
 }
 
-export function nodeToDescription(node: ElaboratedOlliNode, dataset, olliSpec: OlliSpec): Map<string, string> {
+export function nodeToDescription(
+  node: ElaboratedOlliNode,
+  dataset: OlliDataset,
+  olliSpec: OlliSpec
+): Map<string, string> {
   const indexStr = `${(node.parent?.children.indexOf(node) || 0) + 1} of ${(node.parent?.children || []).length}`;
   const description = olliSpec.description || '';
   const chartType = () => {
@@ -91,10 +85,10 @@ export function nodeToDescription(node: ElaboratedOlliNode, dataset, olliSpec: O
       case 'yAxis':
       case 'legend':
         const guideType = node.nodeType === 'xAxis' ? 'x-axis' : node.nodeType === 'yAxis' ? 'y-axis' : 'legend';
-        return `${guideType} titled ${node.groupby}`; 
+        return `${guideType} titled ${node.groupby}`;
       default:
-          throw `Node type ${node.nodeType} does not have the 'name' token.`
-    } 
+        throw `Node type ${node.nodeType} does not have the 'name' token.`;
+    }
   }
 
   function index(node: ElaboratedOlliNode): string {
@@ -104,7 +98,7 @@ export function nodeToDescription(node: ElaboratedOlliNode, dataset, olliSpec: O
       case 'other':
         return indexStr;
       default:
-        throw `Node type ${node.nodeType} does not have the 'index' token.`
+        throw `Node type ${node.nodeType} does not have the 'index' token.`;
     }
   }
 
@@ -133,17 +127,15 @@ export function nodeToDescription(node: ElaboratedOlliNode, dataset, olliSpec: O
               olliSpec.legends?.find((legend) => legend.field === node.groupby);
             const bins = getBins(node.groupby, dataset, olliSpec.fields);
             if (bins.length) {
-              return `for a ${
-                'scaleType' in guide ? guide.scaleType || fieldDef.type : fieldDef.type
-              } scale`;
+              return `for a ${'scaleType' in guide ? guide.scaleType || fieldDef.type : fieldDef.type} scale`;
             }
           } else {
-              return `for a ${fieldDef.type} scale`;
+            return `for a ${fieldDef.type} scale`;
           }
         }
         return '';
       default:
-        throw `Node type ${node.nodeType} does not have the 'type' token.`
+        throw `Node type ${node.nodeType} does not have the 'type' token.`;
     }
   }
 
@@ -161,7 +153,7 @@ export function nodeToDescription(node: ElaboratedOlliNode, dataset, olliSpec: O
       case 'facet':
         return `with axes ${axes}`;
       default:
-        throw `Node type ${node.nodeType} does not have the 'children' token.`
+        throw `Node type ${node.nodeType} does not have the 'children' token.`;
     }
   }
 
@@ -189,17 +181,14 @@ export function nodeToDescription(node: ElaboratedOlliNode, dataset, olliSpec: O
             if (domain.length) {
               first = fmtValue(domain[0]);
               last = fmtValue(domain[domain.length - 1]);
-              return `with ${pluralize(
-                domain.values.length,
-                'value'
-              )} from ${first} to ${last}`;
+              return `with ${pluralize(domain.values.length, 'value')} from ${first} to ${last}`;
             }
           }
         }
         return '';
       case 'filteredData':
         if ('predicate' in node) {
-          return predicateToDescription(node.predicate)
+          return predicateToDescription(node.predicate);
         }
         return '';
       case 'other':
@@ -209,7 +198,7 @@ export function nodeToDescription(node: ElaboratedOlliNode, dataset, olliSpec: O
           return predicateToDescription(node.predicate);
         }
       default:
-        throw `Node type ${node.nodeType} does not have the 'data' token.`
+        throw `Node type ${node.nodeType} does not have the 'data' token.`;
     }
   }
 
@@ -217,9 +206,7 @@ export function nodeToDescription(node: ElaboratedOlliNode, dataset, olliSpec: O
     switch (node.nodeType) {
       case 'root':
         if ('groupby' in node) {
-          return `with ${node.children.length} views for ${
-            node.groupby
-          }`;
+          return `with ${node.children.length} views for ${node.groupby}`;
         }
         if ((olliSpec.mark && olliSpec.axes?.length) || olliSpec.mark) {
           return '';
@@ -230,12 +217,9 @@ export function nodeToDescription(node: ElaboratedOlliNode, dataset, olliSpec: O
         if ('predicate' in node) {
           const instructions = node.children.length ? '' : ' Press t to open table';
           const selection = selectionTest(dataset, node.fullPredicate);
-          return `${pluralize(
-            selection.length,
-            'value'
-          )}.${instructions}`;
+          return `${pluralize(selection.length, 'value')}.${instructions}`;
         }
-      return '';
+        return '';
       case 'annotations':
         return `${node.children.length} annotations`;
       case 'other':
@@ -244,14 +228,11 @@ export function nodeToDescription(node: ElaboratedOlliNode, dataset, olliSpec: O
         } else if ('predicate' in node) {
           const instructions = node.children.length ? '' : ' Press t to open table';
           const selection = selectionTest(dataset, node.fullPredicate);
-          return `${pluralize(
-            selection.length,
-            'value'
-          )}.${instructions}`;
+          return `${pluralize(selection.length, 'value')}.${instructions}`;
         }
         return '';
       default:
-        throw `Node type ${node.nodeType} does not have the 'size' token.`
+        throw `Node type ${node.nodeType} does not have the 'size' token.`;
     }
   }
 
@@ -263,8 +244,8 @@ export function nodeToDescription(node: ElaboratedOlliNode, dataset, olliSpec: O
     ['legend', ['name', 'type', 'data']],
     ['filteredData', ['index', 'data', 'size']],
     ['annotations', ['size']],
-    ['other', ['index', 'data', 'size']]
-  ])
+    ['other', ['index', 'data', 'size']],
+  ]);
 
   const tokenFunctions = new Map<string, Function>([
     ['name', name],
@@ -273,8 +254,7 @@ export function nodeToDescription(node: ElaboratedOlliNode, dataset, olliSpec: O
     ['children', children],
     ['data', data],
     ['size', size],
-  ])
-
+  ]);
 
   const resultDescription = new Map<string, string>();
   const tokens = nodeTypeToTokens.get(node.nodeType);
@@ -282,7 +262,7 @@ export function nodeToDescription(node: ElaboratedOlliNode, dataset, olliSpec: O
     for (const token of tokens) {
       const tokenFunc = tokenFunctions.get(token);
       if (tokenFunc !== undefined) {
-          resultDescription.set(token, tokenFunc(node));
+        resultDescription.set(token, tokenFunc(node));
       }
     }
   }

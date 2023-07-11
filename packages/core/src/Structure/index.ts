@@ -3,6 +3,7 @@ import { FieldPredicate } from 'vega-lite/src/predicate';
 import { OlliSpec, OlliDataset } from '../Types';
 import { fieldToPredicates, selectionTest } from '../util/selection';
 import { ElaboratedOlliNode, OlliNode, OlliNodeLookup, OlliNodeType } from './Types';
+import { nodeToDescription } from '../Customization';
 
 export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
   const namespace = (Math.random() + 1).toString(36).substring(7);
@@ -17,6 +18,7 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
       id: namespace,
       nodeType: 'root',
       fullPredicate: { and: [] },
+      description: new Map<string, string>(),
       children: nodes,
     };
   }
@@ -58,6 +60,7 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
           fullPredicate,
           nodeType,
           groupby: node.groupby,
+          description: new Map<string, string>(),
           children: childPreds.map((p, childIdx) => {
             const childFullPred = {
               and: [...fullPredicate.and, p],
@@ -68,6 +71,7 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
               nodeType: nodeType === 'root' ? 'facet' : 'filteredData',
               predicate: p,
               fullPredicate: childFullPred,
+              description: new Map<string, string>(),
               children: elaborateOlliNodes(node.children, data, childFullPred, childId),
             };
           }),
@@ -83,6 +87,7 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
           nodeType: 'filteredData',
           fullPredicate: nextFullPred,
           predicate,
+          description: new Map<string, string>(),
           children: elaborateOlliNodes(node.children, data, nextFullPred, nextId),
         };
       } else if ('annotations' in node) {
@@ -91,6 +96,7 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
           id: id,
           fullPredicate,
           nodeType: 'annotations',
+          description: new Map<string, string>(),
           children: elaborateOlliNodes(node.annotations, data, fullPredicate, id),
         };
       } else {
@@ -104,17 +110,26 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
   const data = olliSpec.selection ? selectionTest(olliSpec.data, olliSpec.selection) : olliSpec.data;
 
   const tree = ensureFirstLayerHasOneRoot(elaborateOlliNodes(nodes, data, { and: [] }, namespace));
-  addParentRefs(tree);
+  postProcessTree(tree, olliSpec);
   return tree;
 }
 
-export function addParentRefs(tree: ElaboratedOlliNode) {
-  const queue = [tree];
-  while (queue.length > 0) {
-    const node = queue.shift();
+export function postProcessTree(tree: ElaboratedOlliNode, olliSpec: OlliSpec) {
+  const data = olliSpec.selection ? selectionTest(olliSpec.data, olliSpec.selection) : olliSpec.data;
+
+  function postProcess(node) {
+    // add parent refs
     node.children.forEach((child) => {
       child.parent = node;
     });
+    // initialize descriptions
+    node.description = nodeToDescription(node, data, olliSpec);
+  }
+
+  const queue = [tree];
+  while (queue.length > 0) {
+    const node = queue.shift();
+    postProcess(node);
     queue.push(...node.children);
   }
 }

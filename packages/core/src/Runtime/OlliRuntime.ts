@@ -5,7 +5,7 @@ import { OlliSpec } from '../Types';
 import { setOlliGlobalState } from '../util/globalState';
 import { OlliRuntimeTreeItem } from './OlliRuntimeTreeItem';
 import { olliSpecToTree, treeToNodeLookup } from '../Structure';
-import { generateDescriptions, getCustomizedDescription } from '../Customization';
+import { getCustomizedDescription } from '../Customization';
 import { renderTree } from '../Render/TreeView';
 import { LogicalAnd, LogicalComposition } from 'vega-lite/src/logical';
 import { FieldPredicate } from 'vega-lite/src/predicate';
@@ -67,8 +67,6 @@ export class OlliRuntime {
 
     const tree: ElaboratedOlliNode = olliSpecToTree(this.olliSpec);
     this.olliNodeLookup = treeToNodeLookup(tree);
-
-    generateDescriptions(this.olliSpec, tree);
 
     const ul = renderTree(tree);
     this.rootDomNode = ul;
