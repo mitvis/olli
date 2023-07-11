@@ -11,7 +11,6 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
   const view = await getVegaView(compile(spec).spec);
   const scene = getVegaScene(view);
   const data = getData(scene);
-  console.log(data);
   const description = spec.description; // possible text description included with spec
   const olliSpec: OlliSpec = {
     description,
