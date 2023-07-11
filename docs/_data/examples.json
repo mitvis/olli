@@ -172,5 +172,95 @@
         "code": "/examples/densityPlot-vl.html"
       }
     ]
+  },
+  {
+    "title": "Stacked Density Plot",
+    "url": "/gallery/stackedDensityPlot.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/stackedDensityPlot-vl.html"
+      }
+    ]
+  },
+  {
+    "title": "Isotype Dot Plot",
+    "url": "/gallery/isotypeDotPlot.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/isotypeDotPlot-vl.html"
+      }
+    ]
+  },
+  {
+    "title": "Strip Plot",
+    "url": "/gallery/stripPlot.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/stripPlot-vl.html"
+      }
+    ]
+  },
+  {
+    "title": "Area Chart",
+    "url": "/gallery/areaChart.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/areaChart-vl.html"
+      }
+    ]
+  },
+  {
+    "title": "Stacked Area Chart",
+    "url": "/gallery/stackedAreaChart.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/stackedAreaChart-vl.html"
+      }
+    ]
+  },
+  {
+    "title": "Steamgraph",
+    "url": "/gallery/steamgraph.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/steamgraph-vl.html"
+      }
+    ]
+  }, 
+  {
+    "title": "Heatmap",
+    "url": "/gallery/heatmap.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/heatmap-vl.html"
+      }
+    ]
+  },
+  {
+    "title": "Lasagna Plot",
+    "url": "/gallery/lasagnaPlot.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/lasagnaPlot-vl.html"
+      }
+    ]
+  },
+  {
+    "title": "Pie Chart",
+    "url": "/gallery/pieChart.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/pieChart-vl.html"
+      }
+    ]
   }
 ]

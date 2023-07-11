@@ -25,6 +25,7 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
 
     const getMark = (spec: any) => {
       // TODO vega-lite mark type exceeds olli mark type, should do some validation
+      //console.log(spec.mark)
       const mark: any = spec.mark;
       if (mark && mark.type) {
         // e.g. "mark": {"type": "line", "point": true}
@@ -33,6 +34,7 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
       return mark;
     };
     olliSpec.mark = getMark(spec);
+    //console.log(olliSpec.mark)
 
     const getFieldFromEncoding = (encoding) => {
       if ('aggregate' in encoding) {
