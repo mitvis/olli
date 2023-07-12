@@ -1,3 +1,4 @@
+import { getCustomizedDescription } from '../../Customization';
 import { ElaboratedOlliNode } from '../../Structure/Types';
 import './TreeStyle.css';
 
@@ -23,7 +24,7 @@ export function renderTree(node: ElaboratedOlliNode): HTMLElement {
     item.setAttribute('id', node.id);
 
     const label = document.createElement('span');
-    label.innerText = node.description;
+    label.innerText = getCustomizedDescription(node);
     item.appendChild(label);
 
     if (node.children.length) {
