@@ -1,5 +1,5 @@
-[
-  {
+{ 
+  "bar_chart": {
     "title": "Bar Chart",
     "img": "/img/barChart.JPG",
     "url": "/gallery/barChart.html",
@@ -18,7 +18,7 @@
       }
     ]
   },
-  {
+  "line_chart": {
     "title": "Line Chart",
     "img": "/img/lineChart.JPG",
     "url": "/gallery/lineChart.html",
@@ -37,7 +37,7 @@
       }
     ]
   },
-  {
+  "scatterplot": {
     "title": "Scatterplot",
     "img": "/img/scatterplot.JPG",
     "url": "/gallery/scatterplot.html",
@@ -56,7 +56,7 @@
       }
     ]
   },
-  {
+  "multi_series_line_chart": {
     "title": "Multi-Series Line Chart",
     "img": "/img/multiSeriesLineChart.JPG",
     "url": "/gallery/multiSeriesLine.html",
@@ -75,7 +75,7 @@
       }
     ]
   },
-  {
+  "stacked_bar_chart": {
     "title": "Stacked Bar Chart",
     "img": "/img/stackedBarChart.JPG",
     "url": "/gallery/stackedBar.html",
@@ -94,7 +94,7 @@
       }
     ]
   },
-  {
+  "faceted_chart": {
     "title": "Faceted Chart",
     "img": "/img/facetedChart.JPG",
     "url": "/gallery/facet.html",
@@ -112,5 +112,155 @@
         "code": "/examples/facetedChart-op.html"
       }
     ]
+  },
+  "aggregate_bar_chart": {
+    "title": "Aggregate Bar Chart",
+    "url": "/gallery/aggregateBarChart.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/aggregateBarChart-vl.html"
+      }
+    ]
+  },
+  "grouped_bar_chart": {
+    "title": "Grouped Bar Chart",
+    "url": "/gallery/groupedBarChart.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/groupedBarChart-vl.html"
+      }
+    ]
+  },
+  "population_pyramid": {
+    "title": "Population Pyramid",
+    "url": "/gallery/populationPyramid.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/populationPyramid-vl.html"
+      }
+    ]
+  },
+  "histogram": {
+    "title": "Histogram",
+    "url": "/gallery/histogram.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/histogram-vl.html"
+      }
+    ]
+  },
+  "wilkinson_dot_plot": {
+    "title": "Wilkinson Dot Plot",
+    "url": "/gallery/wilkinsonDotPlot.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/wilkinsonDotPlot-vl.html"
+      }
+    ]
+  },
+  "density_plot": {
+    "title": "Density Plot",
+    "url": "/gallery/densityPlot.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/densityPlot-vl.html"
+      }
+    ]
+  },
+  "stacked_density_plot": {
+    "title": "Stacked Density Plot",
+    "url": "/gallery/stackedDensityPlot.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/stackedDensityPlot-vl.html"
+      }
+    ]
+  },
+  "isotype_dot_plot": {
+    "title": "Isotype Dot Plot",
+    "url": "/gallery/isotypeDotPlot.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/isotypeDotPlot-vl.html"
+      }
+    ]
+  },
+  "strip_plot": {
+    "title": "Strip Plot",
+    "url": "/gallery/stripPlot.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/stripPlot-vl.html"
+      }
+    ]
+  },
+  "area_chart": {
+    "title": "Area Chart",
+    "url": "/gallery/areaChart.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/areaChart-vl.html"
+      }
+    ]
+  },
+  "stacked_area_chart": {
+    "title": "Stacked Area Chart",
+    "url": "/gallery/stackedAreaChart.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/stackedAreaChart-vl.html"
+      }
+    ]
+  },
+  "steamgraph": {
+    "title": "Steamgraph",
+    "url": "/gallery/steamgraph.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/steamgraph-vl.html"
+      }
+    ]
+  }, 
+  "heatmap": {
+    "title": "Heatmap",
+    "url": "/gallery/heatmap.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/heatmap-vl.html"
+      }
+    ]
+  },
+  "lasagna_plot": {
+    "title": "Lasagna Plot",
+    "url": "/gallery/lasagnaPlot.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/lasagnaPlot-vl.html"
+      }
+    ]
+  },
+  "pie_chart": {
+    "title": "Pie Chart",
+    "url": "/gallery/pieChart.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/pieChart-vl.html"
+      }
+    ]
   }
-]
+}

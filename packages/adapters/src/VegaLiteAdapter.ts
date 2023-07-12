@@ -19,7 +19,6 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
     axes: [],
     legends: [],
   };
-
   if ('mark' in spec) {
     // unit spec
 
@@ -36,12 +35,15 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
 
     const getFieldFromEncoding = (encoding) => {
       if ('aggregate' in encoding) {
+        if (encoding.field === undefined){ 
+          return `__${encoding.aggregate}`;
+        }
         return `${encoding.aggregate}_${encoding.field}`;
       }
 
       return 'condition' in encoding ? encoding.condition.field : encoding.field;
     };
-
+    
     if (spec.encoding) {
       Object.entries(spec.encoding).forEach(([channel, encoding]) => {
         const fieldDef = { ...encoding };
@@ -51,7 +53,6 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
         if (!fieldDef.field) {
           return;
         }
-
         if (['row', 'column', 'facet'].includes(channel)) {
           // add facet field
           olliSpec.facet = fieldDef.field;
@@ -63,7 +64,7 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
           olliSpec.axes.push({
             axisType: channel as 'x' | 'y',
             field: fieldDef.field,
-            title: encoding.title,
+            title: encoding.title, 
           });
         } else if (['color', 'opacity'].includes(channel)) {
           // add legends
@@ -81,7 +82,6 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
         if (!olliSpec.fields.find((f) => f.field === fieldDef.field)) {
           olliSpec.fields.push(fieldDef);
         }
-
         if (fieldDef.type === 'temporal') {
           // convert temporal data into Date objects
           data.forEach((datum) => {
