@@ -1,5 +1,5 @@
-[
-  {
+{ 
+  "bar_chart": {
     "title": "Bar Chart",
     "img": "/img/barChart.JPG",
     "url": "/gallery/barChart.html",
@@ -18,7 +18,7 @@
       }
     ]
   },
-  {
+  "line_chart": {
     "title": "Line Chart",
     "img": "/img/lineChart.JPG",
     "url": "/gallery/lineChart.html",
@@ -37,7 +37,7 @@
       }
     ]
   },
-  {
+  "scatterplot": {
     "title": "Scatterplot",
     "img": "/img/scatterplot.JPG",
     "url": "/gallery/scatterplot.html",
@@ -56,7 +56,7 @@
       }
     ]
   },
-  {
+  "multi_series_line_chart": {
     "title": "Multi-Series Line Chart",
     "img": "/img/multiSeriesLineChart.JPG",
     "url": "/gallery/multiSeriesLine.html",
@@ -75,7 +75,7 @@
       }
     ]
   },
-  {
+  "stacked_bar_chart": {
     "title": "Stacked Bar Chart",
     "img": "/img/stackedBarChart.JPG",
     "url": "/gallery/stackedBar.html",
@@ -94,7 +94,7 @@
       }
     ]
   },
-  {
+  "faceted_chart": {
     "title": "Faceted Chart",
     "img": "/img/facetedChart.JPG",
     "url": "/gallery/facet.html",
@@ -113,7 +113,7 @@
       }
     ]
   },
-  {
+  "aggregate_bar_chart": {
     "title": "Aggregate Bar Chart",
     "url": "/gallery/aggregateBarChart.html",
     "adapters": [
@@ -123,7 +123,7 @@
       }
     ]
   },
-  {
+  "grouped_bar_chart": {
     "title": "Grouped Bar Chart",
     "url": "/gallery/groupedBarChart.html",
     "adapters": [
@@ -133,7 +133,7 @@
       }
     ]
   },
-  {
+  "population_pyramid": {
     "title": "Population Pyramid",
     "url": "/gallery/populationPyramid.html",
     "adapters": [
@@ -143,7 +143,7 @@
       }
     ]
   },
-  {
+  "histogram": {
     "title": "Histogram",
     "url": "/gallery/histogram.html",
     "adapters": [
@@ -153,7 +153,7 @@
       }
     ]
   },
-  {
+  "wilkinson_dot_plot": {
     "title": "Wilkinson Dot Plot",
     "url": "/gallery/wilkinsonDotPlot.html",
     "adapters": [
@@ -163,7 +163,7 @@
       }
     ]
   },
-  {
+  "density_plot": {
     "title": "Density Plot",
     "url": "/gallery/densityPlot.html",
     "adapters": [
@@ -173,7 +173,7 @@
       }
     ]
   },
-  {
+  "stacked_density_plot": {
     "title": "Stacked Density Plot",
     "url": "/gallery/stackedDensityPlot.html",
     "adapters": [
@@ -183,7 +183,7 @@
       }
     ]
   },
-  {
+  "isotype_dot_plot": {
     "title": "Isotype Dot Plot",
     "url": "/gallery/isotypeDotPlot.html",
     "adapters": [
@@ -193,7 +193,7 @@
       }
     ]
   },
-  {
+  "strip_plot": {
     "title": "Strip Plot",
     "url": "/gallery/stripPlot.html",
     "adapters": [
@@ -203,7 +203,7 @@
       }
     ]
   },
-  {
+  "area_chart": {
     "title": "Area Chart",
     "url": "/gallery/areaChart.html",
     "adapters": [
@@ -213,7 +213,7 @@
       }
     ]
   },
-  {
+  "stacked_area_chart": {
     "title": "Stacked Area Chart",
     "url": "/gallery/stackedAreaChart.html",
     "adapters": [
@@ -223,7 +223,7 @@
       }
     ]
   },
-  {
+  "steamgraph": {
     "title": "Steamgraph",
     "url": "/gallery/steamgraph.html",
     "adapters": [
@@ -233,7 +233,7 @@
       }
     ]
   }, 
-  {
+  "heatmap": {
     "title": "Heatmap",
     "url": "/gallery/heatmap.html",
     "adapters": [
@@ -243,7 +243,7 @@
       }
     ]
   },
-  {
+  "lasagna_plot": {
     "title": "Lasagna Plot",
     "url": "/gallery/lasagnaPlot.html",
     "adapters": [
@@ -253,7 +253,7 @@
       }
     ]
   },
-  {
+  "pie_chart": {
     "title": "Pie Chart",
     "url": "/gallery/pieChart.html",
     "adapters": [
@@ -263,4 +263,4 @@
       }
     ]
   }
-]
+}
