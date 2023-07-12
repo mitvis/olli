@@ -70,7 +70,6 @@ export function getData(scene: SceneGroup): OlliDataset {
     });
     const name = names.reverse()[0]; // TODO do we know this is the right one?
     const dataset = datasets[name].values.value;
-
     return dataset;
   } catch (error) {
     throw new Error(`No data found in the Vega scenegraph \n ${error}`);
