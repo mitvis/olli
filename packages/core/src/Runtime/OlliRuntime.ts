@@ -5,7 +5,7 @@ import { OlliSpec } from '../Types';
 import { setOlliGlobalState } from '../util/globalState';
 import { OlliRuntimeTreeItem } from './OlliRuntimeTreeItem';
 import { olliSpecToTree, treeToNodeLookup } from '../Structure';
-import { generateDescriptions } from '../description';
+import { getCustomizedDescription } from '../Customization';
 import { renderTree } from '../Render/TreeView';
 import { LogicalAnd, LogicalComposition } from 'vega-lite/src/logical';
 import { FieldPredicate } from 'vega-lite/src/predicate';
@@ -68,8 +68,6 @@ export class OlliRuntime {
     const tree: ElaboratedOlliNode = olliSpecToTree(this.olliSpec);
     this.olliNodeLookup = treeToNodeLookup(tree);
 
-    generateDescriptions(this.olliSpec, tree);
-
     const ul = renderTree(tree);
     this.rootDomNode = ul;
     this.renderContainer.replaceChildren(ul);
@@ -95,7 +93,7 @@ export class OlliRuntime {
         for (const li of ul.children) {
           const label = li.firstElementChild! as HTMLElement;
           if (lookup[li.id]) {
-            label.innerText = lookup[li.id].description;
+            label.innerText = getCustomizedDescription(lookup[li.id]);
             if (li.children[1]) {
               _renderTreeDescription(li.children[1] as HTMLElement, lookup);
             }

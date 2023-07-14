@@ -1,4 +1,4 @@
-import { predicateToDescription } from '../../description';
+import { predicateToDescription } from '../../Customization';
 import { ElaboratedOlliNode } from '../../Structure/Types';
 import { OlliSpec } from '../../Types';
 import { selectionTest } from '../../util/selection';
@@ -6,6 +6,7 @@ import { renderTable } from '../Table';
 import { OlliRuntime } from '../../Runtime/OlliRuntime';
 import './dialog.css';
 import { makeSelectionMenu } from './selectionMenu';
+import { makeTargetedNavMenu } from './targetedNavMenu';
 
 export function makeDialog(
   tree: OlliRuntime,
@@ -71,8 +72,8 @@ export function makeDialog(
     const okButton = document.createElement('button');
     okButton.innerText = 'Ok';
     okButton.addEventListener('click', () => {
-      callbacks?.onOk();
       closeDialog();
+      callbacks?.onOk();
     });
     dialogContent.appendChild(okButton);
   }
@@ -116,6 +117,24 @@ export function openSelectionDialog(tree: OlliRuntime) {
   };
 
   const dialog = makeDialog(tree, 'Filter Menu', 'Define a custom filter.', menu, { onOk });
+
+  openDialog(dialog, tree.renderContainer);
+}
+
+export function openTargetedNavigationDialog(tree: OlliRuntime) {
+  const menu = makeTargetedNavMenu(tree);
+
+  const onOk = () => {
+    const selectedNodeId = menu.getAttribute('data-state');
+    console.log(selectedNodeId);
+    const treeItem = tree.treeItems.find((item) => item.olliNode.id === selectedNodeId);
+    console.log(treeItem);
+    if (treeItem) {
+      tree.setFocusToItem(treeItem);
+    }
+  };
+
+  const dialog = makeDialog(tree, 'Targeted Navigation Menu', 'Jump to a location in this chart.', menu, { onOk });
 
   openDialog(dialog, tree.renderContainer);
 }
