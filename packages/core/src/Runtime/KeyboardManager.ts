@@ -1,4 +1,15 @@
-import type { KeyboardAction, KeyRegistration } from "../Types";
+export type KeyboardAction = {
+    action: () => void;
+    title?: string;
+    keyDescription?: string;
+    description?: string;
+    force?: boolean;
+    caseSensitive?: boolean;
+}
+
+export type KeyRegistration = {
+  key: string;
+} & KeyboardAction;
 
 export const keyboardEventToString = (e: KeyboardEvent) => {
     return `${e.altKey ? "Alt+" : ""}${e.ctrlKey ? "Ctrl+" : ""}${

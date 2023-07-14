@@ -64,16 +64,3 @@ export interface OlliFieldDef {
  * Interface describing how a visualization adapter should be created
  */
 export type VisAdapter<T> = (spec: T) => Promise<OlliSpec>;
-
-export type KeyboardAction = {
-    action: () => void;
-    title?: string;
-    keyDescription?: string;
-    description?: string;
-    force?: boolean;
-    caseSensitive?: boolean;
-}
-
-export type KeyRegistration = {
-  key: string;
-} & KeyboardAction;
