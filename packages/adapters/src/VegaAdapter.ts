@@ -9,7 +9,7 @@ import {
   SceneGroup,
   SignalRef,
 } from 'vega';
-import { OlliSpec, VisAdapter, OlliMark, OlliDataset, OlliAxis, OlliLegend } from 'olli';
+import { UnitOlliSpec, VisAdapter, OlliMark, OlliDataset, OlliAxis, OlliLegend } from 'olli';
 import { filterUniqueObjects, findScenegraphNodes, getData, getVegaScene, getVegaView } from './utils';
 
 /**
@@ -18,7 +18,7 @@ import { filterUniqueObjects, findScenegraphNodes, getData, getVegaScene, getVeg
  * @returns the {@link OlliVisSpec}, the non-concrete visualization information that can be later used to
  * generate the Accessibility Tree Encoding
  */
-export const VegaAdapter: VisAdapter<Spec> = async (spec: Spec): Promise<OlliSpec> => {
+export const VegaAdapter: VisAdapter<Spec> = async (spec: Spec): Promise<UnitOlliSpec> => {
   const scene: SceneGroup = getVegaScene(await getVegaView(spec));
   const data = getData(scene)[0];
   const description = spec.description; // possible text description included with spec
@@ -29,7 +29,7 @@ export const VegaAdapter: VisAdapter<Spec> = async (spec: Spec): Promise<OlliSpe
   }
 };
 
-function parseFacets(spec: Spec, scene: SceneGroup, data: OlliDataset): OlliSpec {
+function parseFacets(spec: Spec, scene: SceneGroup, data: OlliDataset): UnitOlliSpec {
   const axes = filterUniqueObjects<OlliAxis>(
     findScenegraphNodes(scene, 'axis').map((axisNode: any) => parseAxisInformation(spec, axisNode, data))
   );
@@ -58,7 +58,7 @@ function parseFacets(spec: Spec, scene: SceneGroup, data: OlliDataset): OlliSpec
   };
 }
 
-function parseSingleChart(spec: Spec, scene: Scene | SceneItem, data: OlliDataset): OlliSpec {
+function parseSingleChart(spec: Spec, scene: Scene | SceneItem, data: OlliDataset): UnitOlliSpec {
   const axes = findScenegraphNodes(scene, 'axis').map((axisNode: any) => parseAxisInformation(spec, axisNode, data));
   const legends = findScenegraphNodes(scene, 'legend').map((legendNode: any) =>
     parseLegendInformation(spec, legendNode, data)

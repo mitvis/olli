@@ -1,4 +1,4 @@
-import { OlliDataset, OlliFieldDef, OlliSpec, OlliValue } from '../Types';
+import { OlliDataset, OlliFieldDef, UnitOlliSpec, OlliValue } from '../Types';
 import { selectionTest } from './selection';
 import { LogicalComposition } from 'vega-lite/src/logical';
 import { FieldPredicate } from 'vega-lite/src/predicate';

@@ -25,6 +25,7 @@ export type OlliNodeType = 'root' | 'facet' | 'xAxis' | 'yAxis' | 'legend' | 'fi
 export interface ElaboratedOlliNode {
   id: string;
   nodeType: OlliNodeType;
+  specIndex?: number;
   fullPredicate: LogicalAnd<FieldPredicate>;
   parent?: ElaboratedOlliNode;
   children: ElaboratedOlliNode[];

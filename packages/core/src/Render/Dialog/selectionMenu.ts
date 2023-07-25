@@ -1,11 +1,11 @@
 import { FieldPredicate } from 'vega-lite/src/predicate';
-import { OlliSpec } from '../../Types';
+import { UnitOlliSpec } from '../../Types';
 import { getDomain, getFieldDef } from '../../util/data';
 import { serializeValue } from '../../util/values';
 
 // this would have been so much easier with some ui framework : \
 
-export function makeSelectionMenu(olliSpec: OlliSpec): HTMLElement {
+export function makeSelectionMenu(olliSpec: UnitOlliSpec): HTMLElement {
   const state: FieldPredicate[] = olliSpec.selection
     ? 'and' in olliSpec.selection
       ? (olliSpec.selection.and as FieldPredicate[])
@@ -90,7 +90,7 @@ function valueToPredicateOp(op) {
   }
 }
 
-function makePredicateContainer(menu: HTMLElement, olliSpec: OlliSpec, state, predicateContainers: HTMLElement[]) {
+function makePredicateContainer(menu: HTMLElement, olliSpec: UnitOlliSpec, state, predicateContainers: HTMLElement[]) {
   const predicateContainer = document.createElement('div');
 
   const fieldSelect = document.createElement('select');
@@ -229,7 +229,7 @@ function makePredicateContainer(menu: HTMLElement, olliSpec: OlliSpec, state, pr
 function setPredicateContainerFromState(
   predicateContainer: HTMLElement,
   predicate: FieldPredicate,
-  olliSpec: OlliSpec
+  olliSpec: UnitOlliSpec
 ) {
   const fieldSelect: HTMLSelectElement = predicateContainer.querySelector('.olli-field-select');
   const opSelect: HTMLSelectElement = predicateContainer.querySelector('.olli-op-select');

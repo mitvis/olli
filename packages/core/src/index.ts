@@ -1,4 +1,4 @@
-import { OlliSpec } from './Types';
+import { UnitOlliSpec } from './Types';
 import { ElaboratedOlliNode } from './Structure/Types';
 import { OlliRuntime, RuntimeCallbacks } from './Runtime/OlliRuntime';
 import { updateGlobalStateOnInitialRender } from './util/globalState';
@@ -16,7 +16,8 @@ export type OlliConfigOptions = {
   onSelection?: (predicate: LogicalComposition<FieldPredicate>) => void;
 };
 
-export function olli(olliSpec: OlliSpec, config?: OlliConfigOptions): HTMLElement {
+export function olli(olliSpec: UnitOlliSpec, config?: OlliConfigOptions): HTMLElement {
+  console.log(olliSpec);
   olliSpec = elaborateSpec(olliSpec);
 
   const renderContainer: HTMLElement = document.createElement('div');

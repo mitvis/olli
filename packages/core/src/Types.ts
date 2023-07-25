@@ -15,7 +15,7 @@ export type OlliMark = 'point' | 'bar' | 'line';
 /**
  * Spec describing a visualization
  */
-export interface OlliSpec {
+export interface UnitOlliSpec {
   // required: data and fields
   data: OlliDataset;
   // semi-required: specification of the fields/typings and structure (inferred if not provided)
@@ -32,6 +32,8 @@ export interface OlliSpec {
   title?: string;
   description?: string;
 }
+
+export type OlliSpec = UnitOlliSpec | UnitOlliSpec[];
 
 type Guide = {
   field: string;

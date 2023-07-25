@@ -1,8 +1,8 @@
-import { OlliAxis, OlliLegend, OlliSpec } from '../Types';
+import { OlliAxis, OlliLegend, UnitOlliSpec } from '../Types';
 import { getFieldDef } from '../util/data';
 import { OlliNode } from './Types';
 
-export function inferStructure(olliSpec: OlliSpec): OlliNode | OlliNode[] {
+export function inferStructure(olliSpec: UnitOlliSpec): OlliNode | OlliNode[] {
   function nodesFromGuides(axes: OlliAxis[], legends: OlliLegend[]): OlliNode[] {
     let nodes: OlliNode[] = [];
     if (axes) {

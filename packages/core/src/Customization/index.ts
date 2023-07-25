@@ -1,5 +1,5 @@
 import { OlliDataset, OlliValue } from '../Types';
-import { OlliSpec } from '../Types';
+import { UnitOlliSpec } from '../Types';
 import { ElaboratedOlliNode, OlliNodeType } from '../Structure/Types';
 import { getBins } from '../util/bin';
 import { getDomain, getFieldDef } from '../util/data';
@@ -32,7 +32,7 @@ export function getCustomizedDescription(node: ElaboratedOlliNode) {
 export function nodeToDescription(
   node: ElaboratedOlliNode,
   dataset: OlliDataset,
-  olliSpec: OlliSpec
+  olliSpec: UnitOlliSpec
 ): Map<string, string> {
   const indexStr = `${(node.parent?.children.indexOf(node) || 0) + 1} of ${(node.parent?.children || []).length}`;
   const description = olliSpec.description || '';

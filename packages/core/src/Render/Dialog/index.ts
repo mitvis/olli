@@ -1,12 +1,13 @@
 import { predicateToDescription } from '../../Customization';
 import { ElaboratedOlliNode } from '../../Structure/Types';
-import { OlliSpec } from '../../Types';
+import { UnitOlliSpec } from '../../Types';
 import { selectionTest } from '../../util/selection';
 import { renderTable } from '../Table';
 import { OlliRuntime } from '../../Runtime/OlliRuntime';
 import './dialog.css';
 import { makeSelectionMenu } from './selectionMenu';
 import { makeTargetedNavMenu } from './targetedNavMenu';
+import { getSpecForNode } from '../../Structure';
 
 export function makeDialog(
   tree: OlliRuntime,
@@ -95,7 +96,7 @@ function openDialog(dialog: HTMLElement, renderContainer: HTMLElement) {
 }
 
 export function openTableDialog(olliNode: ElaboratedOlliNode, tree: OlliRuntime) {
-  const olliSpec = tree.olliSpec;
+  const olliSpec = getSpecForNode(olliNode, tree.olliSpec) as UnitOlliSpec;
   const table = renderTable(
     selectionTest(olliSpec.data, olliNode.fullPredicate),
     olliSpec.fields.map((f) => f.field)
@@ -105,8 +106,9 @@ export function openTableDialog(olliNode: ElaboratedOlliNode, tree: OlliRuntime)
   openDialog(dialog, tree.renderContainer);
 }
 
-export function openSelectionDialog(tree: OlliRuntime) {
-  const menu = makeSelectionMenu(tree.olliSpec);
+export function openSelectionDialog(olliNode: ElaboratedOlliNode, tree: OlliRuntime) {
+  const olliSpec = getSpecForNode(olliNode, tree.olliSpec) as UnitOlliSpec;
+  const menu = makeSelectionMenu(olliSpec);
 
   const onOk = () => {
     const predicate = { and: JSON.parse(menu.getAttribute('data-state')) };
