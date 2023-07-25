@@ -14,11 +14,12 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
   const description = spec.description; // possible text description included with spec
   const olliSpec: OlliSpec = {
     description,
-    data,
+    data: data[0],
     fields: [],
     axes: [],
     legends: [],
   };
+
   if ('mark' in spec) {
     // unit spec
 
@@ -35,7 +36,7 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
 
     const getFieldFromEncoding = (encoding) => {
       if ('aggregate' in encoding) {
-        if (encoding.field === undefined){ 
+        if (encoding.field === undefined) {
           return `__${encoding.aggregate}`;
         }
         return `${encoding.aggregate}_${encoding.field}`;
@@ -43,12 +44,13 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
 
       return 'condition' in encoding ? encoding.condition.field : encoding.field;
     };
-    
+
     if (spec.encoding) {
       Object.entries(spec.encoding).forEach(([channel, encoding]) => {
         const fieldDef = { ...encoding };
         fieldDef.field = getFieldFromEncoding(encoding);
-        fieldDef.type = encoding.type || typeInference(data, fieldDef.field);
+        fieldDef.type =
+          encoding.type || (encoding.timeUnit ? 'temporal' : false) || typeInference(data[0], fieldDef.field);
 
         if (!fieldDef.field) {
           return;
@@ -64,7 +66,7 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
           olliSpec.axes.push({
             axisType: channel as 'x' | 'y',
             field: fieldDef.field,
-            title: encoding.title, 
+            title: encoding.title,
           });
         } else if (['color', 'opacity'].includes(channel)) {
           // add legends
@@ -82,17 +84,45 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
         if (!olliSpec.fields.find((f) => f.field === fieldDef.field)) {
           olliSpec.fields.push(fieldDef);
         }
-        if (fieldDef.type === 'temporal') {
-          // convert temporal data into Date objects
-          data.forEach((datum) => {
-            datum[fieldDef.field] = new Date(datum[fieldDef.field]);
-          });
-        }
       });
     }
   } else {
     // TODO: handle layer and concat specs
+    if ('layer' in spec) {
+      await Promise.all(
+        spec.layer.map(async (layer) => {
+          if ('mark' in layer) {
+            // unit layer
+            const layerSpec = {
+              data: layer.data || spec.data,
+              mark: layer.mark,
+              encoding: layer.encoding,
+            };
+            const layerOlliSpec = await VegaLiteAdapter(layerSpec);
+            olliSpec.fields.push(...layerOlliSpec.fields);
+            olliSpec.axes.push(...layerOlliSpec.axes);
+            olliSpec.legends.push(...layerOlliSpec.legends);
+          } else {
+            // nested layer
+          }
+        })
+      );
+      olliSpec.fields = olliSpec.fields.filter((f, i, self) => self.findIndex((f2) => f2.field === f.field) === i);
+      olliSpec.axes = olliSpec.axes.filter((f, i, self) => self.findIndex((f2) => f2.field === f.field) === i);
+      olliSpec.legends = olliSpec.legends.filter((f, i, self) => self.findIndex((f2) => f2.field === f.field) === i);
+    }
   }
+
+  olliSpec.fields.forEach((fieldDef) => {
+    if (fieldDef.type === 'temporal') {
+      // convert temporal data into Date objects
+      data.forEach((datum) => {
+        datum[fieldDef.field] = new Date(datum[fieldDef.field]);
+      });
+    }
+  });
+
+  console.log(olliSpec);
 
   return olliSpec;
 };

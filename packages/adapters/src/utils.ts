@@ -62,15 +62,24 @@ function verifyNode(scenegraphNode: any, cancelRoles: string[]): boolean {
   }
 }
 
-export function getData(scene: SceneGroup): OlliDataset {
+export function getData(scene: SceneGroup): OlliDataset[] {
   try {
     const datasets = (scene as any).context.data;
-    const names = Object.keys(datasets).filter((name) => {
-      return name.match(/(source)|(data)_\d/);
+    const data_n = Object.keys(datasets).filter((name) => {
+      return name.match(/data_\d/);
     });
-    const name = names.reverse()[0]; // TODO do we know this is the right one?
-    const dataset = datasets[name].values.value;
-    return dataset;
+    if (data_n.length) {
+      return data_n.map((name) => {
+        return datasets[name].values.value;
+      });
+    } else {
+      const source_n = Object.keys(datasets).filter((name) => {
+        return name.match(/source_\d/);
+      });
+      const name = source_n[source_n.length - 1];
+      const dataset = datasets[name].values.value;
+      return [dataset];
+    }
   } catch (error) {
     throw new Error(`No data found in the Vega scenegraph \n ${error}`);
   }

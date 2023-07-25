@@ -1,4 +1,4 @@
-{ 
+{
   "bar_chart": {
     "title": "Bar Chart",
     "img": "/img/barChart.JPG",
@@ -110,6 +110,16 @@
       {
         "name": "ObservablePlot",
         "code": "/examples/facetedChart-op.html"
+      }
+    ]
+  },
+  "layered_chart": {
+    "title": "Layered Chart",
+    "url": "/gallery/layer.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/layeredChart-vl.html"
       }
     ]
   },
@@ -232,7 +242,7 @@
         "code": "/examples/steamgraph-vl.html"
       }
     ]
-  }, 
+  },
   "heatmap": {
     "title": "Heatmap",
     "url": "/gallery/heatmap.html",

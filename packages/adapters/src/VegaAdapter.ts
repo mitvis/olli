@@ -20,7 +20,7 @@ import { filterUniqueObjects, findScenegraphNodes, getData, getVegaScene, getVeg
  */
 export const VegaAdapter: VisAdapter<Spec> = async (spec: Spec): Promise<OlliSpec> => {
   const scene: SceneGroup = getVegaScene(await getVegaView(spec));
-  const data = getData(scene);
+  const data = getData(scene)[0];
   const description = spec.description; // possible text description included with spec
   if (scene.items.some((el: any) => el.role === 'scope')) {
     return { description, ...parseFacets(spec, scene, data) };
