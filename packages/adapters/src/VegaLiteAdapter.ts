@@ -142,7 +142,9 @@ async function adaptLayerSpec(spec: TopLevel<LayerSpec<any>>, data: OlliDataset[
         };
         const dataset = data.find((d) => {
           const fields = Object.keys(d[0]);
-          const layerFields = Object.values(layerSpec.encoding).map((f) => getFieldFromEncoding(f));
+          const layerFields = Object.values(layerSpec.encoding)
+            .map((f) => getFieldFromEncoding(f))
+            .filter((f) => f);
           return layerFields.every((f) => fields.includes(f));
         });
         const layerOlliSpec = adaptUnitSpec(layerSpec, dataset);
@@ -164,6 +166,10 @@ async function adaptLayerSpec(spec: TopLevel<LayerSpec<any>>, data: OlliDataset[
 
     typeCoerceData(s);
   });
+
+  if (olliSpec.length === 1) {
+    return olliSpec[0];
+  }
 
   return olliSpec;
 }

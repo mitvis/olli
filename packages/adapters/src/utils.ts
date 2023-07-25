@@ -69,14 +69,24 @@ export function getData(scene: SceneGroup): OlliDataset[] {
       return name.match(/data_\d/);
     });
     if (data_n.length) {
-      return data_n.map((name) => {
-        return datasets[name].values.value;
-      });
+      return data_n
+        .map((name) => {
+          return datasets[name].values.value;
+        })
+        .filter((d, idx, self) => {
+          if (!d.length) {
+            return false;
+          }
+          if (Object.keys(d[0]).length === 0) {
+            return false;
+          }
+          return self.findLastIndex((d2) => Object.keys(d2[0]).every((k) => Object.keys(d[0]).includes(k))) === idx;
+        });
     } else {
-      const source_n = Object.keys(datasets).filter((name) => {
-        return name.match(/source_\d/);
+      const data_n = Object.keys(datasets).filter((name) => {
+        return name.match(/(source)|(data)_\d/);
       });
-      const name = source_n[source_n.length - 1];
+      const name = data_n[data_n.length - 1];
       const dataset = datasets[name].values.value;
       return [dataset];
     }
