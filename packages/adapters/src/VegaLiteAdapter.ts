@@ -150,6 +150,7 @@ async function adaptLayerSpec(spec: TopLevel<LayerSpec<any>>, data: OlliDataset[
         unitSpec?.fields.push(...layerOlliSpec.fields);
         unitSpec?.axes.push(...layerOlliSpec.axes);
         unitSpec?.legends.push(...layerOlliSpec.legends);
+        unitSpec.mark = layerOlliSpec.mark;
       } else {
         // TODO: nested layer
       }

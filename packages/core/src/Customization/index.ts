@@ -76,6 +76,7 @@ export function nodeToDescription(
           return olliSpec.description || '';
         }
         return '';
+      case 'layer':
       case 'facet':
         if ('predicate' in node && 'equal' in node.predicate) {
           return `titled ${node.predicate.equal}`;
@@ -93,6 +94,7 @@ export function nodeToDescription(
 
   function index(node: ElaboratedOlliNode): string {
     switch (node.nodeType) {
+      case 'layer':
       case 'facet':
       case 'filteredData':
       case 'other':
@@ -111,7 +113,13 @@ export function nodeToDescription(
         if (olliSpec.mark) {
           return `a ${chartType()}`;
         }
+        if (node.children.length && node.children[0].nodeType === 'layer') {
+          return 'a layered chart';
+        }
         return 'a dataset';
+      case 'layer':
+        const layerName = olliSpec.mark === 'line' ? 'line' : olliSpec.mark ? chartType() : 'layer';
+        return `a ${layerName}`;
       case 'facet':
         const facetName = olliSpec.mark === 'line' ? 'line' : olliSpec.mark ? chartType() : 'facet';
         return `a ${facetName}`;
@@ -150,6 +158,7 @@ export function nodeToDescription(
           return ' ' + [...fields].join(', ');
         }
         return '';
+      case 'layer':
       case 'facet':
         return `with axes ${axes}`;
       default:
@@ -181,7 +190,7 @@ export function nodeToDescription(
             if (domain.length) {
               first = fmtValue(domain[0]);
               last = fmtValue(domain[domain.length - 1]);
-              return `with ${pluralize(domain.values.length, 'value')} from ${first} to ${last}`;
+              return `with ${pluralize(domain.length, 'value')} from ${first} to ${last}`;
             }
           }
         }
@@ -239,6 +248,7 @@ export function nodeToDescription(
   const nodeTypeToTokens = new Map<OlliNodeType, string[]>([
     ['root', ['name', 'type', 'size', 'children']],
     ['facet', ['index', 'type', 'name', 'children']],
+    ['layer', ['index', 'type', 'name', 'children']],
     ['xAxis', ['name', 'type', 'data']],
     ['yAxis', ['name', 'type', 'data']],
     ['legend', ['name', 'type', 'data']],

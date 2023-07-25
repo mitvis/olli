@@ -128,9 +128,7 @@ export function openTargetedNavigationDialog(tree: OlliRuntime) {
 
   const onOk = () => {
     const selectedNodeId = menu.getAttribute('data-state');
-    console.log(selectedNodeId);
     const treeItem = tree.treeItems.find((item) => item.olliNode.id === selectedNodeId);
-    console.log(treeItem);
     if (treeItem) {
       tree.setFocusToItem(treeItem);
     }

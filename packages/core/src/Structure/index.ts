@@ -118,7 +118,7 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
       const elaborated = elaborateOlliNodes(spec, idx, nodes, data, { and: [] }, `${namespace}-${idx}`);
       return {
         id: `${namespace}-${idx}`,
-        nodeType: 'facet' as OlliNodeType,
+        nodeType: 'layer' as OlliNodeType,
         specIndex: idx,
         fullPredicate: { and: [] },
         description: new Map<string, string>(),
