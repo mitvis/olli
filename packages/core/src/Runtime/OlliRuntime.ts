@@ -76,8 +76,6 @@ export class OlliRuntime {
 
     findTreeitems(this.rootDomNode, this, this.olliNodeLookup, undefined);
 
-    debugger;
-
     this.rootTreeItem = this.treeItems.find((ti) => ti.olliNode.nodeType === 'root')!;
     this.rootTreeItem.domNode.tabIndex = 0;
   }
