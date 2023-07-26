@@ -1,7 +1,6 @@
 import { LogicalAnd } from 'vega-lite/src/logical';
 import { OlliNode } from './Structure/Types';
 import { FieldPredicate } from 'vega-lite/src/predicate';
-import { TimeUnit } from 'vega-lite/src/timeunit';
 
 export type OlliValue = string | number | Date;
 
@@ -57,11 +56,12 @@ export interface OlliLegend extends Guide {
 }
 
 export type MeasureType = 'quantitative' | 'ordinal' | 'nominal' | 'temporal';
+export type OlliTimeUnit = 'year' | 'month' | 'day' | 'date' | 'hours' | 'minutes' | 'seconds';
 
 export interface OlliFieldDef {
   field: string;
   type?: MeasureType; // optional, but will be inferred if not provided
-  timeUnit?: TimeUnit;
+  timeUnit?: OlliTimeUnit;
 }
 
 /**

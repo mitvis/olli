@@ -1,7 +1,6 @@
 import { isNumeric as vlIsNumeric } from 'vega-lite';
 import { isString } from 'vega';
-import { OlliFieldDef, OlliValue } from '../Types';
-import { TimeUnit } from 'vega-lite/src/timeunit';
+import { OlliFieldDef, OlliTimeUnit, OlliValue } from '../Types';
 
 export const fmtValue = (value: OlliValue, fieldDef: OlliFieldDef): string => {
   if (fieldDef.timeUnit && !(value instanceof Date)) {
@@ -36,7 +35,7 @@ export function isNumeric(value: string): boolean {
   return vlIsNumeric(value.replaceAll(',', ''));
 }
 
-export function dateToTimeUnit(date: Date, timeUnit: TimeUnit): string {
+export function dateToTimeUnit(date: Date, timeUnit: OlliTimeUnit): string {
   let opts;
   switch (timeUnit) {
     case 'year':
