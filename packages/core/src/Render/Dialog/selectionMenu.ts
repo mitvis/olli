@@ -139,7 +139,7 @@ function makePredicateContainer(menu: HTMLElement, olliSpec: UnitOlliSpec, state
     const selectedOp = opSelect.value;
     const fieldDef = getFieldDef(selectedField, olliSpec.fields);
     if (selectedOp === '=' && (fieldDef.type === 'nominal' || fieldDef.type === 'ordinal')) {
-      const domain = getDomain(selectedField, olliSpec.data);
+      const domain = getDomain(fieldDef, olliSpec.data);
       const valueSelect = document.createElement('select');
       const valueOptions = domain.map((value) => {
         const option = document.createElement('option');

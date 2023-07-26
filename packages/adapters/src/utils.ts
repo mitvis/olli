@@ -71,7 +71,7 @@ export function getData(scene: SceneGroup): OlliDataset[] {
     if (data_n.length) {
       return data_n
         .map((name) => {
-          return datasets[name].values.value;
+          return datasets[name].values.value as OlliDataset;
         })
         .filter((d, idx, self) => {
           if (!d.length) {
@@ -80,14 +80,16 @@ export function getData(scene: SceneGroup): OlliDataset[] {
           if (Object.keys(d[0]).length === 0) {
             return false;
           }
-          return self.findLastIndex((d2) => Object.keys(d2[0]).every((k) => Object.keys(d[0]).includes(k))) === idx;
+          return (
+            (self as any).findLastIndex((d2) => Object.keys(d2[0]).every((k) => Object.keys(d[0]).includes(k))) === idx
+          );
         });
     } else {
       const data_n = Object.keys(datasets).filter((name) => {
         return name.match(/(source)|(data)_\d/);
       });
       const name = data_n[data_n.length - 1];
-      const dataset = datasets[name].values.value;
+      const dataset = datasets[name].values.value as OlliDataset;
       return [dataset];
     }
   } catch (error) {

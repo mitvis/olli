@@ -1,4 +1,4 @@
-import { OlliDataset, OlliValue } from '../Types';
+import { OlliDataset, OlliFieldDef, OlliValue } from '../Types';
 import { UnitOlliSpec } from '../Types';
 import { ElaboratedOlliNode, OlliNodeType } from '../Structure/Types';
 import { getBins } from '../util/bin';
@@ -181,15 +181,15 @@ export function nodeToDescription(
               olliSpec.legends?.find((legend) => legend.field === node.groupby);
             const bins = getBins(node.groupby, dataset, olliSpec.fields);
             if (bins.length) {
-              first = fmtValue(bins[0][0]);
-              last = fmtValue(bins[bins.length - 1][1]);
+              first = fmtValue(bins[0][0], fieldDef);
+              last = fmtValue(bins[bins.length - 1][1], fieldDef);
               return `with values from ${first} to ${last}`;
             }
           } else {
-            const domain = getDomain(node.groupby, dataset);
+            const domain = getDomain(fieldDef, dataset);
             if (domain.length) {
-              first = fmtValue(domain[0]);
-              last = fmtValue(domain[domain.length - 1]);
+              first = fmtValue(domain[0], fieldDef);
+              last = fmtValue(domain[domain.length - 1], fieldDef);
               return `with ${pluralize(domain.length, 'value')} from ${first} to ${last}`;
             }
           }
@@ -197,14 +197,14 @@ export function nodeToDescription(
         return '';
       case 'filteredData':
         if ('predicate' in node) {
-          return predicateToDescription(node.predicate);
+          return predicateToDescription(node.predicate, olliSpec.fields);
         }
         return '';
       case 'other':
         if ('groupby' in node) {
           return `grouped by ${node.groupby}`;
         } else if ('predicate' in node) {
-          return predicateToDescription(node.predicate);
+          return predicateToDescription(node.predicate, olliSpec.fields);
         }
       default:
         throw `Node type ${node.nodeType} does not have the 'data' token.`;
@@ -280,37 +280,41 @@ export function nodeToDescription(
   return resultDescription;
 }
 
-export function predicateToDescription(predicate: LogicalComposition<FieldPredicate>) {
+export function predicateToDescription(predicate: LogicalComposition<FieldPredicate>, fields: OlliFieldDef[]) {
   if ('and' in predicate) {
-    return predicate.and.map(predicateToDescription).join(' and ');
+    return predicate.and.map((p) => predicateToDescription(p, fields)).join(' and ');
   }
   if ('or' in predicate) {
-    return predicate.or.map(predicateToDescription).join(' or ');
+    return predicate.or.map((p) => predicateToDescription(p, fields)).join(' or ');
   }
   if ('not' in predicate) {
-    return `not ${predicateToDescription(predicate.not)}`;
+    return `not ${predicateToDescription(predicate.not, fields)}`;
   }
-  return fieldPredicateToDescription(predicate);
+  return fieldPredicateToDescription(predicate, fields);
 }
 
-function fieldPredicateToDescription(predicate: FieldPredicate) {
+function fieldPredicateToDescription(predicate: FieldPredicate, fields: OlliFieldDef[]) {
+  const fieldDef = getFieldDef(predicate.field, fields);
   if ('equal' in predicate) {
-    return `${predicate.field} equals ${fmtValue(predicate.equal as OlliValue)}`;
+    return `${predicate.field} equals ${fmtValue(predicate.equal as OlliValue, fieldDef)}`;
   }
   if ('range' in predicate) {
-    return `${predicate.field} is between ${fmtValue(predicate.range[0])} and ${fmtValue(predicate.range[1])}`;
+    return `${predicate.field} is between ${fmtValue(predicate.range[0], fieldDef)} and ${fmtValue(
+      predicate.range[1],
+      fieldDef
+    )}`;
   }
   if ('lt' in predicate) {
-    return `${predicate.field} is less than ${fmtValue(predicate.lt as OlliValue)}`;
+    return `${predicate.field} is less than ${fmtValue(predicate.lt as OlliValue, fieldDef)}`;
   }
   if ('lte' in predicate) {
-    return `${predicate.field} is less than or equal to ${fmtValue(predicate.lte as OlliValue)}`;
+    return `${predicate.field} is less than or equal to ${fmtValue(predicate.lte as OlliValue, fieldDef)}`;
   }
   if ('gt' in predicate) {
-    return `${predicate.field} is greater than ${fmtValue(predicate.gt as OlliValue)}`;
+    return `${predicate.field} is greater than ${fmtValue(predicate.gt as OlliValue, fieldDef)}`;
   }
   if ('gte' in predicate) {
-    return `${predicate.field} is greater than or equal to ${fmtValue(predicate.gte as OlliValue)}`;
+    return `${predicate.field} is greater than or equal to ${fmtValue(predicate.gte as OlliValue, fieldDef)}`;
   }
 
   return '';

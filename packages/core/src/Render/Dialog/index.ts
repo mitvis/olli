@@ -97,11 +97,8 @@ function openDialog(dialog: HTMLElement, renderContainer: HTMLElement) {
 
 export function openTableDialog(olliNode: ElaboratedOlliNode, tree: OlliRuntime) {
   const olliSpec = getSpecForNode(olliNode, tree.olliSpec) as UnitOlliSpec;
-  const table = renderTable(
-    selectionTest(olliSpec.data, olliNode.fullPredicate),
-    olliSpec.fields.map((f) => f.field)
-  );
-  const dialog = makeDialog(tree, 'Table View', predicateToDescription(olliNode.fullPredicate), table);
+  const table = renderTable(selectionTest(olliSpec.data, olliNode.fullPredicate), olliSpec.fields);
+  const dialog = makeDialog(tree, 'Table View', predicateToDescription(olliNode.fullPredicate, olliSpec.fields), table);
 
   openDialog(dialog, tree.renderContainer);
 }
