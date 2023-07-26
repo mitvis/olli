@@ -1,6 +1,6 @@
 import { LogicalAnd } from 'vega-lite/src/logical';
 import { FieldPredicate } from 'vega-lite/src/predicate';
-import { UnitOlliSpec, OlliDataset, OlliSpec } from '../Types';
+import { UnitOlliSpec, OlliDataset, OlliSpec, isMultiOlliSpec } from '../Types';
 import { fieldToPredicates, selectionTest } from '../util/selection';
 import { ElaboratedOlliNode, OlliNode, OlliNodeLookup, OlliNodeType } from './Types';
 import { nodeToDescription } from '../Customization';
@@ -71,7 +71,8 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
             const childId = `${idPrefix}-${idx}-${childIdx}`;
             return {
               id: childId,
-              nodeType: nodeType === 'root' ? 'facet' : 'filteredData',
+              nodeType: nodeType === 'root' ? 'view' : 'filteredData',
+              viewOp: nodeType === 'root' ? 'facet' : undefined,
               specIndex,
               predicate: p,
               fullPredicate: childFullPred,
@@ -111,21 +112,22 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
     });
   }
 
-  if (Array.isArray(olliSpec)) {
-    const layerNodes = olliSpec.map((spec, idx) => {
+  if (isMultiOlliSpec(olliSpec)) {
+    const viewNodes = olliSpec.units.map((spec, idx) => {
       const nodes = Array.isArray(spec.structure) ? spec.structure : [spec.structure];
       const data = spec.selection ? selectionTest(spec.data, spec.selection) : spec.data;
       const elaborated = elaborateOlliNodes(spec, idx, nodes, data, { and: [] }, `${namespace}-${idx}`);
       return {
         id: `${namespace}-${idx}`,
-        nodeType: 'layer' as OlliNodeType,
+        nodeType: 'view' as OlliNodeType,
+        viewOp: olliSpec.operator,
         specIndex: idx,
         fullPredicate: { and: [] },
         description: new Map<string, string>(),
         children: elaborated,
       };
     });
-    const tree = ensureFirstLayerHasOneRoot(layerNodes);
+    const tree = ensureFirstLayerHasOneRoot(viewNodes);
     postProcessTree(tree, olliSpec);
     return tree;
   } else {
@@ -148,13 +150,13 @@ export function postProcessTree(tree: ElaboratedOlliNode, olliSpec: OlliSpec) {
     // initialize descriptions
     const spec =
       getSpecForNode(node, olliSpec) ||
-      (Array.isArray(olliSpec)
+      (isMultiOlliSpec(olliSpec)
         ? {
-            data: olliSpec.flatMap((s) => s.data),
+            data: olliSpec.units.flatMap((s) => s.data),
             selection: null,
-            fields: olliSpec.flatMap((s) => s.fields),
-            axes: olliSpec.flatMap((s) => s.axes),
-            legends: olliSpec.flatMap((s) => s.legends),
+            fields: olliSpec.units.flatMap((s) => s.fields),
+            axes: olliSpec.units.flatMap((s) => s.axes),
+            legends: olliSpec.units.flatMap((s) => s.legends),
           }
         : olliSpec);
     const data = spec.selection ? selectionTest(spec.data, spec.selection) : spec.data;
@@ -181,5 +183,5 @@ export function treeToNodeLookup(tree: ElaboratedOlliNode): OlliNodeLookup {
 }
 
 export function getSpecForNode(node: ElaboratedOlliNode, olliSpec: OlliSpec): UnitOlliSpec {
-  return Array.isArray(olliSpec) ? olliSpec[node.specIndex] : olliSpec;
+  return isMultiOlliSpec(olliSpec) ? olliSpec.units[node.specIndex] : olliSpec;
 }

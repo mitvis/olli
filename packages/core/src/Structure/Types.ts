@@ -20,21 +20,13 @@ export interface OlliAnnotationNode {
 
 export type OlliNode = OlliGroupNode | OlliPredicateNode | OlliAnnotationNode;
 
-export type OlliNodeType =
-  | 'root'
-  | 'facet'
-  | 'layer'
-  | 'xAxis'
-  | 'yAxis'
-  | 'legend'
-  | 'filteredData'
-  | 'annotations'
-  | 'other';
+export type OlliNodeType = 'root' | 'view' | 'xAxis' | 'yAxis' | 'legend' | 'filteredData' | 'annotations' | 'other';
 
 export interface ElaboratedOlliNode {
   id: string;
   nodeType: OlliNodeType;
   specIndex?: number;
+  viewOp?: 'facet' | 'layer' | 'concat';
   fullPredicate: LogicalAnd<FieldPredicate>;
   parent?: ElaboratedOlliNode;
   children: ElaboratedOlliNode[];

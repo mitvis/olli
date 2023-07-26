@@ -76,8 +76,7 @@ export function nodeToDescription(
           return olliSpec.description || '';
         }
         return '';
-      case 'layer':
-      case 'facet':
+      case 'view':
         if ('predicate' in node && 'equal' in node.predicate) {
           return `titled ${node.predicate.equal}`;
         }
@@ -94,8 +93,7 @@ export function nodeToDescription(
 
   function index(node: ElaboratedOlliNode): string {
     switch (node.nodeType) {
-      case 'layer':
-      case 'facet':
+      case 'view':
       case 'filteredData':
       case 'other':
         return indexStr;
@@ -113,16 +111,19 @@ export function nodeToDescription(
         if (olliSpec.mark) {
           return `a ${chartType()}`;
         }
-        if (node.children.length && node.children[0].nodeType === 'layer') {
-          return 'a layered chart';
+        if (node.children.length) {
+          if (node.children[0].viewOp === 'layer') {
+            return 'a layered chart';
+          }
+          if (node.children[0].viewOp === 'concat') {
+            return 'a multi-view chart';
+          }
         }
         return 'a dataset';
-      case 'layer':
-        const layerName = olliSpec.mark === 'line' ? 'line' : olliSpec.mark ? chartType() : 'layer';
-        return `a ${layerName}`;
-      case 'facet':
-        const facetName = olliSpec.mark === 'line' ? 'line' : olliSpec.mark ? chartType() : 'facet';
-        return `a ${facetName}`;
+      case 'view':
+        const viewName =
+          olliSpec.mark === 'line' ? 'line' : olliSpec.mark ? chartType() : node.viewOp ? node.viewOp : 'view';
+        return `a ${viewName}`;
       case 'xAxis':
       case 'yAxis':
       case 'legend':
@@ -158,8 +159,7 @@ export function nodeToDescription(
           return ' ' + [...fields].join(', ');
         }
         return '';
-      case 'layer':
-      case 'facet':
+      case 'view':
         return `with axes ${axes}`;
       default:
         throw `Node type ${node.nodeType} does not have the 'children' token.`;
@@ -247,8 +247,7 @@ export function nodeToDescription(
 
   const nodeTypeToTokens = new Map<OlliNodeType, string[]>([
     ['root', ['name', 'type', 'size', 'children']],
-    ['facet', ['index', 'type', 'name', 'children']],
-    ['layer', ['index', 'type', 'name', 'children']],
+    ['view', ['index', 'type', 'name', 'children']],
     ['xAxis', ['name', 'type', 'data']],
     ['yAxis', ['name', 'type', 'data']],
     ['legend', ['name', 'type', 'data']],

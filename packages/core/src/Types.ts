@@ -33,7 +33,16 @@ export interface UnitOlliSpec {
   description?: string;
 }
 
-export type OlliSpec = UnitOlliSpec | UnitOlliSpec[];
+export interface MultiOlliSpec {
+  operator: 'layer' | 'concat';
+  units: UnitOlliSpec[];
+}
+
+export const isMultiOlliSpec = (spec: OlliSpec): spec is MultiOlliSpec => {
+  return 'operator' in spec;
+};
+
+export type OlliSpec = UnitOlliSpec | MultiOlliSpec;
 
 type Guide = {
   field: string;

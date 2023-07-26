@@ -1,8 +1,9 @@
 import { TopLevelSpec, compile } from 'vega-lite';
-import { VisAdapter, UnitOlliSpec, typeInference, OlliSpec, OlliDataset } from 'olli';
+import { VisAdapter, UnitOlliSpec, MultiOlliSpec, typeInference, OlliSpec, OlliDataset } from 'olli';
 import { getData, getVegaScene, getVegaView } from './utils';
 import { TopLevelUnitSpec } from 'vega-lite/build/src/spec/unit';
-import { TopLevel, LayerSpec } from 'vega-lite/build/src/spec';
+import { TopLevel, LayerSpec, GenericHConcatSpec, GenericVConcatSpec } from 'vega-lite/build/src/spec';
+import { GenericConcatSpec } from 'vega-lite/build/src/spec/concat';
 
 /**
  * Adapter to deconstruct Vega-Lite visualizations into an {@link OlliVisSpec}
@@ -17,13 +18,9 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
   if ('mark' in spec) {
     return adaptUnitSpec(spec, data[0]);
   } else {
-    // TODO: handle layer and concat specs
-    if ('layer' in spec) {
-      return await adaptLayerSpec(spec, data);
-    } else if ('concat' in spec || 'hconcat' in spec || 'vconcat' in spec) {
-      // TODO: concat specs
-    } else {
-      // TODO: other specs?
+    if ('layer' in spec || 'concat' in spec || 'hconcat' in spec || 'vconcat' in spec) {
+      const op = Object.keys(spec).find((k) => ['layer', 'concat', 'hconcat', 'vconcat'].includes(k));
+      return await adaptMultiSpec(spec, op, data);
     }
   }
 };
@@ -120,8 +117,12 @@ function adaptUnitSpec(spec: TopLevelUnitSpec<any>, data: OlliDataset): UnitOlli
   return olliSpec;
 }
 
-async function adaptLayerSpec(spec: TopLevel<LayerSpec<any>>, data: OlliDataset[]): Promise<UnitOlliSpec[]> {
-  const olliSpec: UnitOlliSpec[] = data.map((d) => {
+async function adaptMultiSpec(
+  spec: TopLevel<LayerSpec<any> | GenericConcatSpec<any> | GenericVConcatSpec<any> | GenericHConcatSpec<any>>,
+  op: string,
+  data: OlliDataset[]
+): Promise<MultiOlliSpec> {
+  const units: UnitOlliSpec[] = data.map((d) => {
     return {
       description: spec.description,
       data: d,
@@ -132,34 +133,34 @@ async function adaptLayerSpec(spec: TopLevel<LayerSpec<any>>, data: OlliDataset[
   });
 
   await Promise.all(
-    spec.layer.map(async (layer) => {
-      if ('mark' in layer) {
-        // unit layer
-        const layerSpec = {
-          data: layer.data || spec.data,
-          mark: layer.mark,
-          encoding: layer.encoding,
+    spec[op].map(async (view) => {
+      if ('mark' in view) {
+        // unit view
+        const viewSpec = {
+          data: view.data || spec.data,
+          mark: view.mark,
+          encoding: view.encoding,
         };
         const dataset = data.find((d) => {
           const fields = Object.keys(d[0]);
-          const layerFields = Object.values(layerSpec.encoding)
+          const viewFields = Object.values(viewSpec.encoding)
             .map((f) => getFieldFromEncoding(f))
             .filter((f) => f);
-          return layerFields.every((f) => fields.includes(f));
+          return viewFields.every((f) => fields.includes(f));
         });
-        const layerOlliSpec = adaptUnitSpec(layerSpec, dataset);
-        const unitSpec = olliSpec.find((s) => Object.keys(s.data[0]).every((k) => dataset[0][k]));
-        unitSpec?.fields.push(...layerOlliSpec.fields);
-        unitSpec?.axes.push(...layerOlliSpec.axes);
-        unitSpec?.legends.push(...layerOlliSpec.legends);
-        unitSpec.mark = layerOlliSpec.mark;
+        const viewOlliSpec = adaptUnitSpec(viewSpec, dataset);
+        const unitSpec = units.find((s) => Object.keys(s.data[0]).every((k) => dataset[0][k]));
+        unitSpec?.fields.push(...viewOlliSpec.fields);
+        unitSpec?.axes.push(...viewOlliSpec.axes);
+        unitSpec?.legends.push(...viewOlliSpec.legends);
+        unitSpec.mark = viewOlliSpec.mark;
       } else {
-        // TODO: nested layer
+        // TODO: nested layer/concat
       }
     })
   );
 
-  olliSpec.forEach((s) => {
+  units.forEach((s) => {
     s.fields = s.fields.filter((f, i, self) => self.findIndex((f2) => f2.field === f.field) === i);
     s.axes = s.axes.filter((f, i, self) => self.findIndex((f2) => f2.field === f.field) === i);
     s.legends = s.legends.filter((f, i, self) => self.findIndex((f2) => f2.field === f.field) === i);
@@ -167,9 +168,12 @@ async function adaptLayerSpec(spec: TopLevel<LayerSpec<any>>, data: OlliDataset[
     typeCoerceData(s);
   });
 
-  if (olliSpec.length === 1) {
-    return olliSpec[0];
+  if (units.length === 1) {
+    return units[0];
   }
 
-  return olliSpec;
+  return {
+    operator: op,
+    units,
+  };
 }
