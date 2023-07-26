@@ -19,7 +19,6 @@ export function getDomain(
       .forEach((v) => {
         if (v instanceof Date) {
           const time_val = dateToTimeUnit(v, fieldDef.timeUnit);
-          console.log('time_val', time_val);
           if (!unique_time_vals.has(time_val)) {
             unique_time_vals.add(time_val);
             unique_vals.add(v);
@@ -33,7 +32,6 @@ export function getDomain(
         unique_vals.add(v);
       });
   }
-  console.log('unique', [...unique_vals]);
   return [...unique_vals].filter((x) => x !== null && x !== undefined).sort((a: any, b: any) => a - b);
 }
 
