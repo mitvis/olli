@@ -30,7 +30,7 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
 
 const getFieldFromEncoding = (encoding) => {
   if ('aggregate' in encoding) {
-    if (encoding.field === undefined) {
+    if (encoding.aggregate === 'count') {
       return `__${encoding.aggregate}`;
     }
     return `${encoding.aggregate}_${encoding.field}`;
