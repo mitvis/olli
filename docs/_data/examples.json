@@ -123,6 +123,16 @@
       }
     ]
   },
+  "concat_chart": {
+    "title": "Concatenated Chart",
+    "url": "/gallery/concat.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/concatChart-vl.html"
+      }
+    ]
+  },
   "aggregate_bar_chart": {
     "title": "Aggregate Bar Chart",
     "url": "/gallery/aggregateBarChart.html",

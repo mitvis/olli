@@ -93,7 +93,7 @@ function adaptUnitSpec(spec: TopLevelUnitSpec<any>, data: OlliDataset): UnitOlli
           field: fieldDef.field,
           title: encoding.title,
         });
-      } else if (['color', 'opacity'].includes(channel)) {
+      } else if (['color', 'opacity', 'size'].includes(channel)) {
         // add legends
         olliSpec.legends.push({
           channel: channel as any,
