@@ -8,28 +8,7 @@ export const fmtValue = (value: OlliValue, fieldDef: OlliFieldDef): string => {
     value = new Date(value);
   }
   if (value instanceof Date) {
-    if (fieldDef?.timeUnit) {
-      let opts;
-      switch (fieldDef.timeUnit) {
-        case 'year':
-          opts = { year: 'numeric' };
-          break;
-        case 'month':
-          opts = { month: 'short' };
-          break;
-        case 'day':
-          opts = { day: 'numeric' };
-          break;
-        default:
-          opts = { year: 'numeric', month: 'short', day: 'numeric' };
-      }
-      return value.toLocaleString('en-US', opts);
-    }
-    return value.toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
+    return dateToTimeUnit(value, fieldDef.timeUnit);
   } else if (typeof value !== 'string' && !isNaN(value) && value % 1 != 0) {
     return Number(value).toFixed(2);
   }
@@ -67,7 +46,19 @@ export function dateToTimeUnit(date: Date, timeUnit: TimeUnit): string {
       opts = { month: 'short' };
       break;
     case 'day':
+      opts = { weekday: 'short' };
+      break;
+    case 'date':
       opts = { day: 'numeric' };
+      break;
+    case 'hours':
+      opts = { hour: 'numeric' };
+      break;
+    case 'minutes':
+      opts = { minute: 'numeric' };
+      break;
+    case 'seconds':
+      opts = { second: 'numeric' };
       break;
     default:
       opts = { year: 'numeric', month: 'short', day: 'numeric' };
