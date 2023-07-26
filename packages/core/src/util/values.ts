@@ -36,32 +36,33 @@ export function isNumeric(value: string): boolean {
 }
 
 export function dateToTimeUnit(date: Date, timeUnit: OlliTimeUnit): string {
-  let opts;
-  switch (timeUnit) {
-    case 'year':
-      opts = { year: 'numeric' };
-      break;
-    case 'month':
-      opts = { month: 'short' };
-      break;
-    case 'day':
-      opts = { weekday: 'short' };
-      break;
-    case 'date':
-      opts = { day: 'numeric' };
-      break;
-    case 'hours':
-      opts = { hour: 'numeric' };
-      break;
-    case 'minutes':
-      opts = { minute: 'numeric' };
-      break;
-    case 'seconds':
-      opts = { second: 'numeric' };
-      break;
-    default:
-      opts = { year: 'numeric', month: 'short', day: 'numeric' };
-      break;
+  if (!timeUnit) {
+    return date.toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  }
+  const opts = {};
+  if (timeUnit.includes('year')) {
+    opts['year'] = 'numeric';
+  }
+  if (timeUnit.includes('month')) {
+    opts['month'] = 'short';
+  }
+  if (timeUnit.includes('day')) {
+    opts['weekday'] = 'short';
+  }
+  if (timeUnit.includes('date')) {
+    opts['day'] = 'numeric';
+  }
+  if (timeUnit.includes('hours')) {
+    opts['hour'] = 'numeric';
+  }
+  if (timeUnit.includes('minutes')) {
+    opts['minute'] = 'numeric';
+  }
+  if (timeUnit.includes('seconds')) {
+    opts['second'] = 'numeric';
+  }
+  if (!Object.keys(opts).length) {
+    return date.toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
   }
   return date.toLocaleString('en-US', opts);
 }
