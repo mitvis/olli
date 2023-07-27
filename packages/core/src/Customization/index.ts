@@ -112,17 +112,17 @@ export function nodeToDescription(
           return `a ${chartType()}`;
         }
         if (node.children.length) {
-          if (node.children[0].viewOp === 'layer') {
+          if (node.children[0].viewType === 'layer') {
             return 'a layered chart';
           }
-          if (node.children[0].viewOp === 'concat') {
+          if (node.children[0].viewType === 'concat') {
             return 'a multi-view chart';
           }
         }
         return 'a dataset';
       case 'view':
         const viewName =
-          olliSpec.mark === 'line' ? 'line' : olliSpec.mark ? chartType() : node.viewOp ? node.viewOp : 'view';
+          olliSpec.mark === 'line' ? 'line' : olliSpec.mark ? chartType() : node.viewType ? node.viewType : 'view';
         return `a ${viewName}`;
       case 'xAxis':
       case 'yAxis':

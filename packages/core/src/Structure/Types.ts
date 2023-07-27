@@ -26,7 +26,7 @@ export interface ElaboratedOlliNode {
   id: string;
   nodeType: OlliNodeType;
   specIndex?: number;
-  viewOp?: 'facet' | 'layer' | 'concat';
+  viewType?: 'facet' | 'layer' | 'concat';
   fullPredicate: LogicalAnd<FieldPredicate>;
   parent?: ElaboratedOlliNode;
   children: ElaboratedOlliNode[];

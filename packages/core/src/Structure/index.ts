@@ -72,7 +72,7 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
             return {
               id: childId,
               nodeType: nodeType === 'root' ? 'view' : 'filteredData',
-              viewOp: nodeType === 'root' ? 'facet' : undefined,
+              viewType: nodeType === 'root' ? 'facet' : undefined,
               specIndex,
               predicate: p,
               fullPredicate: childFullPred,
@@ -120,7 +120,7 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
       return {
         id: `${namespace}-${idx}`,
         nodeType: 'view' as OlliNodeType,
-        viewOp: olliSpec.operator,
+        viewType: olliSpec.operator,
         specIndex: idx,
         fullPredicate: { and: [] },
         description: new Map<string, string>(),
