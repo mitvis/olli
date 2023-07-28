@@ -33,6 +33,7 @@ export interface ElaboratedOlliNode {
   groupby?: string;
   predicate?: FieldPredicate;
   description: Map<string, string>;
+  height: number;
 }
 
 export type OlliNodeLookup = { [id: string]: ElaboratedOlliNode };

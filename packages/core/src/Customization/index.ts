@@ -245,16 +245,47 @@ export function nodeToDescription(
     }
   }
 
+  function depth(node: ElaboratedOlliNode): string {
+    return `level ${node.height}`
+  }
+
+  function parent(node: ElaboratedOlliNode): string {
+    switch (node.nodeType) {
+      default:
+        throw `Node type ${node.nodeType} does not have the 'parent' token.`;
+    }
+  }
+
+  function quartile(node: ElaboratedOlliNode): string {
+    switch (node.nodeType) {
+      default:
+        throw `Node type ${node.nodeType} does not have the 'quartile' token.`;
+    }
+  }
+
+  function aggregate(node: ElaboratedOlliNode): string {
+    switch (node.nodeType) {
+      default:
+        throw `Node type ${node.nodeType} does not have the 'aggregate' token.`;
+    }
+  }
+
   const nodeTypeToTokens = new Map<OlliNodeType, string[]>([
-    ['root', ['name', 'type', 'size', 'children']],
-    ['view', ['index', 'type', 'name', 'children']],
-    ['xAxis', ['name', 'type', 'data']],
-    ['yAxis', ['name', 'type', 'data']],
-    ['legend', ['name', 'type', 'data']],
-    ['filteredData', ['index', 'data', 'size']],
-    ['annotations', ['size']],
-    ['other', ['index', 'data', 'size']],
+    ['root', ['name', 'type', 'size', 'children', 'depth']],
+    ['view', ['index', 'type', 'name', 'children', 'depth']],
+    ['xAxis', ['name', 'type', 'data', 'depth']],
+    ['yAxis', ['name', 'type', 'data', 'depth']],
+    ['legend', ['name', 'type', 'data', 'depth']],
+    ['filteredData', ['index', 'data', 'size', 'depth']],
+    ['annotations', ['size', 'depth']],
+    ['other', ['index', 'data', 'size', 'depth']],
   ]);
+
+  // root: name, type, size, children / depth
+  // view: index, type, name, children / depth
+  // axis: name, type, data / parent, depth, size??, aggregate
+  // section: index, data, size / parent, depth, quartile, aggregate
+  // data: index, data, size / parent, quartile
 
   const tokenFunctions = new Map<string, Function>([
     ['name', name],
@@ -263,6 +294,10 @@ export function nodeToDescription(
     ['children', children],
     ['data', data],
     ['size', size],
+    ['depth', depth],
+    ['parent', parent],
+    ['quartile', quartile],
+    ['aggregate', aggregate]
   ]);
 
   const resultDescription = new Map<string, string>();
