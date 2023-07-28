@@ -147,7 +147,7 @@ export class OlliRuntimeTreeItem {
         }
         break;
       case 'f':
-        openSelectionDialog(this.tree);
+        openSelectionDialog(this.olliNode, this.tree);
         break;
       case 'r':
         openTargetedNavigationDialog(this.tree);

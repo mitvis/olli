@@ -1,5 +1,5 @@
-import { OlliDataset, OlliValue } from '../Types';
-import { OlliSpec } from '../Types';
+import { OlliDataset, OlliFieldDef, OlliValue } from '../Types';
+import { UnitOlliSpec } from '../Types';
 import { ElaboratedOlliNode, OlliNodeType } from '../Structure/Types';
 import { getBins } from '../util/bin';
 import { getDomain, getFieldDef } from '../util/data';
@@ -32,7 +32,7 @@ export function getCustomizedDescription(node: ElaboratedOlliNode) {
 export function nodeToDescription(
   node: ElaboratedOlliNode,
   dataset: OlliDataset,
-  olliSpec: OlliSpec
+  olliSpec: UnitOlliSpec
 ): Map<string, string> {
   const indexStr = `${(node.parent?.children.indexOf(node) || 0) + 1} of ${(node.parent?.children || []).length}`;
   const description = olliSpec.description || '';
@@ -76,7 +76,7 @@ export function nodeToDescription(
           return olliSpec.description || '';
         }
         return '';
-      case 'facet':
+      case 'view':
         if ('predicate' in node && 'equal' in node.predicate) {
           return `titled ${node.predicate.equal}`;
         }
@@ -93,7 +93,7 @@ export function nodeToDescription(
 
   function index(node: ElaboratedOlliNode): string {
     switch (node.nodeType) {
-      case 'facet':
+      case 'view':
       case 'filteredData':
       case 'other':
         return indexStr;
@@ -111,10 +111,19 @@ export function nodeToDescription(
         if (olliSpec.mark) {
           return `a ${chartType()}`;
         }
+        if (node.children.length) {
+          if (node.children[0].viewType === 'layer') {
+            return 'a layered chart';
+          }
+          if (node.children[0].viewType === 'concat') {
+            return 'a multi-view chart';
+          }
+        }
         return 'a dataset';
-      case 'facet':
-        const facetName = olliSpec.mark === 'line' ? 'line' : olliSpec.mark ? chartType() : 'facet';
-        return `a ${facetName}`;
+      case 'view':
+        const viewName =
+          olliSpec.mark === 'line' ? 'line' : olliSpec.mark ? chartType() : node.viewType ? node.viewType : 'view';
+        return `a ${viewName}`;
       case 'xAxis':
       case 'yAxis':
       case 'legend':
@@ -150,7 +159,7 @@ export function nodeToDescription(
           return ' ' + [...fields].join(', ');
         }
         return '';
-      case 'facet':
+      case 'view':
         return `with axes ${axes}`;
       default:
         throw `Node type ${node.nodeType} does not have the 'children' token.`;
@@ -172,30 +181,30 @@ export function nodeToDescription(
               olliSpec.legends?.find((legend) => legend.field === node.groupby);
             const bins = getBins(node.groupby, dataset, olliSpec.fields);
             if (bins.length) {
-              first = fmtValue(bins[0][0]);
-              last = fmtValue(bins[bins.length - 1][1]);
+              first = fmtValue(bins[0][0], fieldDef);
+              last = fmtValue(bins[bins.length - 1][1], fieldDef);
               return `with values from ${first} to ${last}`;
             }
           } else {
-            const domain = getDomain(node.groupby, dataset);
+            const domain = getDomain(fieldDef, dataset);
             if (domain.length) {
-              first = fmtValue(domain[0]);
-              last = fmtValue(domain[domain.length - 1]);
-              return `with ${pluralize(domain.values.length, 'value')} from ${first} to ${last}`;
+              first = fmtValue(domain[0], fieldDef);
+              last = fmtValue(domain[domain.length - 1], fieldDef);
+              return `with ${pluralize(domain.length, 'value')} from ${first} to ${last}`;
             }
           }
         }
         return '';
       case 'filteredData':
         if ('predicate' in node) {
-          return predicateToDescription(node.predicate);
+          return predicateToDescription(node.predicate, olliSpec.fields);
         }
         return '';
       case 'other':
         if ('groupby' in node) {
           return `grouped by ${node.groupby}`;
         } else if ('predicate' in node) {
-          return predicateToDescription(node.predicate);
+          return predicateToDescription(node.predicate, olliSpec.fields);
         }
       default:
         throw `Node type ${node.nodeType} does not have the 'data' token.`;
@@ -238,7 +247,7 @@ export function nodeToDescription(
 
   const nodeTypeToTokens = new Map<OlliNodeType, string[]>([
     ['root', ['name', 'type', 'size', 'children']],
-    ['facet', ['index', 'type', 'name', 'children']],
+    ['view', ['index', 'type', 'name', 'children']],
     ['xAxis', ['name', 'type', 'data']],
     ['yAxis', ['name', 'type', 'data']],
     ['legend', ['name', 'type', 'data']],
@@ -270,37 +279,41 @@ export function nodeToDescription(
   return resultDescription;
 }
 
-export function predicateToDescription(predicate: LogicalComposition<FieldPredicate>) {
+export function predicateToDescription(predicate: LogicalComposition<FieldPredicate>, fields: OlliFieldDef[]) {
   if ('and' in predicate) {
-    return predicate.and.map(predicateToDescription).join(' and ');
+    return predicate.and.map((p) => predicateToDescription(p, fields)).join(' and ');
   }
   if ('or' in predicate) {
-    return predicate.or.map(predicateToDescription).join(' or ');
+    return predicate.or.map((p) => predicateToDescription(p, fields)).join(' or ');
   }
   if ('not' in predicate) {
-    return `not ${predicateToDescription(predicate.not)}`;
+    return `not ${predicateToDescription(predicate.not, fields)}`;
   }
-  return fieldPredicateToDescription(predicate);
+  return fieldPredicateToDescription(predicate, fields);
 }
 
-function fieldPredicateToDescription(predicate: FieldPredicate) {
+function fieldPredicateToDescription(predicate: FieldPredicate, fields: OlliFieldDef[]) {
+  const fieldDef = getFieldDef(predicate.field, fields);
   if ('equal' in predicate) {
-    return `${predicate.field} equals ${fmtValue(predicate.equal as OlliValue)}`;
+    return `${predicate.field} equals ${fmtValue(predicate.equal as OlliValue, fieldDef)}`;
   }
   if ('range' in predicate) {
-    return `${predicate.field} is between ${fmtValue(predicate.range[0])} and ${fmtValue(predicate.range[1])}`;
+    return `${predicate.field} is between ${fmtValue(predicate.range[0], fieldDef)} and ${fmtValue(
+      predicate.range[1],
+      fieldDef
+    )}`;
   }
   if ('lt' in predicate) {
-    return `${predicate.field} is less than ${fmtValue(predicate.lt as OlliValue)}`;
+    return `${predicate.field} is less than ${fmtValue(predicate.lt as OlliValue, fieldDef)}`;
   }
   if ('lte' in predicate) {
-    return `${predicate.field} is less than or equal to ${fmtValue(predicate.lte as OlliValue)}`;
+    return `${predicate.field} is less than or equal to ${fmtValue(predicate.lte as OlliValue, fieldDef)}`;
   }
   if ('gt' in predicate) {
-    return `${predicate.field} is greater than ${fmtValue(predicate.gt as OlliValue)}`;
+    return `${predicate.field} is greater than ${fmtValue(predicate.gt as OlliValue, fieldDef)}`;
   }
   if ('gte' in predicate) {
-    return `${predicate.field} is greater than or equal to ${fmtValue(predicate.gte as OlliValue)}`;
+    return `${predicate.field} is greater than or equal to ${fmtValue(predicate.gte as OlliValue, fieldDef)}`;
   }
 
   return '';

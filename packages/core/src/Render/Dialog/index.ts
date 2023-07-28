@@ -1,12 +1,13 @@
 import { predicateToDescription } from '../../Customization';
 import { ElaboratedOlliNode } from '../../Structure/Types';
-import { OlliSpec } from '../../Types';
+import { UnitOlliSpec } from '../../Types';
 import { selectionTest } from '../../util/selection';
 import { renderTable } from '../Table';
 import { OlliRuntime } from '../../Runtime/OlliRuntime';
 import './dialog.css';
 import { makeSelectionMenu } from './selectionMenu';
 import { makeTargetedNavMenu } from './targetedNavMenu';
+import { getSpecForNode } from '../../Structure';
 
 export function makeDialog(
   tree: OlliRuntime,
@@ -95,18 +96,16 @@ function openDialog(dialog: HTMLElement, renderContainer: HTMLElement) {
 }
 
 export function openTableDialog(olliNode: ElaboratedOlliNode, tree: OlliRuntime) {
-  const olliSpec = tree.olliSpec;
-  const table = renderTable(
-    selectionTest(olliSpec.data, olliNode.fullPredicate),
-    olliSpec.fields.map((f) => f.field)
-  );
-  const dialog = makeDialog(tree, 'Table View', predicateToDescription(olliNode.fullPredicate), table);
+  const olliSpec: UnitOlliSpec = getSpecForNode(olliNode, tree.olliSpec);
+  const table = renderTable(selectionTest(olliSpec.data, olliNode.fullPredicate), olliSpec.fields);
+  const dialog = makeDialog(tree, 'Table View', predicateToDescription(olliNode.fullPredicate, olliSpec.fields), table);
 
   openDialog(dialog, tree.renderContainer);
 }
 
-export function openSelectionDialog(tree: OlliRuntime) {
-  const menu = makeSelectionMenu(tree.olliSpec);
+export function openSelectionDialog(olliNode: ElaboratedOlliNode, tree: OlliRuntime) {
+  const olliSpec: UnitOlliSpec = getSpecForNode(olliNode, tree.olliSpec);
+  const menu = makeSelectionMenu(olliSpec);
 
   const onOk = () => {
     const predicate = { and: JSON.parse(menu.getAttribute('data-state')) };
@@ -126,9 +125,7 @@ export function openTargetedNavigationDialog(tree: OlliRuntime) {
 
   const onOk = () => {
     const selectedNodeId = menu.getAttribute('data-state');
-    console.log(selectedNodeId);
     const treeItem = tree.treeItems.find((item) => item.olliNode.id === selectedNodeId);
-    console.log(treeItem);
     if (treeItem) {
       tree.setFocusToItem(treeItem);
     }

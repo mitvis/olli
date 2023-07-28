@@ -1,10 +1,10 @@
 // Adapted from: https://www.w3.org/WAI/ARIA/apg/patterns/treeview/examples/treeview-1b/
 import { ElaboratedOlliNode, OlliNodeLookup } from '../Structure/Types';
 import { OlliNodeType } from '../Structure/Types';
-import { OlliSpec } from '../Types';
+import { OlliSpec, UnitOlliSpec } from '../Types';
 import { setOlliGlobalState } from '../util/globalState';
 import { OlliRuntimeTreeItem } from './OlliRuntimeTreeItem';
-import { olliSpecToTree, treeToNodeLookup } from '../Structure';
+import { getSpecForNode, olliSpecToTree, treeToNodeLookup } from '../Structure';
 import { getCustomizedDescription } from '../Customization';
 import { renderTree } from '../Render/TreeView';
 import { LogicalAnd, LogicalComposition } from 'vega-lite/src/logical';
@@ -100,7 +100,8 @@ export class OlliRuntime {
 
   setSelection(selection: LogicalAnd<FieldPredicate> | FieldPredicate) {
     const lastNode = this.lastFocusedTreeItem?.olliNode;
-    this.olliSpec.selection = selection;
+    const spec = getSpecForNode(lastNode, this.olliSpec);
+    spec.selection = selection;
     this.init();
     if (lastNode) {
       // find the nearest node to the last selected node and set focus to it
@@ -113,9 +114,9 @@ export class OlliRuntime {
           this.setFocusToItem(item || this.rootTreeItem);
         } else if ('predicate' in lastNode) {
           const pitems = items.filter((ti) => 'predicate' in ti.olliNode);
-          const lastNodeSelection = selectionTest(this.olliSpec.data, { and: [selection, lastNode.predicate] });
+          const lastNodeSelection = selectionTest(spec.data, { and: [selection, lastNode.predicate] });
           const item = pitems.find((ti) => {
-            const tiSelection = selectionTest(this.olliSpec.data, { and: [selection, ti.olliNode.predicate] });
+            const tiSelection = selectionTest(spec.data, { and: [selection, ti.olliNode.predicate] });
             return tiSelection.some((d) => lastNodeSelection.includes(d));
           });
           this.setFocusToItem(item || this.rootTreeItem);
