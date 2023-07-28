@@ -3,9 +3,6 @@ import { isString } from 'vega';
 import { OlliFieldDef, OlliTimeUnit, OlliValue } from '../Types';
 
 export const fmtValue = (value: OlliValue, fieldDef: OlliFieldDef): string => {
-  if (fieldDef.timeUnit && !(value instanceof Date)) {
-    value = new Date(value);
-  }
   if (value instanceof Date) {
     return dateToTimeUnit(value, fieldDef.timeUnit);
   } else if (typeof value !== 'string' && !isNaN(value) && value % 1 != 0) {
