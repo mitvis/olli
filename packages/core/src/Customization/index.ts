@@ -246,11 +246,23 @@ export function nodeToDescription(
   }
 
   function depth(node: ElaboratedOlliNode): string {
-    return `level ${node.height}`
+    return `level ${node.height}`;
   }
 
   function parent(node: ElaboratedOlliNode): string {
     switch (node.nodeType) {
+      case 'xAxis':
+      case 'yAxis':
+      case 'legend':
+      case 'filteredData':
+        let view = node;
+        while (view.parent && view.nodeType != 'view') {
+          view = view.parent;
+        }
+        if ('predicate' in view && 'equal' in view.predicate) {
+          return `${view.predicate.equal}`;
+        }
+        return '';
       default:
         throw `Node type ${node.nodeType} does not have the 'parent' token.`;
     }
@@ -273,19 +285,19 @@ export function nodeToDescription(
   const nodeTypeToTokens = new Map<OlliNodeType, string[]>([
     ['root', ['name', 'type', 'size', 'children', 'depth']],
     ['view', ['index', 'type', 'name', 'children', 'depth']],
-    ['xAxis', ['name', 'type', 'data', 'depth']],
-    ['yAxis', ['name', 'type', 'data', 'depth']],
-    ['legend', ['name', 'type', 'data', 'depth']],
-    ['filteredData', ['index', 'data', 'size', 'depth']],
+    ['xAxis', ['name', 'type', 'data', 'parent', 'depth']],
+    ['yAxis', ['name', 'type', 'data', 'parent', 'depth']],
+    ['legend', ['name', 'type', 'data', 'parent', 'depth']],
+    ['filteredData', ['index', 'data', 'size', 'parent', 'depth']],
     ['annotations', ['size', 'depth']],
     ['other', ['index', 'data', 'size', 'depth']],
   ]);
 
-  // root: name, type, size, children / depth
-  // view: index, type, name, children / depth
-  // axis: name, type, data / parent, depth, size??, aggregate
-  // section: index, data, size / parent, depth, quartile, aggregate
-  // data: index, data, size / parent, quartile
+  // root: name, type, size, children /
+  // view: index, type, name, children /
+  // axis: name, type, data / size??, aggregate
+  // section: index, data, size / quartile, aggregate
+  // data: index, data, size / (parent), quartile
 
   const tokenFunctions = new Map<string, Function>([
     ['name', name],
