@@ -65,6 +65,8 @@ export function nodeToDescription(
   };
   const axes = olliSpec.axes.map((a) => a.title || a.field).join(' and ');
   const pluralize = (count: number, noun: string, suffix = 's') => `${count} ${noun}${count !== 1 ? suffix : ''}`;
+  const averageValue = (selection: OlliDataset, field: string) => Math.round(selection.reduce((a, b) => a + Number(b[field]), 0)
+  /selection.length);
 
   function name(node: ElaboratedOlliNode): string {
     switch (node.nodeType) {
@@ -268,36 +270,73 @@ export function nodeToDescription(
     }
   }
 
-  function quartile(node: ElaboratedOlliNode): string {
+  function aggregate(node: ElaboratedOlliNode): string {
+    let axis;
     switch (node.nodeType) {
+      case 'xAxis':
+      case 'yAxis':
+      case 'legend':
+        axis = getFieldDef(node.groupby, olliSpec.fields);
+      case 'filteredData':
+        if (!axis) { axis = getFieldDef(node.parent.groupby, olliSpec.fields);}
+        if (axis.type !== 'quantitative') { return ''; }
+
+        const selection = selectionTest(dataset, node.fullPredicate);
+        if (selection.length === 0) { return '' };
+        const average = averageValue(selection, axis.field);
+        const maximum = selection.reduce((a, b) => Math.max(a,  Number(b[axis.field])), 
+                        Number(selection[0][axis.field]));
+        const minimum = selection.reduce((a, b) => Math.min(a,  Number(b[axis.field])), 
+                        Number(selection[0][axis.field]));
+        return `the average value is ${average}, the maximum is ${maximum}, and the minimum is ${minimum}`
+
       default:
-        throw `Node type ${node.nodeType} does not have the 'quartile' token.`;
+        throw `Node type ${node.nodeType} does not have the 'aggregate' token.`;
     }
   }
 
-  function aggregate(node: ElaboratedOlliNode): string {
+  function quartile(node: ElaboratedOlliNode): string {
     switch (node.nodeType) {
+      case 'filteredData':
+        const selection = selectionTest(dataset, node.fullPredicate);
+
+        // TODO
+        // find sections to compare against TODO somehow
+        
+        // const avgs: number[] = []
+        // sections.forEach(interval => {
+        //     if (interval.length == 0) {
+        //         avgs.push(0);
+        //         return;
+        //     }
+        //     const avg = averageValue(interval, field);
+        //     avgs.push(Number(avg));
+        // });
+
+        // avgs.sort(function(a, b) {
+        //     return a - b;
+        //   });
+        // const thisAvg = selection.length == 0 ? 0 : averageValue(selection, field)
+        // const sectionsPos = avgs.indexOf(Number(thisAvg))/avgs.length;
+        // const sectionsQuart = Math.max(1, Math.ceil(sectionsPos * 4)); // pos is btwn 0 and 1, no quartile 0
+        // return `This section's average ${field} is in the ${ordinal_suffix_of(sectionsQuart)} quartile  of all sections`
+
+        return ''
       default:
-        throw `Node type ${node.nodeType} does not have the 'aggregate' token.`;
+        throw `Node type ${node.nodeType} does not have the 'quartile' token.`;
     }
   }
 
   const nodeTypeToTokens = new Map<OlliNodeType, string[]>([
     ['root', ['name', 'type', 'size', 'children', 'depth']],
     ['view', ['index', 'type', 'name', 'children', 'depth']],
-    ['xAxis', ['name', 'type', 'data', 'parent', 'depth']],
-    ['yAxis', ['name', 'type', 'data', 'parent', 'depth']],
-    ['legend', ['name', 'type', 'data', 'parent', 'depth']],
-    ['filteredData', ['index', 'data', 'size', 'parent', 'depth']],
+    ['xAxis', ['name', 'type', 'data', 'parent', 'aggregate', 'depth']],
+    ['yAxis', ['name', 'type', 'data', 'parent', 'aggregate', 'depth']],
+    ['legend', ['name', 'type', 'data', 'parent', 'aggregate', 'depth']],
+    ['filteredData', ['index', 'data', 'size', 'parent', 'aggregate', 'quartile', 'depth']],
     ['annotations', ['size', 'depth']],
     ['other', ['index', 'data', 'size', 'depth']],
   ]);
-
-  // root: name, type, size, children /
-  // view: index, type, name, children /
-  // axis: name, type, data / size??, aggregate
-  // section: index, data, size / quartile, aggregate
-  // data: index, data, size / (parent), quartile
 
   const tokenFunctions = new Map<string, Function>([
     ['name', name],
