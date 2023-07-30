@@ -271,24 +271,27 @@ export function nodeToDescription(
   }
 
   function aggregate(node: ElaboratedOlliNode): string {
-    let axis;
+    let axisType: string;
     switch (node.nodeType) {
       case 'xAxis':
       case 'yAxis':
       case 'legend':
-        axis = getFieldDef(node.groupby, olliSpec.fields);
+        axisType = node.nodeType === 'xAxis'? 'x' : 'y';
       case 'filteredData':
-        if (!axis) { axis = getFieldDef(node.parent.groupby, olliSpec.fields);}
-        if (axis.type !== 'quantitative') { return ''; }
+        if (!axisType) axisType = node.parent.nodeType === 'xAxis'? 'x' : 'y';
+
+        const otherAxis = olliSpec.axes.find(axis => axis.axisType !== axisType);
+        const otherAxisFieldDef = getFieldDef(otherAxis.field, olliSpec.fields);
+        if (otherAxisFieldDef.type !== 'quantitative') { return ''; }
 
         const selection = selectionTest(dataset, node.fullPredicate);
         if (selection.length === 0) { return '' };
-        const average = averageValue(selection, axis.field);
-        const maximum = selection.reduce((a, b) => Math.max(a,  Number(b[axis.field])), 
-                        Number(selection[0][axis.field]));
-        const minimum = selection.reduce((a, b) => Math.min(a,  Number(b[axis.field])), 
-                        Number(selection[0][axis.field]));
-        return `the average value is ${average}, the maximum is ${maximum}, and the minimum is ${minimum}`
+        const average = averageValue(selection, otherAxis.field);
+        const maximum = selection.reduce((a, b) => Math.max(a,  Number(b[otherAxis.field])), 
+                        Number(selection[0][otherAxis.field]));
+        const minimum = selection.reduce((a, b) => Math.min(a,  Number(b[otherAxis.field])), 
+                        Number(selection[0][otherAxis.field]));
+        return `the average value for the ${otherAxis.field} field is ${average}, the maximum is ${maximum}, and the minimum is ${minimum}`
 
       default:
         throw `Node type ${node.nodeType} does not have the 'aggregate' token.`;
