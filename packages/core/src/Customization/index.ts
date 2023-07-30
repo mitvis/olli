@@ -68,6 +68,21 @@ export function nodeToDescription(
   const averageValue = (selection: OlliDataset, field: string) => Math.round(selection.reduce((a, b) => a + Number(b[field]), 0)
   /selection.length);
 
+  function ordinal_suffix_of(i: number) { // st, nd, rd, th
+    var j = i % 10,
+        k = i % 100;
+    if (j == 1 && k != 11) {
+        return i + "st";
+    }
+    if (j == 2 && k != 12) {
+        return i + "nd";
+    }
+    if (j == 3 && k != 13) {
+        return i + "rd";
+    }
+    return i + "th";
+  }
+
   function name(node: ElaboratedOlliNode): string {
     switch (node.nodeType) {
       case 'root':
@@ -283,15 +298,16 @@ export function nodeToDescription(
         const otherAxis = olliSpec.axes.find(axis => axis.axisType !== axisType);
         const otherAxisFieldDef = getFieldDef(otherAxis.field, olliSpec.fields);
         if (otherAxisFieldDef.type !== 'quantitative') { return ''; }
+        const field = otherAxis.field;
 
         const selection = selectionTest(dataset, node.fullPredicate);
         if (selection.length === 0) { return '' };
-        const average = averageValue(selection, otherAxis.field);
-        const maximum = selection.reduce((a, b) => Math.max(a,  Number(b[otherAxis.field])), 
-                        Number(selection[0][otherAxis.field]));
-        const minimum = selection.reduce((a, b) => Math.min(a,  Number(b[otherAxis.field])), 
-                        Number(selection[0][otherAxis.field]));
-        return `the average value for the ${otherAxis.field} field is ${average}, the maximum is ${maximum}, and the minimum is ${minimum}`
+        const average = averageValue(selection, field);
+        const maximum = selection.reduce((a, b) => Math.max(a,  Number(b[field])), 
+                        Number(selection[0][field]));
+        const minimum = selection.reduce((a, b) => Math.min(a,  Number(b[field])), 
+                        Number(selection[0][field]));
+        return `the average value for the ${field} field is ${average}, the maximum is ${maximum}, and the minimum is ${minimum}`
 
       default:
         throw `Node type ${node.nodeType} does not have the 'aggregate' token.`;
@@ -301,30 +317,30 @@ export function nodeToDescription(
   function quartile(node: ElaboratedOlliNode): string {
     switch (node.nodeType) {
       case 'filteredData':
-        const selection = selectionTest(dataset, node.fullPredicate);
-
-        // TODO
-        // find sections to compare against TODO somehow
+        const axisType = node.parent.nodeType === 'xAxis'? 'x' : 'y';
+        const otherAxis = olliSpec.axes.find(axis => axis.axisType !== axisType);
+        const otherAxisFieldDef = getFieldDef(otherAxis.field, olliSpec.fields);
+        if (otherAxisFieldDef.type !== 'quantitative') { return ''; }
+        const field = otherAxis.field;
         
-        // const avgs: number[] = []
-        // sections.forEach(interval => {
-        //     if (interval.length == 0) {
-        //         avgs.push(0);
-        //         return;
-        //     }
-        //     const avg = averageValue(interval, field);
-        //     avgs.push(Number(avg));
-        // });
+        const avgs: number[] = []
+        node.parent.children.forEach(section => {
+            const interval = selectionTest(dataset, section.fullPredicate);
+            if (interval.length == 0) {
+                avgs.push(0);
+                return;
+            }
+            avgs.push(Number(averageValue(interval, field)));
+        });
+        avgs.sort(function(a, b) {
+            return a - b;
+        });
 
-        // avgs.sort(function(a, b) {
-        //     return a - b;
-        //   });
-        // const thisAvg = selection.length == 0 ? 0 : averageValue(selection, field)
-        // const sectionsPos = avgs.indexOf(Number(thisAvg))/avgs.length;
-        // const sectionsQuart = Math.max(1, Math.ceil(sectionsPos * 4)); // pos is btwn 0 and 1, no quartile 0
-        // return `This section's average ${field} is in the ${ordinal_suffix_of(sectionsQuart)} quartile  of all sections`
-
-        return ''
+        const selection = selectionTest(dataset, node.fullPredicate);
+        const thisAvg = selection.length == 0 ? 0 : averageValue(selection, field)
+        const sectionsPos = avgs.indexOf(Number(thisAvg))/avgs.length;
+        const sectionsQuart = Math.max(1, Math.ceil(sectionsPos * 4)); // pos is btwn 0 and 1, no quartile 0
+        return `this section's average ${field} is in the ${ordinal_suffix_of(sectionsQuart)} quartile  of all sections`
       default:
         throw `Node type ${node.nodeType} does not have the 'quartile' token.`;
     }
