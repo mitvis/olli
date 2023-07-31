@@ -1,5 +1,5 @@
 import { TopLevelSpec, compile } from 'vega-lite';
-import { VisAdapter, UnitOlliSpec, MultiOlliSpec, typeInference, OlliSpec, OlliDataset } from 'olli';
+import { VisAdapter, UnitOlliSpec, typeInference, OlliSpec, OlliDataset, MultiSpecOperator } from 'olli';
 import { getData, getVegaScene, getVegaView } from './utils';
 import { TopLevelUnitSpec } from 'vega-lite/build/src/spec/unit';
 import { TopLevel, LayerSpec, GenericHConcatSpec, GenericVConcatSpec } from 'vega-lite/build/src/spec';
@@ -121,7 +121,7 @@ async function adaptMultiSpec(
   spec: TopLevel<LayerSpec<any> | GenericConcatSpec<any> | GenericVConcatSpec<any> | GenericHConcatSpec<any>>,
   op: string,
   data: OlliDataset[]
-): Promise<MultiOlliSpec> {
+): Promise<OlliSpec> {
   const units: UnitOlliSpec[] = data.map((d) => {
     return {
       description: spec.description,
@@ -173,7 +173,7 @@ async function adaptMultiSpec(
   }
 
   return {
-    operator: op,
+    operator: op as MultiSpecOperator,
     units,
   };
 }

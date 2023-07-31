@@ -33,8 +33,10 @@ export interface UnitOlliSpec {
   description?: string;
 }
 
+export type MultiSpecOperator = 'layer' | 'concat';
+
 export interface MultiOlliSpec {
-  operator: 'layer' | 'concat';
+  operator: MultiSpecOperator;
   units: UnitOlliSpec[];
 }
 
