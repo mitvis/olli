@@ -143,6 +143,7 @@ export class OlliRuntime {
         }
         setOlliGlobalState({ lastVisitedInstance: this });
       } else {
+        this.collapseTreeItem(ti);
         ti.domNode.tabIndex = -1;
         ti.domNode.setAttribute('aria-selected', 'false');
       }
@@ -164,6 +165,49 @@ export class OlliRuntime {
       if (nodeIndex > 0) {
         this.setFocusToItem(currentItem.parent.children[nodeIndex - 1]);
       }
+    }
+  }
+
+  getPathFromView(node: ElaboratedOlliNode) {
+    if (node.viewType && (node.viewType === 'facet' || node.viewType === 'layer')) {
+      return {
+        view: node,
+        path: ''
+      };
+    }
+    const index = node.parent.children.indexOf(node);
+    const rec = this.getPathFromView(node.parent);
+    return { ...rec, path: rec.path + '/' + index };
+  }
+
+  getNodeForPathFromView(viewNode: ElaboratedOlliNode, path: string) {
+    const indices = path.split('/').filter(x => x.length).map(x => parseInt(x, 10));
+    let node = viewNode;
+    for (let idx of indices) {
+      if (node.children[idx]) {
+        node = node.children[idx];
+      }
+    }
+    return node;
+  }
+
+  isLateralPossible() {
+    return this.rootTreeItem
+      .children
+      .map(n => n.olliNode.viewType)
+      .every(vt => vt === 'facet' || vt === 'layer');
+  }
+
+  setFocusToLateralItem(currentItem: OlliRuntimeTreeItem, direction: 'left' | 'right') {
+    const { view, path } = this.getPathFromView(currentItem.olliNode)
+    const viewIndex = view.parent.children.indexOf(view);
+
+    const newViewIndex = direction === 'left' ? viewIndex - 1 : viewIndex + 1;
+    if (newViewIndex >= 0 && newViewIndex < view.parent.children.length) {
+      const newView = view.parent.children[newViewIndex];
+      const lateralNode = this.getNodeForPathFromView(newView, path);
+      const lateralItem = currentItem.tree.treeItems.find(ti => ti.olliNode === lateralNode);
+      this.setFocusToItem(lateralItem);
     }
   }
 

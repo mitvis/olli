@@ -116,10 +116,22 @@ export class OlliRuntimeTreeItem {
         }
         break;
       case 'ArrowLeft':
+        if (event.shiftKey) {
+          if (this.tree.isLateralPossible()) {
+            this.tree.setFocusToLateralItem(this, 'left');
+          }
+        } else {
         this.tree.setFocusToPreviousItem(this);
+        }
         break;
       case 'ArrowRight':
+        if (event.shiftKey) {
+          if (this.tree.isLateralPossible()) {
+            this.tree.setFocusToLateralItem(this, 'right');
+          }
+        } else {
         this.tree.setFocusToNextItem(this);
+        }
         break;
       case 'Home':
         if (this.parent) {
