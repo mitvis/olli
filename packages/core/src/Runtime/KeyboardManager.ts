@@ -73,8 +73,8 @@ export class KeyboardManager {
 
         if (checkKeys(e, keyboardAction)) {
           keyboardAction.action(tree);
-            e.stopPropagation();
-            e.preventDefault();
+          e.stopPropagation();
+          e.preventDefault();
         }
     }
 
