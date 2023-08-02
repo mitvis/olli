@@ -54,9 +54,6 @@ export class KeyboardManager {
 
     constructor(target: HTMLElement) {
         this.target = target;
-        this.target.addEventListener('keydown', (event) => {
-            this.handleEvents(event);
-        });
         if (!this.target.hasAttribute("tabIndex")) {
             this.target.setAttribute("tabIndex", "0");
         }
@@ -181,128 +178,127 @@ export class KeyboardManager {
 export const initKeyboardManager = (olliInstance: OlliRuntime) => {
 
     const kb = new KeyboardManager(olliInstance.rootDomNode);
-    const lastFocusedTreeItem: OlliRuntimeTreeItem = olliInstance.lastFocusedTreeItem;
     kb.addActions([
       {
         key: 'h',
         title: 'Display help documentation modal',
         action: () => {
           kb.launchHelpDialog();
-        }
+        },
       },
       {
         key: 'Enter',
         title: 'Expand and collapse the current layer of the tree',
-        action: () => {
-          if (lastFocusedTreeItem.isExpandable) {
-            if (lastFocusedTreeItem.isExpanded()) {
-              olliInstance.collapseTreeItem(lastFocusedTreeItem);
+        action: (treeItem) => {
+          if (treeItem.isExpandable) {
+            if (treeItem.isExpanded()) {
+              treeItem.tree.collapseTreeItem(treeItem);
             } else {
-              olliInstance.expandTreeItem(lastFocusedTreeItem);
+              treeItem.tree.expandTreeItem(treeItem);
             }
           }
-        }
+        },
       },
       {
         key: ' ',
         keyDescription: 'Space',
         title: 'Expand and collapse the current layer of the tree',
-        action: () => {
-          if (olliInstance.lastFocusedTreeItem.isExpandable) {
-            if (olliInstance.lastFocusedTreeItem.isExpanded()) {
-              olliInstance.collapseTreeItem(lastFocusedTreeItem);
+        action: (treeItem) => {
+          if (treeItem.tree.lastFocusedTreeItem.isExpandable) {
+            if (treeItem.tree.lastFocusedTreeItem.isExpanded()) {
+              treeItem.tree.collapseTreeItem(treeItem);
             } else {
-              olliInstance.expandTreeItem(lastFocusedTreeItem);
+              treeItem.tree.expandTreeItem(treeItem);
             }
           }
-        }
+        },
       },
       {
         key: 'ArrowDown',
         title: 'Focus on the next layer of the tree',
-        action: () => {
-          if (lastFocusedTreeItem.children.length > 0 && lastFocusedTreeItem.isExpandable) {
-            olliInstance.setFocusToNextLayer(lastFocusedTreeItem);
+        action: (treeItem) => {
+          if (treeItem.children.length > 0 && treeItem.isExpandable) {
+            treeItem.tree.setFocusToNextLayer(treeItem);
           }
-        }
+        },
       },
       {
         key: 'ArrowUp',
         title: 'Focus on the previous layer of the tree',
-        action: () => {
-          if (lastFocusedTreeItem.inGroup) {
-            olliInstance.setFocusToParentItem(lastFocusedTreeItem);
+        action: (treeItem) => {
+          if (treeItem.inGroup) {
+            treeItem.tree.setFocusToParentItem(treeItem);
           }
-        }
+        },
       },
       {
         key: 'Escape',
         title: 'Focus on the previous layer of the tree',
-        action: () => {
-          if (lastFocusedTreeItem.inGroup) {
-            olliInstance.setFocusToParentItem(lastFocusedTreeItem);
+        action: (treeItem) => {
+          if (treeItem.inGroup) {
+            treeItem.tree.setFocusToParentItem(treeItem);
           }
-        }
+        },
       },
       {
         key: 'ArrowLeft',
         title: 'Focus on the previous child element of the tree',
-        action: () => {
-          olliInstance.setFocusToPreviousItem(lastFocusedTreeItem);
-        }
+        action: (treeItem) => {
+          treeItem.tree.setFocusToPreviousItem(treeItem);
+        },
       },
       {
         key: 'ArrowRight',
         title: 'Focus on the next child element of the tree',
-        action: () => {
-          olliInstance.setFocusToNextItem(lastFocusedTreeItem);
-        }
+        action: (treeItem) => {
+          treeItem.tree.setFocusToNextItem(treeItem);
+        },
       },
       {
         key: 'Home',
         title: 'Focus top of the tree',
-        action: () => {
-          if (lastFocusedTreeItem.parent) {
-            olliInstance.setFocusToFirstInLayer(lastFocusedTreeItem);
+        action: (treeItem) => {
+          if (treeItem.parent) {
+            treeItem.tree.setFocusToFirstInLayer(treeItem);
           }       
-        }
+        },
       },
       {
         key: 'x',
-        title: 'Navigate to the x-axis of the grapg',
-        action: () => {
-          olliInstance.focusOnNodeType('xAxis', this);   
-        }
+        title: 'Navigate to the x-axis of the graph',
+        action: (treeItem) => {
+          treeItem.tree.focusOnNodeType('xAxis', treeItem);   
+        },
       },
       {
         key: 'y',
         title: 'Navigate to the y-axis of the graph',
-        action: () => {
-          olliInstance.focusOnNodeType('yAxis', this);
-        }
+        action: (treeItem) => {
+          treeItem.tree.focusOnNodeType('yAxis', treeItem);
+        },
       },
       {
         key: 'l',
         title: 'Navigate to the legend of the graph',
-        action: () => {
-          olliInstance.focusOnNodeType('legend', this);
-        }
+        action: (treeItem) => {
+          treeItem.tree.focusOnNodeType('legend', treeItem);
+        },
       },
       {
         key: 't',
         title: 'Open table dialog',
-        action: () => {
-          if ('predicate' in lastFocusedTreeItem.olliNode || lastFocusedTreeItem.olliNode.nodeType === 'root') {
-            openTableDialog(lastFocusedTreeItem.olliNode, olliInstance);
+        action: (treeItem) => {
+          if ('predicate' in treeItem.olliNode || treeItem.olliNode.nodeType === 'root') {
+            openTableDialog(treeItem.olliNode, treeItem.tree);
           }
-        }
+        },
       },
       {
         key: 'f',
         title: 'Open selection dialog',
-        action: () => {
-          openSelectionDialog(olliInstance);
-        }
+        action: (treeItem) => {
+          openSelectionDialog(treeItem.tree);
+        },
       },
     ])
   
