@@ -3,12 +3,16 @@ import { OlliRuntime } from "./OlliRuntime";
 import { OlliRuntimeTreeItem } from "./OlliRuntimeTreeItem";
 
 export type KeyboardAction = {
-    action: () => void;
+    action: (treeItem: OlliRuntimeTreeItem) => void;
     title?: string;
     keyDescription?: string;
     description?: string;
     force?: boolean;
     caseSensitive?: boolean;
+    shiftKey?: boolean;
+    ctrlKey?: boolean;
+    altKey?: boolean;
+    metaKey?: boolean;
 }
 
 export type KeyRegistration = {
