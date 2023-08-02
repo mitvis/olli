@@ -19,10 +19,26 @@ export type KeyRegistration = {
   key: string;
 } & KeyboardAction;
 
-export const keyboardEventToString = (e: KeyboardEvent) => {
-    return `${e.altKey ? "Alt+" : ""}${e.ctrlKey ? "Ctrl+" : ""}${
-        e.shiftKey ? "Shift+" : ""
-    }${e.key}`;
+export const checkKeys = (e: KeyboardEvent, action: KeyboardAction) => {
+  let hasAlt: boolean = true;
+  let hasShift: boolean = true;
+  let hasCtrl: boolean = true;
+  let hasMeta: boolean = true;
+
+  if (action.altKey) {
+    hasAlt = e.altKey === action.altKey;
+  }
+  if (action.shiftKey) {
+    hasShift = e.shiftKey === action.shiftKey;
+  }
+  if (action.ctrlKey) {
+    hasCtrl = e.ctrlKey === action.ctrlKey;
+  }
+  if (action.metaKey) {
+    hasMeta = e.metaKey === action.metaKey;
+  }
+
+  return hasAlt && hasCtrl && hasMeta && hasShift;
 };
 
 /**
