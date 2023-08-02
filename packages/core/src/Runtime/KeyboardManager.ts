@@ -64,13 +64,18 @@ export class KeyboardManager {
         this.actions = {};
     }
 
-    private handleEvents(e: KeyboardEvent): void {
-        const keyPress = keyboardEventToString(e)
+    public handleEvents(e: KeyboardEvent, tree: OlliRuntimeTreeItem): void {
+        const keyPress = e.key;
+        let keyboardAction: KeyboardAction;
+
         if (keyPress in this.actions) {
-            this.actions[keyPress].action();
-            e.preventDefault();
+          keyboardAction = this.actions[keyPress];
         } else if (keyPress.toUpperCase() in this.actions) {
-            this.actions[keyPress.toUpperCase()].action();
+          keyboardAction = this.actions[keyPress.toUpperCase()];
+        }
+
+        if (checkKeys(e, keyboardAction)) {
+          keyboardAction.action(tree);
             e.stopPropagation();
             e.preventDefault();
         }
@@ -97,7 +102,11 @@ export class KeyboardManager {
             title,
             description,
             action,
-            keyDescription
+            keyDescription,
+            shiftKey,
+            ctrlKey,
+            altKey,
+            metaKey,
         };
     }
 
