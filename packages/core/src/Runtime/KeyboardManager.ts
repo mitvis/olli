@@ -84,6 +84,10 @@ export class KeyboardManager {
         force,
         keyDescription,
         title,
+        shiftKey,
+        ctrlKey,
+        altKey,
+        metaKey,
     }: KeyRegistration): void {
         const checkKey = caseSensitive ? key : key.toUpperCase();
         if (!force && checkKey in this.actions) {
