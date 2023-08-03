@@ -1,4 +1,4 @@
-import { openSelectionDialog, openTableDialog } from "../Render/Dialog";
+import { openHelpDialog, openSelectionDialog, openTableDialog } from "../Render/Dialog";
 import { OlliRuntime } from "./OlliRuntime";
 import { OlliRuntimeTreeItem } from "./OlliRuntimeTreeItem";
 
@@ -109,76 +109,23 @@ export class KeyboardManager {
     }
 
     /**
-    * Build a help dialog
-    */
-    public generateHelpDialog() {
-        const dialog = document.createElement("dialog");
-
-        const closeButton = document.createElement("button");
-        closeButton.textContent = "X";
-        closeButton.ariaLabel = "Close";
-        closeButton.style.position = "absolute";
-        closeButton.style.top = "10px";
-        closeButton.style.right = "10px";
-        closeButton.addEventListener("click", () => {
-            dialog.close();
-        });
-        dialog.appendChild(closeButton);
-
-        const heading = "Olli Help Menu";
-        const h1 = document.createElement("h1");
-        h1.textContent = heading;
-        dialog.setAttribute("aria-live", heading);
-        dialog.appendChild(h1);
-
-        const table = document.createElement("table");
-        const tbody = document.createElement("tbody");
-        Object.entries(this.actions).forEach(([keystroke, details]) => {
-            const tr = document.createElement("tr");
-            const th = document.createElement("th");
-            th.style.textAlign = 'left'; 
-            th.scope = "row";
-            th.textContent = details.title;
-            tr.appendChild(th);
-
-            const td1 = document.createElement("td");
-            td1.textContent = details.keyDescription ?? keystroke;
-            tr.appendChild(td1);
-
-            const td2 = document.createElement("td");
-            td2.textContent = details.description;
-            tr.appendChild(td2);
-
-            tbody.appendChild(tr);
-        });
-        table.appendChild(tbody);
-
-        dialog.appendChild(table);
-        return dialog;
-    }
-
-    /**
-     * Launch help dialog
+     * Return list of possible actions
      */
-    public launchHelpDialog() {
-        if (this.helpModal === null) {
-            this.helpModal = this.generateHelpDialog();
-            document.body.appendChild(this.helpModal);
-        }
-        this.helpModal.showModal();
-        this.helpModal.focus();
+    public getActions(): { [event: string]: KeyboardAction; } {
+      return this.actions;
     }
 }
 
 export const initKeyboardManager = (olliInstance: OlliRuntime) => {
 
     const kb = new KeyboardManager(olliInstance.rootDomNode);
+
     kb.addActions([
       {
         key: 'h',
         title: 'Display help documentation modal',
-        action: () => {
-          kb.launchHelpDialog();
+        action: (treeItem) => {
+          openHelpDialog(treeItem.tree);
         },
       },
       {
