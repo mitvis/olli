@@ -1,18 +1,18 @@
 <script type="module">
 let spec = {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "description": "Google's stock price over time.",
-  "data": { "url": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/stocks.csv" },
-  "mark": {"type": "area", "line": true, "point": true},
+  "description": "Unemployment across industries.",
+  "data": { "url": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/unemployment-across-industries.json" },
+  "mark": "area",
   "encoding": {
     "x": {
-      "field": "date", 
-      "type": "temporal"
+      "timeUnit": "yearmonth", "field": "date",
+      "axis": {"format": "%Y"}
     },
     "y": {
-      "field": "price", 
-      "type": "quantitative"
-    },
+      "aggregate": "sum", "field": "count",
+      "title": "count"
+    }
   }
 }
 

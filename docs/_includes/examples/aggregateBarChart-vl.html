@@ -1,21 +1,23 @@
 <script type="module">
   let spec = {
     "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-    "description": "A bar chart showing the US population distribution of age groups in 2000.",
-    "data": { "url": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/population.json" },
+    "data": { "url": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/seattle-weather.csv" },
     "mark": "bar",
     "encoding": {
       "x": {
-        "aggregate": "sum", "field": "people",
-        "title": "population"
+        "timeUnit": "month",
+        "field": "date",
+        "type": "ordinal"
+
       },
       "y": {
-        "field": "age"
-      },
+        "aggregate": "mean",
+        "field": "precipitation",
+        "type": "quantitative"
+      }
     }
   }
-  
-  
+
   let vegaSpec = vegaLite.compile(spec).spec
   const runtime = vega.parse(vegaSpec);
   const vegaRender = document.getElementById('Visualization-Vega-Lite');

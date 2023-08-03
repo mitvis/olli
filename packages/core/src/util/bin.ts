@@ -12,7 +12,7 @@ export function getBins(
   domainFilter?: LogicalComposition<FieldPredicate>
 ): [number, number][] {
   const fieldDef = getFieldDef(field, fields);
-  const domain = getDomain(field, data, domainFilter);
+  const domain = getDomain(fieldDef, data, domainFilter);
   const bins = [];
   let ticks;
   if (fieldDef.type === 'temporal') {

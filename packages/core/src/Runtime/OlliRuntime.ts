@@ -1,10 +1,10 @@
 // Adapted from: https://www.w3.org/WAI/ARIA/apg/patterns/treeview/examples/treeview-1b/
 import { ElaboratedOlliNode, OlliNodeLookup } from '../Structure/Types';
 import { OlliNodeType } from '../Structure/Types';
-import { OlliSpec } from '../Types';
+import { OlliSpec, UnitOlliSpec } from '../Types';
 import { setOlliGlobalState } from '../util/globalState';
 import { OlliRuntimeTreeItem } from './OlliRuntimeTreeItem';
-import { olliSpecToTree, treeToNodeLookup } from '../Structure';
+import { getSpecForNode, olliSpecToTree, treeToNodeLookup } from '../Structure';
 import { getCustomizedDescription } from '../Customization';
 import { renderTree } from '../Render/TreeView';
 import { LogicalAnd, LogicalComposition } from 'vega-lite/src/logical';
@@ -100,7 +100,8 @@ export class OlliRuntime {
 
   setSelection(selection: LogicalAnd<FieldPredicate> | FieldPredicate) {
     const lastNode = this.lastFocusedTreeItem?.olliNode;
-    this.olliSpec.selection = selection;
+    const spec = getSpecForNode(lastNode, this.olliSpec);
+    spec.selection = selection;
     this.init();
     if (lastNode) {
       // find the nearest node to the last selected node and set focus to it
@@ -113,9 +114,9 @@ export class OlliRuntime {
           this.setFocusToItem(item || this.rootTreeItem);
         } else if ('predicate' in lastNode) {
           const pitems = items.filter((ti) => 'predicate' in ti.olliNode);
-          const lastNodeSelection = selectionTest(this.olliSpec.data, { and: [selection, lastNode.predicate] });
+          const lastNodeSelection = selectionTest(spec.data, { and: [selection, lastNode.predicate] });
           const item = pitems.find((ti) => {
-            const tiSelection = selectionTest(this.olliSpec.data, { and: [selection, ti.olliNode.predicate] });
+            const tiSelection = selectionTest(spec.data, { and: [selection, ti.olliNode.predicate] });
             return tiSelection.some((d) => lastNodeSelection.includes(d));
           });
           this.setFocusToItem(item || this.rootTreeItem);
@@ -142,6 +143,7 @@ export class OlliRuntime {
         }
         setOlliGlobalState({ lastVisitedInstance: this });
       } else {
+        this.collapseTreeItem(ti);
         ti.domNode.tabIndex = -1;
         ti.domNode.setAttribute('aria-selected', 'false');
       }
@@ -163,6 +165,49 @@ export class OlliRuntime {
       if (nodeIndex > 0) {
         this.setFocusToItem(currentItem.parent.children[nodeIndex - 1]);
       }
+    }
+  }
+
+  getPathFromView(node: ElaboratedOlliNode) {
+    if (node.viewType && (node.viewType === 'facet' || node.viewType === 'layer')) {
+      return {
+        view: node,
+        path: ''
+      };
+    }
+    const index = node.parent.children.indexOf(node);
+    const rec = this.getPathFromView(node.parent);
+    return { ...rec, path: rec.path + '/' + index };
+  }
+
+  getNodeForPathFromView(viewNode: ElaboratedOlliNode, path: string) {
+    const indices = path.split('/').filter(x => x.length).map(x => parseInt(x, 10));
+    let node = viewNode;
+    for (let idx of indices) {
+      if (node.children[idx]) {
+        node = node.children[idx];
+      }
+    }
+    return node;
+  }
+
+  isLateralPossible() {
+    return this.rootTreeItem
+      .children
+      .map(n => n.olliNode.viewType)
+      .every(vt => vt === 'facet' || vt === 'layer');
+  }
+
+  setFocusToLateralItem(currentItem: OlliRuntimeTreeItem, direction: 'left' | 'right') {
+    const { view, path } = this.getPathFromView(currentItem.olliNode)
+    const viewIndex = view.parent.children.indexOf(view);
+
+    const newViewIndex = direction === 'left' ? viewIndex - 1 : viewIndex + 1;
+    if (newViewIndex >= 0 && newViewIndex < view.parent.children.length) {
+      const newView = view.parent.children[newViewIndex];
+      const lateralNode = this.getNodeForPathFromView(newView, path);
+      const lateralItem = currentItem.tree.treeItems.find(ti => ti.olliNode === lateralNode);
+      this.setFocusToItem(lateralItem);
     }
   }
 

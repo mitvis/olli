@@ -1,9 +1,22 @@
 import { inferStructure } from '../Structure/infer';
-import { OlliSpec } from '../Types';
+import { OlliSpec, UnitOlliSpec, isMultiOlliSpec } from '../Types';
 import { typeInference } from './types';
 
 // fills in default values for missing spec fields
 export function elaborateSpec(olliSpec: OlliSpec): OlliSpec {
+  if (isMultiOlliSpec(olliSpec)) {
+    return {
+      ...olliSpec,
+      units: olliSpec.units.map((spec) => {
+        return elaborateUnitSpec(spec);
+      }),
+    };
+  } else {
+    return elaborateUnitSpec(olliSpec);
+  }
+}
+
+function elaborateUnitSpec(olliSpec: UnitOlliSpec): UnitOlliSpec {
   // if fields not provided, use all fields in data
   olliSpec.fields =
     olliSpec.fields ||

@@ -1,4 +1,4 @@
-import { VisAdapter, OlliSpec, OlliAxis, OlliLegend, OlliMark } from 'olli';
+import { VisAdapter, UnitOlliSpec, OlliAxis, OlliLegend, OlliMark } from 'olli';
 
 // Observable-Plot has no type declaration file :/
 const Plot = require('@observablehq/plot');
@@ -15,7 +15,7 @@ type ObservablePlotSpec = any;
  */
 export const ObservablePlotAdapter: VisAdapter<ObservablePlotSpec> = async (
   plotObject: ObservablePlotSpec
-): Promise<OlliSpec> => {
+): Promise<UnitOlliSpec> => {
   const plotSVG = await Plot.plot(plotObject);
   const description = plotObject.ariaDescription;
   return plotToOlliSpec(plotObject, plotSVG, description);
@@ -27,7 +27,7 @@ export const ObservablePlotAdapter: VisAdapter<ObservablePlotSpec> = async (
  * @param svg the rendered SVGElement of the visualization
  * @returns the generated {@link FacetedChart}
  */
-function plotToOlliSpec(plot: any, svg: Element, description?: string): OlliSpec {
+function plotToOlliSpec(plot: any, svg: Element, description?: string): UnitOlliSpec {
   const chartSVG = svg.tagName !== 'svg' ? Object.values(svg.children).find((n) => n.tagName === 'svg')! : svg;
   const axes: OlliAxis[] = ['x-axis', 'y-axis'].reduce((parsedAxes: OlliAxis[], s: string) => {
     let axisSVG = findHtmlElement(chartSVG, s);

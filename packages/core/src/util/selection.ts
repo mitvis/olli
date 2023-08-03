@@ -1,7 +1,7 @@
 import { isDate, toNumber, isArray, inrange } from 'vega';
 import { LogicalAnd, LogicalComposition } from 'vega-lite/src/logical';
 import { FieldPredicate, FieldEqualPredicate } from 'vega-lite/src/predicate';
-import { OlliFieldDef, OlliDataset, OlliDatum, OlliValue, OlliSpec } from '../Types';
+import { OlliFieldDef, OlliDataset, OlliDatum, OlliValue } from '../Types';
 import { serializeValue } from './values';
 import { getDomain, getFieldDef } from './data';
 import { getBinPredicates } from './bin';
@@ -167,8 +167,8 @@ export function datumToPredicate(datum: OlliDatum, fieldDefs: OlliFieldDef[]): L
 
 export function fieldToPredicates(field: string, data: OlliDataset, fields: OlliFieldDef[]): FieldPredicate[] {
   const fieldDef = getFieldDef(field, fields);
-  if (fieldDef.type === 'nominal' || fieldDef.type === 'ordinal') {
-    const domain = getDomain(field, data);
+  if (fieldDef.type === 'nominal' || fieldDef.type === 'ordinal' || fieldDef.timeUnit) {
+    const domain = getDomain(fieldDef, data);
     return domain.map((value) => {
       return {
         field: field,

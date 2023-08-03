@@ -15,7 +15,7 @@ export type OlliMark = 'point' | 'bar' | 'line';
 /**
  * Spec describing a visualization
  */
-export interface OlliSpec {
+export interface UnitOlliSpec {
   // required: data and fields
   data: OlliDataset;
   // semi-required: specification of the fields/typings and structure (inferred if not provided)
@@ -32,6 +32,19 @@ export interface OlliSpec {
   title?: string;
   description?: string;
 }
+
+export type MultiSpecOperator = 'layer' | 'concat';
+
+export interface MultiOlliSpec {
+  operator: MultiSpecOperator;
+  units: UnitOlliSpec[];
+}
+
+export const isMultiOlliSpec = (spec: OlliSpec): spec is MultiOlliSpec => {
+  return 'operator' in spec;
+};
+
+export type OlliSpec = UnitOlliSpec | MultiOlliSpec;
 
 type Guide = {
   field: string;
@@ -54,10 +67,12 @@ export interface OlliLegend extends Guide {
 }
 
 export type MeasureType = 'quantitative' | 'ordinal' | 'nominal' | 'temporal';
+export type OlliTimeUnit = 'year' | 'month' | 'day' | 'date' | 'hours' | 'minutes' | 'seconds';
 
 export interface OlliFieldDef {
   field: string;
   type?: MeasureType; // optional, but will be inferred if not provided
+  timeUnit?: OlliTimeUnit;
 }
 
 /**
