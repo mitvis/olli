@@ -2,8 +2,5 @@
   "private": "true",
   "workspaces": [
     "packages/*"
-  ],
-  "dependencies": {
-    "howler": "^2.2.3"
-  }
+  ]
 }

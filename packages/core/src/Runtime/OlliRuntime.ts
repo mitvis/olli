@@ -139,12 +139,13 @@ export class OlliRuntime {
         ti.domNode.focus();
         ti.domNode.setAttribute('aria-selected', 'true');
         this.lastFocusedTreeItem = ti;
+        // spearcon implementation
+        let utterance = new SpeechSynthesisUtterance(ti.olliNode.nodeType);
+        utterance.rate = 10;
+        speechSynthesis.cancel()
+        speechSynthesis.speak(utterance);
         if (this.callbacks.onFocus) {
           this.callbacks.onFocus(ti.domNode, ti.olliNode);
-          // spearcon implementation
-          let utterance = new SpeechSynthesisUtterance(ti.olliNode.nodeType);
-          utterance.rate = 10;
-          speechSynthesis.speak(utterance);
         }
         setOlliGlobalState({ lastVisitedInstance: this });
       } else {
