@@ -176,7 +176,7 @@ let view = new vega.View(runtime)
     .runAsync()
     .then(v => {
         OlliAdapters.VegaAdapter(spec).then(olliVisSpec => {
-            document.getElementById("AccessibilityTree-Vega").append(olli(olliVisSpec))
+            document.getElementById("AccessibilityTree-Vega").append(olli(olliVisSpec, { onFocus: (elem, olliNode) => {} }))
         })
     });
 </script>

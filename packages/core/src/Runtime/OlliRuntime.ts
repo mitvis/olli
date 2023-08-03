@@ -10,6 +10,7 @@ import { renderTree } from '../Render/TreeView';
 import { LogicalAnd, LogicalComposition } from 'vega-lite/src/logical';
 import { FieldPredicate } from 'vega-lite/src/predicate';
 import { selectionTest } from '../util/selection';
+
 /*
  *   This content is licensed according to the W3C Software License at
  *   https://www.w3.org/Consortium/Legal/2015/copyright-software-and-document
@@ -140,6 +141,10 @@ export class OlliRuntime {
         this.lastFocusedTreeItem = ti;
         if (this.callbacks.onFocus) {
           this.callbacks.onFocus(ti.domNode, ti.olliNode);
+          // spearcon implementation
+          let utterance = new SpeechSynthesisUtterance(ti.olliNode.nodeType);
+          utterance.rate = 10;
+          speechSynthesis.speak(utterance);
         }
         setOlliGlobalState({ lastVisitedInstance: this });
       } else {

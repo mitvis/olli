@@ -36,6 +36,6 @@ let view = new vega.View(runtime)
   .run();
 
 OlliAdapters.VegaLiteAdapter(spec).then(olliVisSpec => {
-  document.getElementById("AccessibilityTree-Vega-Lite").append(olli(olliVisSpec))
+  document.getElementById("AccessibilityTree-Vega-Lite").append(olli(olliVisSpec, { onFocus: (elem, olliNode) => {} }))
 })
 </script>
