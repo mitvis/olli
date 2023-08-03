@@ -20,25 +20,20 @@ export type KeyRegistration = {
 } & KeyboardAction;
 
 export const checkKeys = (e: KeyboardEvent, action: KeyboardAction) => {
-  let hasAlt: boolean = true;
-  let hasShift: boolean = true;
-  let hasCtrl: boolean = true;
-  let hasMeta: boolean = true;
-
-  if (action.altKey) {
-    hasAlt = e.altKey === action.altKey;
-  }
-  if (action.shiftKey) {
-    hasShift = e.shiftKey === action.shiftKey;
-  }
-  if (action.ctrlKey) {
-    hasCtrl = e.ctrlKey === action.ctrlKey;
-  }
-  if (action.metaKey) {
-    hasMeta = e.metaKey === action.metaKey;
+  let hasKeys = {
+    altKey: true,
+    shiftKey: true,
+    ctrlKEy: true,
+    metaKey: true,
   }
 
-  return hasAlt && hasCtrl && hasMeta && hasShift;
+  Object.keys(hasKeys).forEach((key: string) => {
+    if (action[key]) {
+      hasKeys[key] = e[key] === action[key];
+    }
+  })
+
+  return Object.keys(hasKeys).every((key: string) => hasKeys[key]);
 };
 
 /**
