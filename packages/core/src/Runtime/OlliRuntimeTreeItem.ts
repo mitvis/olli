@@ -107,21 +107,23 @@ export class OlliRuntimeTreeItem {
         }
         break;
       case 'ArrowDown':
-        if (this.children.length > 0 && this.isExpandable) {
+        if (this.children.length > 0 && this.isExpandable) {   //move if check into setFocusNextLayer
           this.tree.setFocusToNextLayer(this);
+        } else {
+          console.log("here");
         }
         break;
       case 'Escape':
       case 'ArrowUp':
-        if (this.inGroup) {
-          this.tree.setFocusToParentItem(this);
+        if (this.inGroup) {  //move if check into setFocusNextLayer
+          this.tree.setFocusToParentItem(this);   
         }
         break;
       case 'ArrowLeft':
         if (event.shiftKey) {
           if (this.tree.isLateralPossible()) {
             this.tree.setFocusToLateralItem(this, 'left');
-          }
+          } 
         } else {
         this.tree.setFocusToPreviousItem(this);
         }
@@ -130,7 +132,7 @@ export class OlliRuntimeTreeItem {
         if (event.shiftKey) {
           if (this.tree.isLateralPossible()) {
             this.tree.setFocusToLateralItem(this, 'right');
-          }
+          } 
         } else {
         this.tree.setFocusToNextItem(this);
         }

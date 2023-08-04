@@ -230,6 +230,8 @@ export class OlliRuntime {
       const lateralNode = this.getNodeForPathFromView(newView, path);
       const lateralItem = currentItem.tree.treeItems.find(ti => ti.olliNode === lateralNode);
       this.setFocusToItem(lateralItem);
+    } else {
+      console.log("here");
     }
   }
 
