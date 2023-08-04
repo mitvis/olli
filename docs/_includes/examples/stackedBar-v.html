@@ -133,6 +133,6 @@
     .run();
 
   OlliAdapters.VegaAdapter(spec).then(olliVisSpec => {
-    document.getElementById("AccessibilityTree-Vega").append(olli(olliVisSpec, { onFocus: (elem, olliNode) => {} }))
+    document.getElementById("AccessibilityTree-Vega").append(olli(olliVisSpec))
   })
 </script>
