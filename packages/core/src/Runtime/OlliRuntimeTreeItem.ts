@@ -102,6 +102,8 @@ export class OlliRuntimeTreeItem {
           } else {
             this.tree.expandTreeItem(this);
           }
+        } else {
+          console.log("here");
         }
         break;
       case 'ArrowDown':

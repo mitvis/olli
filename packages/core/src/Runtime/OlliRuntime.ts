@@ -10,6 +10,22 @@ import { renderTree } from '../Render/TreeView';
 import { LogicalAnd, LogicalComposition } from 'vega-lite/src/logical';
 import { FieldPredicate } from 'vega-lite/src/predicate';
 import { selectionTest } from '../util/selection';
+
+// const ctx = new AudioContext();
+// let audio;
+
+// fetch("../docs/audio/bonk-sound-effect.mp3")
+//   .then(data => data.arrayBuffer())
+//   .then(arrayBuffer => ctx.decodeAudioData(arrayBuffer))
+//   .then(decodedAudio => { audio = decodedAudio;})
+
+// function playback() {
+//   const playSound = ctx.createBufferSource();
+//   playSound.buffer = audio;
+//   playSound.connect(ctx.destination);
+//   playSound.start(ctx.currentTime);
+// }
+
 /*
  *   This content is licensed according to the W3C Software License at
  *   https://www.w3.org/Consortium/Legal/2015/copyright-software-and-document
@@ -155,6 +171,9 @@ export class OlliRuntime {
       const nodeIndex = currentItem.parent.children.indexOf(currentItem);
       if (nodeIndex < currentItem.parent.children.length - 1) {
         this.setFocusToItem(currentItem.parent.children[nodeIndex + 1]);
+      } else {
+        console.log("here");
+        // playback();
       }
     }
   }
@@ -164,6 +183,9 @@ export class OlliRuntime {
       let nodeIndex = currentItem.parent.children.indexOf(currentItem);
       if (nodeIndex > 0) {
         this.setFocusToItem(currentItem.parent.children[nodeIndex - 1]);
+      } else {
+        console.log("here");
+        // playback();
       }
     }
   }
