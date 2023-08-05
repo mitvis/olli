@@ -133,17 +133,20 @@ export class OlliRuntime {
       var ti = this.treeItems[i];
 
       if (ti === treeitem) {
+        // nodetype spearcon
+        if (!this.lastFocusedTreeItem || this.lastFocusedTreeItem.olliNode.nodeType !== treeitem.olliNode.nodeType) {
+          let utterance = new SpeechSynthesisUtterance(ti.olliNode.nodeType);
+          utterance.rate = 10;
+          speechSynthesis.cancel();
+          speechSynthesis.speak(utterance);
+        }
+        //
         this.expandParents(ti);
         this.collapseChildren(ti);
         ti.domNode.tabIndex = 0;
         ti.domNode.focus();
         ti.domNode.setAttribute('aria-selected', 'true');
         this.lastFocusedTreeItem = ti;
-        // spearcon implementation
-        let utterance = new SpeechSynthesisUtterance(ti.olliNode.nodeType);
-        utterance.rate = 10;
-        speechSynthesis.cancel();
-        speechSynthesis.speak(utterance);
         if (this.callbacks.onFocus) {
           this.callbacks.onFocus(ti.domNode, ti.olliNode);
         }
