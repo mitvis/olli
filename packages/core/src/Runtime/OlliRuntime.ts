@@ -142,7 +142,7 @@ export class OlliRuntime {
         // spearcon implementation
         let utterance = new SpeechSynthesisUtterance(ti.olliNode.nodeType);
         utterance.rate = 10;
-        speechSynthesis.cancel()
+        speechSynthesis.cancel();
         speechSynthesis.speak(utterance);
         if (this.callbacks.onFocus) {
           this.callbacks.onFocus(ti.domNode, ti.olliNode);
@@ -178,7 +178,7 @@ export class OlliRuntime {
     if (node.viewType && (node.viewType === 'facet' || node.viewType === 'layer')) {
       return {
         view: node,
-        path: ''
+        path: '',
       };
     }
     const index = node.parent.children.indexOf(node);
@@ -187,7 +187,10 @@ export class OlliRuntime {
   }
 
   getNodeForPathFromView(viewNode: ElaboratedOlliNode, path: string) {
-    const indices = path.split('/').filter(x => x.length).map(x => parseInt(x, 10));
+    const indices = path
+      .split('/')
+      .filter((x) => x.length)
+      .map((x) => parseInt(x, 10));
     let node = viewNode;
     for (let idx of indices) {
       if (node.children[idx]) {
@@ -198,21 +201,18 @@ export class OlliRuntime {
   }
 
   isLateralPossible() {
-    return this.rootTreeItem
-      .children
-      .map(n => n.olliNode.viewType)
-      .every(vt => vt === 'facet' || vt === 'layer');
+    return this.rootTreeItem.children.map((n) => n.olliNode.viewType).every((vt) => vt === 'facet' || vt === 'layer');
   }
 
   setFocusToLateralItem(currentItem: OlliRuntimeTreeItem, direction: 'left' | 'right') {
-    const { view, path } = this.getPathFromView(currentItem.olliNode)
+    const { view, path } = this.getPathFromView(currentItem.olliNode);
     const viewIndex = view.parent.children.indexOf(view);
 
     const newViewIndex = direction === 'left' ? viewIndex - 1 : viewIndex + 1;
     if (newViewIndex >= 0 && newViewIndex < view.parent.children.length) {
       const newView = view.parent.children[newViewIndex];
       const lateralNode = this.getNodeForPathFromView(newView, path);
-      const lateralItem = currentItem.tree.treeItems.find(ti => ti.olliNode === lateralNode);
+      const lateralItem = currentItem.tree.treeItems.find((ti) => ti.olliNode === lateralNode);
       this.setFocusToItem(lateralItem);
     }
   }
