@@ -208,8 +208,8 @@ export function nodeToDescription(
     }
   }
 
-  function depth(node: ElaboratedOlliNode): string {
-    return `level ${node.height}`;
+  function level(node: ElaboratedOlliNode): string {
+    return `level ${node.level}`;
   }
 
   function parent(node: ElaboratedOlliNode): string {
@@ -293,14 +293,14 @@ export function nodeToDescription(
   }
 
   const nodeTypeToTokens = new Map<OlliNodeType, string[]>([
-    ['root', ['name', 'type', 'size', 'children', 'depth']],
-    ['view', ['index', 'type', 'name', 'children', 'depth']],
-    ['xAxis', ['name', 'type', 'data', 'parent', 'aggregate', 'depth']],
-    ['yAxis', ['name', 'type', 'data', 'parent', 'aggregate', 'depth']],
-    ['legend', ['name', 'type', 'data', 'parent', 'aggregate', 'depth']],
-    ['filteredData', ['index', 'data', 'size', 'parent', 'aggregate', 'quartile', 'depth']],
-    ['annotations', ['size', 'depth']],
-    ['other', ['index', 'data', 'size', 'depth']],
+    ['root', ['name', 'type', 'size', 'children', 'level']],
+    ['view', ['index', 'type', 'name', 'children', 'level']],
+    ['xAxis', ['name', 'type', 'data', 'parent', 'aggregate', 'level']],
+    ['yAxis', ['name', 'type', 'data', 'parent', 'aggregate', 'level']],
+    ['legend', ['name', 'type', 'data', 'parent', 'aggregate', 'level']],
+    ['filteredData', ['index', 'data', 'size', 'parent', 'aggregate', 'quartile', 'level']],
+    ['annotations', ['size', 'level']],
+    ['other', ['index', 'data', 'size', 'level']],
   ]);
 
   const tokenFunctions = new Map<string, Function>([
@@ -310,7 +310,7 @@ export function nodeToDescription(
     ['children', children],
     ['data', data],
     ['size', size],
-    ['depth', depth],
+    ['level', level],
     ['parent', parent],
     ['quartile', quartile],
     ['aggregate', aggregate]
