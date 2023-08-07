@@ -5,21 +5,11 @@ import { getBins } from '../util/bin';
 import { getDomain, getFieldDef } from '../util/data';
 import { selectionTest } from '../util/selection';
 import { fmtValue } from '../util/values';
+import { capitalizeFirst, removeFinalPeriod, getChartType, pluralize, chartTypePrefix, averageValue, ordinal_suffix_of } from '../util/description';
 import { FieldPredicate } from 'vega-lite/src/predicate';
 import { LogicalComposition } from 'vega-lite/src/logical';
 
 export function getCustomizedDescription(node: ElaboratedOlliNode) {
-  function capitalizeFirst(s: string) {
-    return s.slice(0, 1).toUpperCase() + s.slice(1);
-  }
-
-  function removeFinalPeriod(s: string) {
-    if (s.endsWith('.')) {
-      return s.slice(0, -1);
-    }
-    return s;
-  }
-
   return (
     Array.from(node.description.values())
       .filter((s) => s.length > 0)
@@ -36,53 +26,9 @@ export function nodeToDescription(
 ): Map<string, string> {
   const indexStr = `${(node.parent?.children.indexOf(node) || 0) + 1} of ${(node.parent?.children || []).length}`;
   const description = olliSpec.description || '';
-  const chartType = () => {
-    if (olliSpec.mark) {
-      if (olliSpec.mark === 'point' && olliSpec.axes?.length === 2) {
-        if (olliSpec.axes.every((a) => getFieldDef(a.field, olliSpec.fields).type === 'quantitative')) {
-          return 'scatterplot';
-        } else if (
-          olliSpec.axes.find((a) => getFieldDef(a.field, olliSpec.fields).type === 'quantitative') &&
-          !olliSpec.axes.find((a) => getFieldDef(a.field, olliSpec.fields).type === 'temporal')
-        ) {
-          return 'dotplot';
-        }
-      }
-      return `${olliSpec.mark} chart`;
-    } else {
-      return 'dataset';
-    }
-  };
-  const chartTypePrefix = (node: ElaboratedOlliNode): string => {
-    if (node && 'groupby' in node && node.nodeType === 'root') {
-      if (olliSpec.mark === 'line') {
-        return 'multi-series ';
-      } else {
-        return 'multi-view ';
-      }
-    }
-    return '';
-  };
+  const chartType = getChartType(olliSpec);
   const axes = olliSpec.axes.map((a) => a.title || a.field).join(' and ');
-  const pluralize = (count: number, noun: string, suffix = 's') => `${count} ${noun}${count !== 1 ? suffix : ''}`;
-  const averageValue = (selection: OlliDataset, field: string) => Math.round(selection.reduce((a, b) => a + Number(b[field]), 0)
-  /selection.length);
-
-  function ordinal_suffix_of(i: number) { // st, nd, rd, th
-    var j = i % 10,
-        k = i % 100;
-    if (j == 1 && k != 11) {
-        return i + "st";
-    }
-    if (j == 2 && k != 12) {
-        return i + "nd";
-    }
-    if (j == 3 && k != 13) {
-        return i + "rd";
-    }
-    return i + "th";
-  }
-
+  
   function name(node: ElaboratedOlliNode): string {
     switch (node.nodeType) {
       case 'root':
@@ -123,10 +69,10 @@ export function nodeToDescription(
     switch (node.nodeType) {
       case 'root':
         if ('groupby' in node) {
-          return `a ${chartTypePrefix(node)}${chartType()}`;
+          return `a ${chartTypePrefix(node, olliSpec)}${chartType}`;
         }
         if (olliSpec.mark) {
-          return `a ${chartType()}`;
+          return `a ${chartType}`;
         }
         if (node.children.length) {
           if (node.children[0].viewType === 'layer') {
@@ -139,7 +85,7 @@ export function nodeToDescription(
         return 'a dataset';
       case 'view':
         const viewName =
-          olliSpec.mark === 'line' ? 'line' : olliSpec.mark ? chartType() : node.viewType ? node.viewType : 'view';
+          olliSpec.mark === 'line' ? 'line' : olliSpec.mark ? chartType : node.viewType ? node.viewType : 'view';
         return `a ${viewName}`;
       case 'xAxis':
       case 'yAxis':
