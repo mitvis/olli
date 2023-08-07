@@ -14,12 +14,21 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
     if (nodes.length === 1 && !['xAxis', 'yAxis'].includes(nodes[0].nodeType)) {
       return nodes[0];
     }
+
+    // before wrapping, need to increase level of old nodes
+    function recursivelyIncreaseLevel(node) {
+      node.level = node.level + 1;
+      node.children.forEach(recursivelyIncreaseLevel);
+    }
+    nodes.forEach(recursivelyIncreaseLevel)
+
     return {
       id: namespace,
       nodeType: 'root',
       fullPredicate: { and: [] },
       description: new Map<string, string>(),
       children: nodes,
+      level: 1,
     };
   }
 
@@ -47,7 +56,8 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
     olliNodes: OlliNode[],
     data: OlliDataset,
     fullPredicate: LogicalAnd<FieldPredicate>,
-    idPrefix: string
+    idPrefix: string,
+    level: number
   ): ElaboratedOlliNode[] {
     if (!olliNodes) {
       return [];
@@ -77,9 +87,11 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
               predicate: p,
               fullPredicate: childFullPred,
               description: new Map<string, string>(),
-              children: elaborateOlliNodes(olliSpec, specIndex, node.children, data, childFullPred, childId),
+              children: elaborateOlliNodes(olliSpec, specIndex, node.children, data, childFullPred, childId, level+2),
+              level: level+2
             };
           }),
+          level: level+1
         };
       } else if ('predicate' in node) {
         const predicate = node.predicate;
@@ -94,7 +106,8 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
           fullPredicate: nextFullPred,
           predicate,
           description: new Map<string, string>(),
-          children: elaborateOlliNodes(olliSpec, specIndex, node.children, data, nextFullPred, nextId),
+          children: elaborateOlliNodes(olliSpec, specIndex, node.children, data, nextFullPred, nextId, level+1),
+          level: level+1
         };
       } else if ('annotations' in node) {
         const id = `${idPrefix}-${idx}`;
@@ -104,7 +117,8 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
           nodeType: 'annotations',
           specIndex,
           description: new Map<string, string>(),
-          children: elaborateOlliNodes(olliSpec, specIndex, node.annotations, data, fullPredicate, id),
+          children: elaborateOlliNodes(olliSpec, specIndex, node.annotations, data, fullPredicate, id, level+1),
+          level: level+1
         };
       } else {
         throw new Error('Invalid node type');
@@ -116,7 +130,7 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
     const viewNodes = olliSpec.units.map((spec, idx) => {
       const nodes = Array.isArray(spec.structure) ? spec.structure : [spec.structure];
       const data = spec.selection ? selectionTest(spec.data, spec.selection) : spec.data;
-      const elaborated = elaborateOlliNodes(spec, idx, nodes, data, { and: [] }, `${namespace}-${idx}`);
+      const elaborated = elaborateOlliNodes(spec, idx, nodes, data, { and: [] }, `${namespace}-${idx}`, 1);
       return {
         id: `${namespace}-${idx}`,
         nodeType: 'view' as OlliNodeType,
@@ -125,6 +139,7 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
         fullPredicate: { and: [] },
         description: new Map<string, string>(),
         children: elaborated,
+        level: 1
       };
     });
     const tree = ensureFirstLayerHasOneRoot(viewNodes);
@@ -134,7 +149,7 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
     const nodes = Array.isArray(olliSpec.structure) ? olliSpec.structure : [olliSpec.structure];
     const data = olliSpec.selection ? selectionTest(olliSpec.data, olliSpec.selection) : olliSpec.data;
     const tree = ensureFirstLayerHasOneRoot(
-      elaborateOlliNodes(olliSpec, undefined, nodes, data, { and: [] }, namespace)
+      elaborateOlliNodes(olliSpec, undefined, nodes, data, { and: [] }, namespace, 0)
     );
     postProcessTree(tree, olliSpec);
     return tree;

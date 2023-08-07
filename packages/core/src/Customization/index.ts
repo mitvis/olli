@@ -5,21 +5,11 @@ import { getBins } from '../util/bin';
 import { getDomain, getFieldDef } from '../util/data';
 import { selectionTest } from '../util/selection';
 import { fmtValue } from '../util/values';
+import { capitalizeFirst, removeFinalPeriod, getChartType, pluralize, chartTypePrefix, averageValue, ordinal_suffix_of } from '../util/description';
 import { FieldPredicate } from 'vega-lite/src/predicate';
 import { LogicalComposition } from 'vega-lite/src/logical';
 
 export function getCustomizedDescription(node: ElaboratedOlliNode) {
-  function capitalizeFirst(s: string) {
-    return s.slice(0, 1).toUpperCase() + s.slice(1);
-  }
-
-  function removeFinalPeriod(s: string) {
-    if (s.endsWith('.')) {
-      return s.slice(0, -1);
-    }
-    return s;
-  }
-
   return (
     Array.from(node.description.values())
       .filter((s) => s.length > 0)
@@ -36,36 +26,9 @@ export function nodeToDescription(
 ): Map<string, string> {
   const indexStr = `${(node.parent?.children.indexOf(node) || 0) + 1} of ${(node.parent?.children || []).length}`;
   const description = olliSpec.description || '';
-  const chartType = () => {
-    if (olliSpec.mark) {
-      if (olliSpec.mark === 'point' && olliSpec.axes?.length === 2) {
-        if (olliSpec.axes.every((a) => getFieldDef(a.field, olliSpec.fields).type === 'quantitative')) {
-          return 'scatterplot';
-        } else if (
-          olliSpec.axes.find((a) => getFieldDef(a.field, olliSpec.fields).type === 'quantitative') &&
-          !olliSpec.axes.find((a) => getFieldDef(a.field, olliSpec.fields).type === 'temporal')
-        ) {
-          return 'dotplot';
-        }
-      }
-      return `${olliSpec.mark} chart`;
-    } else {
-      return 'dataset';
-    }
-  };
-  const chartTypePrefix = (node: ElaboratedOlliNode): string => {
-    if (node && 'groupby' in node && node.nodeType === 'root') {
-      if (olliSpec.mark === 'line') {
-        return 'multi-series ';
-      } else {
-        return 'multi-view ';
-      }
-    }
-    return '';
-  };
+  const chartType = getChartType(olliSpec);
   const axes = olliSpec.axes.map((a) => a.title || a.field).join(' and ');
-  const pluralize = (count: number, noun: string, suffix = 's') => `${count} ${noun}${count !== 1 ? suffix : ''}`;
-
+  
   function name(node: ElaboratedOlliNode): string {
     switch (node.nodeType) {
       case 'root':
@@ -106,10 +69,10 @@ export function nodeToDescription(
     switch (node.nodeType) {
       case 'root':
         if ('groupby' in node) {
-          return `a ${chartTypePrefix(node)}${chartType()}`;
+          return `a ${chartTypePrefix(node, olliSpec)}${chartType}`;
         }
         if (olliSpec.mark) {
-          return `a ${chartType()}`;
+          return `a ${chartType}`;
         }
         if (node.children.length) {
           if (node.children[0].viewType === 'layer') {
@@ -122,7 +85,7 @@ export function nodeToDescription(
         return 'a dataset';
       case 'view':
         const viewName =
-          olliSpec.mark === 'line' ? 'line' : olliSpec.mark ? chartType() : node.viewType ? node.viewType : 'view';
+          olliSpec.mark === 'line' ? 'line' : olliSpec.mark ? chartType : node.viewType ? node.viewType : 'view';
         return `a ${viewName}`;
       case 'xAxis':
       case 'yAxis':
@@ -245,15 +208,99 @@ export function nodeToDescription(
     }
   }
 
+  function level(node: ElaboratedOlliNode): string {
+    return `level ${node.level}`;
+  }
+
+  function parent(node: ElaboratedOlliNode): string {
+    switch (node.nodeType) {
+      case 'xAxis':
+      case 'yAxis':
+      case 'legend':
+      case 'filteredData':
+        let view = node;
+        while (view.parent && view.nodeType != 'view') {
+          view = view.parent;
+        }
+        if ('predicate' in view && 'equal' in view.predicate) {
+          return `${view.predicate.equal}`;
+        }
+        return '';
+      default:
+        throw `Node type ${node.nodeType} does not have the 'parent' token.`;
+    }
+  }
+
+  function aggregate(node: ElaboratedOlliNode): string {
+    let axisType: string;
+    switch (node.nodeType) {
+      case 'xAxis':
+      case 'yAxis':
+      case 'legend':
+        axisType = node.nodeType === 'xAxis'? 'x' : 'y';
+      case 'filteredData':
+        if (!axisType) axisType = node.parent.nodeType === 'xAxis'? 'x' : 'y';
+
+        const otherAxis = olliSpec.axes.find(axis => axis.axisType !== axisType);
+        const otherAxisFieldDef = getFieldDef(otherAxis.field, olliSpec.fields);
+        if (otherAxisFieldDef.type !== 'quantitative') { return ''; }
+        const field = otherAxis.field;
+
+        const selection = selectionTest(dataset, node.fullPredicate);
+        if (selection.length === 0) { return '' };
+        const average = averageValue(selection, field);
+        const maximum = selection.reduce((a, b) => Math.max(a,  Number(b[field])), 
+                        Number(selection[0][field]));
+        const minimum = selection.reduce((a, b) => Math.min(a,  Number(b[field])), 
+                        Number(selection[0][field]));
+        return `the average value for the ${field} field is ${average}, the maximum is ${maximum}, and the minimum is ${minimum}`
+
+      default:
+        throw `Node type ${node.nodeType} does not have the 'aggregate' token.`;
+    }
+  }
+
+  function quartile(node: ElaboratedOlliNode): string {
+    switch (node.nodeType) {
+      case 'filteredData':
+        const axisType = node.parent.nodeType === 'xAxis'? 'x' : 'y';
+        const otherAxis = olliSpec.axes.find(axis => axis.axisType !== axisType);
+        const otherAxisFieldDef = getFieldDef(otherAxis.field, olliSpec.fields);
+        if (otherAxisFieldDef.type !== 'quantitative') { return ''; }
+        const field = otherAxis.field;
+        
+        const avgs: number[] = []
+        node.parent.children.forEach(section => {
+            const interval = selectionTest(dataset, section.fullPredicate);
+            if (interval.length == 0) {
+                avgs.push(0);
+                return;
+            }
+            avgs.push(Number(averageValue(interval, field)));
+        });
+        avgs.sort(function(a, b) {
+            return a - b;
+        });
+
+        const selection = selectionTest(dataset, node.fullPredicate);
+        const thisAvg = selection.length == 0 ? 0 : averageValue(selection, field)
+        const sectionsPos = avgs.indexOf(Number(thisAvg))/avgs.length;
+        const sectionsQuart = Math.max(1, Math.ceil(sectionsPos * 4)); // pos is btwn 0 and 1, no quartile 0
+        return `this section's average ${field} is in the ${ordinal_suffix_of(sectionsQuart)} quartile  of all sections`
+      default:
+        throw `Node type ${node.nodeType} does not have the 'quartile' token.`;
+    }
+  }
+
   const nodeTypeToTokens = new Map<OlliNodeType, string[]>([
-    ['root', ['name', 'type', 'size', 'children']],
-    ['view', ['index', 'type', 'name', 'children']],
-    ['xAxis', ['name', 'type', 'data']],
-    ['yAxis', ['name', 'type', 'data']],
-    ['legend', ['name', 'type', 'data']],
-    ['filteredData', ['index', 'data', 'size']],
-    ['annotations', ['size']],
-    ['other', ['index', 'data', 'size']],
+    ['root', ['name', 'type', 'size', 'children', 'level']],
+    ['view', ['index', 'type', 'name', 'children', 'level']],
+    ['xAxis', ['name', 'type', 'data', 'parent', 'aggregate', 'level']],
+    ['yAxis', ['name', 'type', 'data', 'parent', 'aggregate', 'level']],
+    ['legend', ['name', 'type', 'data', 'parent', 'aggregate', 'level']],
+    ['filteredData', ['index', 'data', 'size', 'parent', 'aggregate', 'quartile', 'level']],
+    ['annotations', ['size', 'level']],
+    ['other', ['index', 'data', 'size', 'level']],
   ]);
 
   const tokenFunctions = new Map<string, Function>([
@@ -263,6 +310,10 @@ export function nodeToDescription(
     ['children', children],
     ['data', data],
     ['size', size],
+    ['level', level],
+    ['parent', parent],
+    ['quartile', quartile],
+    ['aggregate', aggregate]
   ]);
 
   const resultDescription = new Map<string, string>();

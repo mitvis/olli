@@ -11,21 +11,6 @@ import { LogicalAnd, LogicalComposition } from 'vega-lite/src/logical';
 import { FieldPredicate } from 'vega-lite/src/predicate';
 import { selectionTest } from '../util/selection';
 
-// const ctx = new AudioContext();
-// let audio;
-
-// fetch("../docs/audio/bonk-sound-effect.mp3")
-//   .then(data => data.arrayBuffer())
-//   .then(arrayBuffer => ctx.decodeAudioData(arrayBuffer))
-//   .then(decodedAudio => { audio = decodedAudio;})
-
-// function playback() {
-//   const playSound = ctx.createBufferSource();
-//   playSound.buffer = audio;
-//   playSound.connect(ctx.destination);
-//   playSound.start(ctx.currentTime);
-// }
-
 /*
  *   This content is licensed according to the W3C Software License at
  *   https://www.w3.org/Consortium/Legal/2015/copyright-software-and-document
@@ -148,6 +133,14 @@ export class OlliRuntime {
       var ti = this.treeItems[i];
 
       if (ti === treeitem) {
+        // nodetype spearcon
+        if (!this.lastFocusedTreeItem || this.lastFocusedTreeItem.olliNode.nodeType !== treeitem.olliNode.nodeType) {
+          let utterance = new SpeechSynthesisUtterance(ti.olliNode.nodeType);
+          utterance.rate = 10;
+          speechSynthesis.cancel();
+          speechSynthesis.speak(utterance);
+        }
+        //
         this.expandParents(ti);
         this.collapseChildren(ti);
         ti.domNode.tabIndex = 0;
@@ -194,7 +187,7 @@ export class OlliRuntime {
     if (node.viewType && (node.viewType === 'facet' || node.viewType === 'layer')) {
       return {
         view: node,
-        path: ''
+        path: '',
       };
     }
     const index = node.parent.children.indexOf(node);
@@ -203,7 +196,10 @@ export class OlliRuntime {
   }
 
   getNodeForPathFromView(viewNode: ElaboratedOlliNode, path: string) {
-    const indices = path.split('/').filter(x => x.length).map(x => parseInt(x, 10));
+    const indices = path
+      .split('/')
+      .filter((x) => x.length)
+      .map((x) => parseInt(x, 10));
     let node = viewNode;
     for (let idx of indices) {
       if (node.children[idx]) {
@@ -214,21 +210,18 @@ export class OlliRuntime {
   }
 
   isLateralPossible() {
-    return this.rootTreeItem
-      .children
-      .map(n => n.olliNode.viewType)
-      .every(vt => vt === 'facet' || vt === 'layer');
+    return this.rootTreeItem.children.map((n) => n.olliNode.viewType).every((vt) => vt === 'facet' || vt === 'layer');
   }
 
   setFocusToLateralItem(currentItem: OlliRuntimeTreeItem, direction: 'left' | 'right') {
-    const { view, path } = this.getPathFromView(currentItem.olliNode)
+    const { view, path } = this.getPathFromView(currentItem.olliNode);
     const viewIndex = view.parent.children.indexOf(view);
 
     const newViewIndex = direction === 'left' ? viewIndex - 1 : viewIndex + 1;
     if (newViewIndex >= 0 && newViewIndex < view.parent.children.length) {
       const newView = view.parent.children[newViewIndex];
       const lateralNode = this.getNodeForPathFromView(newView, path);
-      const lateralItem = currentItem.tree.treeItems.find(ti => ti.olliNode === lateralNode);
+      const lateralItem = currentItem.tree.treeItems.find((ti) => ti.olliNode === lateralNode);
       this.setFocusToItem(lateralItem);
     } else {
       console.log("here");
