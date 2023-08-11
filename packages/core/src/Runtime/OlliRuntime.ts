@@ -10,6 +10,9 @@ import { renderTree } from '../Render/TreeView';
 import { LogicalAnd, LogicalComposition } from 'vega-lite/src/logical';
 import { FieldPredicate } from 'vega-lite/src/predicate';
 import { selectionTest } from '../util/selection';
+// import soundfile from '../assets/audio/bonk-sound-effect.mp3'; 
+
+// var navAlert = new Audio(soundfile);
 
 /*
  *   This content is licensed according to the W3C Software License at
@@ -138,9 +141,9 @@ export class OlliRuntime {
           let utterance = new SpeechSynthesisUtterance(ti.olliNode.nodeType);
           utterance.rate = 10;
           speechSynthesis.cancel();
-          speechSynthesis.speak(utterance);
+          speechSynthesis.speak(utterance);  
+          // this if causes you to not hear filtered data everytime you move from one data to another!!!
         }
-        //
         this.expandParents(ti);
         this.collapseChildren(ti);
         ti.domNode.tabIndex = 0;
@@ -166,8 +169,11 @@ export class OlliRuntime {
         this.setFocusToItem(currentItem.parent.children[nodeIndex + 1]);
       } else {
         console.log("here");
-        // playback();
+        // navAlert.play();
       }
+    } else {
+      console.log("here"); // if you try to click right arrow on root
+      // navAlert.play();
     }
   }
 
@@ -178,8 +184,11 @@ export class OlliRuntime {
         this.setFocusToItem(currentItem.parent.children[nodeIndex - 1]);
       } else {
         console.log("here");
-        // playback();
+        // navAlert.play();
       }
+    } else {
+      console.log("here"); // if you try to click left arrow on root
+      // navAlert.play();
     }
   }
 
@@ -225,21 +234,32 @@ export class OlliRuntime {
       this.setFocusToItem(lateralItem);
     } else {
       console.log("here");
+      // navAlert.play();
     }
   }
 
   setFocusToNextLayer(currentItem: OlliRuntimeTreeItem) {
-    if (currentItem.lastVisitedChild) {
-      this.setFocusToItem(currentItem.lastVisitedChild);
+    if (currentItem.children.length > 0 && currentItem.isExpandable){
+      if (currentItem.lastVisitedChild) {
+        this.setFocusToItem(currentItem.lastVisitedChild);
+      } else {
+        this.setFocusToItem(currentItem.children[0]);
+      }
     } else {
-      this.setFocusToItem(currentItem.children[0]);
+      console.log("here");
+      // navAlert.play();
     }
   }
 
   setFocusToParentItem(currentItem: OlliRuntimeTreeItem) {
-    if (currentItem.parent) {
-      currentItem.parent.lastVisitedChild = currentItem;
-      this.setFocusToItem(currentItem.parent);
+    if (currentItem.inGroup){
+      if (currentItem.parent) {
+        currentItem.parent.lastVisitedChild = currentItem;
+        this.setFocusToItem(currentItem.parent);
+      }
+    } else {
+      console.log("here");
+      // navAlert.play();
     }
   }
 
@@ -265,6 +285,19 @@ export class OlliRuntime {
         });
       }
       currentItem.domNode.setAttribute('aria-expanded', 'true');
+    }
+  }
+
+  doTreeItem(item: OlliRuntimeTreeItem): void { //may need to create a "filler" function named doSomething treeItem that then calls this and expand
+    if (item.isExpandable){
+      if (item.isExpanded()){
+        item.tree.collapseTreeItem(item);
+      } else {
+        item.tree.expandTreeItem(item);
+      }
+    } else {
+      console.log("here");
+      // navAlert.play();
     }
   }
 

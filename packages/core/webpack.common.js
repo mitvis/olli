@@ -13,6 +13,17 @@ module.exports = {
         test: /\.css$/,
         use: ['style-loader', 'css-loader'],
       },
+      {
+        test: /\.mp3$/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: '[path][name].[ext]?[contenthash]',
+            },
+          }
+        ],
+      },
     ],
   },
   resolve: {
@@ -27,5 +38,3 @@ module.exports = {
     globalObject: 'this',
   },
 };
-
-//mp3 goes here

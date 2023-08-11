@@ -96,28 +96,14 @@ export class OlliRuntimeTreeItem {
     switch (event.key) {
       case 'Enter':
       case ' ':
-        if (this.isExpandable) {
-          if (this.isExpanded()) {
-            this.tree.collapseTreeItem(this);
-          } else {
-            this.tree.expandTreeItem(this);
-          }
-        } else {
-          console.log("here");
-        }
+        this.tree.doTreeItem(this); // may need to rename this function to a "filler" function?
         break;
       case 'ArrowDown':
-        if (this.children.length > 0 && this.isExpandable) {   //move if check into setFocusNextLayer
-          this.tree.setFocusToNextLayer(this);
-        } else {
-          console.log("here");
-        }
+        this.tree.setFocusToNextLayer(this);
         break;
       case 'Escape':
       case 'ArrowUp':
-        if (this.inGroup) {  //move if check into setFocusNextLayer
-          this.tree.setFocusToParentItem(this);   
-        }
+        this.tree.setFocusToParentItem(this);
         break;
       case 'ArrowLeft':
         if (event.shiftKey) {
