@@ -66,6 +66,8 @@ export class OlliRuntime {
       }
     }
 
+    const lastNode = this.lastFocusedTreeItem?.olliNode;
+
     const tree: ElaboratedOlliNode = olliSpecToTree(this.olliSpec);
     this.olliNodeLookup = treeToNodeLookup(tree);
 
@@ -79,6 +81,29 @@ export class OlliRuntime {
 
     this.rootTreeItem = this.treeItems[0];
     this.rootTreeItem.domNode.tabIndex = 0;
+
+    if (lastNode) {
+      // find the nearest node to the last selected node and set focus to it
+      if (lastNode.nodeType === 'root') {
+        this.setFocusToItem(this.rootTreeItem);
+      } else {
+        const items = this.treeItems.filter((ti) => ti.olliNode.nodeType === lastNode.nodeType);
+        if ('groupby' in lastNode) {
+          const item = items.find((ti) => ti.olliNode.groupby === lastNode.groupby);
+          this.setFocusToItem(item || this.rootTreeItem);
+        } else if ('predicate' in lastNode) {
+          const pitems = items.filter((ti) => 'predicate' in ti.olliNode);
+          const lastNodeSelection = selectionTest(spec.data, { and: [selection, lastNode.predicate] });
+          const item = pitems.find((ti) => {
+            const tiSelection = selectionTest(spec.data, { and: [selection, ti.olliNode.predicate] });
+            return tiSelection.some((d) => lastNodeSelection.includes(d));
+          });
+          this.setFocusToItem(item || this.rootTreeItem);
+        } else {
+          this.setFocusToItem(this.rootTreeItem);
+        }
+      }
+    }
   }
 
   renderTreeDescription() {
@@ -104,28 +129,6 @@ export class OlliRuntime {
     const spec = getSpecForNode(lastNode, this.olliSpec);
     spec.selection = selection;
     this.init();
-    if (lastNode) {
-      // find the nearest node to the last selected node and set focus to it
-      if (lastNode.nodeType === 'root') {
-        this.setFocusToItem(this.rootTreeItem);
-      } else {
-        const items = this.treeItems.filter((ti) => ti.olliNode.nodeType === lastNode.nodeType);
-        if ('groupby' in lastNode) {
-          const item = items.find((ti) => ti.olliNode.groupby === lastNode.groupby);
-          this.setFocusToItem(item || this.rootTreeItem);
-        } else if ('predicate' in lastNode) {
-          const pitems = items.filter((ti) => 'predicate' in ti.olliNode);
-          const lastNodeSelection = selectionTest(spec.data, { and: [selection, lastNode.predicate] });
-          const item = pitems.find((ti) => {
-            const tiSelection = selectionTest(spec.data, { and: [selection, ti.olliNode.predicate] });
-            return tiSelection.some((d) => lastNodeSelection.includes(d));
-          });
-          this.setFocusToItem(item || this.rootTreeItem);
-        } else {
-          this.setFocusToItem(this.rootTreeItem);
-        }
-      }
-    }
   }
 
   setFocusToItem(treeitem: OlliRuntimeTreeItem) {
