@@ -195,9 +195,8 @@ export function nodeToDescription(
         return `with ${fields.length} fields`;
       case 'filteredData':
         if ('predicate' in node) {
-          const instructions = node.children.length ? '' : ' Press t to open table';
           const selection = selectionTest(dataset, node.fullPredicate);
-          return `${pluralize(selection.length, 'value')}.${instructions}`;
+          return `${pluralize(selection.length, 'value')}`;
         }
         return '';
       case 'annotations':
@@ -206,9 +205,8 @@ export function nodeToDescription(
         if ('groupby' in node) {
           return `${node.children.length} groups`;
         } else if ('predicate' in node) {
-          const instructions = node.children.length ? '' : ' Press t to open table';
           const selection = selectionTest(dataset, node.fullPredicate);
-          return `${pluralize(selection.length, 'value')}.${instructions}`;
+          return `${pluralize(selection.length, 'value')}`;
         }
         return '';
       default:
@@ -308,15 +306,29 @@ export function nodeToDescription(
     }
   }
 
+  function instructions(node: ElaboratedOlliNode): string {
+    switch (node.nodeType) {
+      case 'filteredData':
+      case 'other':
+        if ('predicate' in node) {
+          const selection = selectionTest(dataset, node.fullPredicate);
+          return selection.length ?  'press t to open table' : '';
+        }
+        return '';
+      default:
+        throw `Node type ${node.nodeType} does not have the 'instructions' token.`;
+    }
+  }
+
   const nodeTypeToTokens = new Map<OlliNodeType, string[]>([
     ['root', ['name', 'type', 'size', 'children', 'level']],
     ['view', ['index', 'type', 'name', 'children', 'level']],
     ['xAxis', ['name', 'type', 'data', 'parent', 'aggregate', 'level']],
     ['yAxis', ['name', 'type', 'data', 'parent', 'aggregate', 'level']],
     ['legend', ['name', 'type', 'data', 'parent', 'aggregate', 'level']],
-    ['filteredData', ['index', 'data', 'size', 'parent', 'aggregate', 'quartile', 'level']],
+    ['filteredData', ['index', 'data', 'size', 'parent', 'aggregate', 'quartile', 'level', 'instructions']],
     ['annotations', ['size', 'level']],
-    ['other', ['index', 'data', 'size', 'level']],
+    ['other', ['index', 'data', 'size', 'level', 'instructions']],
   ]);
 
   const tokenFunctions = new Map<string, Function>([
@@ -330,6 +342,7 @@ export function nodeToDescription(
     ['parent', parent],
     ['quartile', quartile],
     ['aggregate', aggregate],
+    ['instructions', instructions],
   ]);
 
   const resultDescription = new Map<string, string>();
