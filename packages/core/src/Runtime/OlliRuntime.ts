@@ -69,6 +69,7 @@ export class OlliRuntime {
     const lastNode = this.lastFocusedTreeItem?.olliNode;
 
     const tree: ElaboratedOlliNode = olliSpecToTree(this.olliSpec);
+    console.log('tree', tree);
     this.olliNodeLookup = treeToNodeLookup(tree);
 
     const ul = renderTree(tree);
@@ -92,10 +93,11 @@ export class OlliRuntime {
           const item = items.find((ti) => ti.olliNode.groupby === lastNode.groupby);
           this.setFocusToItem(item || this.rootTreeItem);
         } else if ('predicate' in lastNode) {
+          const spec = getSpecForNode(lastNode, this.olliSpec);
           const pitems = items.filter((ti) => 'predicate' in ti.olliNode);
-          const lastNodeSelection = selectionTest(spec.data, { and: [selection, lastNode.predicate] });
+          const lastNodeSelection = selectionTest(spec.data, { and: [spec.selection, lastNode.predicate] });
           const item = pitems.find((ti) => {
-            const tiSelection = selectionTest(spec.data, { and: [selection, ti.olliNode.predicate] });
+            const tiSelection = selectionTest(spec.data, { and: [spec.selection, ti.olliNode.predicate] });
             return tiSelection.some((d) => lastNodeSelection.includes(d));
           });
           this.setFocusToItem(item || this.rootTreeItem);
