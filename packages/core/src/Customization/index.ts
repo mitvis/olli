@@ -35,7 +35,7 @@ export function nodeToDescription(
   const indexStr = `${(node.parent?.children.indexOf(node) || 0) + 1} of ${(node.parent?.children || []).length}`;
   const description = olliSpec.description || '';
   const chartType = getChartType(olliSpec);
-  const axes = olliSpec.axes.map((a) => a.title || a.field).join(' and ');
+  const axes = olliSpec.axes?.map((a) => a.title || a.field).join(' and ');
 
   function name(node: ElaboratedOlliNode): string {
     switch (node.nodeType) {
@@ -249,7 +249,7 @@ export function nodeToDescription(
       case 'filteredData':
         if (!axisType) axisType = node.parent.nodeType === 'xAxis' ? 'x' : 'y';
 
-        const otherAxis = olliSpec.axes.find((axis) => axis.axisType !== axisType);
+        const otherAxis = olliSpec.axes?.find((axis) => axis.axisType !== axisType);
         if (!otherAxis) return '';
         const otherAxisFieldDef = getFieldDef(otherAxis.field, olliSpec.fields);
         if (otherAxisFieldDef.type !== 'quantitative') {
@@ -275,7 +275,7 @@ export function nodeToDescription(
     switch (node.nodeType) {
       case 'filteredData':
         const axisType = node.parent.nodeType === 'xAxis' ? 'x' : 'y';
-        const otherAxis = olliSpec.axes.find((axis) => axis.axisType !== axisType);
+        const otherAxis = olliSpec.axes?.find((axis) => axis.axisType !== axisType);
         if (!otherAxis) return '';
         const otherAxisFieldDef = getFieldDef(otherAxis.field, olliSpec.fields);
         if (otherAxisFieldDef.type !== 'quantitative') {
