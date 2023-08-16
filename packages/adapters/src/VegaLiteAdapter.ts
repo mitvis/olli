@@ -165,7 +165,7 @@ async function adaptMultiSpec(
         const dataset = data.find((d) => {
           const fields = Object.keys(d[0]);
           const viewFields = Object.values(viewSpec.encoding)
-            .map((f) => getFieldFromEncoding(f, viewSpec.data))
+            .map((f) => getFieldFromEncoding(f, d))
             .filter((f) => f);
           return viewFields.every((f) => fields.includes(f));
         });

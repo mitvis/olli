@@ -265,12 +265,18 @@ export function nodeToDescription(
           return '';
         }
         if (selection.length === 1) {
-          return `the ${label} value is ${selection[0][field]}`;
+          return `the ${label} value is ${fmtValue(selection[0][field], otherAxisFieldDef)}`;
         }
         const average = averageValue(selection, field);
         const maximum = selection.reduce((a, b) => Math.max(a, Number(b[field])), Number(selection[0][field]));
         const minimum = selection.reduce((a, b) => Math.min(a, Number(b[field])), Number(selection[0][field]));
-        return `the average value for the ${label} field is ${average}, the maximum is ${maximum}, and the minimum is ${minimum}`;
+        return `the average value for the ${label} field is ${fmtValue(
+          average,
+          otherAxisFieldDef
+        )}, the maximum is ${fmtValue(maximum, otherAxisFieldDef)}, and the minimum is ${fmtValue(
+          minimum,
+          otherAxisFieldDef
+        )}`;
 
       default:
         throw `Node type ${node.nodeType} does not have the 'aggregate' token.`;
