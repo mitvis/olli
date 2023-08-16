@@ -176,6 +176,7 @@
   "wilkinson_dot_plot": {
     "title": "Wilkinson Dot Plot",
     "url": "/gallery/wilkinsonDotPlot.html",
+    "development_only": true,
     "adapters": [
       {
         "name": "Vega-Lite",
@@ -186,6 +187,7 @@
   "density_plot": {
     "title": "Density Plot",
     "url": "/gallery/densityPlot.html",
+    "development_only": true,
     "adapters": [
       {
         "name": "Vega-Lite",
@@ -196,6 +198,7 @@
   "stacked_density_plot": {
     "title": "Stacked Density Plot",
     "url": "/gallery/stackedDensityPlot.html",
+    "development_only": true,
     "adapters": [
       {
         "name": "Vega-Lite",
@@ -206,6 +209,7 @@
   "isotype_dot_plot": {
     "title": "Isotype Dot Plot",
     "url": "/gallery/isotypeDotPlot.html",
+    "development_only": true,
     "adapters": [
       {
         "name": "Vega-Lite",
@@ -276,6 +280,7 @@
   "pie_chart": {
     "title": "Pie Chart",
     "url": "/gallery/pieChart.html",
+    "development_only": true,
     "adapters": [
       {
         "name": "Vega-Lite",
