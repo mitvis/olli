@@ -20,7 +20,7 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
       node.level = node.level + 1;
       node.children.forEach(recursivelyIncreaseLevel);
     }
-    nodes.forEach(recursivelyIncreaseLevel)
+    nodes.forEach(recursivelyIncreaseLevel);
 
     return {
       id: namespace,
@@ -87,11 +87,11 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
               predicate: p,
               fullPredicate: childFullPred,
               description: new Map<string, string>(),
-              children: elaborateOlliNodes(olliSpec, specIndex, node.children, data, childFullPred, childId, level+2),
-              level: level+2
+              children: elaborateOlliNodes(olliSpec, specIndex, node.children, data, childFullPred, childId, level + 2),
+              level: level + 2,
             };
           }),
-          level: level+1
+          level: level + 1,
         };
       } else if ('predicate' in node) {
         const predicate = node.predicate;
@@ -106,8 +106,8 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
           fullPredicate: nextFullPred,
           predicate,
           description: new Map<string, string>(),
-          children: elaborateOlliNodes(olliSpec, specIndex, node.children, data, nextFullPred, nextId, level+1),
-          level: level+1
+          children: elaborateOlliNodes(olliSpec, specIndex, node.children, data, nextFullPred, nextId, level + 1),
+          level: level + 1,
         };
       } else if ('annotations' in node) {
         const id = `${idPrefix}-${idx}`;
@@ -117,8 +117,8 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
           nodeType: 'annotations',
           specIndex,
           description: new Map<string, string>(),
-          children: elaborateOlliNodes(olliSpec, specIndex, node.annotations, data, fullPredicate, id, level+1),
-          level: level+1
+          children: elaborateOlliNodes(olliSpec, specIndex, node.annotations, data, fullPredicate, id, level + 1),
+          level: level + 1,
         };
       } else {
         throw new Error('Invalid node type');
@@ -139,7 +139,7 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
         fullPredicate: { and: [] },
         description: new Map<string, string>(),
         children: elaborated,
-        level: 1
+        level: 1,
       };
     });
     const tree = ensureFirstLayerHasOneRoot(viewNodes);

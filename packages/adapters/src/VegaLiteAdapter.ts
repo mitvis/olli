@@ -25,7 +25,7 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
   }
 };
 
-const getFieldFromEncoding = (encoding) => {
+const getFieldFromEncoding = (encoding, data: OlliDataset) => {
   if ('aggregate' in encoding) {
     if (encoding.aggregate === 'count') {
       return `__${encoding.aggregate}`;
@@ -35,8 +35,24 @@ const getFieldFromEncoding = (encoding) => {
   if ('timeUnit' in encoding) {
     return `${encoding.timeUnit}_${encoding.field}`;
   }
+  if ('bin' in encoding && encoding.bin === true && data.length) {
+    const fields = Object.keys(data[0]);
+    const binField = fields.find((f) => f.startsWith('bin') && f.includes(encoding.field) && !f.endsWith('_end'));
+    return binField;
+  }
 
   return 'condition' in encoding ? encoding.condition.field : encoding.field;
+};
+
+const getLabelFromEncoding = (encoding) => {
+  if ('aggregate' in encoding) {
+    if (encoding.aggregate === 'count') {
+      return 'count';
+    }
+  }
+  return `${encoding.bin ? 'binned ' : ''}${'aggregate' in encoding ? `${encoding.aggregate} ` : ''}${
+    'condition' in encoding ? encoding.condition.field : encoding.field
+  }${'timeUnit' in encoding ? ` (${encoding.timeUnit})` : ''}`;
 };
 
 const typeCoerceData = (olliSpec: UnitOlliSpec) => {
@@ -74,8 +90,13 @@ function adaptUnitSpec(spec: TopLevelUnitSpec<any>, data: OlliDataset): UnitOlli
   if (spec.encoding) {
     Object.entries(spec.encoding).forEach(([channel, encoding]) => {
       const fieldDef = { ...encoding };
-      fieldDef.field = getFieldFromEncoding(encoding);
-      fieldDef.type = encoding.type || (encoding.timeUnit ? 'temporal' : false) || typeInference(data, fieldDef.field);
+      fieldDef.field = getFieldFromEncoding(encoding, data);
+      fieldDef.label = getLabelFromEncoding(encoding);
+      fieldDef.type =
+        encoding.type ||
+        (encoding.timeUnit ? 'temporal' : false) ||
+        (encoding.bin ? 'quantitative' : false) ||
+        typeInference(data, fieldDef.field);
 
       if (!fieldDef.field) {
         return;
@@ -144,7 +165,7 @@ async function adaptMultiSpec(
         const dataset = data.find((d) => {
           const fields = Object.keys(d[0]);
           const viewFields = Object.values(viewSpec.encoding)
-            .map((f) => getFieldFromEncoding(f))
+            .map((f) => getFieldFromEncoding(f, viewSpec.data))
             .filter((f) => f);
           return viewFields.every((f) => fields.includes(f));
         });
