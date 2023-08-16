@@ -19,8 +19,8 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
     return adaptUnitSpec(spec, data[0]);
   } else {
     if ('layer' in spec || 'concat' in spec || 'hconcat' in spec || 'vconcat' in spec) {
-      const op = Object.keys(spec).find((k) => ['layer', 'concat', 'hconcat', 'vconcat'].includes(k));
-      return await adaptMultiSpec(spec, op, data);
+      const vlOp = Object.keys(spec).find((k) => ['layer', 'concat', 'hconcat', 'vconcat'].includes(k));
+      return await adaptMultiSpec(spec, vlOp, data);
     }
   }
 };
@@ -140,7 +140,7 @@ function adaptUnitSpec(spec: TopLevelUnitSpec<any>, data: OlliDataset): UnitOlli
 
 async function adaptMultiSpec(
   spec: TopLevel<LayerSpec<any> | GenericConcatSpec<any> | GenericVConcatSpec<any> | GenericHConcatSpec<any>>,
-  op: string,
+  vlOp: 'layer' | 'concat' | 'vconcat' | 'hconcat',
   data: OlliDataset[]
 ): Promise<OlliSpec> {
   const units: UnitOlliSpec[] = data.map((d) => {
@@ -154,7 +154,7 @@ async function adaptMultiSpec(
   });
 
   await Promise.all(
-    spec[op].map(async (view) => {
+    spec[vlOp].map(async (view) => {
       if ('mark' in view) {
         // unit view
         const viewSpec = {
@@ -194,7 +194,7 @@ async function adaptMultiSpec(
   }
 
   return {
-    operator: op as MultiSpecOperator,
+    operator: vlOp === 'layer' ? 'layer' : 'concat',
     units,
   };
 }
