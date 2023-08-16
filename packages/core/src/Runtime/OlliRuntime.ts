@@ -69,7 +69,6 @@ export class OlliRuntime {
     const lastNode = this.lastFocusedTreeItem?.olliNode;
 
     const tree: ElaboratedOlliNode = olliSpecToTree(this.olliSpec);
-    console.log(tree);
     this.olliNodeLookup = treeToNodeLookup(tree);
 
     const ul = renderTree(tree);
