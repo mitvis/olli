@@ -65,7 +65,8 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
     return olliNodes.map((node, idx) => {
       if ('groupby' in node) {
         const nodeType = nodeTypeFromGroupField(node.groupby, olliSpec);
-        const childPreds = fieldToPredicates(node.groupby, data, olliSpec.fields);
+        const axis = olliSpec.axes?.find((a) => a.field === node.groupby);
+        const childPreds = fieldToPredicates(node.groupby, data, olliSpec.fields, axis ? axis.ticks : undefined);
 
         return {
           id: `${idPrefix}-${idx}`,

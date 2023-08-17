@@ -2,36 +2,39 @@ import { bin } from 'vega-statistics';
 import { LogicalComposition } from 'vega-lite/src/logical';
 import { FieldPredicate } from 'vega-lite/src/predicate';
 import { getDomain, getFieldDef } from './data';
-import { OlliDataset, OlliFieldDef } from '../Types';
+import { OlliDataset, OlliFieldDef, OlliValue } from '../Types';
 import * as d3 from 'd3';
 
 export function getBins(
   field: string,
   data: OlliDataset,
   fields: OlliFieldDef[],
+  vTicks?: OlliValue[], // ticks from axes
   domainFilter?: LogicalComposition<FieldPredicate>
 ): [number, number][] {
   const fieldDef = getFieldDef(field, fields);
   const domain = getDomain(fieldDef, data, domainFilter);
   const bins = [];
-  let ticks;
-  if (fieldDef.type === 'temporal') {
-    ticks = d3
-      .scaleTime()
-      .domain([domain[0], domain[domain.length - 1]])
-      .ticks(6);
-  } else if (fieldDef.bin && field.startsWith('bin_')) {
-    // field is pre-binned from vega-lite
-    return domain.map((v) => {
-      const v2 = data.find((d) => d[field] === v)[field + '_end'];
-      return [Number(v), Number(v2)];
-    });
-  } else {
-    const binResult = bin({ maxbins: 10, extent: [domain[0], domain[domain.length - 1]] });
+  let ticks = vTicks;
+  if (!ticks) {
+    if (fieldDef.type === 'temporal') {
+      ticks = d3
+        .scaleTime()
+        .domain([domain[0], domain[domain.length - 1]])
+        .ticks(6);
+    } else if (fieldDef.bin && field.startsWith('bin_')) {
+      // field is pre-binned from vega-lite
+      return domain.map((v) => {
+        const v2 = data.find((d) => d[field] === v)[field + '_end'];
+        return [Number(v), Number(v2)];
+      });
+    } else {
+      const binResult = bin({ maxbins: 10, extent: [domain[0], domain[domain.length - 1]] });
 
-    ticks = [];
-    for (let i = binResult.start; i <= binResult.stop; i += binResult.step) {
-      ticks.push(i);
+      ticks = [];
+      for (let i = binResult.start; i <= binResult.stop; i += binResult.step) {
+        ticks.push(i);
+      }
     }
   }
 
@@ -54,9 +57,10 @@ export function getBinPredicates(
   field: string,
   data: OlliDataset,
   fields: OlliFieldDef[],
+  ticks?: OlliValue[], // ticks from axes
   domainFilter?: LogicalComposition<FieldPredicate>
 ) {
-  const bins = getBins(field, data, fields, domainFilter);
+  const bins = getBins(field, data, fields, ticks, domainFilter);
   return bins.map((bin, idx) => {
     return {
       field: field,

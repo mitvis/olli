@@ -62,7 +62,10 @@ export function nodeToDescription(
       case 'legend':
         const guideType = node.nodeType === 'xAxis' ? 'x-axis' : node.nodeType === 'yAxis' ? 'y-axis' : 'legend';
         const fieldDef = getFieldDef(node.groupby, olliSpec.fields);
-        const label = fieldDef.label || fieldDef.field;
+        const guide =
+          olliSpec.axes?.find((axis) => axis.field === node.groupby) ||
+          olliSpec.legends?.find((legend) => legend.field === node.groupby);
+        const label = guide.title || fieldDef.label || fieldDef.field;
         return `${guideType} titled ${label}`;
       default:
         throw `Node type ${node.nodeType} does not have the 'name' token.`;
@@ -105,14 +108,13 @@ export function nodeToDescription(
       case 'xAxis':
       case 'yAxis':
       case 'legend':
-        const guideType = node.nodeType === 'xAxis' ? 'X-axis' : node.nodeType === 'yAxis' ? 'Y-axis' : 'Legend';
         if ('groupby' in node) {
           const fieldDef = getFieldDef(node.groupby, olliSpec.fields);
           if (fieldDef.type === 'quantitative' || fieldDef.type === 'temporal') {
             const guide =
               olliSpec.axes?.find((axis) => axis.field === node.groupby) ||
               olliSpec.legends?.find((legend) => legend.field === node.groupby);
-            const bins = getBins(node.groupby, dataset, olliSpec.fields);
+            const bins = getBins(node.groupby, dataset, olliSpec.fields, 'ticks' in guide ? guide.ticks : undefined);
             if (bins.length) {
               return `for a ${'scaleType' in guide ? guide.scaleType || fieldDef.type : fieldDef.type} scale`;
             }
@@ -153,7 +155,8 @@ export function nodeToDescription(
           const fieldDef = getFieldDef(node.groupby, olliSpec.fields);
           let first, last;
           if (fieldDef.type === 'quantitative' || fieldDef.type === 'temporal') {
-            const bins = getBins(node.groupby, dataset, olliSpec.fields);
+            const axis = olliSpec.axes?.find((axis) => axis.field === node.groupby);
+            const bins = getBins(node.groupby, dataset, olliSpec.fields, axis ? axis.ticks : undefined);
             if (bins.length) {
               first = fmtValue(bins[0][0], fieldDef);
               last = fmtValue(bins[bins.length - 1][1], fieldDef);

@@ -1,9 +1,10 @@
 import { TopLevelSpec, compile } from 'vega-lite';
 import { VisAdapter, UnitOlliSpec, typeInference, OlliSpec, OlliDataset, MultiSpecOperator } from 'olli';
-import { getData, getVegaScene, getVegaView } from './utils';
+import { getData, getVegaAxisTicks, getVegaScene, getVegaView } from './utils';
 import { TopLevelUnitSpec } from 'vega-lite/build/src/spec/unit';
 import { TopLevel, LayerSpec, GenericHConcatSpec, GenericVConcatSpec } from 'vega-lite/build/src/spec';
 import { GenericConcatSpec } from 'vega-lite/build/src/spec/concat';
+import { Scene, SceneGroup, View } from 'vega';
 
 /**
  * Adapter to deconstruct Vega-Lite visualizations into an {@link OlliVisSpec}
@@ -16,11 +17,11 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
   const data = getData(scene);
 
   if ('mark' in spec) {
-    return adaptUnitSpec(spec, data[0]);
+    return adaptUnitSpec(scene, spec, data[0]);
   } else {
     if ('layer' in spec || 'concat' in spec || 'hconcat' in spec || 'vconcat' in spec) {
       const vlOp = Object.keys(spec).find((k) => ['layer', 'concat', 'hconcat', 'vconcat'].includes(k));
-      return await adaptMultiSpec(spec, vlOp, data);
+      return await adaptMultiSpec(scene, spec, vlOp, data);
     }
   }
 };
@@ -66,7 +67,7 @@ const typeCoerceData = (olliSpec: UnitOlliSpec) => {
   });
 };
 
-function adaptUnitSpec(spec: TopLevelUnitSpec<any>, data: OlliDataset): UnitOlliSpec {
+function adaptUnitSpec(scene: SceneGroup, spec: TopLevelUnitSpec<any>, data: OlliDataset): UnitOlliSpec {
   // unit spec
   const olliSpec: UnitOlliSpec = {
     description: spec.description,
@@ -109,10 +110,19 @@ function adaptUnitSpec(spec: TopLevelUnitSpec<any>, data: OlliDataset): UnitOlli
         olliSpec.facet = fieldDef.field;
       } else if (['x', 'y'].includes(channel)) {
         // add axes
+        const ticks = getVegaAxisTicks(scene);
         olliSpec.axes.push({
           axisType: channel as 'x' | 'y',
           field: fieldDef.field,
           title: encoding.title,
+          ticks:
+            ticks && ticks.length
+              ? ticks.length === 1
+                ? ticks[0]
+                : ticks.length === 2 && channel === 'x'
+                ? ticks[0]
+                : ticks[1]
+              : undefined,
         });
       } else if (['color', 'opacity', 'size'].includes(channel)) {
         // add legends
@@ -139,8 +149,9 @@ function adaptUnitSpec(spec: TopLevelUnitSpec<any>, data: OlliDataset): UnitOlli
 }
 
 async function adaptMultiSpec(
+  scene: SceneGroup,
   spec: TopLevel<LayerSpec<any> | GenericConcatSpec<any> | GenericVConcatSpec<any> | GenericHConcatSpec<any>>,
-  vlOp: 'layer' | 'concat' | 'vconcat' | 'hconcat',
+  vlOp: string,
   data: OlliDataset[]
 ): Promise<OlliSpec> {
   const units: UnitOlliSpec[] = data.map((d) => {
@@ -169,7 +180,7 @@ async function adaptMultiSpec(
             .filter((f) => f);
           return viewFields.every((f) => fields.includes(f));
         });
-        const viewOlliSpec = adaptUnitSpec(viewSpec, dataset);
+        const viewOlliSpec = adaptUnitSpec(scene, viewSpec, dataset);
         const unitSpec = units.find((s) => Object.keys(s.data[0]).every((k) => dataset[0][k]));
         unitSpec?.fields.push(...viewOlliSpec.fields);
         unitSpec?.axes.push(...viewOlliSpec.axes);

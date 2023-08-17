@@ -58,6 +58,7 @@ type Guide = {
 export interface OlliAxis extends Guide {
   axisType: 'x' | 'y';
   scaleType?: string; // e.g. linear, logarithmic, band
+  ticks?: OlliValue[]; // axis tick values to use as bins
 }
 
 /**
