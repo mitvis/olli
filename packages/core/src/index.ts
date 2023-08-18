@@ -1,5 +1,6 @@
 import { OlliSpec } from './Types';
 import { ElaboratedOlliNode } from './Structure/Types';
+import { initSettings } from './Customization';
 import { OlliRuntime, RuntimeCallbacks } from './Runtime/OlliRuntime';
 import { updateGlobalStateOnInitialRender } from './util/globalState';
 import { elaborateSpec } from './util/elaborate';
@@ -27,6 +28,7 @@ export function olli(olliSpec: OlliSpec, config?: OlliConfigOptions): HTMLElemen
     onSelection: config?.onSelection,
   };
 
+  initSettings(); // must be before t.init because tree node text pulls from settings
   const t = new OlliRuntime(olliSpec, renderContainer, treeCallbacks);
   t.init();
   updateGlobalStateOnInitialRender(t);

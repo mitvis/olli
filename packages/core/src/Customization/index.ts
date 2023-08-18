@@ -16,11 +16,26 @@ import {
 } from '../util/description';
 import { FieldPredicate } from 'vega-lite/src/predicate';
 import { LogicalComposition } from 'vega-lite/src/logical';
+import { CustomizeSetting } from './Types';
+import { defaultSetting } from './data';
+
+export function initSettings() {
+  const storedData = localStorage.getItem('settingsData');
+  if (!storedData) {
+    localStorage.setItem('settingsData', JSON.stringify(defaultSetting));
+  }
+}
 
 export function getCustomizedDescription(node: ElaboratedOlliNode) {
+  const settings: CustomizeSetting = JSON.parse(localStorage.getItem('settingsData'));
+  
   return (
-    Array.from(node.description.values())
-      .filter((s) => s.length > 0)
+    Array.from(node.description)
+    // customize based on settings for this node type
+      .filter(([type, _]) => settings[type])
+    // format text of description
+      .map(([_, desc]) => desc) 
+      .filter(desc => desc.length > 0)
       .map(capitalizeFirst)
       .map(removeFinalPeriod)
       .join('. ') + '.'
@@ -200,9 +215,8 @@ export function nodeToDescription(
         return `with ${olliSpec.fields.length} fields`;
       case 'filteredData':
         if ('predicate' in node) {
-          const instructions = node.children.length ? '' : ' Press t to open table';
           const selection = selectionTest(dataset, node.fullPredicate);
-          return `${pluralize(selection.length, 'value')}.${instructions}`;
+          return `${pluralize(selection.length, 'value')}`;
         }
         return '';
       case 'annotations':
@@ -211,9 +225,8 @@ export function nodeToDescription(
         if ('groupby' in node) {
           return `${node.children.length} groups`;
         } else if ('predicate' in node) {
-          const instructions = node.children.length ? '' : ' Press t to open table';
           const selection = selectionTest(dataset, node.fullPredicate);
-          return `${pluralize(selection.length, 'value')}.${instructions}`;
+          return `${pluralize(selection.length, 'value')}`;
         }
         return '';
       default:
@@ -324,15 +337,29 @@ export function nodeToDescription(
     }
   }
 
+  function instructions(node: ElaboratedOlliNode): string {
+    switch (node.nodeType) {
+      case 'filteredData':
+      case 'other':
+        if ('predicate' in node) {
+          const selection = selectionTest(dataset, node.fullPredicate);
+          return selection.length ?  'press t to open table' : '';
+        }
+        return '';
+      default:
+        throw `Node type ${node.nodeType} does not have the 'instructions' token.`;
+    }
+  }
+
   const nodeTypeToTokens = new Map<OlliNodeType, string[]>([
     ['root', ['name', 'type', 'size', 'children', 'level']],
     ['view', ['index', 'type', 'name', 'children', 'level']],
     ['xAxis', ['name', 'type', 'data', 'parent', 'aggregate', 'level']],
     ['yAxis', ['name', 'type', 'data', 'parent', 'aggregate', 'level']],
     ['legend', ['name', 'type', 'data', 'parent', 'aggregate', 'level']],
-    ['filteredData', ['index', 'data', 'size', 'parent', 'aggregate', 'quartile', 'level']],
+    ['filteredData', ['index', 'data', 'size', 'parent', 'aggregate', 'quartile', 'level', 'instructions']],
     ['annotations', ['size', 'level']],
-    ['other', ['index', 'data', 'size', 'level']],
+    ['other', ['index', 'data', 'size', 'level', 'instructions']],
   ]);
 
   const tokenFunctions = new Map<string, Function>([
@@ -346,6 +373,7 @@ export function nodeToDescription(
     ['parent', parent],
     ['quartile', quartile],
     ['aggregate', aggregate],
+    ['instructions', instructions],
   ]);
 
   const resultDescription = new Map<string, string>();
