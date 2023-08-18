@@ -96,7 +96,7 @@ export class OlliRuntimeTreeItem {
     switch (event.key) {
       case 'Enter':
       case ' ':
-        this.tree.doTreeItem(this); // may need to rename this function to a "filler" function?
+        this.tree.toggleTreeItem(this); // may need to rename this function to a "filler" function?
         break;
       case 'ArrowDown':
         this.tree.setFocusToNextLayer(this);

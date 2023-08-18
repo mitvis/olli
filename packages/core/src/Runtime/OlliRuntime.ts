@@ -288,7 +288,7 @@ export class OlliRuntime {
     }
   }
 
-  doTreeItem(item: OlliRuntimeTreeItem): void { //may need to create a "filler" function named doSomething treeItem that then calls this and expand
+  toggleTreeItem(item: OlliRuntimeTreeItem): void { //may need to create a "filler" function named doSomething treeItem that then calls this and expand
     if (item.isExpandable){
       if (item.isExpanded()){
         item.tree.collapseTreeItem(item);
