@@ -35,7 +35,12 @@ export function nodeToDescription(
   const indexStr = `${(node.parent?.children.indexOf(node) || 0) + 1} of ${(node.parent?.children || []).length}`;
   const description = olliSpec.description || '';
   const chartType = getChartType(olliSpec);
-  const axes = olliSpec.axes.map((a) => a.title || a.field).join(' and ');
+  const axes = olliSpec.axes
+    ?.map((a) => {
+      const fieldDef = getFieldDef(a.field, olliSpec.fields);
+      return a.title || fieldDef.label || a.field;
+    })
+    .join(' and ');
 
   function name(node: ElaboratedOlliNode): string {
     switch (node.nodeType) {
@@ -56,7 +61,12 @@ export function nodeToDescription(
       case 'yAxis':
       case 'legend':
         const guideType = node.nodeType === 'xAxis' ? 'x-axis' : node.nodeType === 'yAxis' ? 'y-axis' : 'legend';
-        return `${guideType} titled ${node.groupby}`;
+        const fieldDef = getFieldDef(node.groupby, olliSpec.fields);
+        const guide =
+          olliSpec.axes?.find((axis) => axis.field === node.groupby) ||
+          olliSpec.legends?.find((legend) => legend.field === node.groupby);
+        const label = guide.title || fieldDef.label || fieldDef.field;
+        return `${guideType} titled ${label}`;
       default:
         throw `Node type ${node.nodeType} does not have the 'name' token.`;
     }
@@ -98,14 +108,13 @@ export function nodeToDescription(
       case 'xAxis':
       case 'yAxis':
       case 'legend':
-        const guideType = node.nodeType === 'xAxis' ? 'X-axis' : node.nodeType === 'yAxis' ? 'Y-axis' : 'Legend';
         if ('groupby' in node) {
           const fieldDef = getFieldDef(node.groupby, olliSpec.fields);
           if (fieldDef.type === 'quantitative' || fieldDef.type === 'temporal') {
             const guide =
               olliSpec.axes?.find((axis) => axis.field === node.groupby) ||
               olliSpec.legends?.find((legend) => legend.field === node.groupby);
-            const bins = getBins(node.groupby, dataset, olliSpec.fields);
+            const bins = getBins(node.groupby, dataset, olliSpec.fields, 'ticks' in guide ? guide.ticks : undefined);
             if (bins.length) {
               return `for a ${'scaleType' in guide ? guide.scaleType || fieldDef.type : fieldDef.type} scale`;
             }
@@ -125,7 +134,7 @@ export function nodeToDescription(
         if ('groupby' in node || (olliSpec.mark && olliSpec.axes?.length)) {
           return `with axes ${axes}`;
         }
-        const fields = olliSpec.fields.map((f) => f.field);
+        const fields = olliSpec.fields.map((f) => f.label || f.field);
         if (fields.length <= 3) {
           return ' ' + [...fields].join(', ');
         }
@@ -142,15 +151,12 @@ export function nodeToDescription(
       case 'xAxis':
       case 'yAxis':
       case 'legend':
-        const guideType = node.nodeType === 'xAxis' ? 'X-axis' : node.nodeType === 'yAxis' ? 'Y-axis' : 'Legend';
         if ('groupby' in node) {
           const fieldDef = getFieldDef(node.groupby, olliSpec.fields);
           let first, last;
           if (fieldDef.type === 'quantitative' || fieldDef.type === 'temporal') {
-            const guide =
-              olliSpec.axes?.find((axis) => axis.field === node.groupby) ||
-              olliSpec.legends?.find((legend) => legend.field === node.groupby);
-            const bins = getBins(node.groupby, dataset, olliSpec.fields);
+            const axis = olliSpec.axes?.find((axis) => axis.field === node.groupby);
+            const bins = getBins(node.groupby, dataset, olliSpec.fields, axis ? axis.ticks : undefined);
             if (bins.length) {
               first = fmtValue(bins[0][0], fieldDef);
               last = fmtValue(bins[bins.length - 1][1], fieldDef);
@@ -191,8 +197,7 @@ export function nodeToDescription(
         if ((olliSpec.mark && olliSpec.axes?.length) || olliSpec.mark) {
           return '';
         }
-        const fields = olliSpec.fields.map((f) => f.field);
-        return `with ${fields.length} fields`;
+        return `with ${olliSpec.fields.length} fields`;
       case 'filteredData':
         if ('predicate' in node) {
           const selection = selectionTest(dataset, node.fullPredicate);
@@ -247,22 +252,32 @@ export function nodeToDescription(
       case 'filteredData':
         if (!axisType) axisType = node.parent.nodeType === 'xAxis' ? 'x' : 'y';
 
-        const otherAxis = olliSpec.axes.find((axis) => axis.axisType !== axisType);
+        const otherAxis = olliSpec.axes?.find((axis) => axis.axisType !== axisType);
         if (!otherAxis) return '';
         const otherAxisFieldDef = getFieldDef(otherAxis.field, olliSpec.fields);
         if (otherAxisFieldDef.type !== 'quantitative') {
           return '';
         }
-        const field = otherAxis.field;
+        const label = otherAxisFieldDef.label || otherAxisFieldDef.field;
+        const field = otherAxisFieldDef.field;
 
         const selection = selectionTest(dataset, node.fullPredicate);
         if (selection.length === 0) {
           return '';
         }
+        if (selection.length === 1) {
+          return `the ${label} value is ${fmtValue(selection[0][field], otherAxisFieldDef)}`;
+        }
         const average = averageValue(selection, field);
         const maximum = selection.reduce((a, b) => Math.max(a, Number(b[field])), Number(selection[0][field]));
         const minimum = selection.reduce((a, b) => Math.min(a, Number(b[field])), Number(selection[0][field]));
-        return `the average value for the ${field} field is ${average}, the maximum is ${maximum}, and the minimum is ${minimum}`;
+        return `the average value for the ${label} field is ${fmtValue(
+          average,
+          otherAxisFieldDef
+        )}, the maximum is ${fmtValue(maximum, otherAxisFieldDef)}, and the minimum is ${fmtValue(
+          minimum,
+          otherAxisFieldDef
+        )}`;
 
       default:
         throw `Node type ${node.nodeType} does not have the 'aggregate' token.`;
@@ -273,13 +288,14 @@ export function nodeToDescription(
     switch (node.nodeType) {
       case 'filteredData':
         const axisType = node.parent.nodeType === 'xAxis' ? 'x' : 'y';
-        const otherAxis = olliSpec.axes.find((axis) => axis.axisType !== axisType);
+        const otherAxis = olliSpec.axes?.find((axis) => axis.axisType !== axisType);
         if (!otherAxis) return '';
         const otherAxisFieldDef = getFieldDef(otherAxis.field, olliSpec.fields);
         if (otherAxisFieldDef.type !== 'quantitative') {
           return '';
         }
-        const field = otherAxis.field;
+        const label = otherAxisFieldDef.label || otherAxisFieldDef.field;
+        const field = otherAxisFieldDef.field;
 
         const avgs: number[] = [];
         node.parent.children.forEach((section) => {
@@ -298,7 +314,7 @@ export function nodeToDescription(
         const thisAvg = selection.length == 0 ? 0 : averageValue(selection, field);
         const sectionsPos = avgs.indexOf(Number(thisAvg)) / avgs.length;
         const sectionsQuart = Math.max(1, Math.ceil(sectionsPos * 4)); // pos is btwn 0 and 1, no quartile 0
-        return `this section's average ${field} is in the ${ordinal_suffix_of(
+        return `this section's average ${label} is in the ${ordinal_suffix_of(
           sectionsQuart
         )} quartile  of all sections`;
       default:
@@ -374,26 +390,27 @@ export function predicateToDescription(predicate: LogicalComposition<FieldPredic
 
 function fieldPredicateToDescription(predicate: FieldPredicate, fields: OlliFieldDef[]) {
   const fieldDef = getFieldDef(predicate.field, fields);
+  const field = fieldDef.label || fieldDef.field;
   if ('equal' in predicate) {
-    return `${predicate.field} equals ${fmtValue(predicate.equal as OlliValue, fieldDef)}`;
+    return `${field} equals ${fmtValue(predicate.equal as OlliValue, fieldDef)}`;
   }
   if ('range' in predicate) {
-    return `${predicate.field} is between ${fmtValue(predicate.range[0], fieldDef)} and ${fmtValue(
+    return `${field} is between ${fmtValue(predicate.range[0], fieldDef)} and ${fmtValue(
       predicate.range[1],
       fieldDef
     )}`;
   }
   if ('lt' in predicate) {
-    return `${predicate.field} is less than ${fmtValue(predicate.lt as OlliValue, fieldDef)}`;
+    return `${field} is less than ${fmtValue(predicate.lt as OlliValue, fieldDef)}`;
   }
   if ('lte' in predicate) {
-    return `${predicate.field} is less than or equal to ${fmtValue(predicate.lte as OlliValue, fieldDef)}`;
+    return `${field} is less than or equal to ${fmtValue(predicate.lte as OlliValue, fieldDef)}`;
   }
   if ('gt' in predicate) {
-    return `${predicate.field} is greater than ${fmtValue(predicate.gt as OlliValue, fieldDef)}`;
+    return `${field} is greater than ${fmtValue(predicate.gt as OlliValue, fieldDef)}`;
   }
   if ('gte' in predicate) {
-    return `${predicate.field} is greater than or equal to ${fmtValue(predicate.gte as OlliValue, fieldDef)}`;
+    return `${field} is greater than or equal to ${fmtValue(predicate.gte as OlliValue, fieldDef)}`;
   }
 
   return '';

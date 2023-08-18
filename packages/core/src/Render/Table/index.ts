@@ -9,7 +9,7 @@ export function renderTable(data: OlliDataset, fields: OlliFieldDef[]): HTMLElem
   fields.forEach((fieldDef: OlliFieldDef) => {
     const th = document.createElement('th');
     th.setAttribute('scope', 'col');
-    th.innerText = fieldDef.field;
+    th.innerText = fieldDef.label || fieldDef.field;
     theadtr.appendChild(th);
   });
 

@@ -16,10 +16,11 @@ export type OlliMark = 'point' | 'bar' | 'line';
  * Spec describing a visualization
  */
 export interface UnitOlliSpec {
-  // required: data and fields
+  // required: data
   data: OlliDataset;
-  // semi-required: specification of the fields/typings and structure (inferred if not provided)
+  // semi-required: specification of the fields/typings (inferred from data if not provided)
   fields?: OlliFieldDef[];
+  // semi-required: structure (inferred from fields if not provided)
   structure?: OlliNode | OlliNode[];
   // optional information about the chart's visual encodings for descriptions
   mark?: OlliMark;
@@ -57,6 +58,7 @@ type Guide = {
 export interface OlliAxis extends Guide {
   axisType: 'x' | 'y';
   scaleType?: string; // e.g. linear, logarithmic, band
+  ticks?: OlliValue[]; // axis tick values to use as bins
 }
 
 /**
@@ -71,8 +73,10 @@ export type OlliTimeUnit = 'year' | 'month' | 'day' | 'date' | 'hours' | 'minute
 
 export interface OlliFieldDef {
   field: string;
+  label?: string; // human-readable field name used for description
   type?: MeasureType; // optional, but will be inferred if not provided
   timeUnit?: OlliTimeUnit;
+  bin?: boolean;
 }
 
 /**

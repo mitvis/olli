@@ -96,3 +96,27 @@ export function getData(scene: SceneGroup): OlliDataset[] {
     throw new Error(`No data found in the Vega scenegraph \n ${error}`);
   }
 }
+
+export function getVegaAxisTicks(scene) {
+  const axisTicks = findNodeByRole(scene, 'axis-tick');
+
+  if (axisTicks.length) {
+    const ticks = axisTicks.map((axis) => axis.items.map((n) => n.datum.value));
+    return ticks;
+  }
+
+  return null;
+}
+
+function findNodeByRole(node: SceneGroup | Scene, role: string, found: Scene[] = []) {
+  if ('role' in node) {
+    if (node.role === role) {
+      found.push(node);
+    }
+    return node.items.reduce((acc, n) => findNodeByRole(n, role, acc), found);
+  }
+  if ('items' in node) {
+    return node.items.reduce((acc, n) => findNodeByRole(n, role, acc), found);
+  }
+  return found;
+}

@@ -1,9 +1,10 @@
 import { TopLevelSpec, compile } from 'vega-lite';
 import { VisAdapter, UnitOlliSpec, typeInference, OlliSpec, OlliDataset, MultiSpecOperator } from 'olli';
-import { getData, getVegaScene, getVegaView } from './utils';
+import { getData, getVegaAxisTicks, getVegaScene, getVegaView } from './utils';
 import { TopLevelUnitSpec } from 'vega-lite/build/src/spec/unit';
 import { TopLevel, LayerSpec, GenericHConcatSpec, GenericVConcatSpec } from 'vega-lite/build/src/spec';
 import { GenericConcatSpec } from 'vega-lite/build/src/spec/concat';
+import { Scene, SceneGroup, View } from 'vega';
 
 /**
  * Adapter to deconstruct Vega-Lite visualizations into an {@link OlliVisSpec}
@@ -16,16 +17,16 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
   const data = getData(scene);
 
   if ('mark' in spec) {
-    return adaptUnitSpec(spec, data[0]);
+    return adaptUnitSpec(scene, spec, data[0]);
   } else {
     if ('layer' in spec || 'concat' in spec || 'hconcat' in spec || 'vconcat' in spec) {
-      const op = Object.keys(spec).find((k) => ['layer', 'concat', 'hconcat', 'vconcat'].includes(k));
-      return await adaptMultiSpec(spec, op, data);
+      const vlOp = Object.keys(spec).find((k) => ['layer', 'concat', 'hconcat', 'vconcat'].includes(k));
+      return await adaptMultiSpec(scene, spec, vlOp, data);
     }
   }
 };
 
-const getFieldFromEncoding = (encoding) => {
+const getFieldFromEncoding = (encoding, data: OlliDataset) => {
   if ('aggregate' in encoding) {
     if (encoding.aggregate === 'count') {
       return `__${encoding.aggregate}`;
@@ -35,8 +36,24 @@ const getFieldFromEncoding = (encoding) => {
   if ('timeUnit' in encoding) {
     return `${encoding.timeUnit}_${encoding.field}`;
   }
+  if ('bin' in encoding && encoding.bin === true && data.length) {
+    const fields = Object.keys(data[0]);
+    const binField = fields.find((f) => f.startsWith('bin') && f.includes(encoding.field) && !f.endsWith('_end'));
+    return binField;
+  }
 
   return 'condition' in encoding ? encoding.condition.field : encoding.field;
+};
+
+const getLabelFromEncoding = (encoding) => {
+  if ('aggregate' in encoding) {
+    if (encoding.aggregate === 'count') {
+      return 'count';
+    }
+  }
+  return `${encoding.bin ? 'binned ' : ''}${'aggregate' in encoding ? `${encoding.aggregate} ` : ''}${
+    'condition' in encoding ? encoding.condition.field : encoding.field
+  }${'timeUnit' in encoding ? ` (${encoding.timeUnit})` : ''}`;
 };
 
 const typeCoerceData = (olliSpec: UnitOlliSpec) => {
@@ -50,7 +67,7 @@ const typeCoerceData = (olliSpec: UnitOlliSpec) => {
   });
 };
 
-function adaptUnitSpec(spec: TopLevelUnitSpec<any>, data: OlliDataset): UnitOlliSpec {
+function adaptUnitSpec(scene: SceneGroup, spec: TopLevelUnitSpec<any>, data: OlliDataset): UnitOlliSpec {
   // unit spec
   const olliSpec: UnitOlliSpec = {
     description: spec.description,
@@ -74,8 +91,13 @@ function adaptUnitSpec(spec: TopLevelUnitSpec<any>, data: OlliDataset): UnitOlli
   if (spec.encoding) {
     Object.entries(spec.encoding).forEach(([channel, encoding]) => {
       const fieldDef = { ...encoding };
-      fieldDef.field = getFieldFromEncoding(encoding);
-      fieldDef.type = encoding.type || (encoding.timeUnit ? 'temporal' : false) || typeInference(data, fieldDef.field);
+      fieldDef.field = getFieldFromEncoding(encoding, data);
+      fieldDef.label = getLabelFromEncoding(encoding);
+      fieldDef.type =
+        encoding.type ||
+        (encoding.timeUnit ? 'temporal' : false) ||
+        (encoding.bin ? 'quantitative' : false) ||
+        typeInference(data, fieldDef.field);
 
       if (!fieldDef.field) {
         return;
@@ -88,10 +110,19 @@ function adaptUnitSpec(spec: TopLevelUnitSpec<any>, data: OlliDataset): UnitOlli
         olliSpec.facet = fieldDef.field;
       } else if (['x', 'y'].includes(channel)) {
         // add axes
+        const ticks = getVegaAxisTicks(scene);
         olliSpec.axes.push({
           axisType: channel as 'x' | 'y',
           field: fieldDef.field,
           title: encoding.title,
+          ticks:
+            ticks && ticks.length
+              ? ticks.length === 1
+                ? ticks[0]
+                : ticks.length === 2 && channel === 'x'
+                ? ticks[0]
+                : ticks[1]
+              : undefined,
         });
       } else if (['color', 'opacity', 'size'].includes(channel)) {
         // add legends
@@ -118,8 +149,9 @@ function adaptUnitSpec(spec: TopLevelUnitSpec<any>, data: OlliDataset): UnitOlli
 }
 
 async function adaptMultiSpec(
+  scene: SceneGroup,
   spec: TopLevel<LayerSpec<any> | GenericConcatSpec<any> | GenericVConcatSpec<any> | GenericHConcatSpec<any>>,
-  op: string,
+  vlOp: string,
   data: OlliDataset[]
 ): Promise<OlliSpec> {
   const units: UnitOlliSpec[] = data.map((d) => {
@@ -133,7 +165,7 @@ async function adaptMultiSpec(
   });
 
   await Promise.all(
-    spec[op].map(async (view) => {
+    spec[vlOp].map(async (view) => {
       if ('mark' in view) {
         // unit view
         const viewSpec = {
@@ -144,11 +176,11 @@ async function adaptMultiSpec(
         const dataset = data.find((d) => {
           const fields = Object.keys(d[0]);
           const viewFields = Object.values(viewSpec.encoding)
-            .map((f) => getFieldFromEncoding(f))
+            .map((f) => getFieldFromEncoding(f, d))
             .filter((f) => f);
           return viewFields.every((f) => fields.includes(f));
         });
-        const viewOlliSpec = adaptUnitSpec(viewSpec, dataset);
+        const viewOlliSpec = adaptUnitSpec(scene, viewSpec, dataset);
         const unitSpec = units.find((s) => Object.keys(s.data[0]).every((k) => dataset[0][k]));
         unitSpec?.fields.push(...viewOlliSpec.fields);
         unitSpec?.axes.push(...viewOlliSpec.axes);
@@ -173,7 +205,7 @@ async function adaptMultiSpec(
   }
 
   return {
-    operator: op as MultiSpecOperator,
+    operator: vlOp === 'layer' ? 'layer' : 'concat',
     units,
   };
 }
