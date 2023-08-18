@@ -16,11 +16,26 @@ import {
 } from '../util/description';
 import { FieldPredicate } from 'vega-lite/src/predicate';
 import { LogicalComposition } from 'vega-lite/src/logical';
+import { CustomizeSetting } from './Types';
+import { defaultSetting } from './data';
+
+export function initSettings() {
+  const storedData = localStorage.getItem('settingsData');
+  if (!storedData) {
+    localStorage.setItem('settingsData', JSON.stringify(defaultSetting));
+  }
+}
 
 export function getCustomizedDescription(node: ElaboratedOlliNode) {
+  const settings: CustomizeSetting = JSON.parse(localStorage.getItem('settingsData'));
+  
   return (
-    Array.from(node.description.values())
-      .filter((s) => s.length > 0)
+    Array.from(node.description)
+    // customize based on settings for this node type
+      .filter(([type, _]) => settings[type])
+    // format text of description
+      .map(([_, desc]) => desc) 
+      .filter(desc => desc.length > 0)
       .map(capitalizeFirst)
       .map(removeFinalPeriod)
       .join('. ') + '.'
