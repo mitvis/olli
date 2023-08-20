@@ -34,37 +34,42 @@ export const updateGlobalStateOnInitialRender = (t: OlliRuntime) => {
         const { lastVisitedInstance, instancesOnPage } = getOlliGlobalState();
         switch (e.code) {
           case 'KeyO':
-            const currentInstance = lastVisitedInstance || instancesOnPage[0];
-            if (currentInstance.rootDomNode.firstElementChild.getAttribute('aria-selected') === 'true') {
-              // we are currently focusing on the root of this tree
-              const idx = instancesOnPage.indexOf(currentInstance);
-              if (e.shiftKey) {
-                // shift + t means jump to the prev one
-                if (idx > 0) {
-                  const prev = instancesOnPage[idx - 1];
-                  prev.setFocusToItem(prev.rootTreeItem);
+            const currentInstance =
+              (lastVisitedInstance && document.body.contains(lastVisitedInstance.rootDomNode)
+                ? lastVisitedInstance
+                : false) || (instancesOnPage.length ? instancesOnPage[0] : null);
+            if (currentInstance) {
+              if (document.activeElement === currentInstance.rootDomNode) {
+                // we are currently focusing on the root of this tree
+                const idx = instancesOnPage.indexOf(currentInstance);
+                if (e.shiftKey) {
+                  // shift + t means jump to the prev one
+                  if (idx > 0) {
+                    const prev = instancesOnPage[idx - 1];
+                    prev.setFocusToItem(prev.rootTreeItem);
+                  } else {
+                    // TODO play some sort of earcon / notification to indicate you are at a boundary
+                  }
                 } else {
-                  // TODO play some sort of earcon / notification to indicate you are at a boundary
+                  // jump to the next one
+                  if (idx < instancesOnPage.length - 1) {
+                    const next = instancesOnPage[idx + 1];
+                    next.setFocusToItem(next.rootTreeItem);
+                  } else {
+                    // TODO play some sort of earcon / notification to indicate you are at a boundary
+                  }
                 }
               } else {
-                // jump to the next one
-                if (idx < instancesOnPage.length - 1) {
-                  const next = instancesOnPage[idx + 1];
-                  next.setFocusToItem(next.rootTreeItem);
+                if (
+                  !currentInstance.lastFocusedTreeItem ||
+                  document.activeElement === currentInstance.lastFocusedTreeItem.domNode
+                ) {
+                  // we are not focused on the root of the tree, so jump there
+                  currentInstance.setFocusToItem(currentInstance.rootTreeItem);
                 } else {
-                  // TODO play some sort of earcon / notification to indicate you are at a boundary
+                  // we are focused somewhere else, so jump back to the last focused item
+                  currentInstance.setFocusToItem(currentInstance.lastFocusedTreeItem);
                 }
-              }
-            } else {
-              if (
-                !currentInstance.lastFocusedTreeItem ||
-                document.activeElement === currentInstance.lastFocusedTreeItem.domNode
-              ) {
-                // we are not focused on the root of the tree, so jump there
-                currentInstance.setFocusToItem(currentInstance.rootTreeItem);
-              } else {
-                // we are focused somewhere else, so jump back to the last focused item
-                currentInstance.setFocusToItem(currentInstance.lastFocusedTreeItem);
               }
             }
             break;
