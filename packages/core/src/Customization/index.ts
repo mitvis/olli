@@ -28,14 +28,14 @@ export function initSettings() {
 
 export function getCustomizedDescription(node: ElaboratedOlliNode) {
   const settings: CustomizeSetting = JSON.parse(localStorage.getItem('settingsData'));
-  
+
   return (
     Array.from(node.description)
-    // customize based on settings for this node type
+      // customize based on settings for this node type
       .filter(([type, _]) => settings[type])
-    // format text of description
-      .map(([_, desc]) => desc) 
-      .filter(desc => desc.length > 0)
+      // format text of description
+      .map(([_, desc]) => desc)
+      .filter((desc) => desc.length > 0)
       .map(capitalizeFirst)
       .map(removeFinalPeriod)
       .join('. ') + '.'
@@ -147,7 +147,7 @@ export function nodeToDescription(
     switch (node.nodeType) {
       case 'root':
         if ('groupby' in node || (olliSpec.mark && olliSpec.axes?.length)) {
-          return `with axes ${axes}`;
+          return `with ${olliSpec.axes.length > 1 ? 'axes' : 'axis'} ${axes}`;
         }
         const fields = olliSpec.fields.map((f) => f.label || f.field);
         if (fields.length <= 3) {
@@ -155,7 +155,10 @@ export function nodeToDescription(
         }
         return '';
       case 'view':
-        return `with axes ${axes}`;
+        if (olliSpec.axes?.length) {
+          return `with ${olliSpec.axes.length > 1 ? 'axes' : 'axis'} ${axes}`;
+        }
+        return '';
       default:
         throw `Node type ${node.nodeType} does not have the 'children' token.`;
     }
@@ -343,7 +346,7 @@ export function nodeToDescription(
       case 'other':
         if ('predicate' in node) {
           const selection = selectionTest(dataset, node.fullPredicate);
-          return selection.length ?  'press t to open table' : '';
+          return selection.length ? 'press t to open table' : '';
         }
         return '';
       default:
