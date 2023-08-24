@@ -26,7 +26,7 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
       id: namespace,
       nodeType: 'root',
       fullPredicate: { and: [] },
-      description: new Map<string, string>(),
+      description: new Map<string, string[]>(),
       children: nodes,
       level: 1,
     };
@@ -74,7 +74,7 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
           nodeType,
           specIndex,
           groupby: node.groupby,
-          description: new Map<string, string>(),
+          description: new Map<string, string[]>(),
           children: childPreds.map((p, childIdx) => {
             const childFullPred = {
               and: [...fullPredicate.and, p],
@@ -87,7 +87,7 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
               specIndex,
               predicate: p,
               fullPredicate: childFullPred,
-              description: new Map<string, string>(),
+              description: new Map<string, string[]>(),
               children: elaborateOlliNodes(olliSpec, specIndex, node.children, data, childFullPred, childId, level + 2),
               level: level + 2,
             };
@@ -106,7 +106,7 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
           specIndex,
           fullPredicate: nextFullPred,
           predicate,
-          description: new Map<string, string>(),
+          description: new Map<string, string[]>(),
           children: elaborateOlliNodes(olliSpec, specIndex, node.children, data, nextFullPred, nextId, level + 1),
           level: level + 1,
         };
@@ -117,7 +117,7 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
           fullPredicate,
           nodeType: 'annotations',
           specIndex,
-          description: new Map<string, string>(),
+          description: new Map<string, string[]>(),
           children: elaborateOlliNodes(olliSpec, specIndex, node.annotations, data, fullPredicate, id, level + 1),
           level: level + 1,
         };
@@ -138,7 +138,7 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
         viewType: olliSpec.operator,
         specIndex: idx,
         fullPredicate: { and: [] },
-        description: new Map<string, string>(),
+        description: new Map<string, string[]>(),
         children: elaborated,
         level: 1,
       };
