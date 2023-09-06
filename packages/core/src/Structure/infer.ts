@@ -19,6 +19,21 @@ export function inferStructure(olliSpec: UnitOlliSpec): OlliNode | OlliNode[] {
         })
       );
     }
+    const otherFields = olliSpec.fields.filter((field) => {
+      return (
+        !axes?.find((axis) => axis.field === field.field) &&
+        !legends?.find((legend) => legend.field === field.field) &&
+        !(olliSpec.facet === field.field)
+      );
+    });
+    if (otherFields.length) {
+      console.log(otherFields);
+      nodes = nodes.concat(
+        otherFields.map((field) => {
+          return { groupby: field.field, children: [] };
+        })
+      );
+    }
     return nodes;
   }
 

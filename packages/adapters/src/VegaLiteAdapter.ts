@@ -133,7 +133,6 @@ function adaptUnitSpec(scene: SceneGroup, spec: TopLevelUnitSpec<any>, data: Oll
         });
       } else {
         // TODO: handle other channels
-        return;
       }
 
       // add field to list of field defs
