@@ -28,25 +28,25 @@ export function initSettings() {
 
 export function getCustomizedDescription(node: ElaboratedOlliNode) {
   const settings: CustomizeSetting = JSON.parse(localStorage.getItem('settingsData'));
+  const results: string[] = [];
 
-  return (
-    Array.from(node.description)
-      // customize based on settings for this node type
-      .filter(([type, _]) => settings[type])
-      // format text of description
-      .map(([_, desc]) => desc)
-      .filter((desc) => desc.length > 0)
-      .map(capitalizeFirst)
-      .map(removeFinalPeriod)
-      .join('. ') + '.'
-  );
+  for (const [type, verbosity] of settings) {  // Iterate through token type in the order stored in settings
+    // Check if this node has that token
+    if (!node.description.has(type) || node.description.get(type)[0].length === 0) { continue; }
+    // If so, get it at the correct level of verbosity
+    const desc = node.description.get(type)[verbosity];
+    // Pretty-format the text
+    results.push(removeFinalPeriod(capitalizeFirst(desc)));
+  }
+  
+  return results.join('. ') + '.';
 }
 
 export function nodeToDescription(
   node: ElaboratedOlliNode,
   dataset: OlliDataset,
   olliSpec: UnitOlliSpec
-): Map<string, string> {
+): Map<string, string[]> {
   const indexStr = `${(node.parent?.children.indexOf(node) || 0) + 1} of ${(node.parent?.children || []).length}`;
   const description = olliSpec.description || '';
   const chartType = getChartType(olliSpec);
@@ -57,21 +57,21 @@ export function nodeToDescription(
     })
     .join(' and ');
 
-  function name(node: ElaboratedOlliNode): string {
+  function name(node: ElaboratedOlliNode): string[] {
     switch (node.nodeType) {
       case 'root':
         if ('groupby' in node) {
-          return description;
+          return [description, description];
         }
-        if (olliSpec.mark) {
-          return olliSpec.description || '';
+        if (olliSpec.mark && olliSpec.description !== undefined) {
+          return [olliSpec.description, olliSpec.description] || ['', ''];
         }
-        return '';
+        return ['', ''];
       case 'view':
         if ('predicate' in node && 'equal' in node.predicate) {
-          return `titled ${node.predicate.equal}`;
+          return [node.predicate.equal + '', `titled ${node.predicate.equal}`];
         }
-        return '';
+        return ['', ''];
       case 'xAxis':
       case 'yAxis':
       case 'legend':
@@ -81,45 +81,46 @@ export function nodeToDescription(
           olliSpec.axes?.find((axis) => axis.field === node.groupby) ||
           olliSpec.legends?.find((legend) => legend.field === node.groupby);
         const label = guide.title || fieldDef.label || fieldDef.field;
-        return `${guideType} titled ${label}`;
+        return [`${guideType} ${label}`, `${guideType} titled ${label}`];
       default:
         throw `Node type ${node.nodeType} does not have the 'name' token.`;
     }
   }
 
-  function index(node: ElaboratedOlliNode): string {
+  function index(node: ElaboratedOlliNode): string[] {
     switch (node.nodeType) {
       case 'view':
       case 'filteredData':
       case 'other':
-        return indexStr;
+        return [indexStr, indexStr];
       default:
         throw `Node type ${node.nodeType} does not have the 'index' token.`;
     }
   }
 
-  function type(node: ElaboratedOlliNode): string {
+  function type(node: ElaboratedOlliNode): string[] {
     switch (node.nodeType) {
       case 'root':
         if ('groupby' in node) {
-          return `a ${chartTypePrefix(node, olliSpec)}${chartType}`;
+          return [`a ${chartTypePrefix(node, olliSpec)}${chartType}`,
+            `a ${chartTypePrefix(node, olliSpec)}${chartType}`];
         }
         if (olliSpec.mark) {
-          return `a ${chartType}`;
+          return [`a ${chartType}`, `a ${chartType}`];
         }
         if (node.children.length) {
           if (node.children[0].viewType === 'layer') {
-            return 'a layered chart';
+            return ['a layered chart', 'a layered chart'];
           }
           if (node.children[0].viewType === 'concat') {
-            return 'a multi-view chart';
+            return ['a multi-view chart', 'a multi-view chart'];
           }
         }
-        return 'a dataset';
+        return ['a dataset', 'a dataset'];
       case 'view':
         const viewName =
           olliSpec.mark === 'line' ? 'line' : olliSpec.mark ? chartType : node.viewType ? node.viewType : 'view';
-        return `a ${viewName}`;
+        return [`a ${viewName}`, `a ${viewName}`];
       case 'xAxis':
       case 'yAxis':
       case 'legend':
@@ -131,40 +132,43 @@ export function nodeToDescription(
               olliSpec.legends?.find((legend) => legend.field === node.groupby);
             const bins = getBins(node.groupby, dataset, olliSpec.fields, 'ticks' in guide ? guide.ticks : undefined);
             if (bins.length) {
-              return `for a ${'scaleType' in guide ? guide.scaleType || fieldDef.type : fieldDef.type} scale`;
+              return [`for a ${'scaleType' in guide ? guide.scaleType || fieldDef.type : fieldDef.type} scale`,
+              `for a ${'scaleType' in guide ? guide.scaleType || fieldDef.type : fieldDef.type} scale`];
             }
           } else {
-            return `for a ${fieldDef.type} scale`;
+            return [`for a ${fieldDef.type} scale`, `for a ${fieldDef.type} scale`];
           }
         }
-        return '';
+        return ['', ''];
       default:
         throw `Node type ${node.nodeType} does not have the 'type' token.`;
     }
   }
 
-  function children(node: ElaboratedOlliNode): string {
+  function children(node: ElaboratedOlliNode): string[] {
     switch (node.nodeType) {
       case 'root':
         if ('groupby' in node || (olliSpec.mark && olliSpec.axes?.length)) {
-          return `with ${olliSpec.axes.length > 1 ? 'axes' : 'axis'} ${axes}`;
+          return [`with ${olliSpec.axes.length > 1 ? 'axes' : 'axis'} ${axes}`,
+          `with ${olliSpec.axes.length > 1 ? 'axes' : 'axis'} ${axes}`];
         }
         const fields = olliSpec.fields.map((f) => f.label || f.field);
         if (fields.length <= 3) {
-          return ' ' + [...fields].join(', ');
+          return [' ' + [...fields].join(', '), ' ' + [...fields].join(', ')];
         }
-        return '';
+        return ['', ''];
       case 'view':
         if (olliSpec.axes?.length) {
-          return `with ${olliSpec.axes.length > 1 ? 'axes' : 'axis'} ${axes}`;
+          return [`with ${olliSpec.axes.length > 1 ? 'axes' : 'axis'} ${axes}`,
+          `with ${olliSpec.axes.length > 1 ? 'axes' : 'axis'} ${axes}`];
         }
-        return '';
+        return ['', ''];
       default:
         throw `Node type ${node.nodeType} does not have the 'children' token.`;
     }
   }
 
-  function data(node: ElaboratedOlliNode): string {
+  function data(node: ElaboratedOlliNode): string[] {
     switch (node.nodeType) {
       case 'xAxis':
       case 'yAxis':
@@ -178,26 +182,27 @@ export function nodeToDescription(
             if (bins.length) {
               first = fmtValue(bins[0][0], fieldDef);
               last = fmtValue(bins[bins.length - 1][1], fieldDef);
-              return `with values from ${first} to ${last}`;
+              return [`with values from ${first} to ${last}`, `with values from ${first} to ${last}`];
             }
           } else {
             const domain = getDomain(fieldDef, dataset);
             if (domain.length) {
               first = fmtValue(domain[0], fieldDef);
               last = fmtValue(domain[domain.length - 1], fieldDef);
-              return `with ${pluralize(domain.length, 'value')} from ${first} to ${last}`;
+              return [`with ${pluralize(domain.length, 'value')} from ${first} to ${last}`,
+                  `with ${pluralize(domain.length, 'value')} from ${first} to ${last}`];
             }
           }
         }
-        return '';
+        return ['', ''];
       case 'filteredData':
         if ('predicate' in node) {
           return predicateToDescription(node.predicate, olliSpec.fields);
         }
-        return '';
+        return ['', ''];
       case 'other':
         if ('groupby' in node) {
-          return `grouped by ${node.groupby}`;
+          return [`grouped by ${node.groupby}`, `grouped by ${node.groupby}`];
         } else if ('predicate' in node) {
           return predicateToDescription(node.predicate, olliSpec.fields);
         }
@@ -206,42 +211,43 @@ export function nodeToDescription(
     }
   }
 
-  function size(node: ElaboratedOlliNode): string {
+  function size(node: ElaboratedOlliNode): string[] {
     switch (node.nodeType) {
       case 'root':
         if ('groupby' in node) {
-          return `with ${node.children.length} views for ${node.groupby}`;
+          return [`with ${node.children.length} views for ${node.groupby}`, 
+            `with ${node.children.length} views for ${node.groupby}`];
         }
         if ((olliSpec.mark && olliSpec.axes?.length) || olliSpec.mark) {
-          return '';
+          return ['', ''];
         }
-        return `with ${olliSpec.fields.length} fields`;
+        return [`with ${olliSpec.fields.length} fields`, `with ${olliSpec.fields.length} fields`];
       case 'filteredData':
         if ('predicate' in node) {
           const selection = selectionTest(dataset, node.fullPredicate);
-          return `${pluralize(selection.length, 'value')}`;
+          return [`${pluralize(selection.length, 'value')}`, `${pluralize(selection.length, 'value')}`];
         }
-        return '';
+        return ['', ''];
       case 'annotations':
-        return `${node.children.length} annotations`;
+        return [`${node.children.length} annotations`, `${node.children.length} annotations`];
       case 'other':
         if ('groupby' in node) {
-          return `${node.children.length} groups`;
+          return [`${node.children.length} groups`, `${node.children.length} groups`];
         } else if ('predicate' in node) {
           const selection = selectionTest(dataset, node.fullPredicate);
-          return `${pluralize(selection.length, 'value')}`;
+          return [`${pluralize(selection.length, 'value')}`, `${pluralize(selection.length, 'value')}`];
         }
-        return '';
+        return ['', ''];
       default:
         throw `Node type ${node.nodeType} does not have the 'size' token.`;
     }
   }
 
-  function level(node: ElaboratedOlliNode): string {
-    return `level ${node.level}`;
+  function level(node: ElaboratedOlliNode): string[] {
+    return [`level ${node.level}`, `level ${node.level}`];
   }
 
-  function parent(node: ElaboratedOlliNode): string {
+  function parent(node: ElaboratedOlliNode): string[] {
     switch (node.nodeType) {
       case 'xAxis':
       case 'yAxis':
@@ -252,15 +258,15 @@ export function nodeToDescription(
           view = view.parent;
         }
         if ('predicate' in view && 'equal' in view.predicate) {
-          return `${view.predicate.equal}`;
+          return [`${view.predicate.equal}`, `${view.predicate.equal}`];
         }
-        return '';
+        return ['', ''];
       default:
         throw `Node type ${node.nodeType} does not have the 'parent' token.`;
     }
   }
 
-  function aggregate(node: ElaboratedOlliNode): string {
+  function aggregate(node: ElaboratedOlliNode): string[] {
     let axisType: string;
     switch (node.nodeType) {
       case 'xAxis':
@@ -271,46 +277,48 @@ export function nodeToDescription(
         if (!axisType) axisType = node.parent.nodeType === 'xAxis' ? 'x' : 'y';
 
         const otherAxis = olliSpec.axes?.find((axis) => axis.axisType !== axisType);
-        if (!otherAxis) return '';
+        if (!otherAxis) return ['', ''];
         const otherAxisFieldDef = getFieldDef(otherAxis.field, olliSpec.fields);
         if (otherAxisFieldDef.type !== 'quantitative') {
-          return '';
+          return ['', ''];
         }
         const label = otherAxisFieldDef.label || otherAxisFieldDef.field;
         const field = otherAxisFieldDef.field;
 
         const selection = selectionTest(dataset, node.fullPredicate);
         if (selection.length === 0) {
-          return '';
+          return ['', ''];
         }
         if (selection.length === 1) {
-          return `the ${label} value is ${fmtValue(selection[0][field], otherAxisFieldDef)}`;
+          return [`the ${label} value is ${fmtValue(selection[0][field], otherAxisFieldDef)}`];
         }
         const average = averageValue(selection, field);
         const maximum = selection.reduce((a, b) => Math.max(a, Number(b[field])), Number(selection[0][field]));
         const minimum = selection.reduce((a, b) => Math.min(a, Number(b[field])), Number(selection[0][field]));
-        return `the average value for the ${label} field is ${fmtValue(
+        return [`average ${fmtValue(average, otherAxisFieldDef)}, maximum ${fmtValue(
+          maximum, otherAxisFieldDef)}, minimum ${fmtValue(minimum, otherAxisFieldDef)}`,
+          `the average value for the ${label} field is ${fmtValue(
           average,
           otherAxisFieldDef
         )}, the maximum is ${fmtValue(maximum, otherAxisFieldDef)}, and the minimum is ${fmtValue(
           minimum,
           otherAxisFieldDef
-        )}`;
+        )}`];
 
       default:
         throw `Node type ${node.nodeType} does not have the 'aggregate' token.`;
     }
   }
 
-  function quartile(node: ElaboratedOlliNode): string {
+  function quartile(node: ElaboratedOlliNode): string[] {
     switch (node.nodeType) {
       case 'filteredData':
         const axisType = node.parent.nodeType === 'xAxis' ? 'x' : 'y';
         const otherAxis = olliSpec.axes?.find((axis) => axis.axisType !== axisType);
-        if (!otherAxis) return '';
+        if (!otherAxis) return ['', ''];
         const otherAxisFieldDef = getFieldDef(otherAxis.field, olliSpec.fields);
         if (otherAxisFieldDef.type !== 'quantitative') {
-          return '';
+          return ['', ''];
         }
         const label = otherAxisFieldDef.label || otherAxisFieldDef.field;
         const field = otherAxisFieldDef.field;
@@ -332,23 +340,24 @@ export function nodeToDescription(
         const thisAvg = selection.length == 0 ? 0 : averageValue(selection, field);
         const sectionsPos = avgs.indexOf(Number(thisAvg)) / avgs.length;
         const sectionsQuart = Math.max(1, Math.ceil(sectionsPos * 4)); // pos is btwn 0 and 1, no quartile 0
-        return `this section's average ${label} is in the ${ordinal_suffix_of(
-          sectionsQuart
-        )} quartile  of all sections`;
+        return [`${ordinal_suffix_of(sectionsQuart)} quartile`, 
+          `this section's average ${label} is in the ${ordinal_suffix_of(
+            sectionsQuart
+          )} quartile  of all sections`];
       default:
         throw `Node type ${node.nodeType} does not have the 'quartile' token.`;
     }
   }
 
-  function instructions(node: ElaboratedOlliNode): string {
+  function instructions(node: ElaboratedOlliNode): string[] {
     switch (node.nodeType) {
       case 'filteredData':
       case 'other':
         if ('predicate' in node) {
           const selection = selectionTest(dataset, node.fullPredicate);
-          return selection.length ? 'press t to open table' : '';
+          return selection.length ? ['t opens table', 'press t to open table'] : ['', ''];
         }
-        return '';
+        return ['', ''];
       default:
         throw `Node type ${node.nodeType} does not have the 'instructions' token.`;
     }
@@ -379,7 +388,7 @@ export function nodeToDescription(
     ['instructions', instructions],
   ]);
 
-  const resultDescription = new Map<string, string>();
+  const resultDescription = new Map<string, string[]>();
   const tokens = nodeTypeToTokens.get(node.nodeType);
   if (tokens !== undefined) {
     for (const token of tokens) {

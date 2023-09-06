@@ -1,4 +1,7 @@
-import { CustomizeSetting } from './Types';
+import { CustomizeSetting, tokenLength } from './Types';
+
+const Short = tokenLength.Short
+const Long = tokenLength.Long
 
 // Note: when putting a number before a quotation mark, add a space or else VoiceOver will read 
 // the quotation mark as feet/inches
@@ -16,16 +19,16 @@ export const tokenDescs = {
   'instructions': 'Instructions for accessing data table',
 }
 
-export let defaultSetting: CustomizeSetting = {
-  'name': true,
-  'index': true,
-  'type': true,
-  'children': true,
-  'data': true,
-  'size': true,
-  'level': true,
-  'parent': true,
-  'quartile': true,
-  'aggregate': true,
-  'instructions': true,
-}
+export let defaultSetting: CustomizeSetting = [
+  ['name', Long],
+  ['index', Long],
+  ['type', Long],
+  ['children', Long],
+  ['data', Long],
+  ['size', Long],
+  ['level', Long],
+  ['parent', Long],
+  ['quartile', Long],
+  ['aggregate', Long],
+  ['instructions', Long],
+]

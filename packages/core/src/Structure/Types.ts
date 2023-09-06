@@ -32,7 +32,7 @@ export interface ElaboratedOlliNode {
   children: ElaboratedOlliNode[];
   groupby?: string;
   predicate?: FieldPredicate;
-  description: Map<string, string>;
+  description: Map<string, string[]>;
   level: number;
 }
 
