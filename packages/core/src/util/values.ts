@@ -5,6 +5,8 @@ import { OlliFieldDef, OlliTimeUnit, OlliValue } from '../Types';
 export const fmtValue = (value: OlliValue, fieldDef: OlliFieldDef): string => {
   if (fieldDef.type === 'temporal' && !(value instanceof Date)) {
     value = new Date(value);
+  } else if (fieldDef.type === 'quantitative' && isNumeric(String(value))) {
+    value = Number(String(value));
   }
   if (value instanceof Date) {
     return dateToTimeUnit(value, fieldDef.timeUnit);

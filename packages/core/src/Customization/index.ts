@@ -69,7 +69,7 @@ export function nodeToDescription(
         return '';
       case 'view':
         if ('predicate' in node && 'equal' in node.predicate) {
-          return `titled ${node.predicate.equal}`;
+          return `titled ${fmtValue(node.predicate.equal as any, getFieldDef(node.predicate.field, olliSpec.fields))}`;
         }
         return '';
       case 'xAxis':
