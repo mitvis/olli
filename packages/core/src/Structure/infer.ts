@@ -27,7 +27,6 @@ export function inferStructure(olliSpec: UnitOlliSpec): OlliNode | OlliNode[] {
       );
     });
     if (otherFields.length) {
-      console.log(otherFields);
       nodes = nodes.concat(
         otherFields.map((field) => {
           return { groupby: field.field, children: [] };
