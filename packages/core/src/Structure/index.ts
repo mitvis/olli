@@ -47,6 +47,10 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
     if (legend) {
       return 'legend';
     }
+    const guide = olliSpec.guides?.find((g) => g.field === field);
+    if (guide) {
+      return 'guide';
+    }
     return 'other';
   }
 

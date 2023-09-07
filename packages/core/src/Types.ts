@@ -51,6 +51,7 @@ export type OlliSpec = UnitOlliSpec | MultiOlliSpec;
 export type OlliGuide = {
   field: string;
   title?: string; // optional human-readable title used for description
+  channel?: string;
 };
 
 /**

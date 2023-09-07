@@ -20,7 +20,16 @@ export interface OlliAnnotationNode {
 
 export type OlliNode = OlliGroupNode | OlliPredicateNode | OlliAnnotationNode;
 
-export type OlliNodeType = 'root' | 'view' | 'xAxis' | 'yAxis' | 'legend' | 'filteredData' | 'annotations' | 'other';
+export type OlliNodeType =
+  | 'root'
+  | 'view'
+  | 'xAxis'
+  | 'yAxis'
+  | 'legend'
+  | 'guide'
+  | 'filteredData'
+  | 'annotations'
+  | 'other';
 
 export interface ElaboratedOlliNode {
   id: string;

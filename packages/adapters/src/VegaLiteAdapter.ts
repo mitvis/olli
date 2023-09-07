@@ -136,6 +136,7 @@ function adaptUnitSpec(scene: SceneGroup, spec: TopLevelUnitSpec<any>, data: Oll
         olliSpec.guides.push({
           field: fieldDef.field,
           title: encoding.title,
+          channel: channel,
         });
       } else {
         // TODO: handle other channels

@@ -75,11 +75,22 @@ export function nodeToDescription(
       case 'xAxis':
       case 'yAxis':
       case 'legend':
-        const guideType = node.nodeType === 'xAxis' ? 'x-axis' : node.nodeType === 'yAxis' ? 'y-axis' : 'legend';
+      case 'guide':
         const fieldDef = getFieldDef(node.groupby, olliSpec.fields);
         const guide =
           olliSpec.axes?.find((axis) => axis.field === node.groupby) ||
-          olliSpec.legends?.find((legend) => legend.field === node.groupby);
+          olliSpec.legends?.find((legend) => legend.field === node.groupby) ||
+          olliSpec.guides?.find((guide) => guide.field === node.groupby);
+        const guideType =
+          node.nodeType === 'xAxis'
+            ? 'x-axis'
+            : node.nodeType === 'yAxis'
+            ? 'y-axis'
+            : node.nodeType === 'legend'
+            ? 'legend'
+            : guide.channel
+            ? guide.channel
+            : 'guide';
         const label = guide.title || fieldDef.label || fieldDef.field;
         return `${guideType} titled ${label}`;
       default:
@@ -123,13 +134,20 @@ export function nodeToDescription(
       case 'xAxis':
       case 'yAxis':
       case 'legend':
+      case 'guide':
         if ('groupby' in node) {
           const fieldDef = getFieldDef(node.groupby, olliSpec.fields);
           if (fieldDef.type === 'quantitative' || fieldDef.type === 'temporal') {
             const guide =
               olliSpec.axes?.find((axis) => axis.field === node.groupby) ||
-              olliSpec.legends?.find((legend) => legend.field === node.groupby);
-            const bins = getBins(node.groupby, dataset, olliSpec.fields, 'ticks' in guide ? guide.ticks : undefined);
+              olliSpec.legends?.find((legend) => legend.field === node.groupby) ||
+              olliSpec.guides?.find((guide) => guide.field === node.groupby);
+            const bins = getBins(
+              node.groupby,
+              dataset,
+              olliSpec.fields,
+              'ticks' in guide && Array.isArray(guide.ticks) ? guide.ticks : undefined
+            );
             if (bins.length) {
               return `for a ${'scaleType' in guide ? guide.scaleType || fieldDef.type : fieldDef.type} scale`;
             }
@@ -169,6 +187,7 @@ export function nodeToDescription(
       case 'xAxis':
       case 'yAxis':
       case 'legend':
+      case 'guide':
         if ('groupby' in node) {
           const fieldDef = getFieldDef(node.groupby, olliSpec.fields);
           let first, last;
@@ -246,6 +265,7 @@ export function nodeToDescription(
       case 'xAxis':
       case 'yAxis':
       case 'legend':
+      case 'guide':
       case 'filteredData':
         let view = node;
         while (view.parent && view.nodeType != 'view') {
@@ -360,6 +380,7 @@ export function nodeToDescription(
     ['xAxis', ['name', 'type', 'data', 'parent', 'aggregate', 'level']],
     ['yAxis', ['name', 'type', 'data', 'parent', 'aggregate', 'level']],
     ['legend', ['name', 'type', 'data', 'parent', 'aggregate', 'level']],
+    ['guide', ['name', 'type', 'data', 'parent', 'level']],
     ['filteredData', ['index', 'data', 'size', 'parent', 'aggregate', 'quartile', 'level', 'instructions']],
     ['annotations', ['size', 'level']],
     ['other', ['index', 'data', 'size', 'level', 'instructions']],
