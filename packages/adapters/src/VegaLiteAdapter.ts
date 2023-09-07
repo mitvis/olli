@@ -53,7 +53,7 @@ const getLabelFromEncoding = (encoding) => {
   }
   return `${encoding.bin ? 'binned ' : ''}${'aggregate' in encoding ? `${encoding.aggregate} ` : ''}${
     'condition' in encoding ? encoding.condition.field : encoding.field
-  }${'timeUnit' in encoding ? ` (${encoding.timeUnit})` : ''}`;
+  }${'timeUnit' in encoding && !(encoding.timeUnit === encoding.field.toLowerCase()) ? ` (${encoding.timeUnit})` : ''}`;
 };
 
 const typeCoerceData = (olliSpec: UnitOlliSpec) => {

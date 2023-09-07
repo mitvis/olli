@@ -290,32 +290,35 @@ export function nodeToDescription(
       case 'filteredData':
         if (!axisType) axisType = node.parent.nodeType === 'xAxis' ? 'x' : 'y';
 
-        const otherAxis = olliSpec.axes?.find((axis) => axis.axisType !== axisType);
-        if (!otherAxis) return '';
-        const otherAxisFieldDef = getFieldDef(otherAxis.field, olliSpec.fields);
-        if (otherAxisFieldDef.type !== 'quantitative') {
-          return '';
+        // TODO this should use key semantics
+        let fieldDef = getFieldDef(node.groupby, olliSpec.fields);
+        if (fieldDef.type !== 'quantitative') {
+          const otherAxis = olliSpec.axes?.find((axis) => axis.axisType !== axisType);
+          if (!otherAxis) return '';
+          const otherAxisFieldDef = getFieldDef(otherAxis.field, olliSpec.fields);
+          if (otherAxisFieldDef.type !== 'quantitative') {
+            return '';
+          }
+          fieldDef = otherAxisFieldDef;
         }
-        const label = otherAxisFieldDef.label || otherAxisFieldDef.field;
-        const field = otherAxisFieldDef.field;
+
+        const label = fieldDef.label || fieldDef.field;
+        const field = fieldDef.field;
 
         const selection = selectionTest(dataset, node.fullPredicate);
         if (selection.length === 0) {
           return '';
         }
         if (selection.length === 1) {
-          return `the ${label} value is ${fmtValue(selection[0][field], otherAxisFieldDef)}`;
+          return `the ${label} value is ${fmtValue(selection[0][field], fieldDef)}`;
         }
         const average = averageValue(selection, field);
         const maximum = selection.reduce((a, b) => Math.max(a, Number(b[field])), Number(selection[0][field]));
         const minimum = selection.reduce((a, b) => Math.min(a, Number(b[field])), Number(selection[0][field]));
-        return `the average value for the ${label} field is ${fmtValue(
-          average,
-          otherAxisFieldDef
-        )}, the maximum is ${fmtValue(maximum, otherAxisFieldDef)}, and the minimum is ${fmtValue(
-          minimum,
-          otherAxisFieldDef
-        )}`;
+        return `the average value for the ${label} field is ${fmtValue(average, fieldDef)}, the maximum is ${fmtValue(
+          maximum,
+          fieldDef
+        )}, and the minimum is ${fmtValue(minimum, fieldDef)}`;
 
       default:
         throw `Node type ${node.nodeType} does not have the 'aggregate' token.`;
