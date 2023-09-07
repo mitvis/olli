@@ -75,6 +75,7 @@ function adaptUnitSpec(scene: SceneGroup, spec: TopLevelUnitSpec<any>, data: Oll
     fields: [],
     axes: [],
     legends: [],
+    guides: [],
   };
 
   const getMark = (spec: any) => {
@@ -128,6 +129,11 @@ function adaptUnitSpec(scene: SceneGroup, spec: TopLevelUnitSpec<any>, data: Oll
         // add legends
         olliSpec.legends.push({
           channel: channel as any,
+          field: fieldDef.field,
+          title: encoding.title,
+        });
+      } else if (channel === 'order') {
+        olliSpec.guides.push({
           field: fieldDef.field,
           title: encoding.title,
         });

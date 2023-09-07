@@ -1,9 +1,9 @@
-import { OlliAxis, OlliLegend, UnitOlliSpec } from '../Types';
+import { OlliAxis, OlliGuide, OlliLegend, UnitOlliSpec } from '../Types';
 import { getFieldDef } from '../util/data';
 import { OlliNode } from './Types';
 
 export function inferStructure(olliSpec: UnitOlliSpec): OlliNode | OlliNode[] {
-  function nodesFromGuides(axes: OlliAxis[], legends: OlliLegend[]): OlliNode[] {
+  function nodesFromGuides(axes: OlliAxis[], legends: OlliLegend[], guides?: OlliGuide[]): OlliNode[] {
     let nodes: OlliNode[] = [];
     if (axes) {
       nodes = nodes.concat(
@@ -16,6 +16,13 @@ export function inferStructure(olliSpec: UnitOlliSpec): OlliNode | OlliNode[] {
       nodes = nodes.concat(
         legends.map((legend) => {
           return { groupby: legend.field, children: [] };
+        })
+      );
+    }
+    if (guides) {
+      nodes = nodes.concat(
+        guides.map((guide) => {
+          return { groupby: guide.field, children: [] };
         })
       );
     }
@@ -40,7 +47,7 @@ export function inferStructure(olliSpec: UnitOlliSpec): OlliNode | OlliNode[] {
     if (olliSpec.axes?.length || olliSpec.legends?.length) {
       return {
         groupby: olliSpec.facet,
-        children: nodesFromGuides(olliSpec.axes, olliSpec.legends),
+        children: nodesFromGuides(olliSpec.axes, olliSpec.legends, olliSpec.guides),
       };
     } else {
       return {
@@ -62,7 +69,8 @@ export function inferStructure(olliSpec: UnitOlliSpec): OlliNode | OlliNode[] {
         groupby: colorLegend.field,
         children: nodesFromGuides(
           olliSpec.axes,
-          olliSpec.legends.filter((legend) => legend !== colorLegend)
+          olliSpec.legends.filter((legend) => legend !== colorLegend),
+          olliSpec.guides
         ),
       };
     }

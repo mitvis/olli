@@ -26,6 +26,7 @@ export interface UnitOlliSpec {
   mark?: OlliMark;
   axes?: OlliAxis[];
   legends?: OlliLegend[];
+  guides?: OlliGuide[]; // generic guides that aren't axes / legends (e.g. order)
   facet?: string;
   // an optional initial top level selection query
   selection?: LogicalAnd<FieldPredicate> | FieldPredicate;
@@ -47,24 +48,24 @@ export const isMultiOlliSpec = (spec: OlliSpec): spec is MultiOlliSpec => {
 
 export type OlliSpec = UnitOlliSpec | MultiOlliSpec;
 
-type Guide = {
+export type OlliGuide = {
   field: string;
   title?: string; // optional human-readable title used for description
 };
 
 /**
- * Extending the {@link Guide} interface for visualization axes
+ * Extending the {@link OlliGuide} interface for visualization axes
  */
-export interface OlliAxis extends Guide {
+export interface OlliAxis extends OlliGuide {
   axisType: 'x' | 'y';
   scaleType?: string; // e.g. linear, logarithmic, band
   ticks?: OlliValue[]; // axis tick values to use as bins
 }
 
 /**
- * Extending the {@link Guide} interface for visualization legends
+ * Extending the {@link OlliGuide} interface for visualization legends
  */
-export interface OlliLegend extends Guide {
+export interface OlliLegend extends OlliGuide {
   channel: 'color' | 'opacity' | 'size';
 }
 
