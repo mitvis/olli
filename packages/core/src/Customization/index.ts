@@ -272,7 +272,7 @@ export function nodeToDescription(
           view = view.parent;
         }
         if ('predicate' in view && 'equal' in view.predicate) {
-          return `${view.predicate.equal}`;
+          return `${fmtValue(view.predicate.equal as any, getFieldDef(view.predicate.field, olliSpec.fields))}`;
         }
         return '';
       default:
