@@ -174,9 +174,9 @@ export function postProcessTree(tree: ElaboratedOlliNode, olliSpec: OlliSpec) {
         ? {
             data: olliSpec.units.flatMap((s) => s.data),
             selection: null,
-            fields: olliSpec.units.flatMap((s) => s.fields),
-            axes: olliSpec.units.flatMap((s) => s.axes),
-            legends: olliSpec.units.flatMap((s) => s.legends),
+            fields: olliSpec.units.flatMap((s) => s.fields).filter((f) => f !== undefined),
+            axes: olliSpec.units.flatMap((s) => s.axes).filter((f) => f !== undefined),
+            legends: olliSpec.units.flatMap((s) => s.legends).filter((f) => f !== undefined),
           }
         : olliSpec);
     const data = spec.selection ? selectionTest(spec.data, spec.selection) : spec.data;

@@ -170,33 +170,33 @@ async function adaptMultiSpec(
     };
   });
 
-  await Promise.all(
-    spec[vlOp].map(async (view) => {
-      if ('mark' in view) {
-        // unit view
-        const viewSpec = {
-          data: view.data || spec.data,
-          mark: view.mark,
-          encoding: view.encoding,
-        };
-        const dataset = data.find((d) => {
-          const fields = Object.keys(d[0]);
-          const viewFields = Object.values(viewSpec.encoding)
-            .map((f) => getFieldFromEncoding(f, d))
-            .filter((f) => f);
-          return viewFields.every((f) => fields.includes(f));
-        });
-        const viewOlliSpec = adaptUnitSpec(scene, viewSpec, dataset);
-        const unitSpec = units.find((s) => Object.keys(s.data[0]).every((k) => dataset[0][k]));
-        unitSpec?.fields.push(...viewOlliSpec.fields);
-        unitSpec?.axes.push(...viewOlliSpec.axes);
-        unitSpec?.legends.push(...viewOlliSpec.legends);
+  spec[vlOp].map((view) => {
+    if ('mark' in view) {
+      // unit view
+      const viewSpec = {
+        data: view.data || spec.data,
+        mark: view.mark,
+        encoding: view.encoding,
+      };
+      const dataset = data.find((d) => {
+        const fields = Object.keys(d[0]);
+        const viewFields = Object.values(viewSpec.encoding)
+          .map((f) => getFieldFromEncoding(f, d))
+          .filter((f) => f);
+        return viewFields.every((f) => fields.includes(f));
+      });
+      const viewOlliSpec = adaptUnitSpec(scene, viewSpec, dataset);
+      const unitSpec = units.find((s) => Object.keys(s.data[0]).every((k) => k in dataset[0]));
+      if (unitSpec) {
+        unitSpec.fields.push(...viewOlliSpec.fields);
+        unitSpec.axes.push(...viewOlliSpec.axes);
+        unitSpec.legends.push(...viewOlliSpec.legends);
         unitSpec.mark = viewOlliSpec.mark;
-      } else {
-        // TODO: nested layer/concat
       }
-    })
-  );
+    } else {
+      // TODO: nested layer/concat
+    }
+  });
 
   units.forEach((s) => {
     s.fields = s.fields.filter((f, i, self) => self.findIndex((f2) => f2.field === f.field) === i);
