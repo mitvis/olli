@@ -292,7 +292,7 @@ export function nodeToDescription(
 
         // TODO this should use key semantics
         let fieldDef = getFieldDef(node.groupby, olliSpec.fields);
-        if (fieldDef.type !== 'quantitative') {
+        if (!fieldDef || fieldDef.type !== 'quantitative') {
           const otherAxis = olliSpec.axes?.find((axis) => axis.axisType !== axisType);
           if (!otherAxis) return '';
           const otherAxisFieldDef = getFieldDef(otherAxis.field, olliSpec.fields);
