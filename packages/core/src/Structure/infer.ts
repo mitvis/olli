@@ -40,7 +40,12 @@ export function inferStructure(olliSpec: UnitOlliSpec): OlliNode | OlliNode[] {
     //     })
     //   );
     // }
-    return nodes;
+    return nodes.filter((node, index, arr) => {
+      if ('groupby' in node) {
+        return arr.findIndex((n) => 'groupby' in n && n.groupby === node.groupby) === index;
+      }
+      return true;
+    });
   }
 
   if (olliSpec.facet) {
