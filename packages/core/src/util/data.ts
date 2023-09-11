@@ -41,7 +41,17 @@ export function getDomain(
         }
       });
   }
-  return [...unique_vals].filter((x) => x !== null && x !== undefined).sort((a: any, b: any) => a - b);
+  return [...unique_vals]
+    .filter((x) => x !== null && x !== undefined)
+    .sort((a: any, b: any) => {
+      if (a instanceof Date && b instanceof Date) {
+        return a.getTime() - b.getTime();
+      }
+      if (typeof a === 'string' && typeof b === 'string') {
+        return a.localeCompare(b);
+      }
+      return a - b;
+    });
 }
 
 export function getFieldDef(field: string, fields: OlliFieldDef[]): OlliFieldDef {
