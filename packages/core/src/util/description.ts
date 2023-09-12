@@ -25,11 +25,21 @@ export function getChartType(olliSpec: UnitOlliSpec) {
         return 'dotplot';
       }
     }
+    if (olliSpec.mark === 'line') {
+      if (olliSpec.axes?.length === 2 && olliSpec.guides?.length === 1) {
+        if (
+          olliSpec.axes.every((a) => getFieldDef(a.field, olliSpec.fields).type === 'quantitative') &&
+          olliSpec.guides[0].channel === 'order'
+        ) {
+          return 'connected scatterplot';
+        }
+      }
+    }
     return `${olliSpec.mark} chart`;
   } else {
     return 'dataset';
   }
-};
+}
 export const chartTypePrefix = (node: ElaboratedOlliNode, olliSpec: UnitOlliSpec): string => {
   if (node && 'groupby' in node && node.nodeType === 'root') {
     if (olliSpec.mark === 'line') {
@@ -41,20 +51,21 @@ export const chartTypePrefix = (node: ElaboratedOlliNode, olliSpec: UnitOlliSpec
   return '';
 };
 export const pluralize = (count: number, noun: string, suffix = 's') => `${count} ${noun}${count !== 1 ? suffix : ''}`;
-export const averageValue = (selection: OlliDataset, field: string) => Math.round(selection.reduce((a, b) => a + Number(b[field]), 0)
-/selection.length);
+export const averageValue = (selection: OlliDataset, field: string) =>
+  Math.round(selection.reduce((a, b) => a + Number(b[field]), 0) / selection.length);
 
-export function ordinal_suffix_of(i: number) { // st, nd, rd, th
+export function ordinal_suffix_of(i: number) {
+  // st, nd, rd, th
   var j = i % 10,
-      k = i % 100;
+    k = i % 100;
   if (j == 1 && k != 11) {
-      return i + "st";
+    return i + 'st';
   }
   if (j == 2 && k != 12) {
-      return i + "nd";
+    return i + 'nd';
   }
   if (j == 3 && k != 13) {
-      return i + "rd";
+    return i + 'rd';
   }
-  return i + "th";
+  return i + 'th';
 }
