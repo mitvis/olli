@@ -38,6 +38,8 @@ export function getBins(
     }
   }
 
+  ticks = ticks.filter((t) => t >= domain[0] && t <= domain[domain.length - 1]);
+
   if (domain[0] < ticks[0]) {
     // if domain is smaller than first bin, add a bin
     bins.push([domain[0], ticks[0]]);
