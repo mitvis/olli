@@ -7,6 +7,8 @@ import { OlliRuntime } from '../../Runtime/OlliRuntime';
 import './dialog.css';
 import { makeSelectionMenu } from './selectionMenu';
 import { makeTargetedNavMenu } from './targetedNavMenu';
+import { renderHelpDialog } from '../Help';
+import { getOlliGlobalState } from '../../util/globalState';
 import { getSpecForNode } from '../../Structure';
 
 export function makeDialog(
@@ -93,6 +95,14 @@ function openDialog(dialog: HTMLElement, renderContainer: HTMLElement) {
   window.requestAnimationFrame(() => {
     dialog.querySelector('button').focus();
   });
+}
+
+export function openHelpDialog(tree: OlliRuntime) {
+  const { keyboardManager } = getOlliGlobalState();
+  const table = renderHelpDialog(keyboardManager);
+  const dialog = makeDialog(tree, 'Olli Help Menu', 'Below are the controls to navigate the Olli tree.', table);
+
+  openDialog(dialog, tree.renderContainer)
 }
 
 export function openTableDialog(olliNode: ElaboratedOlliNode, tree: OlliRuntime) {

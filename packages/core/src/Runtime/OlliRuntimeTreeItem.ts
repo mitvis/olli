@@ -10,6 +10,8 @@
 
 import { openSelectionDialog, openTableDialog, openTargetedNavigationDialog } from '../Render/Dialog';
 import { ElaboratedOlliNode } from '../Structure/Types';
+import { getOlliGlobalState } from '../util/globalState';
+import { KeyboardManager } from './KeyboardManager';
 import { OlliRuntime } from './OlliRuntime';
 
 /*
@@ -29,6 +31,7 @@ export class OlliRuntimeTreeItem {
   olliNode: ElaboratedOlliNode;
   isExpandable: boolean;
   inGroup: boolean;
+  keyboardManager: KeyboardManager;
 
   parent?: OlliRuntimeTreeItem;
   children: OlliRuntimeTreeItem[];
@@ -65,7 +68,7 @@ export class OlliRuntimeTreeItem {
   init() {
     this.domNode.tabIndex = -1;
 
-    this.domNode.addEventListener('keydown', this.handleKeydown.bind(this));
+    this.domNode.addEventListener('keydown', this.handleKeydown.bind(this))
     this.domNode.addEventListener('click', this.handleClick.bind(this));
     this.domNode.addEventListener('focus', this.handleFocus.bind(this));
     this.domNode.addEventListener('blur', this.handleBlur.bind(this));
@@ -83,92 +86,14 @@ export class OlliRuntimeTreeItem {
     return false;
   }
 
-  /* EVENT HANDLERS */
+  // /* EVENT HANDLERS */
   handleKeydown(event: KeyboardEvent) {
+    const { keyboardManager } = getOlliGlobalState();
     if (event.altKey || event.ctrlKey || event.metaKey) {
       return;
     }
 
-    this.checkBaseKeys(event);
-  }
-
-  checkBaseKeys(event: KeyboardEvent) {
-    switch (event.key) {
-      case 'Enter':
-      case ' ':
-        if (this.isExpandable) {
-          if (this.isExpanded()) {
-            this.tree.collapseTreeItem(this);
-          } else {
-            this.tree.expandTreeItem(this);
-          }
-        }
-        break;
-      case 'ArrowDown':
-        if (this.children.length > 0 && this.isExpandable) {
-          this.tree.setFocusToNextLayer(this);
-        }
-        break;
-      case 'Escape':
-      case 'ArrowUp':
-        if (this.inGroup) {
-          this.tree.setFocusToParentItem(this);
-        }
-        break;
-      case 'ArrowLeft':
-        if (event.shiftKey) {
-          if (this.tree.isLateralPossible()) {
-            this.tree.setFocusToLateralItem(this, 'left');
-          }
-        } else {
-        this.tree.setFocusToPreviousItem(this);
-        }
-        break;
-      case 'ArrowRight':
-        if (event.shiftKey) {
-          if (this.tree.isLateralPossible()) {
-            this.tree.setFocusToLateralItem(this, 'right');
-          }
-        } else {
-        this.tree.setFocusToNextItem(this);
-        }
-        break;
-      case 'Home':
-        if (this.parent) {
-          this.tree.setFocusToFirstInLayer(this);
-        }
-        break;
-
-      case 'End':
-        if (this.parent) {
-          this.tree.setFocusToLastInLayer(this);
-        }
-        break;
-      case 'x':
-        this.tree.focusOnNodeType('xAxis', this);
-        break;
-      case 'y':
-        this.tree.focusOnNodeType('yAxis', this);
-        break;
-      case 'l':
-        this.tree.focusOnNodeType('legend', this);
-        break;
-      case 't':
-        if ('predicate' in this.olliNode || this.olliNode.nodeType === 'root') {
-          openTableDialog(this.olliNode, this.tree);
-        }
-        break;
-      case 'f':
-        openSelectionDialog(this.olliNode, this.tree);
-        break;
-      case 'r':
-        openTargetedNavigationDialog(this.tree);
-        break;
-      default:
-        // return to avoid preventing default event action
-        return;
-    }
-
+    keyboardManager.handleEvents(event, this);
     event.stopPropagation();
     event.preventDefault();
   }

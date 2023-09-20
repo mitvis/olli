@@ -1,3 +1,4 @@
+import { KeyboardManager, initKeyboardManager } from '../Runtime/KeyboardManager';
 import { OlliRuntime } from '../Runtime/OlliRuntime';
 import { nodeIsTextInput } from './events';
 
@@ -5,6 +6,7 @@ export interface OlliGlobalState {
   keyListenerAttached: boolean;
   lastVisitedInstance: OlliRuntime;
   instancesOnPage: OlliRuntime[];
+  keyboardManager: KeyboardManager;
 }
 
 export const getOlliGlobalState = (): OlliGlobalState => {
@@ -76,6 +78,6 @@ export const updateGlobalStateOnInitialRender = (t: OlliRuntime) => {
         }
       }
     });
-    setOlliGlobalState({ keyListenerAttached: true });
+    setOlliGlobalState({ keyListenerAttached: true, keyboardManager: initKeyboardManager(t) });
   }
 };
