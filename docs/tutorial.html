@@ -15,15 +15,16 @@ title: "Tutorial"
         The top of each chart contains a description of the chart type and data fields.
         The next level contains descriptions of the chart encodings (e.g. axes, legends).
         After that, the data is broken down by category for discrete encodings, and interval for continuous encodings.
-        Finally, the bottom of the chart contains a data table with data filtered according to the user's position in the tree.
+        At any location in the tree, press 't' to open a table view of the data.
     </p>
 
     {% include exampleControls.html %}
 
+    <h3>Example</h3>
     <h4>Vega-Lite Visualization:</h4>
     <div id="Visualization"></div>
     <h4>Olli output:</h4>
-    <div id="AccessibilityTree"></div>
+    <div id="OlliOutput"></div>
     <script>
         let spec = {
             "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
@@ -60,7 +61,7 @@ title: "Tutorial"
             .run()
 
         OlliAdapters.VegaLiteAdapter(spec).then(olliVisSpec => {
-            document.getElementById("AccessibilityTree").append(olli(olliVisSpec))
+            document.getElementById("OlliOutput").append(olli(olliVisSpec))
         })
     </script>
 </div>

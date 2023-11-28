@@ -154,9 +154,7 @@ export class OlliRuntimeTreeItem {
         this.tree.focusOnNodeType('legend', this);
         break;
       case 't':
-        if ('predicate' in this.olliNode || this.olliNode.nodeType === 'root') {
-          openTableDialog(this.olliNode, this.tree);
-        }
+        openTableDialog(this.olliNode, this.tree);
         break;
       case 'f':
         openSelectionDialog(this.olliNode, this.tree);
