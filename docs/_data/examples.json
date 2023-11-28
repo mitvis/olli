@@ -247,13 +247,13 @@
       }
     ]
   },
-  "steamgraph": {
-    "title": "Steamgraph",
-    "url": "/gallery/steamgraph.html",
+  "streamgraph": {
+    "title": "Streamgraph",
+    "url": "/gallery/streamgraph.html",
     "adapters": [
       {
         "name": "Vega-Lite",
-        "code": "/examples/steamgraph-vl.html"
+        "code": "/examples/streamgraph-vl.html"
       }
     ]
   },

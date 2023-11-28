@@ -78,7 +78,7 @@ export class OlliRuntimeTreeItem {
 
   isExpanded() {
     if (this.isExpandable) {
-      return this.domNode.getAttribute('aria-expanded') === 'true';
+      return this.domNode.classList.contains('expanded');
     }
     return false;
   }
@@ -121,7 +121,7 @@ export class OlliRuntimeTreeItem {
             this.tree.setFocusToLateralItem(this, 'left');
           }
         } else {
-        this.tree.setFocusToPreviousItem(this);
+          this.tree.setFocusToPreviousItem(this);
         }
         break;
       case 'ArrowRight':
@@ -130,7 +130,7 @@ export class OlliRuntimeTreeItem {
             this.tree.setFocusToLateralItem(this, 'right');
           }
         } else {
-        this.tree.setFocusToNextItem(this);
+          this.tree.setFocusToNextItem(this);
         }
         break;
       case 'Home':

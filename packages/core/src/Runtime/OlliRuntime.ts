@@ -149,7 +149,6 @@ export class OlliRuntime {
         this.collapseChildren(ti);
         ti.domNode.tabIndex = 0;
         ti.domNode.focus();
-        ti.domNode.setAttribute('aria-selected', 'true');
         this.lastFocusedTreeItem = ti;
         if (this.callbacks.onFocus) {
           this.callbacks.onFocus(ti.domNode, ti.olliNode);
@@ -158,7 +157,6 @@ export class OlliRuntime {
       } else {
         this.collapseTreeItem(ti);
         ti.domNode.tabIndex = -1;
-        ti.domNode.setAttribute('aria-selected', 'false');
       }
     }
   }
@@ -256,17 +254,17 @@ export class OlliRuntime {
       if (currentItem.parent) {
         currentItem.parent.children.forEach((item) => {
           if (item !== currentItem) {
-            item.domNode.setAttribute('aria-expanded', 'false');
+            item.domNode.classList.remove('expanded');
           }
         });
       }
-      currentItem.domNode.setAttribute('aria-expanded', 'true');
+      currentItem.domNode.classList.add('expanded');
     }
   }
 
   collapseTreeItem(item: OlliRuntimeTreeItem): void {
     if (item && item.isExpanded()) {
-      item.domNode.setAttribute('aria-expanded', 'false');
+      item.domNode.classList.remove('expanded');
     }
   }
 

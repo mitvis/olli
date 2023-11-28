@@ -18,16 +18,28 @@ import { FieldPredicate } from 'vega-lite/src/predicate';
 import { LogicalComposition } from 'vega-lite/src/logical';
 import { CustomizeSetting } from './Types';
 import { defaultSetting } from './data';
+import Storage from 'versioned-storage';
 
-export function initSettings() {
-  const storedData = localStorage.getItem('settingsData');
-  if (!storedData) {
-    localStorage.setItem('settingsData', JSON.stringify(defaultSetting));
+export function getSettingsStorage(): Storage<CustomizeSetting> {
+  let settingsStorage: Storage<CustomizeSetting>;
+  const STORAGE_VERSION = 1;
+  try {
+    settingsStorage = new Storage<CustomizeSetting>('settingsData'); // Get the storage of existing version
+    switch ((settingsStorage as any).version) {
+      // add migrations here
+      default:
+        throw new Error('Incompatible legacy storage schema');
+    }
+  } catch (_error) {
+    settingsStorage = new Storage<CustomizeSetting>('settingsData', STORAGE_VERSION); // Start from scratch if not migratable
+    settingsStorage.write(defaultSetting);
   }
+  return settingsStorage;
 }
 
 export function getCustomizedDescription(node: ElaboratedOlliNode) {
-  const settings: CustomizeSetting = JSON.parse(localStorage.getItem('settingsData'));
+  const store = getSettingsStorage();
+  const settings: CustomizeSetting = store.read();
 
   return (
     Array.from(node.description)

@@ -20,7 +20,6 @@ export function renderTree(node: ElaboratedOlliNode): HTMLElement {
     item.setAttribute('aria-level', String(level));
     item.setAttribute('aria-setsize', String(setsize));
     item.setAttribute('aria-posinset', String(posinset));
-    item.setAttribute('aria-expanded', 'false');
     item.setAttribute('id', node.id);
 
     const label = document.createElement('span');

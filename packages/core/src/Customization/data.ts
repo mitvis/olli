@@ -25,7 +25,7 @@ export let defaultSetting: CustomizeSetting = {
   size: true,
   level: false,
   parent: true,
-  quartile: true,
+  quartile: false,
   aggregate: true,
   instructions: true,
 };

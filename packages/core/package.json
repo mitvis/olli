@@ -30,6 +30,7 @@
     "dayjs": "^1.11.7",
     "vega-lite": "^5.9.3",
     "vega-statistics": "^1.9.0",
+    "versioned-storage": "^2.0.49",
     "webpack": "^5.76.0"
   },
   "devDependencies": {

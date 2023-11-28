@@ -31,3 +31,7 @@
   max-height: 300px;
   overflow-y: auto;
 }
+
+.olli-hidden {
+  display: none;
+}
