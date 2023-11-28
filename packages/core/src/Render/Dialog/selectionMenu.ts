@@ -2,6 +2,7 @@ import { FieldPredicate } from 'vega-lite/src/predicate';
 import { UnitOlliSpec } from '../../Types';
 import { getDomain, getFieldDef } from '../../util/data';
 import { serializeValue } from '../../util/values';
+import { pluralize } from '../../util/description';
 
 // this would have been so much easier with some ui framework : \
 
@@ -35,10 +36,19 @@ export function makeSelectionMenu(olliSpec: UnitOlliSpec): HTMLElement {
   addButton.onclick = () => {
     predicateContainers.push(makePredicateContainer(menu, olliSpec, state, predicateContainers));
     container.replaceChildren(...predicateContainers);
+    if (predicateContainers.length > 0) {
+      const clearButton = menu.querySelector('.olli-clear-button');
+      clearButton.classList.remove('olli-hidden');
+      document.querySelector('.olli-status-text').innerHTML = pluralize(predicateContainers.length, 'condition');
+    }
   };
 
   const clearButton = document.createElement('button');
+  clearButton.classList.add('olli-clear-button');
   clearButton.innerText = 'Clear conditions';
+  if (predicateContainers.length === 0) {
+    clearButton.classList.add('olli-hidden');
+  }
   clearButton.onclick = () => {
     predicateContainers.forEach((predicateContainer) => {
       predicateContainer.remove();
@@ -47,9 +57,15 @@ export function makeSelectionMenu(olliSpec: UnitOlliSpec): HTMLElement {
     container.replaceChildren(...predicateContainers);
     state.splice(0, state.length);
     menu.setAttribute('data-state', JSON.stringify(state));
+    document.querySelector('.olli-status-text').innerHTML = pluralize(predicateContainers.length, 'condition');
   };
 
-  menu.replaceChildren(container, addButton, clearButton);
+  const statusText = document.createElement('div');
+  statusText.setAttribute('role', 'status');
+  statusText.classList.add('olli-status-text');
+  statusText.innerHTML = pluralize(predicateContainers.length, 'condition');
+
+  menu.replaceChildren(statusText, addButton, container, clearButton);
 
   menu.setAttribute('data-state', JSON.stringify(state));
 
@@ -219,6 +235,11 @@ function makePredicateContainer(menu: HTMLElement, olliSpec: UnitOlliSpec, state
     state.splice(index, 1);
     menu.setAttribute('data-state', JSON.stringify(state));
     predicateContainer.remove();
+    if (predicateContainers.length === 0) {
+      const clearButton = menu.querySelector('.olli-clear-button');
+      clearButton.classList.add('olli-hidden');
+    }
+    document.querySelector('.olli-status-text').innerHTML = pluralize(predicateContainers.length, 'condition');
   };
   predicateContainer.appendChild(removeButton);
 
