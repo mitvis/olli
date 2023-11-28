@@ -1,6 +1,6 @@
 {
   "name": "olli",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Olli is a library for converting web visualizations into accessible text structures for blind and low-vision screen reader users.",
   "main": "./dist/olli.js",
   "types": "../../dist/packages/core/src/index.d.ts",
@@ -11,6 +11,7 @@
     "prettier:check": "npx prettier --check .",
     "prettier:write": "npx prettier --write ."
   },
+  "files": ["dist"],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mitvis/olli.git"
