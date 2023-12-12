@@ -4,7 +4,7 @@
         {% unless example.development_only and jekyll.environment == "production" %}
             {% for prop in example %}
                 {% if prop.url and prop.title and prop.img %}
-                <a class="Gallery-Link" href="{{site.baseurl}}{{example.url}}">
+                <a class="Gallery-Link" href="{{site.baseurl}}{{prop.url}}">
                     <img class="Gallery-Image" alt="{{prop.title}}" src="{{site.baseurl}}{{prop.img}}" />
                 </a>
                 {% endif %}
