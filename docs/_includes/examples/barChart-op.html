@@ -2,14 +2,14 @@
 import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm";
 
 const data = [
-    { "a": "A", "b": 28 }, { "a": "B", "b": 55 }, { "a": "C", "b": 43 },
-    { "a": "D", "b": 91 }, { "a": "E", "b": 81 }, { "a": "F", "b": 53 },
-    { "a": "G", "b": 19 }, { "a": "H", "b": 87 }, { "a": "I", "b": 52 }
+    { "category": "A", "amount": 28 }, { "category": "B", "amount": 55 }, { "category": "C", "amount": 43 },
+    { "category": "D", "amount": 91 }, { "category": "E", "amount": 81 }, { "category": "F", "amount": 53 },
+    { "category": "G", "amount": 19 }, { "category": "H", "amount": 87 }, { "category": "I", "amount": 52 }
 ]
 
 let spec = {
     marks: [
-        Plot.barY(data, { x: "a", y: "b", fill: "steelblue" }),
+        Plot.barY(data, { x: "category", y: "amount", fill: "steelblue" }),
         Plot.ruleY([0])
     ]
 }
