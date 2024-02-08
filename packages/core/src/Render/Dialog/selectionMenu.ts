@@ -159,7 +159,7 @@ function makePredicateContainer(menu: HTMLElement, olliSpec: UnitOlliSpec, state
       const valueSelect = document.createElement('select');
       const valueOptions = domain.map((value) => {
         const option = document.createElement('option');
-        option.setAttribute('value', serializeValue(value, fieldDef));
+        option.setAttribute('value', String(value));
         option.innerText = String(value);
         return option;
       });
@@ -167,7 +167,7 @@ function makePredicateContainer(menu: HTMLElement, olliSpec: UnitOlliSpec, state
       valueContainer.replaceChildren(valueSelect);
       valueSelect.onchange = () => {
         const value = valueSelect.value;
-        const predicate: FieldPredicate = { field: selectedField, equal: value };
+        const predicate: FieldPredicate = { field: selectedField, equal: serializeValue(value, fieldDef) };
         updateState(predicate);
       };
     } else if (selectedOp === 'between') {
