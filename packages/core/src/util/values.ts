@@ -16,10 +16,10 @@ export const fmtValue = (value: OlliValue, fieldDef: OlliFieldDef): string => {
   return String(value);
 };
 
-export function serializeValue(value: any, fieldDef: any) {
+export function serializeValue(value: any, fieldDef: OlliFieldDef) {
   if (fieldDef.type === 'temporal') {
     value = datestampToTime(value);
-  } else if (isString(value) && isNumeric(value)) {
+  } else if (fieldDef.type === 'quantitative' && isString(value) && isNumeric(value)) {
     value = Number(value);
   }
   return value;
