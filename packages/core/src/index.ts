@@ -5,6 +5,7 @@ import { updateGlobalStateOnInitialRender } from './util/globalState';
 import { elaborateSpec } from './util/elaborate';
 import { LogicalComposition } from 'vega-lite/src/logical';
 import { FieldPredicate } from 'vega-lite/src/predicate';
+import { bin } from './Annotation';
 
 export * from './Types';
 export * from './Structure/Types';
@@ -16,7 +17,7 @@ export type OlliConfigOptions = {
   onSelection?: (predicate: LogicalComposition<FieldPredicate>) => void;
 };
 
-export function olli(olliSpec: OlliSpec, config?: OlliConfigOptions): HTMLElement {
+export function olli(olliSpec: OlliSpec, onUpdated, config?: OlliConfigOptions): HTMLElement {
   olliSpec = elaborateSpec(olliSpec);
 
   const renderContainer: HTMLElement = document.createElement('div');
@@ -31,5 +32,22 @@ export function olli(olliSpec: OlliSpec, config?: OlliConfigOptions): HTMLElemen
   t.init();
   updateGlobalStateOnInitialRender(t);
 
+  // Use bin function and .then() to handle the promise
+  bin(olliSpec).then(binNodes => {
+    olliSpec.structure.push(...binNodes);
+
+    // After bin nodes are added, initialize and render the updated tree
+    const t_2 = new OlliRuntime(olliSpec, renderContainer, treeCallbacks);
+    t_2.init();
+    updateGlobalStateOnInitialRender(t_2);
+
+    // Notify the caller that the renderContainer has been updated
+    if (typeof onUpdated === 'function') {
+        onUpdated(renderContainer);
+    }
+  });
+
+  // Return the initial render container immediately
   return renderContainer;
+
 }

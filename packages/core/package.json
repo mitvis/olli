@@ -11,7 +11,9 @@
     "prettier:check": "npx prettier --check .",
     "prettier:write": "npx prettier --write ."
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mitvis/olli.git"
@@ -29,6 +31,9 @@
   "dependencies": {
     "d3-scale": "^4.0.2",
     "dayjs": "^1.11.7",
+    "exponential-backoff": "^3.1.1",
+    "jsonc-parser": "^3.2.1",
+    "openai": "^4.26.0",
     "vega-lite": "^5.9.3",
     "vega-statistics": "^1.9.0",
     "versioned-storage": "^2.0.49",

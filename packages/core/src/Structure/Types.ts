@@ -16,6 +16,7 @@ export interface OlliPredicateNode {
 
 export interface OlliAnnotationNode {
   annotations: OlliNode[];
+  // field that says name (bin title for now ) 
 }
 
 export type OlliNode = OlliGroupNode | OlliPredicateNode | OlliAnnotationNode;

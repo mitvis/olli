@@ -66,7 +66,10 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
     if (!olliNodes) {
       return [];
     }
+    // console.log(olliNodes)
     return olliNodes.map((node, idx) => {
+      // console.log(node, idx);
+      
       if ('groupby' in node) {
         const nodeType = nodeTypeFromGroupField(node.groupby, olliSpec);
         const axis = olliSpec.axes?.find((a) => a.field === node.groupby);
@@ -135,6 +138,9 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
     const viewNodes = olliSpec.units.map((spec, idx) => {
       const nodes = Array.isArray(spec.structure) ? spec.structure : [spec.structure];
       const data = spec.selection ? selectionTest(spec.data, spec.selection) : spec.data;
+      console.log("here")
+      console.log(spec)
+      console.log(nodes)
       const elaborated = elaborateOlliNodes(spec, idx, nodes, data, { and: [] }, `${namespace}-${idx}`, 1);
       return {
         id: `${namespace}-${idx}`,
@@ -153,6 +159,9 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
   } else {
     const nodes = Array.isArray(olliSpec.structure) ? olliSpec.structure : [olliSpec.structure];
     const data = olliSpec.selection ? selectionTest(olliSpec.data, olliSpec.selection) : olliSpec.data;
+    console.log("tree")
+    console.log(olliSpec)
+    console.log(nodes)
     const tree = ensureFirstLayerHasOneRoot(
       elaborateOlliNodes(olliSpec, undefined, nodes, data, { and: [] }, namespace, 0)
     );
