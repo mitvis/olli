@@ -16,6 +16,7 @@ export interface OlliPredicateNode {
 
 export interface OlliAnnotationNode {
   annotations: OlliNode[];
+  name: string;
   // field that says name (bin title for now ) 
 }
 
