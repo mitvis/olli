@@ -26,7 +26,7 @@ let view = new vega.View(runtime)
   .run();
 
 OlliAdapters.VegaLiteAdapter(spec).then(olliVisSpec => {
-  const initialRenderContainer = olli(olliVisSpec, {}, updatedRenderContainer => {
+  const initialRenderContainer = olli(olliVisSpec, updatedRenderContainer => {
     console.log('Container updated', updatedRenderContainer);
     document.getElementById("AccessibilityTree-Vega-Lite").append(updatedRenderContainer);
   });

@@ -22,7 +22,8 @@ d3.json("https://raw.githubusercontent.com/vega/vega-datasets/next/data/barley.j
     document.getElementById("Visualization-ObservablePlot").append(Plot.plot(spec))
 
     OlliAdapters.ObservablePlotAdapter(spec).then(olliVisSpec => {
-        document.getElementById("AccessibilityTree-ObservablePlot").append(olli(olliVisSpec))
+        const initialRenderContainer = olli(olliVisSpec);
+        document.getElementById("AccessibilityTree-ObservablePlot").append(initialRenderContainer);
     })
 })
 </script>

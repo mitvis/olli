@@ -204,6 +204,7 @@ let view = new vega.View(runtime)
     .run();
 
 OlliAdapters.VegaAdapter(spec).then(olliVisSpec => {
-    document.getElementById("AccessibilityTree-Vega").append(olli(olliVisSpec))
+    const initialRenderContainer = olli(olliVisSpec);
+    document.getElementById("AccessibilityTree-Vega").append(initialRenderContainer);
 })
 </script>

@@ -50,7 +50,8 @@ export function createAnnotationNodesFromBins(bins: Bin[]): OlliAnnotationNode[]
 
         // Wrap the predicate nodes in an OlliAnnotationNode
         return {
-            annotations: predicateNodes
+            annotations: predicateNodes,
+            name: bin.bin_name
         };
     });
 }

@@ -16,8 +16,7 @@ export interface OlliPredicateNode {
 
 export interface OlliAnnotationNode {
   annotations: OlliNode[];
-  name: string;
-  // field that says name (bin title for now ) 
+  name?: string;
 }
 
 export type OlliNode = OlliGroupNode | OlliPredicateNode | OlliAnnotationNode;
@@ -42,6 +41,7 @@ export interface ElaboratedOlliNode {
   parent?: ElaboratedOlliNode;
   children: ElaboratedOlliNode[];
   groupby?: string;
+  name?: string;
   predicate?: FieldPredicate;
   description: Map<string, string>;
   level: number;

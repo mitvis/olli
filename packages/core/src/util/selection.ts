@@ -146,6 +146,12 @@ function testPoint(datum: OlliDatum, entry: { unit?: string; fields: any; values
         return dval <= values[i];
       case TYPE_PRED_GTE:
         return dval >= values[i];
+      case TYPE_PRED_ONE_OF:
+        console.log("includes")
+        console.log(values.includes(dval))
+        console.log("values")
+        console.log(values)
+        return values.includes(dval);
       case TYPE_PRED_VALID:
         return !(dval === null || isNaN(dval as number));
       default:

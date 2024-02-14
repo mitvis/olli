@@ -70,7 +70,7 @@ export function nodeToDescription(
     .join(' and ');
 
   function name(node: ElaboratedOlliNode): string {
-    switch (node.nodeType) {
+    switch (node.nodeType) { //case for annotation, and add case for node.name? 
       case 'root':
         if ('groupby' in node) {
           return description;
@@ -105,6 +105,8 @@ export function nodeToDescription(
             : 'guide';
         const label = guide.title || fieldDef.label || fieldDef.field;
         return `${guideType} titled ${label}`;
+      case 'annotations':
+        return `Bin titled ${node.name}`;
       default:
         throw `Node type ${node.nodeType} does not have the 'name' token.`;
     }
@@ -397,7 +399,7 @@ export function nodeToDescription(
     ['legend', ['name', 'type', 'data', 'parent', 'aggregate', 'level']],
     ['guide', ['name', 'type', 'data', 'parent', 'level']],
     ['filteredData', ['index', 'data', 'size', 'parent', 'aggregate', 'quartile', 'level', 'instructions']],
-    ['annotations', ['size', 'level']],
+    ['annotations', ['name', 'size', 'level']],
     ['other', ['index', 'data', 'size', 'level', 'instructions']],
   ]);
 
@@ -465,6 +467,9 @@ function fieldPredicateToDescription(predicate: FieldPredicate, fields: OlliFiel
   }
   if ('gte' in predicate) {
     return `${field} is greater than or equal to ${fmtValue(predicate.gte as OlliValue, fieldDef)}`;
+  }
+  if ('oneOf' in predicate) {
+    return `${field} is equal to one of ${(predicate.oneOf).map(value => fmtValue(value, fieldDef))}`;
   }
 
   return '';

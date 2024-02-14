@@ -1,9 +1,6 @@
 import { inferStructure } from '../Structure/infer';
 import { OlliSpec, UnitOlliSpec, isMultiOlliSpec } from '../Types';
 import { typeInference } from './types';
-import { llmBin } from '../Annotation/llm';
-import { extractAndParseJSON, createAnnotationNodesFromBins} from '../Annotation';
-import { OlliAnnotationNode, OlliPredicateNode } from '../Structure/Types';
 
 // fills in default values for missing spec fields
 export function elaborateSpec(olliSpec: OlliSpec): OlliSpec {
@@ -38,7 +35,6 @@ function elaborateUnitSpec(olliSpec: UnitOlliSpec): UnitOlliSpec {
 
   // infer structure if not provided
   if (!olliSpec.structure || [olliSpec.structure].flat().length === 0) {
-    console.log(olliSpec);
     olliSpec.structure = inferStructure(olliSpec);
   }
 
