@@ -86,6 +86,8 @@ function predicateOpToValue(op) {
       return '>';
     case 'gte':
       return '>=';
+    case 'oneOf':
+      return 'one of';
   }
 }
 
@@ -103,6 +105,8 @@ function valueToPredicateOp(op) {
       return 'gt';
     case '>=':
       return 'gte';
+    case 'one of':
+      return 'oneOf';
   }
 }
 

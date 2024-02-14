@@ -123,7 +123,7 @@ function testPoint(datum: OlliDatum, entry: { unit?: string; fields: any; values
     if (isDate(dval)) dval = toNumber(dval);
     if (isDate(values[i])) values[i] = toNumber(values[i]);
     if (isDate(values[i][0])) values[i] = values[i].map(toNumber);
-
+    console.log("type"+f.type)
     switch (f.type) {
       case TYPE_ENUM:
         // Enumerated fields can either specify individual values (single/multi selections)
@@ -132,9 +132,10 @@ function testPoint(datum: OlliDatum, entry: { unit?: string; fields: any; values
       case TYPE_RANGE_INC:
         return inrange(dval as number, values[i], true, true);
       case TYPE_RANGE_RE:
-        // Discrete selection of bins test within the range [bin_start, bin_end).
+        // Discrete selection of bins test within the range [bin_start, bin_end)
         return inrange(dval as number, values[i], true, false);
       case TYPE_RANGE_EXC: // 'R-E'/'R-LE' included for completeness.
+        console.log("range"+inrange(dval as number, values[i], false, false))
         return inrange(dval as number, values[i], false, false);
       case TYPE_RANGE_LE:
         return inrange(dval as number, values[i], false, true);
@@ -147,11 +148,7 @@ function testPoint(datum: OlliDatum, entry: { unit?: string; fields: any; values
       case TYPE_PRED_GTE:
         return dval >= values[i];
       case TYPE_PRED_ONE_OF:
-        console.log("includes")
-        console.log(values.includes(dval))
-        console.log("values")
-        console.log(values)
-        return values.includes(dval);
+        return  (values[i]).includes(String(dval)) | (values[i]).includes((dval as number));
       case TYPE_PRED_VALID:
         return !(dval === null || isNaN(dval as number));
       default:

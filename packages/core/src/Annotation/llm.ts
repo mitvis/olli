@@ -128,7 +128,7 @@ export async function llmBin(dataset: OlliDataset, field1: string, field2: strin
                 {
                     role: "user", 
                     content: 
-                    `Given the data, come up with meaningful bins of the data. It's ok to have overlap across bins. 
+                    `Given the data, come up with meaningful bins of the data. Focus on using oneOf. It's ok to have overlap across bins. 
                     Make sure to give a full response in a JSON format. Do not change the names of the fields in your answer.
                     `
                 }

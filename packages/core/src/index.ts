@@ -33,19 +33,21 @@ export function olli(olliSpec: OlliSpec, onUpdated, config?: OlliConfigOptions):
   updateGlobalStateOnInitialRender(t);
 
   // Use bin function and .then() to handle the promise
-  bin(olliSpec).then(binNodes => {
-    olliSpec.structure.push(...binNodes);
-
-    // After bin nodes are added, initialize and render the updated tree
-    const t_2 = new OlliRuntime(olliSpec, renderContainer, treeCallbacks);
-    t_2.init();
-    updateGlobalStateOnInitialRender(t_2);
-
-    // Notify the caller that the renderContainer has been updated
-    if (typeof onUpdated === 'function') {
-        onUpdated(renderContainer);
-    }
-  });
+  if (onUpdated){
+    bin(olliSpec).then(binNodes => {
+      olliSpec.structure.push(...binNodes);
+  
+      // After bin nodes are added, initialize and render the updated tree
+      const t_2 = new OlliRuntime(olliSpec, renderContainer, treeCallbacks);
+      t_2.init();
+      updateGlobalStateOnInitialRender(t_2);
+  
+      // Notify the caller that the renderContainer has been updated
+      if (typeof onUpdated === 'function') {
+          onUpdated(renderContainer);
+      }
+    });
+  }
 
   // Return the initial render container immediately
   return renderContainer;
