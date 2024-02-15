@@ -3,7 +3,8 @@ import { isString } from 'vega';
 import { OlliFieldDef, OlliTimeUnit, OlliValue } from '../Types';
 
 export const fmtValue = (value: OlliValue, fieldDef: OlliFieldDef): string => {
-  if (fieldDef.type === 'temporal' && !(value instanceof Date)) {
+
+  if ((fieldDef.type === 'temporal' && !(value instanceof Date))) {
     value = new Date(value);
   } else if (fieldDef.type === 'quantitative' && isNumeric(String(value))) {
     value = Number(String(value));
@@ -12,6 +13,10 @@ export const fmtValue = (value: OlliValue, fieldDef: OlliFieldDef): string => {
     return dateToTimeUnit(value, fieldDef.timeUnit);
   } else if (typeof value !== 'string' && !isNaN(value) && value % 1 != 0) {
     return Number(value).toFixed(2);
+  }
+  if (isValidDateFormat(value)){
+    value = new Date(value);
+    return dateToTimeUnit(value, fieldDef.timeUnit);
   }
   return String(value);
 };
@@ -35,6 +40,11 @@ export function datestampToTime(datestamp: string | string[]) {
 
 export function isNumeric(value: string): boolean {
   return vlIsNumeric(value.replaceAll(',', ''));
+}
+
+export function isValidDateFormat(dateString) {
+  const regex = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:\d{2})?)?$/;
+  return regex.test(dateString);
 }
 
 export function dateToTimeUnit(date: Date, timeUnit: OlliTimeUnit): string {

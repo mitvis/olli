@@ -15,20 +15,26 @@ interface BinsContainer {
 }
 
 export async function bin(spec: OlliSpec): Promise<OlliNode[]> {
-    console.log("data")
-    console.log(spec.data)
 
-    const response = await llmBin(spec.data);
+    const extractDataBasedOnFields = (data, fields) => {
+        return data.map(item => {
+            let extracted = {};
+            fields.forEach(field => {
+                extracted[field.field] = item[field.field];
+            });
+            return extracted;
+        });
+    };
+    console.log(spec.data)
+    const extractedData = extractDataBasedOnFields(spec.data, spec.fields);
+    console.log(extractedData);
+    const response = await llmBin(extractedData);
     console.log(response);
 
     if (response !== ''){
         const data = extractAndParseJSON(response);
-        console.log(data);
-
         // Create the OlliAnnotationNodes from the data
         const annotationNodes = createAnnotationNodesFromBins(data.bins);
-        console.log(annotationNodes)
-
         return annotationNodes
     }
 }

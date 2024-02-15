@@ -140,8 +140,6 @@ export async function llmBin(dataset: OlliDataset): Promise<string> {
             ]
         });
 
-        console.log(chat.choices[0].message.content);
-
         return chat.choices[0].message.content;
     }
 }

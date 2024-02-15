@@ -2,7 +2,7 @@ import { isDate, toNumber, isArray, inrange } from 'vega';
 import { LogicalAnd, LogicalComposition } from 'vega-lite/src/logical';
 import { FieldPredicate, FieldEqualPredicate } from 'vega-lite/src/predicate';
 import { OlliFieldDef, OlliDataset, OlliDatum, OlliValue } from '../Types';
-import { serializeValue } from './values';
+import { serializeValue, isValidDateFormat} from './values';
 import { getDomain, getFieldDef } from './data';
 import { getBinPredicates } from './bin';
 
@@ -112,11 +112,6 @@ export function selectionTest(data: OlliDataset, predicate: LogicalComposition<F
   }
 }
 
-function isValidDateFormat(dateString) {
-  const regex = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:\d{2})?)?$/;
-  return regex.test(dateString);
-}
-
 function testPoint(datum: OlliDatum, entry: { unit?: string; fields: any; values: any }) {
   var fields = entry.fields,
     values = entry.values,
@@ -125,9 +120,9 @@ function testPoint(datum: OlliDatum, entry: { unit?: string; fields: any; values
   return fields.every((f: { field: string | number; type: any }, i: string | number) => {
     dval = datum[f.field];
 
-    if (isValidDateFormat(dval)) dval = new Date(dval);
-    if (isValidDateFormat(values[i])) values[i] = new Date(values[i]);
-    if (isValidDateFormat(values[i][0])) values[i] = values[i].map(value => new Date(value));
+    if (isValidDateFormat(dval)) dval = new Date(new Date(dval).toUTCString());
+    if (isValidDateFormat(values[i])) values[i] = new Date(new Date(values[i]).toUTCString());
+    if (isValidDateFormat(values[i][0])) values[i] = values[i].map(value => new Date(new Date(value).toUTCString()));
 
     if (isDate(dval)) dval = toNumber(dval);
     if (isDate(values[i])) values[i] = toNumber(values[i]);
