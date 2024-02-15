@@ -471,6 +471,5 @@ function fieldPredicateToDescription(predicate: FieldPredicate, fields: OlliFiel
   if ('oneOf' in predicate) {
     return `${field} is equal to one of ${(predicate.oneOf).map(value => fmtValue(value, fieldDef))}`;
   }
-
   return '';
 }

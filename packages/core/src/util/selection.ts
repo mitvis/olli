@@ -112,6 +112,11 @@ export function selectionTest(data: OlliDataset, predicate: LogicalComposition<F
   }
 }
 
+function isValidDateFormat(dateString) {
+  const regex = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:\d{2})?)?$/;
+  return regex.test(dateString);
+}
+
 function testPoint(datum: OlliDatum, entry: { unit?: string; fields: any; values: any }) {
   var fields = entry.fields,
     values = entry.values,
@@ -120,10 +125,14 @@ function testPoint(datum: OlliDatum, entry: { unit?: string; fields: any; values
   return fields.every((f: { field: string | number; type: any }, i: string | number) => {
     dval = datum[f.field];
 
+    if (isValidDateFormat(dval)) dval = new Date(dval);
+    if (isValidDateFormat(values[i])) values[i] = new Date(values[i]);
+    if (isValidDateFormat(values[i][0])) values[i] = values[i].map(value => new Date(value));
+
     if (isDate(dval)) dval = toNumber(dval);
     if (isDate(values[i])) values[i] = toNumber(values[i]);
     if (isDate(values[i][0])) values[i] = values[i].map(toNumber);
-    console.log("type"+f.type)
+
     switch (f.type) {
       case TYPE_ENUM:
         // Enumerated fields can either specify individual values (single/multi selections)
@@ -135,7 +144,6 @@ function testPoint(datum: OlliDatum, entry: { unit?: string; fields: any; values
         // Discrete selection of bins test within the range [bin_start, bin_end)
         return inrange(dval as number, values[i], true, false);
       case TYPE_RANGE_EXC: // 'R-E'/'R-LE' included for completeness.
-        console.log("range"+inrange(dval as number, values[i], false, false))
         return inrange(dval as number, values[i], false, false);
       case TYPE_RANGE_LE:
         return inrange(dval as number, values[i], false, true);

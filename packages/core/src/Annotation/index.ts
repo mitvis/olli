@@ -18,13 +18,7 @@ export async function bin(spec: OlliSpec): Promise<OlliNode[]> {
     console.log("data")
     console.log(spec.data)
 
-    console.log("field1")
-    console.log(spec.fields[0].field)
-
-    console.log("field2")
-    console.log(spec.fields[1].field)
-
-    const response = await llmBin(spec.data, spec.fields[0].field, spec.fields[1].field);
+    const response = await llmBin(spec.data);
     console.log(response);
 
     if (response !== ''){
@@ -42,12 +36,12 @@ export async function bin(spec: OlliSpec): Promise<OlliNode[]> {
 
 export function createAnnotationNodesFromBins(bins: Bin[]): OlliAnnotationNode[] {
     return bins.map(bin => {
-        // Create a OlliPredicateNode for each predicate in the subset
+        // Create a OlliPredicateNode for each predicate in the bin
         const predicateNodes: OlliPredicateNode[] = bin.pred.map(pred => ({
             predicate: pred,
             children: [] // Assuming no children for simplicity
         }));
-
+        
         // Wrap the predicate nodes in an OlliAnnotationNode
         return {
             annotations: predicateNodes,

@@ -35,8 +35,10 @@ export function olli(olliSpec: OlliSpec, onUpdated, config?: OlliConfigOptions):
   // Use bin function and .then() to handle the promise
   if (onUpdated){
     bin(olliSpec).then(binNodes => {
+      console.log(olliSpec)
       olliSpec.structure.push(...binNodes);
-  
+      olliSpec = elaborateSpec(olliSpec);
+      console.log(olliSpec)
       // After bin nodes are added, initialize and render the updated tree
       const t_2 = new OlliRuntime(olliSpec, renderContainer, treeCallbacks);
       t_2.init();
