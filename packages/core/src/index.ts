@@ -23,24 +23,45 @@ export function olli(olliSpec: OlliSpec, onUpdated, config?: OlliConfigOptions):
   const renderContainer: HTMLElement = document.createElement('div');
   renderContainer.classList.add('olli-vis');
 
+  // Create a live region for accessibility notifications
+  const liveRegion = document.createElement('div');
+  liveRegion.setAttribute('aria-live', 'assertive');
+  liveRegion.setAttribute('role', 'alert'); // Enhances semantic meaning for assistive technologies
+  liveRegion.style.position = 'absolute'; // Position off-screen if visually hidden
+  liveRegion.style.left = '-9999px';
+  liveRegion.style.width = '1px';
+  liveRegion.style.height = '1px';
+  liveRegion.style.overflow = 'hidden';
+
+  // Append the live region to the document body or another appropriate container
+  document.body.appendChild(liveRegion); // Adjust as necessary
+
   const treeCallbacks: RuntimeCallbacks = {
     onFocus: config?.onFocus,
     onSelection: config?.onSelection,
   };
 
-  const t = new OlliRuntime(olliSpec, renderContainer, treeCallbacks);
+  let t = new OlliRuntime(olliSpec, renderContainer, treeCallbacks);
   t.init();
   updateGlobalStateOnInitialRender(t);
 
   // Use bin function and .then() to handle the promise
   if (onUpdated){
     bin(olliSpec).then(binNodes => {
+      
       olliSpec.structure.push(...binNodes);
       olliSpec = elaborateSpec(olliSpec);
+      console.log(olliSpec)
+
       // After bin nodes are added, initialize and render the updated tree
-      const t_2 = new OlliRuntime(olliSpec, renderContainer, treeCallbacks);
-      t_2.init();
-      updateGlobalStateOnInitialRender(t_2);
+      t = new OlliRuntime(olliSpec, renderContainer, treeCallbacks);
+      t.init();
+      updateGlobalStateOnInitialRender(t);
+      // Restart focus onto new render container. 
+      t.setFocusToItem(t.rootTreeItem);
+
+      // Update the live region with a notification message
+      liveRegion.textContent = 'Semantic bins now available. Press O to see updated Olli tree.'; // This will be announced by screen readers
   
       // Notify the caller that the renderContainer has been updated
       if (typeof onUpdated === 'function') {
