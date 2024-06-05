@@ -1,3 +1,4 @@
+import { openTableDialog } from '../Render/Dialog';
 import { OlliRuntime } from '../Runtime/OlliRuntime';
 import { nodeIsTextInput } from './events';
 
@@ -74,6 +75,88 @@ export const updateGlobalStateOnInitialRender = (t: OlliRuntime) => {
             }
             break;
         }
+      }
+
+      ////
+      const { lastVisitedInstance, instancesOnPage } = getOlliGlobalState();
+      const currentInstance =
+        (lastVisitedInstance && document.body.contains(lastVisitedInstance.rootDomNode)
+          ? lastVisitedInstance
+          : false) || (instancesOnPage.length ? instancesOnPage[0] : null);
+      const currentItem = currentInstance.lastFocusedTreeItem || currentInstance.rootTreeItem;
+
+      switch (e.key) {
+        case 'Enter':
+        case ' ':
+          if (currentItem.isExpandable) {
+            if (currentItem.isExpanded()) {
+              currentInstance.collapseTreeItem(currentItem);
+            } else {
+              currentInstance.expandTreeItem(currentItem);
+            }
+          }
+          break;
+        case 'ArrowDown':
+          if (currentItem.children.length > 0 && currentItem.isExpandable) {
+            currentInstance.setFocusToNextLayer(currentItem);
+          }
+          break;
+        case 'Escape':
+        case 'ArrowUp':
+          if (currentItem.inGroup) {
+            currentInstance.setFocusToParentItem(currentItem);
+          }
+          break;
+        case 'ArrowLeft':
+          if (e.shiftKey) {
+            if (currentInstance.isLateralPossible()) {
+              currentInstance.setFocusToLateralItem(currentItem, 'left');
+            }
+          } else {
+            currentInstance.setFocusToPreviousItem(currentItem);
+          }
+          break;
+        case 'ArrowRight':
+          if (e.shiftKey) {
+            if (currentInstance.isLateralPossible()) {
+              currentInstance.setFocusToLateralItem(currentItem, 'right');
+            }
+          } else {
+            currentInstance.setFocusToNextItem(currentItem);
+          }
+          break;
+        case 'Home':
+          if (currentItem.parent) {
+            currentInstance.setFocusToFirstInLayer(currentItem);
+          }
+          break;
+
+        case 'End':
+          if (currentItem.parent) {
+            currentInstance.setFocusToLastInLayer(currentItem);
+          }
+          break;
+        case 'x':
+          currentInstance.focusOnNodeType('xAxis', currentItem);
+          break;
+        case 'y':
+          currentInstance.focusOnNodeType('yAxis', currentItem);
+          break;
+        case 'l':
+          currentInstance.focusOnNodeType('legend', currentItem);
+          break;
+        case 't':
+          openTableDialog(currentItem.olliNode, currentInstance);
+          break;
+        // case 'f':
+        //   openSelectionDialog(this.olliNode, getOlliGlobalState().lastVisitedInstance);
+        //   break;
+        // case 'r':
+        //   openTargetedNavigationDialog(getOlliGlobalState().lastVisitedInstance);
+        //   break;
+        default:
+          // return to avoid preventing default event action
+          return;
       }
     });
     setOlliGlobalState({ keyListenerAttached: true });

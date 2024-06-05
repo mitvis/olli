@@ -105,6 +105,11 @@ export function nodeToDescription(
             : 'guide';
         const label = guide.title || fieldDef.label || fieldDef.field;
         return `${guideType} titled ${label}`;
+      case 'filteredData':
+        if ('name' in node && 'reasoning' in node) {
+          return `${node.name}. ${node.reasoning}.`;
+        }
+        return '';
       default:
         throw `Node type ${node.nodeType} does not have the 'name' token.`;
     }
@@ -254,7 +259,7 @@ export function nodeToDescription(
         }
         return '';
       case 'annotations':
-        return `${node.children.length} annotations`;
+        return `Data highlights. ${node.children.length} highlights.`;
       case 'other':
         if ('groupby' in node) {
           return `${node.children.length} groups`;
@@ -396,7 +401,8 @@ export function nodeToDescription(
     ['yAxis', ['name', 'type', 'data', 'parent', 'aggregate', 'level']],
     ['legend', ['name', 'type', 'data', 'parent', 'aggregate', 'level']],
     ['guide', ['name', 'type', 'data', 'parent', 'level']],
-    ['filteredData', ['index', 'data', 'size', 'parent', 'aggregate', 'quartile', 'level', 'instructions']],
+    // ['filteredData', ['index', 'data', 'size', 'parent', 'aggregate', 'quartile', 'level', 'instructions']],
+    ['filteredData', ['index', 'name', 'data', 'size', 'parent', 'level', 'instructions']],
     ['annotations', ['size', 'level']],
     ['other', ['index', 'data', 'size', 'level', 'instructions']],
   ]);
@@ -431,7 +437,14 @@ export function nodeToDescription(
 
 export function predicateToDescription(predicate: LogicalComposition<FieldPredicate>, fields: OlliFieldDef[]) {
   if ('and' in predicate) {
-    return predicate.and.map((p) => predicateToDescription(p, fields)).join(' and ');
+    const terms = predicate.and.map((p) => predicateToDescription(p, fields)).filter((s) => s.trim().length);
+    if (terms.length) {
+      if (terms.length > 1) {
+        return terms.join(' and ');
+      }
+      return terms[0];
+    }
+    return '';
   }
   if ('or' in predicate) {
     return predicate.or.map((p) => predicateToDescription(p, fields)).join(' or ');
