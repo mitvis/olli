@@ -3,10 +3,6 @@
     "node_modules",
     "dist"
   ],
-  "include": [
-    "./packages/*/src",
-    "./packages/*/src/**/*"
-  ],
   "compilerOptions": {
     "target": "ES2015",
     "module": "esnext",
@@ -17,8 +13,6 @@
       "esnext",
       "es2015"
     ],
-    "rootDir": ".",
-    "outDir": "dist",
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
