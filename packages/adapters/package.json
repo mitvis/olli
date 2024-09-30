@@ -5,7 +5,6 @@
   "main": "./dist/adapters.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "webpack --config webpack.dev.js",
     "build": "webpack --config webpack.prod.js",
     "prettier:check": "npx prettier --check .",
@@ -21,6 +20,14 @@
     "accessibility"
   ],
   "author": "Matthew Blanco",
+  "contributors": [
+    {
+      "name": "Matthew Blanco"
+    },
+    {
+      "name": "Jonathan Zong",
+      "email": "jonathan@jonathanzong.com"
+    }],
   "license": "BSD-3-Clause",
   "bugs": {
     "url": "https://github.com/mitvis/olli/issues"
