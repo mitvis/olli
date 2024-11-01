@@ -105,6 +105,13 @@ export function nodeToDescription(
             : 'guide';
         const label = guide.title || fieldDef.label || fieldDef.field;
         return `${guideType} titled ${label}`;
+      case 'filteredData':
+        if ('name' in node && 'reasoning' in node) {
+          return `${node.name}. ${node.reasoning}.`;
+        }
+        return '';
+      case 'annotations':
+        return 'Data highlights.';
       default:
         throw `Node type ${node.nodeType} does not have the 'name' token.`;
     }
@@ -114,6 +121,7 @@ export function nodeToDescription(
     switch (node.nodeType) {
       case 'view':
       case 'filteredData':
+      case 'annotations':
       case 'other':
         return indexStr;
       default:
@@ -254,7 +262,7 @@ export function nodeToDescription(
         }
         return '';
       case 'annotations':
-        return `${node.children.length} annotations`;
+        return `${node.children.length} highlights.`;
       case 'other':
         if ('groupby' in node) {
           return `${node.children.length} groups`;
@@ -396,8 +404,8 @@ export function nodeToDescription(
     ['yAxis', ['name', 'type', 'data', 'parent', 'aggregate', 'level']],
     ['legend', ['name', 'type', 'data', 'parent', 'aggregate', 'level']],
     ['guide', ['name', 'type', 'data', 'parent', 'level']],
-    ['filteredData', ['index', 'data', 'size', 'parent', 'aggregate', 'quartile', 'level', 'instructions']],
-    ['annotations', ['size', 'level']],
+    ['filteredData', ['index', 'name', 'data', 'size', 'parent', 'aggregate', 'quartile', 'level', 'instructions']],
+    ['annotations', ['index', 'name', 'size', 'level']],
     ['other', ['index', 'data', 'size', 'level', 'instructions']],
   ]);
 
@@ -431,7 +439,10 @@ export function nodeToDescription(
 
 export function predicateToDescription(predicate: LogicalComposition<FieldPredicate>, fields: OlliFieldDef[]) {
   if ('and' in predicate) {
-    return predicate.and.map((p) => predicateToDescription(p, fields)).join(' and ');
+    return predicate.and
+      .map((p) => predicateToDescription(p, fields))
+      .filter((s) => s.trim().length)
+      .join(' and ');
   }
   if ('or' in predicate) {
     return predicate.or.map((p) => predicateToDescription(p, fields)).join(' or ');
@@ -465,6 +476,9 @@ function fieldPredicateToDescription(predicate: FieldPredicate, fields: OlliFiel
   }
   if ('gte' in predicate) {
     return `${field} is greater than or equal to ${fmtValue(predicate.gte as OlliValue, fieldDef)}`;
+  }
+  if ('oneOf' in predicate) {
+    return `${field} is one of ${predicate.oneOf.map((value) => fmtValue(value, fieldDef)).join(', ')}`;
   }
 
   return '';
