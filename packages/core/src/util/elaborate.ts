@@ -1,22 +1,25 @@
 import { inferStructure } from '../Structure/infer';
 import { OlliSpec, UnitOlliSpec, isMultiOlliSpec } from '../Types';
+import { getDataHighlights } from './llm';
 import { typeInference } from './types';
 
 // fills in default values for missing spec fields
-export function elaborateSpec(olliSpec: OlliSpec): OlliSpec {
+export async function elaborateSpec(olliSpec: OlliSpec): Promise<OlliSpec> {
   if (isMultiOlliSpec(olliSpec)) {
     return {
       ...olliSpec,
-      units: olliSpec.units.map((spec) => {
-        return elaborateUnitSpec(spec);
-      }),
+      units: await Promise.all(
+        olliSpec.units.map(async (spec) => {
+          return await elaborateUnitSpec(spec);
+        })
+      ),
     };
   } else {
-    return elaborateUnitSpec(olliSpec);
+    return await elaborateUnitSpec(olliSpec);
   }
 }
 
-function elaborateUnitSpec(olliSpec: UnitOlliSpec): UnitOlliSpec {
+async function elaborateUnitSpec(olliSpec: UnitOlliSpec): Promise<UnitOlliSpec> {
   // if fields not provided, use all fields in data
   olliSpec.fields =
     olliSpec.fields ||
@@ -36,6 +39,12 @@ function elaborateUnitSpec(olliSpec: UnitOlliSpec): UnitOlliSpec {
   if (!olliSpec.structure || [olliSpec.structure].flat().length === 0) {
     olliSpec.structure = inferStructure(olliSpec);
   }
+
+  olliSpec.structure = Array.isArray(olliSpec.structure) ? olliSpec.structure : [olliSpec.structure];
+  // add data highlights
+  olliSpec.structure.unshift({
+    annotations: await getDataHighlights(olliSpec.data),
+  });
 
   return olliSpec;
 }

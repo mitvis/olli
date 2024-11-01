@@ -17,19 +17,19 @@ export type OlliConfigOptions = {
 };
 
 export function olli(olliSpec: OlliSpec, config?: OlliConfigOptions): HTMLElement {
-  olliSpec = elaborateSpec(olliSpec);
-
   const renderContainer: HTMLElement = document.createElement('div');
   renderContainer.classList.add('olli-vis');
 
-  const treeCallbacks: RuntimeCallbacks = {
-    onFocus: config?.onFocus,
-    onSelection: config?.onSelection,
-  };
+  elaborateSpec(olliSpec).then((elaboratedSpec) => {
+    const treeCallbacks: RuntimeCallbacks = {
+      onFocus: config?.onFocus,
+      onSelection: config?.onSelection,
+    };
 
-  const t = new OlliRuntime(olliSpec, renderContainer, treeCallbacks);
-  t.init();
-  updateGlobalStateOnInitialRender(t);
+    const t = new OlliRuntime(elaboratedSpec, renderContainer, treeCallbacks);
+    t.init();
+    updateGlobalStateOnInitialRender(t);
+  });
 
   return renderContainer;
 }

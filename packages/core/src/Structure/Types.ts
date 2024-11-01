@@ -12,10 +12,12 @@ export interface OlliGroupNode {
 export interface OlliPredicateNode {
   predicate: LogicalComposition<FieldPredicate>;
   children?: OlliNode[];
+  name?: string;
+  reasoning?: string;
 }
 
 export interface OlliAnnotationNode {
-  annotations: OlliNode[];
+  annotations: OlliPredicateNode[];
 }
 
 export type OlliNode = OlliGroupNode | OlliPredicateNode | OlliAnnotationNode;
