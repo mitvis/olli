@@ -1,5 +1,5 @@
 import { FieldPredicate } from 'vega-lite/src/predicate';
-import { LogicalAnd } from 'vega-lite/src/logical';
+import { LogicalAnd, LogicalComposition } from 'vega-lite/src/logical';
 
 /**
  * Node types describing an Olli tree structure
@@ -10,7 +10,7 @@ export interface OlliGroupNode {
 }
 
 export interface OlliPredicateNode {
-  predicate: FieldPredicate;
+  predicate: LogicalComposition<FieldPredicate>;
   children?: OlliNode[];
 }
 
@@ -36,11 +36,11 @@ export interface ElaboratedOlliNode {
   nodeType: OlliNodeType;
   specIndex?: number;
   viewType?: 'facet' | 'layer' | 'concat';
-  fullPredicate: LogicalAnd<FieldPredicate>;
+  fullPredicate: LogicalComposition<FieldPredicate>;
   parent?: ElaboratedOlliNode;
   children: ElaboratedOlliNode[];
   groupby?: string;
-  predicate?: FieldPredicate;
+  predicate?: LogicalComposition<FieldPredicate>;
   description: Map<string, string>;
   level: number;
 }

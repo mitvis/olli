@@ -148,6 +148,8 @@ function testPoint(datum: OlliDatum, entry: { unit?: string; fields: any; values
         return dval >= values[i];
       case TYPE_PRED_VALID:
         return !(dval === null || isNaN(dval as number));
+      case TYPE_PRED_ONE_OF:
+        return values[i].includes(String(dval)) || values[i].includes(toNumber(dval));
       default:
         return true;
     }

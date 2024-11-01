@@ -1,4 +1,4 @@
-import { LogicalAnd } from 'vega-lite/src/logical';
+import { LogicalAnd, LogicalComposition } from 'vega-lite/src/logical';
 import { FieldPredicate } from 'vega-lite/src/predicate';
 import { UnitOlliSpec, OlliDataset, OlliSpec, isMultiOlliSpec } from '../Types';
 import { fieldToPredicates, selectionTest } from '../util/selection';
@@ -59,7 +59,7 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
     specIndex: number,
     olliNodes: OlliNode[],
     data: OlliDataset,
-    fullPredicate: LogicalAnd<FieldPredicate>,
+    fullPredicate: LogicalComposition<FieldPredicate>,
     idPrefix: string,
     level: number
   ): ElaboratedOlliNode[] {
@@ -81,7 +81,7 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
           description: new Map<string, string>(),
           children: childPreds.map((p, childIdx) => {
             const childFullPred = {
-              and: [...fullPredicate.and, p],
+              and: [...(fullPredicate as LogicalAnd<FieldPredicate>).and, p], // TODO handle other compositions
             };
             const childId = `${idPrefix}-${idx}-${childIdx}`;
             return {
@@ -100,12 +100,19 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
         };
       } else if ('predicate' in node) {
         const predicate = node.predicate;
-        const nextFullPred = {
-          and: [...fullPredicate.and, predicate],
-        };
+        let nextFullPred: LogicalComposition<FieldPredicate>;
+        if ('name' in node && 'reasoning' in node) {
+          nextFullPred = predicate;
+        } else {
+          nextFullPred = {
+            and: [...(fullPredicate as LogicalAnd<FieldPredicate>).and, predicate],
+          };
+        }
         const nextId = `${idPrefix}-${idx}`;
         return {
           id: nextId,
+          name: (node as any).name,
+          reasoning: (node as any).reasoning,
           nodeType: 'filteredData',
           specIndex,
           fullPredicate: nextFullPred,
