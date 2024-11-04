@@ -43,7 +43,7 @@ export class OlliRuntime {
     this.treeItems = [];
   }
 
-  init(): void {
+  async init(): Promise<void> {
     function findTreeitems(node, tree: OlliRuntime, lookup: OlliNodeLookup, group: OlliRuntimeTreeItem | undefined) {
       let elem = node.firstElementChild;
       let ti = group;
@@ -68,7 +68,7 @@ export class OlliRuntime {
 
     const lastNode = this.lastFocusedTreeItem?.olliNode;
 
-    const tree: ElaboratedOlliNode = olliSpecToTree(this.olliSpec);
+    const tree: ElaboratedOlliNode = await olliSpecToTree(this.olliSpec);
     this.olliNodeLookup = treeToNodeLookup(tree);
 
     const ul = renderTree(tree);

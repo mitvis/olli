@@ -1,12 +1,14 @@
 import OpenAI from 'openai';
 import { OlliPredicateNode } from '../Structure/Types';
-import { OlliDataset } from '../Types';
+import { OlliDataset, OlliFieldDef } from '../Types';
 import * as jsonc from 'jsonc-parser';
 import { ChatCompletionMessageParam } from 'openai/resources';
 import { LogicalComposition } from 'vega-lite/src/logical';
 import { FieldPredicate } from 'vega-lite/src/predicate';
 import { backOff } from 'exponential-backoff';
 import { simplifyPredicate } from './selection';
+import { getDomain, getFieldDef } from './data';
+import { serializeValue } from './values';
 
 const secrets = process.env.NODE_ENV === 'development' ? require('../secrets/openai.json') : {};
 const openai = new OpenAI({
@@ -18,28 +20,88 @@ type LLMResponse = {
   groups: OlliPredicateNode[];
 };
 
-export async function getDataHighlights(data: OlliDataset): Promise<OlliPredicateNode[]> {
-  const csvData = toCSV(data);
-  const storageKey = String(hashCode(csvData));
+export async function getDataHighlights(data: OlliDataset, fields: OlliFieldDef[]): Promise<OlliPredicateNode[]> {
+  const dataWithActiveFields = data.map((row) => {
+    const newRow = {};
+    fields.forEach((field) => {
+      newRow[field.field] = row[field.field];
+    });
+    return newRow;
+  });
+  const csvData = toCSV(dataWithActiveFields);
+  const storageKey = 'highlight' + String(hashCode(csvData));
   const cache = localStorage.getItem(storageKey);
 
   if (cache) {
     console.log('cache hit');
     return JSON.parse(cache);
   } else {
-    const llmResponse = await queryLLM(dataHighlightPrompt(csvData));
+    const prompt = dataHighlightPrompt(csvData);
+    console.log(prompt);
+    const llmResponse = await queryLLM(prompt);
+    console.log('llmResponse', llmResponse.groups);
     const groups = llmResponse.groups.map((group) => {
       return {
         ...group,
         predicate: simplifyPredicate(group.predicate),
       };
     });
+    console.log('groups', groups);
     localStorage.setItem(storageKey, JSON.stringify(groups));
     return groups;
   }
 }
 
-export async function semanticBins(selection: OlliDataset, field: string): Promise<OlliPredicateNode[]> {
+export async function getSemanticBins(
+  data: OlliDataset,
+  fields: OlliFieldDef[],
+  field: string
+): Promise<OlliPredicateNode[]> {
+  const fieldDef = getFieldDef(field, fields);
+  if (fieldDef.type === 'nominal') {
+    const domain = getDomain(fieldDef, data);
+    return domain.map((value) => {
+      return {
+        name: value.toString(),
+        explanation: '',
+        predicate: {
+          field: field,
+          equal: serializeValue(value, fieldDef),
+        },
+      };
+    });
+  }
+
+  const dataWithActiveFields = data.map((row) => {
+    const newRow = {};
+    fields.forEach((field) => {
+      newRow[field.field] = row[field.field];
+    });
+    return newRow;
+  });
+  const csvData = toCSV(dataWithActiveFields);
+  const storageKey = 'bin' + field + String(hashCode(csvData));
+  const cache = localStorage.getItem(storageKey);
+
+  if (cache) {
+    console.log('cache hit');
+    return JSON.parse(cache);
+  } else {
+    const domain = getDomain(fieldDef, data);
+    const prompt = semanticBinPrompt(csvData, field, domain);
+    console.log(prompt);
+    const llmResponse = await queryLLM(prompt);
+    console.log('llmResponse', llmResponse.groups);
+    const groups = llmResponse.groups.map((group) => {
+      return {
+        ...group,
+        predicate: simplifyPredicate(group.predicate),
+      };
+    });
+    console.log('groups', groups);
+    localStorage.setItem(storageKey, JSON.stringify(groups));
+    return groups;
+  }
   return [];
 }
 
@@ -53,7 +115,7 @@ async function queryLLM(messages: ChatCompletionMessageParam[]): Promise<LLMResp
   console.log('attempting api call');
   const chat = await backOff(() => {
     return openai.chat.completions.create({
-      model: 'gpt-4-turbo-preview',
+      model: 'gpt-4o-mini',
       response_format: { type: 'json_object' },
       seed: 1,
       messages,
@@ -80,29 +142,97 @@ function hashCode(str) {
   return hash;
 }
 
+const predicatePrompt = `
+Please return the groups in the format:
+{
+  "groups": [...]
+}
+  where each group is in the format:
+{
+  "name": string,
+  "explanation": string,
+  "predicate": LogicalComposition<FieldPredicate>
+}
+Where "predicate" is a Vega-Lite predicate that selects the data points in the group.
+Examples of valid field predicates include:
+{ "field": "age", "gt": 18 }
+{ "field": "miles", "lte": 27 }
+{ "field": "Species", "equal": "Gentoo" }
+{ "field": "Horsepower", "range": [100, 150] }
+
+Here is an example of a logical composition predicate:
+{
+  "and": [
+    { "field": "age", "gt": 18 },
+    { "field": "weight", "lte": 150 }
+  ]
+}`;
+
 const dataHighlightPrompt = (csvData: string): ChatCompletionMessageParam[] => {
   return [
     {
       role: 'system',
-      content: `You are an expert data analyst. When I provide a dataset, you respond with a list of JSON objects identifying semantically meaningful groupings of data.`,
+      content: `You are an expert data analyst. When I provide a dataset, return JSON that groups the data in a semantically meaningful way.`,
     },
     {
       role: 'user',
-      content: `Here is the data we'll be analyzing: ${csvData}`,
+      content: `Here is the dataset we are analyzing: ${csvData}`,
     },
     {
       role: 'user',
-      content: `Given the data, identify meaningful groupings of data. Consider all the fields in the data. Incorporate domain-specific knowledge, social and political context, and history or current events. Prioritize groupings that are interesting or surprising, and may not be obvious just from looking at the data. Please respond in the format:
+      content: `Consider all the fields in the data.
+
+      You will use domain-specific knowledge, social and political context, and history or current events to identify semantically meaningful groupings of data.
+
+      A good grouping will involve multiple fields, prioritize things that would be interesting or surprising to a data analyst, and require outside knowledge not in the dataset to understand.
+
+      ${predicatePrompt}
+
+      Convert all dates to utc time numeric format. Respond in JSON and return nothing but valid JSON.`,
+    },
+  ];
+};
+
+const semanticBinPrompt = (csvData: string, field: string, domain: any[]): ChatCompletionMessageParam[] => {
+  return [
+    {
+      role: 'system',
+      content: `You are an expert data analyst. When I provide a dataset and a field name, return JSON that bins the field in a semantically meaningful way.`,
+    },
+    {
+      role: 'user',
+      content: `Here is the dataset we are analyzing: ${csvData}`,
+    },
+    {
+      role: 'user',
+      content: `Consider all the fields in the data.
+
+      You will use knowledge of external information relevant to the data, social and political context, and history or current events to identify a semantically meaningful binning of the ${field} field.
+
+      A binning is a way to group data points into categories. For example, you might bin ages into "child", "adult", and "senior".
+
+      Bins must cover the entire range of the field (i.e. ${domain.toString()}) and be mutually exclusive.
+
+      Please return the bin in the format:
       {
         "groups": [...]
       }
-        where each group is in the format:
+        where each bin is in the format:
       {
         "name": string,
         "explanation": string,
-        "predicate": LogicalComposition<FieldPredicate>
+        "predicate": {
+          field: "${field}",
+          range: [lower, upper],
+          inclusive: true
+        }
       }
-      Where "predicate" is a Vega-Lite predicate that selects the data points in the group. Convert all dates to utc time numeric format. Respond in JSON and return nothing but valid JSON.`,
+
+      The "range" field should be an array with two numbers, the lower and upper bounds (inclusive) of the bin.
+
+      Prioritize bins that require contextual knowledge outside of the dataset to understand.
+
+      Convert all dates to utc time numeric format. Respond in JSON and return nothing but valid JSON.`,
     },
   ];
 };

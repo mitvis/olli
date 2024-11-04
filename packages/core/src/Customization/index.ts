@@ -403,7 +403,8 @@ export function nodeToDescription(
     ['yAxis', ['name', 'type', 'data', 'parent', 'aggregate', 'level']],
     ['legend', ['name', 'type', 'data', 'parent', 'aggregate', 'level']],
     ['guide', ['name', 'type', 'data', 'parent', 'level']],
-    ['filteredData', ['index', 'name', 'data', 'size', 'parent', 'aggregate', 'quartile', 'level', 'instructions']],
+    ['filteredData', ['index', 'name', 'data', 'size', 'parent', 'level', 'instructions']],
+    // ['filteredData', ['index', 'name', 'data', 'size', 'parent', 'aggregate', 'quartile', 'level', 'instructions']],
     ['annotations', ['name', 'size', 'level']],
     ['other', ['index', 'data', 'size', 'level', 'instructions']],
   ]);
@@ -454,6 +455,9 @@ export function predicateToDescription(predicate: LogicalComposition<FieldPredic
 
 function fieldPredicateToDescription(predicate: FieldPredicate, fields: OlliFieldDef[]) {
   const fieldDef = getFieldDef(predicate.field, fields);
+  if (!fieldDef) {
+    debugger;
+  }
   const field = fieldDef.label || fieldDef.field;
   if ('equal' in predicate) {
     return `${field} equals ${fmtValue(predicate.equal as OlliValue, fieldDef)}`;

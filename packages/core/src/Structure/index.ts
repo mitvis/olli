@@ -4,8 +4,9 @@ import { UnitOlliSpec, OlliDataset, OlliSpec, isMultiOlliSpec } from '../Types';
 import { fieldToPredicates, selectionTest } from '../util/selection';
 import { ElaboratedOlliNode, OlliNode, OlliNodeLookup, OlliNodeType } from './Types';
 import { nodeToDescription } from '../Customization';
+import { getSemanticBins } from '../util/llm';
 
-export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
+export async function olliSpecToTree(olliSpec: OlliSpec): Promise<ElaboratedOlliNode> {
   const namespace = (Math.random() + 1).toString(36).substring(7);
   /**
    * If the top level has multiple nodes, we wrap them in a single node
@@ -54,7 +55,7 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
     return 'other';
   }
 
-  function elaborateOlliNodes(
+  async function elaborateOlliNodes(
     olliSpec: UnitOlliSpec,
     specIndex: number,
     olliNodes: OlliNode[],
@@ -62,87 +63,146 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
     fullPredicate: LogicalComposition<FieldPredicate>,
     idPrefix: string,
     level: number
-  ): ElaboratedOlliNode[] {
+  ): Promise<ElaboratedOlliNode[]> {
     if (!olliNodes) {
       return [];
     }
-    return olliNodes.map((node, idx) => {
-      if ('groupby' in node) {
-        const nodeType = nodeTypeFromGroupField(node.groupby, olliSpec);
-        const axis = olliSpec.axes?.find((a) => a.field === node.groupby);
-        const childPreds = fieldToPredicates(node.groupby, data, olliSpec.fields, axis ? axis.ticks : undefined);
+    return Promise.all(
+      olliNodes.map(async (node, idx) => {
+        if ('groupby' in node) {
+          const nodeType = nodeTypeFromGroupField(node.groupby, olliSpec);
+          const axis = olliSpec.axes?.find((a) => a.field === node.groupby);
 
-        return {
-          id: `${idPrefix}-${idx}`,
-          fullPredicate,
-          nodeType,
-          specIndex,
-          groupby: node.groupby,
-          description: new Map<string, string>(),
-          children: childPreds.map((p, childIdx) => {
-            const childFullPred = {
-              and: [...(fullPredicate as LogicalAnd<FieldPredicate>).and, p], // TODO handle other compositions
-            };
-            const childId = `${idPrefix}-${idx}-${childIdx}`;
-            return {
-              id: childId,
-              nodeType: nodeType === 'root' ? 'view' : 'filteredData',
-              viewType: nodeType === 'root' ? 'facet' : undefined,
-              specIndex,
-              predicate: p,
-              fullPredicate: childFullPred,
-              description: new Map<string, string>(),
-              children: elaborateOlliNodes(olliSpec, specIndex, node.children, data, childFullPred, childId, level + 2),
-              level: level + 2,
-            };
-          }),
-          level: level + 1,
-        };
-      } else if ('predicate' in node) {
-        const predicate = node.predicate;
-        let nextFullPred: LogicalComposition<FieldPredicate>;
-        if ('name' in node && 'explanation' in node) {
-          nextFullPred = predicate;
-        } else {
-          nextFullPred = {
-            and: [...(fullPredicate as LogicalAnd<FieldPredicate>).and, predicate],
+          const semanticBins = await getSemanticBins(data, olliSpec.fields, node.groupby);
+
+          console.log(semanticBins);
+
+          return {
+            id: `${idPrefix}-${idx}`,
+            fullPredicate,
+            nodeType,
+            specIndex,
+            groupby: node.groupby,
+            description: new Map<string, string>(),
+            children: await Promise.all(
+              semanticBins.map(async (semanticBin, semanticBinIdx) => {
+                const p = semanticBin.predicate;
+                const semanticBinFullPred = {
+                  and: [...(fullPredicate as LogicalAnd<FieldPredicate>).and, p], // TODO handle other compositions
+                };
+                const semanticBinId = `${idPrefix}-${idx}-${semanticBinIdx}`;
+
+                const normalBins = fieldToPredicates(
+                  node.groupby,
+                  selectionTest(data, semanticBinFullPred),
+                  olliSpec.fields,
+                  axis ? axis.ticks : undefined
+                );
+
+                return {
+                  id: semanticBinId,
+                  nodeType: nodeType === 'root' ? 'view' : 'filteredData',
+                  viewType: nodeType === 'root' ? 'facet' : undefined,
+                  name: semanticBin.name,
+                  explanation: semanticBin.explanation,
+                  specIndex,
+                  predicate: p,
+                  fullPredicate: semanticBinFullPred,
+                  description: new Map<string, string>(),
+                  children: await Promise.all(
+                    normalBins.map(async (binPred, binIdx) => {
+                      const binId = `${semanticBinId}-${binIdx}`;
+                      const binFullPred = {
+                        and: [...(semanticBinFullPred as LogicalAnd<FieldPredicate>).and, binPred],
+                      };
+                      return {
+                        id: binId,
+                        nodeType: 'filteredData',
+                        specIndex,
+                        fullPredicate: binFullPred,
+                        predicate: binPred,
+                        description: new Map<string, string>(),
+                        children: await elaborateOlliNodes(
+                          olliSpec,
+                          specIndex,
+                          node.children,
+                          data,
+                          binFullPred,
+                          binId,
+                          level + 3
+                        ),
+                        level: level + 3,
+                      };
+                    })
+                  ),
+                  level: level + 2,
+                };
+              })
+            ),
+            level: level + 1,
           };
+        } else if ('predicate' in node) {
+          const predicate = node.predicate;
+          let nextFullPred: LogicalComposition<FieldPredicate>;
+          if ('name' in node && 'explanation' in node) {
+            nextFullPred = predicate;
+          } else {
+            nextFullPred = {
+              and: [...(fullPredicate as LogicalAnd<FieldPredicate>).and, predicate],
+            };
+          }
+          const nextId = `${idPrefix}-${idx}`;
+          return {
+            id: nextId,
+            name: node.name,
+            explanation: node.explanation,
+            nodeType: 'filteredData',
+            specIndex,
+            fullPredicate: nextFullPred,
+            predicate,
+            description: new Map<string, string>(),
+            children: await elaborateOlliNodes(
+              olliSpec,
+              specIndex,
+              node.children,
+              data,
+              nextFullPred,
+              nextId,
+              level + 1
+            ),
+            level: level + 1,
+          };
+        } else if ('annotations' in node) {
+          const id = `${idPrefix}-${idx}`;
+          return {
+            id: id,
+            fullPredicate,
+            nodeType: 'annotations',
+            specIndex,
+            description: new Map<string, string>(),
+            children: await elaborateOlliNodes(
+              olliSpec,
+              specIndex,
+              node.annotations,
+              data,
+              fullPredicate,
+              id,
+              level + 1
+            ),
+            level: level + 1,
+          };
+        } else {
+          throw new Error('Invalid node type');
         }
-        const nextId = `${idPrefix}-${idx}`;
-        return {
-          id: nextId,
-          name: node.name,
-          explanation: node.explanation,
-          nodeType: 'filteredData',
-          specIndex,
-          fullPredicate: nextFullPred,
-          predicate,
-          description: new Map<string, string>(),
-          children: elaborateOlliNodes(olliSpec, specIndex, node.children, data, nextFullPred, nextId, level + 1),
-          level: level + 1,
-        };
-      } else if ('annotations' in node) {
-        const id = `${idPrefix}-${idx}`;
-        return {
-          id: id,
-          fullPredicate,
-          nodeType: 'annotations',
-          specIndex,
-          description: new Map<string, string>(),
-          children: elaborateOlliNodes(olliSpec, specIndex, node.annotations, data, fullPredicate, id, level + 1),
-          level: level + 1,
-        };
-      } else {
-        throw new Error('Invalid node type');
-      }
-    });
+      })
+    );
   }
 
   if (isMultiOlliSpec(olliSpec)) {
-    const viewNodes = olliSpec.units.map((spec, idx) => {
+    const viewNodes = olliSpec.units.map(async (spec, idx) => {
       const nodes = Array.isArray(spec.structure) ? spec.structure : [spec.structure];
       const data = spec.selection ? selectionTest(spec.data, spec.selection) : spec.data;
-      const elaborated = elaborateOlliNodes(spec, idx, nodes, data, { and: [] }, `${namespace}-${idx}`, 1);
+      const elaborated = await elaborateOlliNodes(spec, idx, nodes, data, { and: [] }, `${namespace}-${idx}`, 1);
       return {
         id: `${namespace}-${idx}`,
         nodeType: 'view' as OlliNodeType,
@@ -154,14 +214,15 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
         level: 1,
       };
     });
-    const tree = ensureFirstLayerHasOneRoot(viewNodes);
+    const resolvedViewNodes = await Promise.all(viewNodes);
+    const tree = ensureFirstLayerHasOneRoot(resolvedViewNodes);
     postProcessTree(tree, olliSpec);
     return tree;
   } else {
     const nodes = Array.isArray(olliSpec.structure) ? olliSpec.structure : [olliSpec.structure];
     const data = olliSpec.selection ? selectionTest(olliSpec.data, olliSpec.selection) : olliSpec.data;
     const tree = ensureFirstLayerHasOneRoot(
-      elaborateOlliNodes(olliSpec, undefined, nodes, data, { and: [] }, namespace, 0)
+      await elaborateOlliNodes(olliSpec, undefined, nodes, data, { and: [] }, namespace, 0)
     );
     postProcessTree(tree, olliSpec);
     return tree;

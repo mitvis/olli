@@ -143,12 +143,14 @@ export function simplifyPredicate(predicate: LogicalComposition<FieldPredicate>)
   }
   if ('or' in predicate && predicate.or.every((p) => 'equal' in p)) {
     // if it's an 'or' of equal predicates, simplify to a oneOf
-    const field = predicate.or[0].field;
-    if (predicate.or.every((p) => p.field === field)) {
-      return {
-        field,
-        oneOf: predicate.or.map((p) => p.equal) as any,
-      };
+    if (predicate.or.length) {
+      const field = predicate.or[0].field;
+      if (predicate.or.every((p) => p.field === field)) {
+        return {
+          field,
+          oneOf: predicate.or.map((p) => (p as any).equal) as any,
+        };
+      }
     }
   }
   // recurse

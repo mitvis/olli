@@ -42,7 +42,7 @@ async function elaborateUnitSpec(olliSpec: UnitOlliSpec): Promise<UnitOlliSpec> 
 
   olliSpec.structure = Array.isArray(olliSpec.structure) ? olliSpec.structure : [olliSpec.structure];
   // add data highlights
-  const annotations = await getDataHighlights(olliSpec.data);
+  const annotations = await getDataHighlights(olliSpec.data, olliSpec.fields);
   console.log('annotations', annotations);
   if (annotations.length > 0) {
     olliSpec.structure.unshift({
