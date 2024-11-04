@@ -8,7 +8,6 @@ import { FieldPredicate } from 'vega-lite/src/predicate';
 import { backOff } from 'exponential-backoff';
 import { simplifyPredicate } from './selection';
 import { getDomain, getFieldDef } from './data';
-import { serializeValue } from './values';
 
 const secrets = process.env.NODE_ENV === 'development' ? require('../secrets/openai.json') : {};
 const openai = new OpenAI({
@@ -59,17 +58,7 @@ export async function getSemanticBins(
 ): Promise<OlliPredicateNode[]> {
   const fieldDef = getFieldDef(field, fields);
   if (fieldDef.type === 'nominal') {
-    const domain = getDomain(fieldDef, data);
-    return domain.map((value) => {
-      return {
-        name: value.toString(),
-        explanation: '',
-        predicate: {
-          field: field,
-          equal: serializeValue(value, fieldDef),
-        },
-      };
-    });
+    return [];
   }
 
   const dataWithActiveFields = data.map((row) => {

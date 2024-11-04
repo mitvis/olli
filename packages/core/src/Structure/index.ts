@@ -75,72 +75,110 @@ export async function olliSpecToTree(olliSpec: OlliSpec): Promise<ElaboratedOlli
 
           const semanticBins = await getSemanticBins(data, olliSpec.fields, node.groupby);
 
-          console.log(semanticBins);
+          if (semanticBins.length) {
+            return {
+              id: `${idPrefix}-${idx}`,
+              fullPredicate,
+              nodeType,
+              specIndex,
+              groupby: node.groupby,
+              description: new Map<string, string>(),
+              children: await Promise.all(
+                semanticBins.map(async (semanticBin, semanticBinIdx) => {
+                  const p = semanticBin.predicate;
+                  const semanticBinFullPred = {
+                    and: [...(fullPredicate as LogicalAnd<FieldPredicate>).and, p], // TODO handle other compositions
+                  };
+                  const semanticBinId = `${idPrefix}-${idx}-${semanticBinIdx}`;
 
-          return {
-            id: `${idPrefix}-${idx}`,
-            fullPredicate,
-            nodeType,
-            specIndex,
-            groupby: node.groupby,
-            description: new Map<string, string>(),
-            children: await Promise.all(
-              semanticBins.map(async (semanticBin, semanticBinIdx) => {
-                const p = semanticBin.predicate;
-                const semanticBinFullPred = {
-                  and: [...(fullPredicate as LogicalAnd<FieldPredicate>).and, p], // TODO handle other compositions
-                };
-                const semanticBinId = `${idPrefix}-${idx}-${semanticBinIdx}`;
+                  const normalBins = fieldToPredicates(
+                    node.groupby,
+                    selectionTest(data, semanticBinFullPred),
+                    olliSpec.fields,
+                    axis ? axis.ticks : undefined
+                  );
 
-                const normalBins = fieldToPredicates(
-                  node.groupby,
-                  selectionTest(data, semanticBinFullPred),
-                  olliSpec.fields,
-                  axis ? axis.ticks : undefined
-                );
-
-                return {
-                  id: semanticBinId,
-                  nodeType: nodeType === 'root' ? 'view' : 'filteredData',
-                  viewType: nodeType === 'root' ? 'facet' : undefined,
-                  name: semanticBin.name,
-                  explanation: semanticBin.explanation,
-                  specIndex,
-                  predicate: p,
-                  fullPredicate: semanticBinFullPred,
-                  description: new Map<string, string>(),
-                  children: await Promise.all(
-                    normalBins.map(async (binPred, binIdx) => {
-                      const binId = `${semanticBinId}-${binIdx}`;
-                      const binFullPred = {
-                        and: [...(semanticBinFullPred as LogicalAnd<FieldPredicate>).and, binPred],
-                      };
-                      return {
-                        id: binId,
-                        nodeType: 'filteredData',
-                        specIndex,
-                        fullPredicate: binFullPred,
-                        predicate: binPred,
-                        description: new Map<string, string>(),
-                        children: await elaborateOlliNodes(
-                          olliSpec,
+                  return {
+                    id: semanticBinId,
+                    nodeType: nodeType === 'root' ? 'view' : 'filteredData',
+                    viewType: nodeType === 'root' ? 'facet' : undefined,
+                    name: semanticBin.name,
+                    explanation: semanticBin.explanation,
+                    specIndex,
+                    predicate: p,
+                    fullPredicate: semanticBinFullPred,
+                    description: new Map<string, string>(),
+                    children: await Promise.all(
+                      normalBins.map(async (binPred, binIdx) => {
+                        const binId = `${semanticBinId}-${binIdx}`;
+                        const binFullPred = {
+                          and: [...(semanticBinFullPred as LogicalAnd<FieldPredicate>).and, binPred],
+                        };
+                        return {
+                          id: binId,
+                          nodeType: 'filteredData',
                           specIndex,
-                          node.children,
-                          data,
-                          binFullPred,
-                          binId,
-                          level + 3
-                        ),
-                        level: level + 3,
-                      };
-                    })
-                  ),
-                  level: level + 2,
-                };
-              })
-            ),
-            level: level + 1,
-          };
+                          fullPredicate: binFullPred,
+                          predicate: binPred,
+                          description: new Map<string, string>(),
+                          children: await elaborateOlliNodes(
+                            olliSpec,
+                            specIndex,
+                            node.children,
+                            data,
+                            binFullPred,
+                            binId,
+                            level + 3
+                          ),
+                          level: level + 3,
+                        };
+                      })
+                    ),
+                    level: level + 2,
+                  };
+                })
+              ),
+              level: level + 1,
+            };
+          } else {
+            const normalBins = fieldToPredicates(node.groupby, data, olliSpec.fields, axis ? axis.ticks : undefined);
+
+            return {
+              id: `${idPrefix}-${idx}`,
+              fullPredicate,
+              nodeType,
+              specIndex,
+              groupby: node.groupby,
+              description: new Map<string, string>(),
+              children: await Promise.all(
+                normalBins.map(async (binPred, binIdx) => {
+                  const binId = `${idPrefix}-${idx}-${binIdx}`;
+                  const binFullPred = {
+                    and: [...(fullPredicate as LogicalAnd<FieldPredicate>).and, binPred],
+                  };
+                  return {
+                    id: binId,
+                    nodeType: 'filteredData',
+                    specIndex,
+                    fullPredicate: binFullPred,
+                    predicate: binPred,
+                    description: new Map<string, string>(),
+                    children: await elaborateOlliNodes(
+                      olliSpec,
+                      specIndex,
+                      node.children,
+                      data,
+                      binFullPred,
+                      binId,
+                      level + 2
+                    ),
+                    level: level + 2,
+                  };
+                })
+              ),
+              level: level + 1,
+            };
+          }
         } else if ('predicate' in node) {
           const predicate = node.predicate;
           let nextFullPred: LogicalComposition<FieldPredicate>;

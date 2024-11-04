@@ -403,7 +403,7 @@ export function nodeToDescription(
     ['yAxis', ['name', 'type', 'data', 'parent', 'aggregate', 'level']],
     ['legend', ['name', 'type', 'data', 'parent', 'aggregate', 'level']],
     ['guide', ['name', 'type', 'data', 'parent', 'level']],
-    ['filteredData', ['index', 'name', 'data', 'size', 'parent', 'level', 'instructions']],
+    ['filteredData', ['index', 'name', 'data', 'size']],
     // ['filteredData', ['index', 'name', 'data', 'size', 'parent', 'aggregate', 'quartile', 'level', 'instructions']],
     ['annotations', ['name', 'size', 'level']],
     ['other', ['index', 'data', 'size', 'level', 'instructions']],
