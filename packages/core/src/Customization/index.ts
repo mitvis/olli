@@ -106,8 +106,8 @@ export function nodeToDescription(
         const label = guide.title || fieldDef.label || fieldDef.field;
         return `${guideType} titled ${label}`;
       case 'filteredData':
-        if ('name' in node && 'reasoning' in node) {
-          return `${node.name}. ${node.reasoning}.`;
+        if ('name' in node && 'explanation' in node) {
+          return `${node.name}. ${node.explanation}${node.explanation.endsWith('.') ? '' : '.'}`;
         }
         return '';
       case 'annotations':
@@ -121,7 +121,6 @@ export function nodeToDescription(
     switch (node.nodeType) {
       case 'view':
       case 'filteredData':
-      case 'annotations':
       case 'other':
         return indexStr;
       default:
@@ -405,7 +404,7 @@ export function nodeToDescription(
     ['legend', ['name', 'type', 'data', 'parent', 'aggregate', 'level']],
     ['guide', ['name', 'type', 'data', 'parent', 'level']],
     ['filteredData', ['index', 'name', 'data', 'size', 'parent', 'aggregate', 'quartile', 'level', 'instructions']],
-    ['annotations', ['index', 'name', 'size', 'level']],
+    ['annotations', ['name', 'size', 'level']],
     ['other', ['index', 'data', 'size', 'level', 'instructions']],
   ]);
 

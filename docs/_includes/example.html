@@ -25,14 +25,13 @@
     </script>
 
     <select name="adapter" id="adapter" onchange="onSelectAdapter(this.value)">
-        {% for adapter in include.content.adapters %}
+        {% assign adapter = include.content.adapters[0] %}
             <option value="{{ adapter.name }}" id="{{ adapter.name }}">
                 {{ adapter.name }}
             </option>
-        {% endfor %}
     </select>
 
-    {% for adapter in include.content.adapters %}
+    {% assign adapter = include.content.adapters[0] %}
     <div id="Block-Example-{{adapter.name}}" class="Block-Example">
         <div>
             <h4>{{adapter.name}} Visualization:</h4>
@@ -45,7 +44,6 @@
         <div class="Code-Block"><code class="language-js"></code></div>
         {% include {{ adapter.code }} %}
     </div>
-    {% endfor %}
     <script type="module">
         const initAdapter = localStorage.getItem('selectedAdapter') ?? 'Vega-Lite';
         document.getElementById(`Block-Example-${initAdapter}`).classList.add('Select-Vis-Enabled');

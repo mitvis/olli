@@ -10,7 +10,9 @@
     "prettier:check": "npx prettier --check .",
     "prettier:write": "npx prettier --write ."
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mitvis/olli.git"
@@ -27,7 +29,8 @@
     {
       "name": "Jonathan Zong",
       "email": "jonathan@jonathanzong.com"
-    }],
+    }
+  ],
   "license": "BSD-3-Clause",
   "bugs": {
     "url": "https://github.com/mitvis/olli/issues"

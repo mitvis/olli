@@ -13,7 +13,7 @@ export interface OlliPredicateNode {
   predicate: LogicalComposition<FieldPredicate>;
   children?: OlliNode[];
   name?: string;
-  reasoning?: string;
+  explanation?: string;
 }
 
 export interface OlliAnnotationNode {
@@ -38,6 +38,8 @@ export interface ElaboratedOlliNode {
   nodeType: OlliNodeType;
   specIndex?: number;
   viewType?: 'facet' | 'layer' | 'concat';
+  name?: string;
+  explanation?: string;
   fullPredicate: LogicalComposition<FieldPredicate>;
   parent?: ElaboratedOlliNode;
   children: ElaboratedOlliNode[];

@@ -1,6 +1,6 @@
 import { isDate, toNumber, isArray, inrange } from 'vega';
 import { LogicalAnd, LogicalComposition } from 'vega-lite/src/logical';
-import { FieldPredicate, FieldEqualPredicate } from 'vega-lite/src/predicate';
+import { FieldPredicate, FieldEqualPredicate, FieldRangePredicate } from 'vega-lite/src/predicate';
 import { OlliFieldDef, OlliDataset, OlliDatum, OlliValue } from '../Types';
 import { serializeValue } from './values';
 import { getDomain, getFieldDef } from './data';
@@ -97,6 +97,78 @@ export function predicateToSelectionStore(predicate: LogicalComposition<FieldPre
     //   return null;
     // }
   }
+}
+
+export function simplifyPredicate(predicate: LogicalComposition<FieldPredicate>): LogicalComposition<FieldPredicate> {
+  if ('and' in predicate && predicate.and.length === 1) {
+    simplifyPredicate(predicate.and[0]);
+  }
+  if ('and' in predicate) {
+    // if it's an 'and' of a lt and a gte, simplify to a range
+    const and = predicate.and;
+    const lte = and.find((p) => 'lte' in p);
+    const gte = and.find((p) => 'gte' in p);
+    const lt = and.find((p) => 'lt' in p);
+    if (lte && gte) {
+      const field = lte.field;
+      const lteValue = lte.lte;
+      const gteValue = gte.gte;
+      return simplifyPredicate({
+        and: [
+          ...predicate.and.filter((p) => p !== lte && p !== gte),
+          {
+            field,
+            range: [gteValue as any, lteValue as any],
+            inclusive: true,
+          } as FieldRangePredicate,
+        ],
+      });
+    } else if (lt && gte) {
+      const field = lt.field;
+      const ltValue = lt.lt;
+      const gteValue = gte.gte;
+      return simplifyPredicate({
+        and: [
+          ...predicate.and.filter((p) => p !== lt && p !== gte),
+          {
+            field,
+            range: [gteValue as any, ltValue as any],
+          },
+        ],
+      });
+    }
+  }
+  if ('or' in predicate && predicate.or.length === 1) {
+    return simplifyPredicate(predicate.or[0]);
+  }
+  if ('or' in predicate && predicate.or.every((p) => 'equal' in p)) {
+    // if it's an 'or' of equal predicates, simplify to a oneOf
+    const field = predicate.or[0].field;
+    if (predicate.or.every((p) => p.field === field)) {
+      return {
+        field,
+        oneOf: predicate.or.map((p) => p.equal) as any,
+      };
+    }
+  }
+  // recurse
+  if ('and' in predicate) {
+    predicate.and = predicate.and.map((p) => simplifyPredicate(p));
+  }
+  if ('or' in predicate) {
+    predicate.or = predicate.or.map((p) => simplifyPredicate(p));
+  }
+  if ('not' in predicate) {
+    predicate.not = simplifyPredicate(predicate.not);
+  }
+  // base predicates
+  if ('oneOf' in predicate && predicate.oneOf.length === 1) {
+    return {
+      field: predicate.field,
+      equal: predicate.oneOf[0],
+    };
+  }
+  return predicate;
 }
 
 export function selectionTest(data: OlliDataset, predicate: LogicalComposition<FieldPredicate>): OlliDataset {

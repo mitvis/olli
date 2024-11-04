@@ -101,7 +101,7 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
       } else if ('predicate' in node) {
         const predicate = node.predicate;
         let nextFullPred: LogicalComposition<FieldPredicate>;
-        if ('name' in node && 'reasoning' in node) {
+        if ('name' in node && 'explanation' in node) {
           nextFullPred = predicate;
         } else {
           nextFullPred = {
@@ -111,8 +111,8 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
         const nextId = `${idPrefix}-${idx}`;
         return {
           id: nextId,
-          name: (node as any).name,
-          reasoning: (node as any).reasoning,
+          name: node.name,
+          explanation: node.explanation,
           nodeType: 'filteredData',
           specIndex,
           fullPredicate: nextFullPred,
